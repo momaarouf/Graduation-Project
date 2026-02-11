@@ -24,6 +24,7 @@
 
 import Navigation from '@/src/components/layout/Navigation'
 import HeroSection from '@/src/components/landing/HeroSection'
+import SafetyPillarBar from '@/src/components/landing/SafetyPillarBar'
 
 export default function HomePage() {
   return (
@@ -43,6 +44,12 @@ export default function HomePage() {
         Full dual theme implementation
       */}
       <HeroSection />
+      
+      {/* 
+        ============================================
+        SECTION 2.5: SAFETY PILLARS
+        ============================================ */}
+      <SafetyPillarBar />
       
       {/* 
         ============================================
