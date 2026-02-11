@@ -38,7 +38,7 @@ export default function Navigation() {
 
     return (
         <nav
-            className="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800"
+            className="fixed top-0 w-full z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800"
         >
             <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-14 sm:h-16">
