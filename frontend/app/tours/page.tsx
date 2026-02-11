@@ -55,7 +55,7 @@ function DesktopSidebar() {
   return (
     <aside
       className={`
-        relative
+        group relative
         hidden lg:block
         flex-shrink-0
         transition-all duration-300 ease-in-out
@@ -63,26 +63,6 @@ function DesktopSidebar() {
       `}
       aria-label="Tour filters sidebar"
     >
-      {/* 
-        ========================================
-        STICKY CONTAINER - PERFECT HEIGHT
-        ========================================
-        
-        🔴 CRITICAL CALCULATION:
-        
-        h-[calc(100vh-4rem)]:
-        - 100vh = full viewport height
-        - 4rem (64px) = height of fixed navbar
-        - Result: Sidebar starts directly below navbar, ends at bottom of screen
-        
-        overflow-y-auto: 
-        - If filter content exceeds height, scroll internally
-        - Never scroll the page itself
-        
-        overscroll-contain:
-        - Prevents scroll chaining to parent
-        - Better UX on trackpads
-      */}
       <div className="
         h-full
         overflow-y-auto
@@ -94,43 +74,48 @@ function DesktopSidebar() {
       ">
         {/* 
           ========================================
-          COLLAPSE TOGGLE BUTTON
+          SIDEBAR HEADER - DUAL THEME
           ========================================
           
-          DESIGN DECISIONS:
-          - Positioned on the right edge, centered vertically
-          - Always visible when expanded
-          - Fades in on hover when collapsed (saves screen space)
-          - Rotating chevron icon indicates direction
+          Only visible when expanded.
+          Contains page title and collapse button.
+          Matches the mobile X button design exactly.
         */}
-        <button
-          onClick={toggleSidebar}
-          className={`
-            absolute -right-3 top-6
-            z-20
-            flex items-center justify-center
-            w-6 h-6
-            rounded-full
-            bg-white dark:bg-gray-900
-            border border-gray-300 dark:border-gray-700
-            text-gray-600 dark:text-gray-400
-            hover:bg-gray-100 dark:hover:bg-gray-800
-            hover:text-gray-900 dark:hover:text-white
-            transition-all duration-200
-            shadow-md
-            ${isCollapsed ? 'lg:opacity-0 lg:group-hover:opacity-100' : 'opacity-100'}
-            
-            
-          `}
-          aria-label={isCollapsed ? 'Expand filters' : 'Collapse filters'}
-          title={isCollapsed ? 'Expand filters' : 'Collapse filters'}
-        >
-          {isCollapsed ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <ChevronLeft className="w-4 h-4" />
-          )}
-        </button>
+        {!isCollapsed && (
+          <div className="
+            sticky top-0 z-20
+            flex items-center justify-between
+            px-4 py-3
+            bg-white/80 dark:bg-gray-950/80
+            backdrop-blur-sm
+            border-b border-gray-100 dark:border-gray-900
+            mb-2
+          ">
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+              <span className="font-semibold text-gray-900 dark:text-white">
+                Filters
+              </span>
+            </div>
+
+            <button
+              onClick={toggleSidebar}
+              className="
+                p-1.5
+                rounded-lg
+                text-gray-500 dark:text-gray-400
+                hover:bg-blue-50 dark:hover:bg-blue-900/20
+                hover:text-blue-600 dark:hover:text-blue-400
+                transition-all duration-200
+                focus:outline-none focus:ring-2 focus:ring-blue-500/20
+              "
+              aria-label="Collapse filters"
+              title="Collapse filters"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+          </div>
+        )}
 
         {/* 
           ========================================
