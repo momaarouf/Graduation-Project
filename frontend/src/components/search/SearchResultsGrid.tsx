@@ -1,56 +1,34 @@
 // ============================================================================
-// SEARCH RESULTS GRID COMPONENT - DUAL THEME
+// SEARCH RESULTS GRID - WITH FILTERING AND SORTING
 // ============================================================================
 // LOCATION: /frontend/src/components/search/SearchResultsGrid.tsx
 // 
-// PURPOSE: Display tour search results in a responsive grid layout
+// 🔴 CRITICAL FIX (2026-02-11):
+// ============================================================================
 // 
-// FIXES APPLIED (2026-02-11):
+// FIX 1: REMOVED DUPLICATE SORT DROPDOWN
+// ---------------------------------------
+// BEFORE: ToursPageContent had its own sort dropdown
+// AFTER:  This component is the ONLY place that renders sort controls
 // 
-// ISSUE 1: renderRating function signature mismatch
-// ------------------------------------------------
-// PROBLEM: Function defined as renderRating(rating, reviewCount) 
-//          but called as renderRating(tour.rating)
+// WHY: Single Responsibility Principle
+//      - ToursPage: Layout and structure
+//      - SearchResultsGrid: Results display and interaction
 // 
-// SOLUTION: Added proper parameter passing in TourCard component
+// FIX 2: ADDED SORTING FUNCTIONALITY
+// -----------------------------------
+// BEFORE: Sort dropdown existed but did nothing
+// AFTER:  Full sorting implementation with 4 options
 // 
-// ISSUE 2: Missing reviewCount in rating display
-// ------------------------------------------------
-// PROBLEM: Review count was not displaying correctly
-// 
-// SOLUTION: Properly pass and format reviewCount in renderRating
-// 
-// BUSINESS REQUIREMENTS (from project spec):
-// 1. Display tours with:
-//    - Tour title & location
-//    - Main image (with fallback)
-//    - Guide name & verification badge
-//    - Price (with dynamic pricing indicators)
-//    - Halal badge if applicable
-//    - Rating & review count
-//    - Available dates / "Next available"
-//    - Min/max capacity indicator
-// 
-// 2. Responsive grid:
-//    - Mobile: 1 column
-//    - Tablet: 2 columns  
-//    - Desktop: 3 columns
-//    - Large desktop: 4 columns
-// 
-// 3. Interactive:
-//    - Click card → navigate to tour detail page
-//    - Hover effects for better UX
-//    - Loading skeleton states
-//    - Empty state when no results
-// 
-// 4. Dual theme support:
-//    - Light mode: Bright, clean cards
-//    - Dark mode: Muted, deep grays
+// FIX 3: IMPROVED FILTER COUNT COMMUNICATION
+// -------------------------------------------
+// BEFORE: Active filter count was calculated in two places
+// AFTER:  Single source of truth via context + callback
 // ============================================================================
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
@@ -64,27 +42,25 @@ import {
     Sparkles,
     Award,
     Leaf,
+    FilterX,
+    ArrowUpDown
 } from 'lucide-react'
 
 // ============================================================================
-// TYPE DEFINITIONS
+// IMPORTS
 // ============================================================================
-// These types define the shape of tour data that comes from the backend API
-// 
-// IMPORTANT: This is the V1 mock data structure. In Phase 2, this will be
-// replaced with actual API responses from the backend.
-// 
-// The structure is designed to be:
-// 1. Backward compatible - adding fields won't break existing code
-// 2. Self-documenting - clear property names
-// 3. Type-safe - full TypeScript support
+import { useFilterState, useFilterDispatch } from '@/src/lib/contexts/FilterContext'
+import { Country, FilterState } from './types/filters.types'
+
+// ============================================================================
+// TYPE DEFINITIONS
 // ============================================================================
 
 export interface TourCardData {
     id: string
     title: string
     location: string
-    country: 'lebanon' | 'turkey'
+    country: Country
     mainImage: string
     guideName: string
     guideId: string
@@ -111,21 +87,11 @@ export interface TourCardData {
     }>
 }
 
+// Sort option type
+export type SortOption = 'recommended' | 'price-low' | 'price-high' | 'rating'
+
 // ============================================================================
-// MOCK DATA FOR DEVELOPMENT
-// ============================================================================
-// This data simulates what we'll receive from the backend API in Phase 2.
-// 
-// DESIGN PHILOSOPHY:
-// - Realistic data that mirrors actual tours in Lebanon and Turkey
-// - Varied prices, ratings, and availability
-// - Mix of halal-certified and non-halal tours
-// - Different badge combinations
-// 
-// USAGE:
-// Replace with actual API call in Phase 2:
-// const response = await fetch('/api/tours/search?q=...')
-// const data = await response.json()
+// MOCK DATA
 // ============================================================================
 
 export const MOCK_TOURS: TourCardData[] = [
@@ -133,7 +99,7 @@ export const MOCK_TOURS: TourCardData[] = [
         id: '1',
         title: 'Ottoman Heritage: Topkapi Palace & Hagia Sophia',
         location: 'Istanbul',
-        country: 'turkey',
+        country: Country.TURKEY,
         mainImage: '/images/tours/istanbul-ottoman.jpg',
         guideName: 'Mehmet Yilmaz',
         guideId: 'guide-123',
@@ -161,7 +127,7 @@ export const MOCK_TOURS: TourCardData[] = [
         id: '2',
         title: 'Beirut Street Food & Cultural Walk',
         location: 'Beirut',
-        country: 'lebanon',
+        country: Country.LEBANON,
         mainImage: '/images/tours/beirut-food.jpg',
         guideName: 'Layla Hassan',
         guideId: 'guide-456',
@@ -188,7 +154,7 @@ export const MOCK_TOURS: TourCardData[] = [
         id: '3',
         title: 'Cappadocia Sunrise Balloon & Valley Hike',
         location: 'Cappadocia',
-        country: 'turkey',
+        country: Country.TURKEY,
         mainImage: '/images/tours/cappadocia-balloon.jpg',
         guideName: 'Ahmet Demir',
         guideId: 'guide-789',
@@ -217,7 +183,7 @@ export const MOCK_TOURS: TourCardData[] = [
         id: '4',
         title: 'Byblos Ancient Ruins & Archaeological Tour',
         location: 'Byblos',
-        country: 'lebanon',
+        country: Country.LEBANON,
         mainImage: '/images/tours/byblos-ruins.jpg',
         guideName: 'Elias Khoury',
         guideId: 'guide-101',
@@ -238,7 +204,7 @@ export const MOCK_TOURS: TourCardData[] = [
         id: '5',
         title: 'Bosphorus Sunset Cruise with Dinner',
         location: 'Istanbul',
-        country: 'turkey',
+        country: Country.TURKEY,
         mainImage: '/images/tours/bosphorus-cruise.jpg',
         guideName: 'Zeynep Kaya',
         guideId: 'guide-202',
@@ -264,7 +230,7 @@ export const MOCK_TOURS: TourCardData[] = [
         id: '6',
         title: 'Bekaa Valley Heritage & Nature Tour',
         location: 'Bekaa Valley',
-        country: 'lebanon',
+        country: Country.LEBANON,
         mainImage: '/images/tours/bekaa-heritage.jpg',
         guideName: 'Nadine Abboud',
         guideId: 'guide-303',
@@ -291,18 +257,6 @@ export const MOCK_TOURS: TourCardData[] = [
 // HELPER FUNCTIONS
 // ============================================================================
 
-/**
- * Format price with currency
- * 
- * WHY:
- * - Different currencies display differently
- * - USD: $89
- * - TRY: ₺890
- * - LBP: ل.ل 450,000
- * 
- * FALLBACK:
- * If currency is not recognized, default to USD format
- */
 const formatPrice = (amount: number, currency: string): string => {
     switch (currency) {
         case 'USD':
@@ -316,32 +270,16 @@ const formatPrice = (amount: number, currency: string): string => {
     }
 }
 
-/**
- * Get country flag emoji for location display
- * Visual cue for Lebanon vs Turkey tours
- */
 const getCountryFlag = (country: 'lebanon' | 'turkey'): string => {
     return country === 'lebanon' ? '🇱🇧' : '🇹🇷'
 }
 
-/**
- * Render star rating as visual stars + numeric
- * 
- * FIXED: Now properly accepts both rating and reviewCount
- * 
- * DESIGN DECISION:
- * - Full stars: 1-5 scale
- * - Half-star precision for accurate ratings
- * - Gold color for premium feel
- * - Review count in parentheses
- */
 const renderRating = (rating: number, reviewCount: number) => {
     const fullStars = Math.floor(rating)
     const hasHalfStar = rating % 1 >= 0.5
 
     return (
         <div className="flex items-center gap-1">
-            {/* Star visualization */}
             <div className="flex items-center">
                 {[...Array(5)].map((_, i) => {
                     if (i < fullStars) {
@@ -369,12 +307,10 @@ const renderRating = (rating: number, reviewCount: number) => {
                 })}
             </div>
             
-            {/* Rating number */}
             <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">
                 {rating.toFixed(1)}
             </span>
             
-            {/* Review count */}
             <span className="text-xs text-gray-500 dark:text-gray-400">
                 ({reviewCount.toLocaleString()})
             </span>
@@ -383,24 +319,151 @@ const renderRating = (rating: number, reviewCount: number) => {
 }
 
 // ============================================================================
-// TOUR CARD COMPONENT (Individual)
+// FILTERING LOGIC
 // ============================================================================
-// 
-// This component renders a single tour card within the grid.
-// 
-// RESPONSIBILITIES:
-// 1. Display all tour information in a compact, scannable format
-// 2. Handle image loading states
-// 3. Show appropriate badges based on tour attributes
-// 4. Link to tour detail page
-// 5. Maintain consistent height across cards
-// 
-// DESIGN PATTERN:
-// - Card-based UI with subtle shadow
-// - Image at top with overlay for badges
-// - Content below in consistent order
-// - Price prominently displayed
-// - CTA through entire card click
+
+function filterTours(tours: TourCardData[], filters: FilterState): TourCardData[] {
+    return tours.filter(tour => {
+        
+        // Location filters
+        if (filters.countries && filters.countries.length > 0) {
+            if (!filters.countries.includes(tour.country)) {
+                return false
+            }
+        }
+        
+        if (filters.cities && filters.cities.length > 0) {
+            const tourCityLower = tour.location.toLowerCase()
+            const matchesCity = filters.cities.some(city => 
+                tourCityLower.includes(city.toLowerCase()) ||
+                city.toLowerCase().includes(tourCityLower)
+            )
+            if (!matchesCity) return false
+        }
+        
+        // Tour attributes
+        if (filters.isHalalCertified && !tour.halalCertified) {
+            return false
+        }
+        
+        if (filters.hasGroupDiscount) {
+            const hasGroupDiscountBadge = tour.badges?.some(b => b.type === 'group')
+            if (!hasGroupDiscountBadge) return false
+        }
+        
+        if (filters.isFamilyFriendly) {
+            const hasFamilyBadge = tour.badges?.some(b => b.type === 'family')
+            if (!hasFamilyBadge) return false
+        }
+        
+        if (filters.isPremium) {
+            const hasPremiumBadge = tour.badges?.some(b => b.type === 'premium')
+            if (!hasPremiumBadge) return false
+        }
+        
+        // Price filters
+        if (filters.minPrice !== undefined && tour.price.amount < filters.minPrice) {
+            return false
+        }
+        
+        if (filters.maxPrice !== undefined && tour.price.amount > filters.maxPrice) {
+            return false
+        }
+        
+        // Duration filters
+        if (filters.durations && filters.durations.length > 0) {
+            const durationHours = parseFloat(tour.duration)
+            
+            const matchesDuration = filters.durations.some(duration => {
+                switch (duration) {
+                    case '1-3':
+                        return durationHours >= 1 && durationHours <= 3
+                    case '3-6':
+                        return durationHours >= 3 && durationHours <= 6
+                    case '6-12':
+                        return durationHours >= 6 && durationHours <= 12
+                    case '12+':
+                        return durationHours >= 12
+                    default:
+                        return false
+                }
+            })
+            
+            if (!matchesDuration) return false
+        }
+        
+        // Group size filters
+        if (filters.minGroupSize !== undefined && tour.maxCapacity < filters.minGroupSize) {
+            return false
+        }
+        
+        if (filters.maxGroupSize !== undefined && tour.minCapacity > filters.maxGroupSize) {
+            return false
+        }
+        
+        if (filters.hasAvailableSpots && tour.availableSpots <= 0) {
+            return false
+        }
+        
+        // Guide quality filters
+        if (filters.isGuideVerified && !tour.guideVerified) {
+            return false
+        }
+        
+        // Rating filters
+        if (filters.minRating && filters.minRating !== 'any') {
+            const minRatingValue = parseFloat(filters.minRating)
+            if (tour.rating < minRatingValue) {
+                return false
+            }
+        }
+        
+        // Availability filters (simplified for Phase 1)
+        if (filters.availability && filters.availability !== 'any') {
+            if (filters.availability === 'today' && !tour.nextAvailableDate?.includes('Today')) {
+                return false
+            }
+            if (filters.availability === 'tomorrow' && !tour.nextAvailableDate?.includes('Tomorrow')) {
+                return false
+            }
+        }
+        
+        return true
+    })
+}
+
+// ============================================================================
+// SORTING LOGIC
+// ============================================================================
+
+function sortTours(tours: TourCardData[], sortBy: SortOption): TourCardData[] {
+    const sorted = [...tours]
+    
+    switch (sortBy) {
+        case 'price-low':
+            return sorted.sort((a, b) => a.price.amount - b.price.amount)
+        
+        case 'price-high':
+            return sorted.sort((a, b) => b.price.amount - a.price.amount)
+        
+        case 'rating':
+            return sorted.sort((a, b) => b.rating - a.rating)
+        
+        case 'recommended':
+        default:
+            // Recommended = rating + recency + availability
+            // Simplified for Phase 1: sort by rating, then by available spots
+            return sorted.sort((a, b) => {
+                if (b.rating !== a.rating) {
+                    return b.rating - a.rating
+                }
+                return b.availableSpots - a.availableSpots
+            })
+    }
+}
+
+// ============================================================================
+// TOUR CARD COMPONENT
 // ============================================================================
 
 interface TourCardProps {
@@ -411,7 +474,6 @@ function TourCard({ tour }: TourCardProps) {
     const [isImageLoaded, setIsImageLoaded] = useState(false)
     const [isLiked, setIsLiked] = useState(false)
 
-    // Determine availability status color based on percentage
     const getAvailabilityColor = () => {
         const percentage = (tour.availableSpots / tour.maxCapacity) * 100
         if (percentage <= 20) return 'text-red-600 dark:text-red-400'
@@ -437,25 +499,14 @@ function TourCard({ tour }: TourCardProps) {
             "
             aria-label={`View ${tour.title} tour in ${tour.location}, guided by ${tour.guideName}`}
         >
-            {/* ========================================
-                IMAGE SECTION
-                ========================================
-                
-                CRITICAL: Image handling best practices:
-                1. Use Next.js Image for optimization
-                2. Show skeleton while loading
-                3. Fallback for broken images
-                4. Aspect ratio 4:3 for consistency
-            */}
+            {/* Image section */}
             <div className="relative w-full aspect-[4/3] bg-gray-100 dark:bg-gray-800">
-                {/* Loading spinner */}
                 {!isImageLoaded && (
                     <div className="absolute inset-0 flex items-center justify-center">
                         <div className="w-8 h-8 border-2 border-gray-300 dark:border-gray-600 border-t-blue-600 rounded-full animate-spin" />
                     </div>
                 )}
-
-                {/* Main image */}
+                
                 <Image
                     src={tour.mainImage}
                     alt={tour.title}
@@ -468,24 +519,11 @@ function TourCard({ tour }: TourCardProps) {
                         ${isImageLoaded ? 'opacity-100' : 'opacity-0'}
                     `}
                     onLoad={() => setIsImageLoaded(true)}
-                    onError={() => setIsImageLoaded(true)} // Fallback to gray background
+                    onError={() => setIsImageLoaded(true)}
                 />
 
-                {/* ========================================
-                    IMAGE OVERLAY ELEMENTS
-                    ========================================
-                    
-                    Positioned absolutely on top of image:
-                    1. Country flag badge (top-left)
-                    2. Halal certification badge (top-left, next to flag)
-                    3. Save/Wishlist button (top-right)
-                    4. Availability indicator (bottom-left)
-                    5. Duration (bottom-right)
-                */}
-
-                {/* Country & Halal badges */}
+                {/* Badges */}
                 <div className="absolute top-3 left-3 flex flex-wrap gap-2">
-                    {/* Country flag badge */}
                     <span className="
                         inline-flex items-center gap-1
                         px-2 py-1
@@ -501,7 +539,6 @@ function TourCard({ tour }: TourCardProps) {
                         <span className="hidden xs:inline">{tour.location}</span>
                     </span>
 
-                    {/* Halal certification badge */}
                     {tour.halalCertified && (
                         <span className="
                             inline-flex items-center gap-1
@@ -522,7 +559,7 @@ function TourCard({ tour }: TourCardProps) {
                 {/* Wishlist button */}
                 <button
                     onClick={(e) => {
-                        e.preventDefault() // Prevent navigation to tour detail
+                        e.preventDefault()
                         setIsLiked(!isLiked)
                     }}
                     className="
@@ -551,7 +588,7 @@ function TourCard({ tour }: TourCardProps) {
                     />
                 </button>
 
-                {/* Availability indicator */}
+                {/* Availability */}
                 <div className="
                     absolute bottom-3 left-3
                     flex items-center gap-1.5
@@ -568,7 +605,7 @@ function TourCard({ tour }: TourCardProps) {
                     </span>
                 </div>
 
-                {/* Duration badge */}
+                {/* Duration */}
                 <div className="
                     absolute bottom-3 right-3
                     flex items-center gap-1
@@ -585,21 +622,8 @@ function TourCard({ tour }: TourCardProps) {
                 </div>
             </div>
 
-            {/* ========================================
-                CONTENT SECTION
-                ========================================
-                
-                All text content below the image:
-                1. Tour title (truncated if too long)
-                2. Guide information with verification badge
-                3. Rating and review count
-                4. Price and any discounts
-                5. Next available date
-                6. Additional badges
-            */}
+            {/* Content */}
             <div className="flex-1 p-4 sm:p-5">
-
-                {/* Tour title */}
                 <h3 className="
                     font-semibold
                     text-base sm:text-lg
@@ -612,9 +636,8 @@ function TourCard({ tour }: TourCardProps) {
                     {tour.title}
                 </h3>
 
-                {/* Guide information */}
+                {/* Guide info */}
                 <div className="flex items-center gap-2 mb-3">
-                    {/* Guide avatar */}
                     <div className="
                         relative
                         w-6 h-6
@@ -637,7 +660,6 @@ function TourCard({ tour }: TourCardProps) {
                         )}
                     </div>
 
-                    {/* Guide name and verification */}
                     <div className="flex-1 flex items-center gap-1">
                         <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
                             {tour.guideName}
@@ -652,14 +674,13 @@ function TourCard({ tour }: TourCardProps) {
                     </div>
                 </div>
 
-                {/* Rating - FIXED: Now passing both rating AND reviewCount */}
+                {/* Rating */}
                 <div className="flex items-center mb-3">
                     {renderRating(tour.rating, tour.reviewCount)}
                 </div>
 
-                {/* Price section */}
+                {/* Price */}
                 <div className="flex items-baseline gap-2 mb-3">
-                    {/* Current price */}
                     <span className="
                         text-xl sm:text-2xl
                         font-bold
@@ -668,7 +689,6 @@ function TourCard({ tour }: TourCardProps) {
                         {formatPrice(tour.price.amount, tour.price.currency)}
                     </span>
 
-                    {/* Original price (if discounted) */}
                     {tour.price.originalPrice && (
                         <>
                             <span className="
@@ -690,7 +710,6 @@ function TourCard({ tour }: TourCardProps) {
                         </>
                     )}
 
-                    {/* Dynamic pricing indicator */}
                     {tour.price.dynamicPricing && (
                         <span className="
                             px-1.5 py-0.5
@@ -706,7 +725,7 @@ function TourCard({ tour }: TourCardProps) {
                     )}
                 </div>
 
-                {/* Next available date */}
+                {/* Next available */}
                 {tour.nextAvailableDate && (
                     <div className="flex items-center gap-1.5 mb-3">
                         <Clock className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
@@ -718,7 +737,7 @@ function TourCard({ tour }: TourCardProps) {
                     </div>
                 )}
 
-                {/* Additional badges */}
+                {/* Badges */}
                 {tour.badges && tour.badges.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-auto">
                         {tour.badges.map((badge, index) => (
@@ -754,20 +773,7 @@ function TourCard({ tour }: TourCardProps) {
 }
 
 // ============================================================================
-// LOADING SKELETON COMPONENT
-// ============================================================================
-// 
-// PURPOSE: Display placeholder cards while data is loading
-// 
-// WHY SKELETONS:
-// 1. Perceived performance - users see immediate feedback
-// 2. Layout stability - prevents content shift (CLS)
-// 3. Better UX than spinner
-// 
-// DESIGN:
-// - Matches exact dimensions of real cards
-// - Uses subtle pulse animation
-// - Respects dark mode
+// LOADING SKELETON
 // ============================================================================
 
 function SearchResultsSkeleton() {
@@ -785,10 +791,7 @@ function SearchResultsSkeleton() {
                         animate-pulse
                     "
                 >
-                    {/* Image skeleton */}
                     <div className="w-full aspect-[4/3] bg-gray-200 dark:bg-gray-800" />
-
-                    {/* Content skeleton */}
                     <div className="p-4 sm:p-5 space-y-3">
                         <div className="h-5 w-3/4 bg-gray-200 dark:bg-gray-800 rounded" />
                         <div className="flex items-center gap-2">
@@ -810,23 +813,14 @@ function SearchResultsSkeleton() {
 }
 
 // ============================================================================
-// EMPTY STATE COMPONENT
-// ============================================================================
-// 
-// PURPOSE: Display when no tours match search criteria
-// 
-// WHEN TO SHOW:
-// - No results from API
-// - Search query returned zero matches
-// - Filters eliminated all options
-// 
-// DESIGN:
-// - Friendly, encouraging message
-// - Clear call-to-action
-// - Visual icon for emotional connection
+// EMPTY STATE
 // ============================================================================
 
-function EmptySearchResults() {
+interface EmptySearchResultsProps {
+    onClearFilters?: () => void
+}
+
+function EmptySearchResults({ onClearFilters }: EmptySearchResultsProps) {
     return (
         <div className="
             col-span-full
@@ -834,7 +828,6 @@ function EmptySearchResults() {
             flex flex-col items-center justify-center
             text-center
         ">
-            {/* Empty state illustration */}
             <div className="
                 w-24 h-24 sm:w-32 sm:h-32
                 mb-6
@@ -842,20 +835,19 @@ function EmptySearchResults() {
                 bg-gray-100 dark:bg-gray-800
                 flex items-center justify-center
             ">
-                <MapPin className="
+                <FilterX className="
                     w-12 h-12 sm:w-16 sm:h-16
                     text-gray-400 dark:text-gray-600
                 " />
             </div>
 
-            {/* Message */}
             <h3 className="
                 text-lg sm:text-xl md:text-2xl
                 font-semibold
                 text-gray-900 dark:text-white
                 mb-2
             ">
-                No tours found
+                No tours match your filters
             </h3>
 
             <p className="
@@ -864,87 +856,123 @@ function EmptySearchResults() {
                 max-w-md
                 mb-6
             ">
-                Try adjusting your search or filters to find the perfect experience.
+                Try adjusting your filters or clear them to see all available tours.
             </p>
 
-            {/* CTA Button */}
-            <button
-                onClick={() => {
-                    // Reset search and filters
-                    window.location.href = '/tours'
-                }}
-                className="
-                    px-6 py-3
-                    bg-blue-600 dark:bg-blue-700
-                    text-white
-                    rounded-full
-                    font-medium
-                    hover:bg-blue-700 dark:hover:bg-blue-800
-                    transition-colors
-                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                "
-            >
-                Browse All Tours
-            </button>
+            {onClearFilters && (
+                <button
+                    onClick={onClearFilters}
+                    className="
+                        px-6 py-3
+                        bg-blue-600 dark:bg-blue-700
+                        text-white
+                        rounded-full
+                        font-medium
+                        hover:bg-blue-700 dark:hover:bg-blue-800
+                        transition-colors
+                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                    "
+                >
+                    Clear All Filters
+                </button>
+            )}
         </div>
     )
 }
 
 // ============================================================================
-// MAIN SEARCH RESULTS GRID COMPONENT
-// ============================================================================
-// 
-// PURPOSE: Orchestrate the display of tour search results
-// 
-// RESPONSIBILITIES:
-// 1. Fetch data (mock in V1, API in V2)
-// 2. Manage loading states
-// 3. Handle empty states
-// 4. Render responsive grid
-// 5. Pass props to individual cards
-// 
-// PROPS INTERFACE (Phase 2):
-// - searchQuery?: string - Current search term
-// - filters?: SearchFilters - Active filters
-// - sort?: SortOption - Current sort order
-// - page?: number - Pagination page
-// 
-// For V1, we use internal mock data
+// MAIN COMPONENT
 // ============================================================================
 
 interface SearchResultsGridProps {
+    /** Optional initial tours (for SSR) */
     initialTours?: TourCardData[]
+    /** External loading state */
     isLoading?: boolean
+    /** Callback for filter count changes (for mobile badge) */
+    onFilterCountChange?: (count: number) => void
 }
 
 export default function SearchResultsGrid({
     initialTours,
-    isLoading = false
+    isLoading: externalLoading = false,
+    onFilterCountChange
 }: SearchResultsGridProps) {
+    // ========================================
+    // STATE
+    // ========================================
     const [mounted, setMounted] = useState(false)
     const [tours, setTours] = useState<TourCardData[]>(initialTours || [])
-    const [loading, setLoading] = useState(isLoading)
+    const [loading, setLoading] = useState(externalLoading)
+    const [sortBy, setSortBy] = useState<SortOption>('recommended')
+    
+    // ========================================
+    // CONTEXT
+    // ========================================
+    const { filters, isLoading: contextLoading } = useFilterState()
+    const dispatch = useFilterDispatch()
+    
+    // ========================================
+    // MEMOIZED FILTERED AND SORTED TOURS
+    // ========================================
+    
+    const filteredTours = useMemo(() => {
+        if (!tours.length) return []
+        return filterTours(tours, filters)
+    }, [tours, filters])
+    
+    const sortedAndFilteredTours = useMemo(() => {
+        return sortTours(filteredTours, sortBy)
+    }, [filteredTours, sortBy])
+    
+    // ========================================
+    // EFFECTS
+    // ========================================
+    
+    // Update total results count in context
+    useEffect(() => {
+        dispatch({ 
+            type: 'SET_TOTAL_RESULTS', 
+            payload: filteredTours.length 
+        })
+    }, [filteredTours.length, dispatch])
+    
+    // Notify parent of filter count changes
+    useEffect(() => {
+        onFilterCountChange?.(filteredTours.length)
+    }, [filteredTours.length, onFilterCountChange])
 
     // Prevent hydration mismatch
     useEffect(() => {
         setMounted(true)
     }, [])
 
-    // Load mock data on component mount (simulates API call)
+    // Load mock data
     useEffect(() => {
         if (!initialTours && mounted) {
             setLoading(true)
-            // Simulate network delay for realistic loading state
             const timer = setTimeout(() => {
                 setTours(MOCK_TOURS)
                 setLoading(false)
-            }, 800) // 800ms delay feels natural
+            }, 800)
             
             return () => clearTimeout(timer)
         }
     }, [initialTours, mounted])
 
-    // Don't render during SSR to prevent theme mismatch
+    // ========================================
+    // HANDLERS
+    // ========================================
+    
+    const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setSortBy(e.target.value as SortOption)
+    }
+    
+    const handleClearFilters = () => {
+        dispatch({ type: 'CLEAR_FILTERS' })
+    }
+
+    // Don't render during SSR
     if (!mounted) {
         return (
             <div className="w-full">
@@ -956,7 +984,7 @@ export default function SearchResultsGrid({
     }
 
     // Show loading state
-    if (loading) {
+    if (loading || contextLoading) {
         return (
             <div className="w-full">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
@@ -967,69 +995,97 @@ export default function SearchResultsGrid({
     }
 
     // Show empty state
-    if (!tours || tours.length === 0) {
-        return <EmptySearchResults />
+    if (!sortedAndFilteredTours || sortedAndFilteredTours.length === 0) {
+        return (
+            <EmptySearchResults 
+                onClearFilters={handleClearFilters}
+            />
+        )
     }
 
     // Show results grid
     return (
         <div className="w-full">
-            {/* ========================================
-                RESULTS HEADER
-                ========================================
-                Displays count and sorting options
-                Will be expanded in Phase 2
+            {/* 
+              ========================================
+              RESULTS HEADER - SINGLE SOURCE OF TRUTH
+              ========================================
+              
+              🔴 CRITICAL: This is the ONLY place in the entire app
+              where results count and sort dropdown are rendered.
+              
+              DO NOT add another sort dropdown anywhere else!
             */}
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+            <div className="
+                flex flex-col sm:flex-row 
+                items-start sm:items-center 
+                justify-between 
+                gap-3 sm:gap-0
+                mb-4 sm:mb-6
+            ">
+                {/* Results count */}
+                <p className="
+                    text-sm sm:text-base 
+                    text-gray-600 dark:text-gray-400
+                ">
                     <span className="font-semibold text-gray-900 dark:text-white">
-                        {tours.length}
+                        {sortedAndFilteredTours.length}
                     </span>{' '}
-                    {tours.length === 1 ? 'tour' : 'tours'} found
+                    {sortedAndFilteredTours.length === 1 ? 'tour' : 'tours'} found
                 </p>
 
-                {/* Sort dropdown placeholder */}
-                <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
+                {/* Sort dropdown - FULLY FUNCTIONAL */}
+                <div className="
+                    flex items-center gap-2
+                    w-full sm:w-auto
+                ">
+                    <span className="
+                        text-sm 
+                        text-gray-500 dark:text-gray-400 
+                        hidden sm:inline
+                    ">
                         Sort by:
                     </span>
-                    <select
-                        className="
-                            text-sm
-                            px-3 py-1.5
-                            bg-white dark:bg-gray-900
-                            border border-gray-300 dark:border-gray-700
-                            rounded-lg
-                            text-gray-900 dark:text-white
-                            focus:outline-none focus:ring-2 focus:ring-blue-500
-                        "
-                        aria-label="Sort tours by"
-                        defaultValue="recommended"
-                    >
-                        <option value="recommended">Recommended</option>
-                        <option value="price-low">Price: Low to High</option>
-                        <option value="price-high">Price: High to Low</option>
-                        <option value="rating">Highest Rated</option>
-                        <option value="popular">Most Popular</option>
-                    </select>
+                    
+                    <div className="relative w-full sm:w-48">
+                        <select
+                            value={sortBy}
+                            onChange={handleSortChange}
+                            className="
+                                w-full
+                                appearance-none
+                                px-4 py-2.5 sm:py-2
+                                pl-4 pr-10
+                                text-sm
+                                bg-white dark:bg-gray-900
+                                border border-gray-300 dark:border-gray-700
+                                rounded-lg
+                                text-gray-900 dark:text-white
+                                focus:outline-none focus:ring-2 focus:ring-blue-500
+                                cursor-pointer
+                                hover:border-gray-400 dark:hover:border-gray-600
+                                transition-colors
+                            "
+                            aria-label="Sort tours by"
+                        >
+                            <option value="recommended">Recommended</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                            <option value="rating">Highest Rated</option>
+                        </select>
+                        
+                        {/* Custom dropdown arrow */}
+                        <ArrowUpDown className="
+                            absolute right-3 top-1/2 -translate-y-1/2
+                            w-4 h-4
+                            text-gray-500 dark:text-gray-400
+                            pointer-events-none
+                        " />
+                    </div>
                 </div>
             </div>
 
-            {/* ========================================
-                MAIN RESULTS GRID
-                ========================================
-                
-                RESPONSIVE BREAKPOINTS:
-                - Mobile: 1 column (default)
-                - Tablet: 2 columns (sm:)
-                - Desktop: 3 columns (lg:)
-                - Large desktop: 4 columns (xl:)
-                
-                GAP SIZING:
-                - Mobile: gap-4 (16px)
-                - Tablet: gap-5 (20px)
-                - Desktop: gap-6 (24px)
-            */}
+            {/* Tour cards grid */}
             <div className="
                 grid 
                 grid-cols-1 
@@ -1038,31 +1094,27 @@ export default function SearchResultsGrid({
                 xl:grid-cols-4 
                 gap-4 sm:gap-5 lg:gap-6
             ">
-                {tours.map((tour) => (
+                {sortedAndFilteredTours.map((tour) => (
                     <TourCard key={tour.id} tour={tour} />
                 ))}
             </div>
 
-            {/* ========================================
-                PAGINATION PLACEHOLDER
-                ========================================
-                Will be implemented in Phase 2
-                For V1, we show all results
-            */}
-            {tours.length > 12 && (
+            {/* Load more (pagination placeholder) */}
+            {sortedAndFilteredTours.length > 12 && (
                 <div className="flex justify-center mt-8 sm:mt-10">
                     <button
                         className="
-                            px-4 py-2
+                            px-6 py-3
                             text-sm font-medium
                             text-gray-700 dark:text-gray-300
                             bg-gray-100 dark:bg-gray-800
                             rounded-lg
                             hover:bg-gray-200 dark:hover:bg-gray-700
                             transition-colors
+                            focus:outline-none focus:ring-2 focus:ring-blue-500
                         "
                     >
-                        Load More
+                        Load More Tours
                     </button>
                 </div>
             )}
@@ -1071,13 +1123,32 @@ export default function SearchResultsGrid({
 }
 
 // ============================================================================
-// EXPORT FOR USE IN OTHER COMPONENTS
+// ARCHITECTURE SUMMARY:
 // ============================================================================
 // 
-// This component is now ready for use in:
-// 1. /app/tours/page.tsx - Main search results page
-// 2. /app/page.tsx - Featured tours section (future)
-// 3. Guide profile pages - Tours by specific guide (future)
+// FILTER FLOW:
+// 1. User clicks filter in SearchFilters
+// 2. FilterContext updates filters state
+// 3. This component detects filters change via useFilterState()
+// 4. useMemo recalculates filteredTours
+// 5. useMemo recalculates sortedAndFilteredTours
+// 6. UI updates with filtered/sorted results
 // 
-// The mock data is exported so it can be used for testing
+// SORT FLOW:
+// 1. User selects sort option from dropdown
+// 2. handleSortChange updates sortBy state
+// 3. useMemo recalculates sortedAndFilteredTours
+// 4. UI updates with newly sorted results
+// 
+// SINGLE RESPONSIBILITY:
+// - ToursPage: Layout only (pt-14, sidebar, main container)
+// - SearchFilters: Filter UI only
+// - SearchResultsGrid: Results display + sorting only
+// - FilterContext: State management only
+// 
+// This separation makes the code:
+// ✅ Easier to debug
+// ✅ Easier to test
+// ✅ Easier to extend
+// ✅ Performance optimized
 // ============================================================================
