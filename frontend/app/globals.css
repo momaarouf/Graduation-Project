@@ -167,49 +167,46 @@
   /* 
     SCROLLBAR STYLES - DUAL THEME
     -----------------------------
-    Custom scrollbars for each theme
+    Custom scrollbars for each theme.
+    Using explicit .dark selectors for reliable theme matching.
   */
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
   }
 
+  /* Light mode scrollbar */
   ::-webkit-scrollbar-track {
-    /* Light mode track */
     background: #f3f4f6;
-    /* Gray-100 */
-
-    /* Dark mode track */
-    .dark & {
-      background: #1f2937;
-      /* Gray-800 */
-    }
+    /* gray-100 */
   }
 
   ::-webkit-scrollbar-thumb {
     border-radius: 5px;
-
-    /* Light mode thumb */
     background: #9ca3af;
-    /* Gray-400 */
-
-    /* Dark mode thumb */
-    .dark & {
-      background: #4b5563;
-      /* Gray-600 */
-    }
+    /* gray-400 */
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    /* Light mode hover */
     background: #6b7280;
-    /* Gray-500 */
+    /* gray-500 */
+  }
 
-    /* Dark mode hover */
-    .dark & {
-      background: #374151;
-      /* Gray-700 */
-    }
+  /* Dark mode scrollbar - Blends with gray-950 (#030712) background */
+  .dark ::-webkit-scrollbar-track {
+    background: #030712;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    background: #1f2937;
+    /* gray-800 */
+    border: 2px solid #030712;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #374151;
+    /* gray-700 */
   }
 
   /* 
@@ -402,6 +399,7 @@
     text-decoration: underline !important;
   }
 }
+
 /* ============================================================================
    ADD TO GLOBALS.CSS - HALF-STAR RATING SUPPORT
    ============================================================================

@@ -126,7 +126,7 @@ interface ExtendedSearchFiltersProps extends SearchFiltersProps {
     toggleSidebar?: () => void
 }
 
-export default function SearchFilters({ 
+export default function SearchFilters({
     filters: externalFilters, // Kept for backward compatibility
     onFilterChange: externalOnFilterChange, // Kept for backward compatibility
     onClearAll: externalOnClearAll,
@@ -137,7 +137,7 @@ export default function SearchFilters({
     toggleSidebar,
     onActiveFilterCountChange
 }: ExtendedSearchFiltersProps) {
-    
+
     // ========================================
     // CONTEXT INTEGRATION
     // ========================================
@@ -145,11 +145,11 @@ export default function SearchFilters({
     // CRITICAL FIX: Now using real filter state from context
     // This connects SearchFilters to SearchResultsGrid
     // ========================================
-    
+
     const { filters, dispatch } = useFilters()
     const { applyFilters, clearFilters: contextClearFilters } = useApplyFilters()
     const { isLoading: contextLoading } = useFilterState()
-    
+
     // Local UI state
     const [selectedCountry, setSelectedCountry] = useState<Country | null>(null)
     const [localExpanded, setLocalExpanded] = useState<Record<string, boolean>>({})
@@ -157,11 +157,11 @@ export default function SearchFilters({
     // ========================================
     // DERIVED VALUES
     // ========================================
-    
-    const activeFilterCount = useMemo(() => 
-        getActiveFilterCount(filters), 
-    [filters])
-    
+
+    const activeFilterCount = useMemo(() =>
+        getActiveFilterCount(filters),
+        [filters])
+
     // Notify parent of active filter count (for mobile badge)
     useEffect(() => {
         onActiveFilterCountChange?.(activeFilterCount)
@@ -170,14 +170,14 @@ export default function SearchFilters({
     // ========================================
     // FILTER UPDATE HANDLERS
     // ========================================
-    
+
     /**
      * Update filters through context
      * This triggers re-filtering in SearchResultsGrid
      */
     const handleFilterChange = useCallback((newFilters: Partial<FilterState>) => {
         applyFilters(newFilters)
-        
+
         // For backward compatibility
         if (externalOnFilterChange) {
             externalOnFilterChange({ ...filters, ...newFilters })
@@ -218,7 +218,7 @@ export default function SearchFilters({
     // These only change when mock data changes (never in Phase 1)
     // ========================================
 
-    const countryOptions = useMemo(() => 
+    const countryOptions = useMemo(() =>
         Object.values(Country).map(country => ({
             id: country,
             label: CountryLabels[country],
@@ -230,9 +230,9 @@ export default function SearchFilters({
                     .filter(c => CityCountryMap[c] === Country.TURKEY)
                     .reduce((sum, city) => sum + (MOCK_CITY_COUNTS[city] || 0), 0)
         }))
-    , [])
+        , [])
 
-    const cityOptions = useMemo(() => 
+    const cityOptions = useMemo(() =>
         Object.values(City)
             .filter(city => !selectedCountry || CityCountryMap[city] === selectedCountry)
             .map(city => ({
@@ -240,36 +240,36 @@ export default function SearchFilters({
                 label: CityLabels[city],
                 count: MOCK_CITY_COUNTS[city]
             }))
-    , [selectedCountry])
+        , [selectedCountry])
 
-    const languageOptions = useMemo(() => 
+    const languageOptions = useMemo(() =>
         Object.values(Language).map(lang => ({
             id: lang,
             label: LanguageLabels[lang],
             count: MOCK_LANGUAGE_COUNTS[lang]
         }))
-    , [])
+        , [])
 
-    const durationOptions = useMemo(() => 
+    const durationOptions = useMemo(() =>
         Object.values(Duration).map(duration => ({
             id: duration,
             label: DurationLabels[duration]
         }))
-    , [])
+        , [])
 
-    const ratingOptions = useMemo(() => 
+    const ratingOptions = useMemo(() =>
         Object.values(MinRating).map(rating => ({
             id: rating,
             label: MinRatingLabels[rating]
         }))
-    , [])
+        , [])
 
-    const availabilityOptions = useMemo(() => 
+    const availabilityOptions = useMemo(() =>
         Object.values(Availability).map(avail => ({
             id: avail,
             label: AvailabilityLabels[avail]
         }))
-    , [])
+        , [])
 
     // ========================================
     // COLLAPSED MODE RENDERING
@@ -396,7 +396,7 @@ export default function SearchFilters({
     // ========================================
     // EXPANDED MODE RENDERING (Default)
     // ========================================
-    
+
     return (
         <div className={`
             w-full h-full
@@ -492,8 +492,8 @@ export default function SearchFilters({
                 {/* ========================================
                     SECTION 1: LOCATION
                     ======================================== */}
-                <FilterSection 
-                    title="Location" 
+                <FilterSection
+                    title="Location"
                     icon={<MapPin className="w-4 h-4" />}
                     defaultExpanded={!isCollapsed}
                 >
@@ -558,8 +558,8 @@ export default function SearchFilters({
                 {/* ========================================
                     SECTION 2: TOUR ATTRIBUTES
                     ======================================== */}
-                <FilterSection 
-                    title="Tour Features" 
+                <FilterSection
+                    title="Tour Features"
                     icon={<Briefcase className="w-4 h-4" />}
                     defaultExpanded={!isCollapsed}
                 >
@@ -673,8 +673,8 @@ export default function SearchFilters({
                 {/* ========================================
                     SECTION 3: PRICE RANGE
                     ======================================== */}
-                <FilterSection 
-                    title="Price" 
+                <FilterSection
+                    title="Price"
                     icon={<DollarSign className="w-4 h-4" />}
                     defaultExpanded={!isCollapsed}
                 >
@@ -691,8 +691,8 @@ export default function SearchFilters({
                 {/* ========================================
                     SECTION 4: DURATION
                     ======================================== */}
-                <FilterSection 
-                    title="Duration" 
+                <FilterSection
+                    title="Duration"
                     icon={<Clock className="w-4 h-4" />}
                     defaultExpanded={!isCollapsed}
                 >
@@ -708,8 +708,8 @@ export default function SearchFilters({
                 {/* ========================================
                     SECTION 5: GROUP SIZE
                     ======================================== */}
-                <FilterSection 
-                    title="Group Size" 
+                <FilterSection
+                    title="Group Size"
                     icon={<Users className="w-4 h-4" />}
                     defaultExpanded={!isCollapsed}
                 >
@@ -787,8 +787,8 @@ export default function SearchFilters({
                 {/* ========================================
                     SECTION 6: GUIDE QUALITY
                     ======================================== */}
-                <FilterSection 
-                    title="Guide Quality" 
+                <FilterSection
+                    title="Guide Quality"
                     icon={<Shield className="w-4 h-4" />}
                     defaultExpanded={!isCollapsed}
                 >
@@ -840,8 +840,8 @@ export default function SearchFilters({
                 {/* ========================================
                     SECTION 7: RATING
                     ======================================== */}
-                <FilterSection 
-                    title="Rating" 
+                <FilterSection
+                    title="Rating"
                     icon={<Star className="w-4 h-4" />}
                     defaultExpanded={!isCollapsed}
                 >
@@ -876,8 +876,8 @@ export default function SearchFilters({
                 {/* ========================================
                     SECTION 8: AVAILABILITY
                     ======================================== */}
-                <FilterSection 
-                    title="Availability" 
+                <FilterSection
+                    title="Availability"
                     icon={<Calendar className="w-4 h-4" />}
                     defaultExpanded={!isCollapsed}
                 >
@@ -912,8 +912,8 @@ export default function SearchFilters({
                 {/* ========================================
                     SECTION 9: PREMIUM FEATURES
                     ======================================== */}
-                <FilterSection 
-                    title="Premium" 
+                <FilterSection
+                    title="Premium"
                     icon={<Star className="w-4 h-4 text-amber-500" />}
                     defaultExpanded={!isCollapsed}
                 >
