@@ -26,6 +26,7 @@ import Navigation from '@/src/components/layout/Navigation'
 import HeroSection from '@/src/components/landing/HeroSection'
 import SafetyPillarBar from '@/src/components/landing/SafetyPillarBar'
 import CategoryTiles from '@/src/components/landing/CategoryTiles'
+import ImpactMap from '@/src/components/landing/ImpactMap' 
 
 export default function HomePage() {
   return (
@@ -54,7 +55,9 @@ export default function HomePage() {
       {/* ← NEW: Curated Categories */}
       <section className="py-8 sm:py-12 bg-gray-50 dark:bg-gray-900 ..."></section>
       <CategoryTiles />
-      
+      {/* ← NEW: Live Impact Map */}
+      <ImpactMap />
+      <section className="py-8 sm:py-12 bg-gray-50 dark:bg-gray-900 ..."></section>
       {/* 
         ============================================
         SECTION 3: TRUST & PARTNERS
