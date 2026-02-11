@@ -71,14 +71,34 @@
     /* Smooth scrolling */
     scroll-behavior: smooth;
 
-    /* Prevent horizontal overflow */
+    /* Prevent horizontal overflow & bounce */
     overflow-x: hidden;
+    overscroll-behavior-x: none;
+    min-width: 100%;
 
     /* System font stack */
     font-family: ui-sans-serif, system-ui, sans-serif, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+
+    /* 
+      MATCH BACKGROUND TO BODY
+      This prevents the "black bar" or white gap when overscrolling on mobile
+    */
+    background-color: #ffffff;
+    /* Light mode default */
+  }
+
+  /* Dark mode html background */
+  .dark {
+    background-color: #030712;
+    /* Dark mode default */
   }
 
   body {
+    min-width: 100%;
+    position: relative;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
     /* ============================================
        LIGHT MODE STYLES (DEFAULT)
        ============================================ */
