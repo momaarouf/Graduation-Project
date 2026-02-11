@@ -26,7 +26,9 @@ import Navigation from '@/src/components/layout/Navigation'
 import HeroSection from '@/src/components/landing/HeroSection'
 import SafetyPillarBar from '@/src/components/landing/SafetyPillarBar'
 import CategoryTiles from '@/src/components/landing/CategoryTiles'
-import ImpactMap from '@/src/components/landing/ImpactMap' 
+import ImpactMap from '@/src/components/landing/ImpactMap'
+
+
 
 export default function HomePage() {
   return (
@@ -38,7 +40,7 @@ export default function HomePage() {
         Uses dual theme colors automatically
       */}
       <Navigation />
-      
+
       {/* 
         ============================================
         SECTION 2: MAIN HERO
@@ -46,7 +48,7 @@ export default function HomePage() {
         Full dual theme implementation
       */}
       <HeroSection />
-      
+
       {/* 
         ============================================
         SECTION 2.5: SAFETY PILLARS
@@ -64,7 +66,7 @@ export default function HomePage() {
         ============================================
         Dual theme section with separate colors
       */}
-      <section 
+      <section
         className="
           py-8 sm:py-12 
           bg-gray-50 dark:bg-gray-900          /* Dual background */
@@ -82,7 +84,7 @@ export default function HomePage() {
           ">
             TRUSTED PARTNERS
           </p>
-          
+
           {/* Partner logos - dual colors */}
           <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-8">
             {/* Each logo has separate light/dark colors */}
@@ -92,14 +94,14 @@ export default function HomePage() {
             ">
               WHISH
             </div>
-            
+
             <div className="
               text-sm sm:text-base font-semibold 
               text-gray-400 dark:text-gray-600   /* Dual logo colors */
             ">
               Tourism Lebanon
             </div>
-            
+
             <div className="
               text-sm sm:text-base font-semibold 
               text-gray-400 dark:text-gray-600   /* Dual logo colors */
@@ -109,14 +111,14 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-      
+
       {/* 
         ============================================
         SECTION 4: FEATURES PREVIEW
         ============================================
         Cards with complete dual theme support
       */}
-      <section 
+      <section
         className="
           py-10 sm:py-16 
           bg-white dark:bg-gray-950              /* Dual background */
@@ -133,7 +135,7 @@ export default function HomePage() {
           ">
             More Features Coming Soon
           </h2>
-          
+
           {/* Section description - dual text colors */}
           <p className="
             text-sm sm:text-base 
@@ -142,7 +144,7 @@ export default function HomePage() {
           ">
             We're building a complete travel marketplace with advanced features.
           </p>
-          
+
           {/* 
             FEATURE CARDS - DUAL THEME IMPLEMENTATION
             Each card has separate styles for light/dark
@@ -164,7 +166,7 @@ export default function HomePage() {
                   bg-gray-400 dark:bg-gray-600     /* Dual icon colors */
                 " />
               </div>
-              
+
               {/* Feature title - dual text colors */}
               <h3 className="
                 font-semibold 
@@ -173,7 +175,7 @@ export default function HomePage() {
               ">
                 Advanced Safety
               </h3>
-              
+
               {/* Feature description - dual text colors */}
               <p className="
                 text-sm 
@@ -182,7 +184,7 @@ export default function HomePage() {
                 Verified guides, secure payments, 48h refund guarantee
               </p>
             </div>
-            
+
             {/* Feature Card 2: Categories */}
             <div className="
               card-theme                           /* Dual theme card utility */
@@ -212,7 +214,7 @@ export default function HomePage() {
                 Halal-friendly, hiking, historical, cultural experiences
               </p>
             </div>
-            
+
             {/* Feature Card 3: Live Map */}
             <div className="
               card-theme                           /* Dual theme card utility */
@@ -245,14 +247,14 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-      
+
       {/* 
         ============================================
         SECTION 5: FOOTER
         ============================================
         Dual theme footer
       */}
-      <footer 
+      <footer
         className="
           py-6 
           bg-gray-50 dark:bg-gray-900              /* Dual background */
@@ -273,3 +275,4 @@ export default function HomePage() {
     </>
   )
 }
+

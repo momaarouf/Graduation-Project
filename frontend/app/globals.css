@@ -402,3 +402,73 @@
     text-decoration: underline !important;
   }
 }
+/* ============================================================================
+   ADD TO GLOBALS.CSS - HALF-STAR RATING SUPPORT
+   ============================================================================
+   LOCATION: /frontend/src/app/globals.css
+   
+   PURPOSE: Enable half-star ratings in tour cards
+   
+   HOW IT WORKS:
+   1. Full star: Normal fill
+   2. Half star: Two overlapping stars
+   3. Clip-path cuts the top star in half
+   4. Perfect for ratings like 4.5, 3.5, etc.
+   ============================================================================ */
+
+/* 
+  HALF-STAR CLIPPING UTILITY
+  -------------------------
+  Used in SearchResultsGrid component for accurate rating display
+  Cuts the star in half vertically to show partial ratings
+*/
+.clip-half {
+  clip-path: inset(0 50% 0 0);
+}
+
+/* 
+  ADDITIONAL SEARCH PAGE STYLES
+  ----------------------------
+  These will be used by the search page layout
+*/
+.search-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.search-container {
+  width: 100%;
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .search-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .search-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* 
+  CARD HOVER ENHANCEMENTS
+  ----------------------
+  Smooth transitions for interactive elements
+*/
+.tour-card-image {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tour-card:hover .tour-card-image {
+  transform: scale(1.05);
+}
