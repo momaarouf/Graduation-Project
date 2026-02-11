@@ -51,9 +51,9 @@ import { Filter, ChevronLeft, ChevronRight } from 'lucide-react'
 function DesktopSidebar() {
   const { isCollapsed, toggleSidebar } = useSidebarState()
   const [activeFilterCount, setActiveFilterCount] = useState(0)
-  
+
   return (
-    <aside 
+    <aside
       className={`
         relative
         hidden lg:block
@@ -84,8 +84,7 @@ function DesktopSidebar() {
         - Better UX on trackpads
       */}
       <div className="
-        sticky top-16
-        h-[calc(100vh-4rem)]
+        h-full
         overflow-y-auto
         overflow-x-hidden
         overscroll-contain
@@ -119,7 +118,7 @@ function DesktopSidebar() {
             hover:text-gray-900 dark:hover:text-white
             transition-all duration-200
             shadow-md
-            ${isCollapsed ? 'lg:opacity-0 lg:group-hover:opacity-100': 'opacity-100'}
+            ${isCollapsed ? 'lg:opacity-0 lg:group-hover:opacity-100' : 'opacity-100'}
             
             
           `}
@@ -132,7 +131,7 @@ function DesktopSidebar() {
             <ChevronLeft className="w-4 h-4" />
           )}
         </button>
-        
+
         {/* 
           ========================================
           FILTERS CONTENT
@@ -173,11 +172,11 @@ function ToursPageContent() {
   // ========================================
   const [showMobileFilters, setShowMobileFilters] = useState(false)
   const [activeFilterCount, setActiveFilterCount] = useState(0)
-  
+
   // ========================================
   // HANDLERS
   // ========================================
-  
+
   /**
    * Open mobile filter drawer
    * @function handleOpenMobileFilters
@@ -185,7 +184,7 @@ function ToursPageContent() {
   const handleOpenMobileFilters = useCallback(() => {
     setShowMobileFilters(true)
   }, [])
-  
+
   /**
    * Close mobile filter drawer
    * @function handleCloseMobileFilters
@@ -193,7 +192,7 @@ function ToursPageContent() {
   const handleCloseMobileFilters = useCallback(() => {
     setShowMobileFilters(false)
   }, [])
-  
+
   return (
     // ========================================
     // PAGE LAYOUT WRAPPER
@@ -203,11 +202,13 @@ function ToursPageContent() {
     // This offsets the fixed navbar (height 56px mobile, 64px desktop)
     // No other padding should be added at this level
     // ========================================
-    <PageLayout>
+    <PageLayout hideFooter>
       <div className="
-        pt-14 sm:pt-16
+        h-[calc(100vh-0rem)]
         w-full
         bg-white dark:bg-gray-950
+        overflow-hidden
+        flex flex-col
       ">
         {/* 
           ========================================
@@ -215,38 +216,37 @@ function ToursPageContent() {
           ========================================
           
           flex-row: Sidebar and content side by side
-          min-h-[calc(100vh-4rem)]: Fill remaining viewport height
-          items-start: Align to top, no stretching
+          h-full: Fill remaining viewport height
+          overflow-hidden: Prevent global scrollbar
+          pt-14/sm:pt-16: Offset the fixed navbar
         */}
         <div className="
           flex flex-row
           w-full
-          min-h-[calc(100vh-4rem)]
-          items-start
+          h-full
+          pt-14 sm:pt-16
+          overflow-hidden
         ">
           {/* DESKTOP SIDEBAR - Hidden on mobile */}
           <DesktopSidebar />
-          
+
           {/* 
             ========================================
             MAIN CONTENT - SEARCH RESULTS
             ========================================
             
             flex-1: Take remaining width after sidebar
-            h-[calc(100vh-4rem)]: Match sidebar height
-            overflow-y-auto: Scroll independently
-            px-4 sm:px-6 lg:px-8: Responsive horizontal padding
-            
-            🔴 NO ADDITIONAL pt-* OR mt-* HERE
-            The pt-14 at the parent already handles navbar offset
+            h-full: Fill parent height
+            overflow-y-auto: Independent scrolling for results
           */}
           <main className="
             flex-1
+            h-full
             min-w-0
             px-4 sm:px-6 lg:px-8
             py-4 sm:py-6
             overflow-y-auto
-            
+            overscroll-contain
           ">
             {/* 
               ========================================
@@ -291,7 +291,7 @@ function ToursPageContent() {
                 )}
               </button>
             </div>
-            
+
             {/* 
               ========================================
               SEARCH RESULTS GRID
@@ -308,13 +308,13 @@ function ToursPageContent() {
               
               DO NOT add another sort dropdown here!
             */}
-            <SearchResultsGrid 
+            <SearchResultsGrid
               onFilterCountChange={setActiveFilterCount}
             />
           </main>
         </div>
       </div>
-      
+
       {/* 
         ========================================
         MOBILE FILTER DRAWER
@@ -363,7 +363,7 @@ export default function ToursPage() {
 // ============================================================================
 // LAYOUT SUMMARY - BEFORE vs AFTER
 // ============================================================================
-// 
+//
 // ❌ BEFORE (Broken):
 // ┌─────────────────────────────────┐
 // │ PageLayout (pt-14)             │ ← Double padding starts here
@@ -376,7 +376,7 @@ export default function ToursPage() {
 // │ │ └─────────────────────┘  │  │
 // │ └───────────────────────────┘  │
 // └─────────────────────────────────┘
-// 
+//
 // ✅ AFTER (Fixed):
 // ┌─────────────────────────────────┐
 // │ PageLayout (no padding)        │ ← Clean slate
