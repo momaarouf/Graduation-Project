@@ -11,9 +11,10 @@
 
 'use client'
 
-import { Search, Shield, Users, Globe, Star } from 'lucide-react'
+import { Search, Shield, Users, Globe, Star, ChevronDown, Check } from 'lucide-react'
 import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from '@headlessui/react'
 
 export default function HeroSection() {
     const router = useRouter()
@@ -166,20 +167,70 @@ export default function HeroSection() {
                         </div>
 
                         {/* LOCATION DROPDOWN - DUAL THEME */}
-                        <div className="relative">
-                            <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5 pointer-events-none" />
-                            <select
-                                value={selectedLocation}
-                                onChange={(e) => setSelectedLocation(e.target.value)}
-                                className="w-full sm:w-40 pl-9 sm:pl-12 pr-8 sm:pr-10 py-3 sm:py-4 text-sm sm:text-base border-0 bg-gray-50 dark:bg-gray-800 dark:text-white rounded-lg sm:rounded-xl focus:outline-none appearance-none"
-                                aria-label="Select location"
-                            >
-                                {LOCATIONS.map((location) => (
-                                    <option key={location.value} value={location.value}>
-                                        {location.label}
-                                    </option>
-                                ))}
-                            </select>
+                        <div className="relative w-full sm:w-40">
+                            <Listbox value={selectedLocation} onChange={setSelectedLocation}>
+                                <div className="relative h-full">
+                                    <ListboxButton className="
+                                        w-full h-full
+                                        flex items-center gap-3
+                                        pl-9 sm:pl-10 pr-8 sm:pr-10 py-3 sm:py-4 
+                                        text-sm sm:text-base 
+                                        bg-gray-50 dark:bg-gray-800 
+                                        dark:text-white 
+                                        rounded-lg sm:rounded-xl 
+                                        focus:outline-none focus:ring-2 focus:ring-orange-500/20
+                                        transition-all duration-200
+                                        text-left
+                                    ">
+                                        <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5 pointer-events-none" />
+                                        <span className="block truncate">
+                                            {LOCATIONS.find(loc => loc.value === selectedLocation)?.label}
+                                        </span>
+                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform duration-200 ui-open:rotate-180" />
+                                    </ListboxButton>
+
+                                    <Transition
+                                        leave="transition ease-in duration-100"
+                                        leaveFrom="opacity-100"
+                                        leaveTo="opacity-0"
+                                    >
+                                        <ListboxOptions className="
+                                            absolute z-50 mt-1.5
+                                            max-h-60 w-full overflow-auto
+                                            rounded-xl bg-white dark:bg-gray-900
+                                            py-1.5 text-sm
+                                            shadow-xl ring-1 ring-black/5 dark:ring-white/10
+                                            focus:outline-none
+                                        ">
+                                            {LOCATIONS.map((location) => (
+                                                <ListboxOption
+                                                    key={location.value}
+                                                    value={location.value}
+                                                    className={({ focus, selected }) => `
+                                                        relative cursor-default select-none
+                                                        py-2.5 pl-10 pr-4 transition-colors
+                                                        ${focus ? 'bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400' : 'text-gray-900 dark:text-gray-200'}
+                                                        ${selected ? 'font-semibold' : 'font-normal'}
+                                                    `}
+                                                >
+                                                    {({ selected }) => (
+                                                        <>
+                                                            <span className={`block truncate ${selected ? 'text-orange-600 dark:text-orange-400' : ''}`}>
+                                                                {location.label}
+                                                            </span>
+                                                            {selected ? (
+                                                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-orange-600 dark:text-orange-400">
+                                                                    <Check className="w-4 h-4" />
+                                                                </span>
+                                                            ) : null}
+                                                        </>
+                                                    )}
+                                                </ListboxOption>
+                                            ))}
+                                        </ListboxOptions>
+                                    </Transition>
+                                </div>
+                            </Listbox>
                         </div>
 
                         {/* SEARCH BUTTON - DUAL THEME */}

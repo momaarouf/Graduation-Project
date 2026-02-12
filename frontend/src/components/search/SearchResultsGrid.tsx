@@ -43,8 +43,11 @@ import {
     Award,
     Leaf,
     FilterX,
-    ArrowUpDown
+    ArrowUpDown,
+    ChevronDown,
+    Check
 } from 'lucide-react'
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from '@headlessui/react'
 
 // ============================================================================
 // IMPORTS
@@ -89,6 +92,13 @@ export interface TourCardData {
 
 // Sort option type
 export type SortOption = 'recommended' | 'price-low' | 'price-high' | 'rating'
+
+const SORT_OPTIONS = [
+    { id: 'recommended', name: 'Recommended' },
+    { id: 'price-low', name: 'Price: Low to High' },
+    { id: 'price-high', name: 'Price: High to Low' },
+    { id: 'rating', name: 'Highest Rated' },
+] as const
 
 // ============================================================================
 // MOCK DATA
@@ -284,9 +294,9 @@ const renderRating = (rating: number, reviewCount: number) => {
                 {[...Array(5)].map((_, i) => {
                     if (i < fullStars) {
                         return (
-                            <Star 
-                                key={i} 
-                                className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-400" 
+                            <Star
+                                key={i}
+                                className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-amber-400 text-amber-400"
                             />
                         )
                     } else if (i === fullStars && hasHalfStar) {
@@ -298,19 +308,19 @@ const renderRating = (rating: number, reviewCount: number) => {
                         )
                     } else {
                         return (
-                            <Star 
-                                key={i} 
-                                className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-300 dark:text-gray-600" 
+                            <Star
+                                key={i}
+                                className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-300 dark:text-gray-600"
                             />
                         )
                     }
                 })}
             </div>
-            
+
             <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white">
                 {rating.toFixed(1)}
             </span>
-            
+
             <span className="text-xs text-gray-500 dark:text-gray-400">
                 ({reviewCount.toLocaleString()})
             </span>
@@ -324,56 +334,56 @@ const renderRating = (rating: number, reviewCount: number) => {
 
 function filterTours(tours: TourCardData[], filters: FilterState): TourCardData[] {
     return tours.filter(tour => {
-        
+
         // Location filters
         if (filters.countries && filters.countries.length > 0) {
             if (!filters.countries.includes(tour.country)) {
                 return false
             }
         }
-        
+
         if (filters.cities && filters.cities.length > 0) {
             const tourCityLower = tour.location.toLowerCase()
-            const matchesCity = filters.cities.some(city => 
+            const matchesCity = filters.cities.some(city =>
                 tourCityLower.includes(city.toLowerCase()) ||
                 city.toLowerCase().includes(tourCityLower)
             )
             if (!matchesCity) return false
         }
-        
+
         // Tour attributes
         if (filters.isHalalCertified && !tour.halalCertified) {
             return false
         }
-        
+
         if (filters.hasGroupDiscount) {
             const hasGroupDiscountBadge = tour.badges?.some(b => b.type === 'group')
             if (!hasGroupDiscountBadge) return false
         }
-        
+
         if (filters.isFamilyFriendly) {
             const hasFamilyBadge = tour.badges?.some(b => b.type === 'family')
             if (!hasFamilyBadge) return false
         }
-        
+
         if (filters.isPremium) {
             const hasPremiumBadge = tour.badges?.some(b => b.type === 'premium')
             if (!hasPremiumBadge) return false
         }
-        
+
         // Price filters
         if (filters.minPrice !== undefined && tour.price.amount < filters.minPrice) {
             return false
         }
-        
+
         if (filters.maxPrice !== undefined && tour.price.amount > filters.maxPrice) {
             return false
         }
-        
+
         // Duration filters
         if (filters.durations && filters.durations.length > 0) {
             const durationHours = parseFloat(tour.duration)
-            
+
             const matchesDuration = filters.durations.some(duration => {
                 switch (duration) {
                     case '1-3':
@@ -388,28 +398,28 @@ function filterTours(tours: TourCardData[], filters: FilterState): TourCardData[
                         return false
                 }
             })
-            
+
             if (!matchesDuration) return false
         }
-        
+
         // Group size filters
         if (filters.minGroupSize !== undefined && tour.maxCapacity < filters.minGroupSize) {
             return false
         }
-        
+
         if (filters.maxGroupSize !== undefined && tour.minCapacity > filters.maxGroupSize) {
             return false
         }
-        
+
         if (filters.hasAvailableSpots && tour.availableSpots <= 0) {
             return false
         }
-        
+
         // Guide quality filters
         if (filters.isGuideVerified && !tour.guideVerified) {
             return false
         }
-        
+
         // Rating filters
         if (filters.minRating && filters.minRating !== 'any') {
             const minRatingValue = parseFloat(filters.minRating)
@@ -417,7 +427,7 @@ function filterTours(tours: TourCardData[], filters: FilterState): TourCardData[
                 return false
             }
         }
-        
+
         // Availability filters (simplified for Phase 1)
         if (filters.availability && filters.availability !== 'any') {
             if (filters.availability === 'today' && !tour.nextAvailableDate?.includes('Today')) {
@@ -427,7 +437,7 @@ function filterTours(tours: TourCardData[], filters: FilterState): TourCardData[
                 return false
             }
         }
-        
+
         return true
     })
 }
@@ -438,17 +448,17 @@ function filterTours(tours: TourCardData[], filters: FilterState): TourCardData[
 
 function sortTours(tours: TourCardData[], sortBy: SortOption): TourCardData[] {
     const sorted = [...tours]
-    
+
     switch (sortBy) {
         case 'price-low':
             return sorted.sort((a, b) => a.price.amount - b.price.amount)
-        
+
         case 'price-high':
             return sorted.sort((a, b) => b.price.amount - a.price.amount)
-        
+
         case 'rating':
             return sorted.sort((a, b) => b.rating - a.rating)
-        
+
         case 'recommended':
         default:
             // Recommended = rating + recency + availability
@@ -506,7 +516,7 @@ function TourCard({ tour }: TourCardProps) {
                         <div className="w-8 h-8 border-2 border-gray-300 dark:border-gray-600 border-t-blue-600 rounded-full animate-spin" />
                     </div>
                 )}
-                
+
                 <Image
                     src={tour.mainImage}
                     alt={tour.title}
@@ -905,38 +915,38 @@ export default function SearchResultsGrid({
     const [tours, setTours] = useState<TourCardData[]>(initialTours || [])
     const [loading, setLoading] = useState(externalLoading)
     const [sortBy, setSortBy] = useState<SortOption>('recommended')
-    
+
     // ========================================
     // CONTEXT
     // ========================================
     const { filters, isLoading: contextLoading } = useFilterState()
     const dispatch = useFilterDispatch()
-    
+
     // ========================================
     // MEMOIZED FILTERED AND SORTED TOURS
     // ========================================
-    
+
     const filteredTours = useMemo(() => {
         if (!tours.length) return []
         return filterTours(tours, filters)
     }, [tours, filters])
-    
+
     const sortedAndFilteredTours = useMemo(() => {
         return sortTours(filteredTours, sortBy)
     }, [filteredTours, sortBy])
-    
+
     // ========================================
     // EFFECTS
     // ========================================
-    
+
     // Update total results count in context
     useEffect(() => {
-        dispatch({ 
-            type: 'SET_TOTAL_RESULTS', 
-            payload: filteredTours.length 
+        dispatch({
+            type: 'SET_TOTAL_RESULTS',
+            payload: filteredTours.length
         })
     }, [filteredTours.length, dispatch])
-    
+
     // Notify parent of filter count changes
     useEffect(() => {
         onFilterCountChange?.(filteredTours.length)
@@ -955,7 +965,7 @@ export default function SearchResultsGrid({
                 setTours(MOCK_TOURS)
                 setLoading(false)
             }, 800)
-            
+
             return () => clearTimeout(timer)
         }
     }, [initialTours, mounted])
@@ -963,11 +973,11 @@ export default function SearchResultsGrid({
     // ========================================
     // HANDLERS
     // ========================================
-    
+
     const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setSortBy(e.target.value as SortOption)
     }
-    
+
     const handleClearFilters = () => {
         dispatch({ type: 'CLEAR_FILTERS' })
     }
@@ -997,7 +1007,7 @@ export default function SearchResultsGrid({
     // Show empty state
     if (!sortedAndFilteredTours || sortedAndFilteredTours.length === 0) {
         return (
-            <EmptySearchResults 
+            <EmptySearchResults
                 onClearFilters={handleClearFilters}
             />
         )
@@ -1046,41 +1056,72 @@ export default function SearchResultsGrid({
                     ">
                         Sort by:
                     </span>
-                    
-                    <div className="relative w-full sm:w-48">
-                        <select
-                            value={sortBy}
-                            onChange={handleSortChange}
-                            className="
-                                w-full
-                                appearance-none
-                                px-4 py-2.5 sm:py-2
-                                pl-4 pr-10
-                                text-sm
-                                bg-white dark:bg-gray-900
-                                border border-gray-300 dark:border-gray-700
-                                rounded-lg
-                                text-gray-900 dark:text-white
-                                focus:outline-none focus:ring-2 focus:ring-blue-500
-                                cursor-pointer
-                                hover:border-gray-400 dark:hover:border-gray-600
-                                transition-colors
-                            "
-                            aria-label="Sort tours by"
-                        >
-                            <option value="recommended">Recommended</option>
-                            <option value="price-low">Price: Low to High</option>
-                            <option value="price-high">Price: High to Low</option>
-                            <option value="rating">Highest Rated</option>
-                        </select>
-                        
-                        {/* Custom dropdown arrow */}
-                        <ArrowUpDown className="
-                            absolute right-3 top-1/2 -translate-y-1/2
-                            w-4 h-4
-                            text-gray-500 dark:text-gray-400
-                            pointer-events-none
-                        " />
+
+                    <div className="relative w-full sm:w-56">
+                        <Listbox value={sortBy} onChange={(val) => setSortBy(val as SortOption)}>
+                            <div className="relative">
+                                <ListboxButton className="
+                                    relative w-full
+                                    flex items-center justify-between
+                                    px-4 py-2.5 sm:py-2
+                                    bg-white dark:bg-gray-900
+                                    border border-gray-200 dark:border-gray-800
+                                    rounded-xl
+                                    text-sm text-left
+                                    text-gray-900 dark:text-white
+                                    hover:border-blue-400 dark:hover:border-blue-500
+                                    focus:outline-none focus:ring-2 focus:ring-blue-500/20
+                                    transition-all duration-200
+                                    shadow-sm hover:shadow-md
+                                ">
+                                    <span className="block truncate font-medium">
+                                        {SORT_OPTIONS.find(opt => opt.id === sortBy)?.name}
+                                    </span>
+                                    <ChevronDown className="w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform duration-200 ui-open:rotate-180" />
+                                </ListboxButton>
+
+                                <Transition
+                                    leave="transition ease-in duration-100"
+                                    leaveFrom="opacity-100"
+                                    leaveTo="opacity-0"
+                                >
+                                    <ListboxOptions className="
+                                        absolute z-50 mt-1.5
+                                        max-h-60 w-full overflow-auto
+                                        rounded-xl bg-white dark:bg-gray-900
+                                        py-1.5 text-sm
+                                        shadow-xl ring-1 ring-black/5 dark:ring-white/10
+                                        focus:outline-none
+                                    ">
+                                        {SORT_OPTIONS.map((option) => (
+                                            <ListboxOption
+                                                key={option.id}
+                                                value={option.id}
+                                                className={({ focus, selected }) => `
+                                                    relative cursor-default select-none
+                                                    py-2.5 pl-10 pr-4 transition-colors
+                                                    ${focus ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-gray-200'}
+                                                    ${selected ? 'font-semibold' : 'font-normal'}
+                                                `}
+                                            >
+                                                {({ selected }) => (
+                                                    <>
+                                                        <span className={`block truncate ${selected ? 'text-blue-600 dark:text-blue-400' : ''}`}>
+                                                            {option.name}
+                                                        </span>
+                                                        {selected ? (
+                                                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-600 dark:text-blue-400">
+                                                                <Check className="w-4 h-4" />
+                                                            </span>
+                                                        ) : null}
+                                                    </>
+                                                )}
+                                            </ListboxOption>
+                                        ))}
+                                    </ListboxOptions>
+                                </Transition>
+                            </div>
+                        </Listbox>
                     </div>
                 </div>
             </div>
@@ -1125,7 +1166,7 @@ export default function SearchResultsGrid({
 // ============================================================================
 // ARCHITECTURE SUMMARY:
 // ============================================================================
-// 
+//
 // FILTER FLOW:
 // 1. User clicks filter in SearchFilters
 // 2. FilterContext updates filters state
@@ -1133,19 +1174,19 @@ export default function SearchResultsGrid({
 // 4. useMemo recalculates filteredTours
 // 5. useMemo recalculates sortedAndFilteredTours
 // 6. UI updates with filtered/sorted results
-// 
+//
 // SORT FLOW:
 // 1. User selects sort option from dropdown
 // 2. handleSortChange updates sortBy state
 // 3. useMemo recalculates sortedAndFilteredTours
 // 4. UI updates with newly sorted results
-// 
+//
 // SINGLE RESPONSIBILITY:
 // - ToursPage: Layout only (pt-14, sidebar, main container)
 // - SearchFilters: Filter UI only
 // - SearchResultsGrid: Results display + sorting only
 // - FilterContext: State management only
-// 
+//
 // This separation makes the code:
 // ✅ Easier to debug
 // ✅ Easier to test
