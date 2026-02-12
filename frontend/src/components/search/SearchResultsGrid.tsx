@@ -280,7 +280,7 @@ const formatPrice = (amount: number, currency: string): string => {
     }
 }
 
-const getCountryFlag = (country: 'lebanon' | 'turkey'): string => {
+export const getCountryFlag = (country: 'lebanon' | 'turkey'): string => {
     return country === 'lebanon' ? '🇱🇧' : '🇹🇷'
 }
 
