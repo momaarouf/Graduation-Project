@@ -35,27 +35,13 @@ export default function FilterSection({
     const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
     return (
-        <div className={`
-      w-full
-      ${showSeparator ? 'border-b border-gray-200 dark:border-gray-800' : ''}
-      ${className}
-    `}>
+        <div className={`w-full ${showSeparator ? 'border-b border-gray-200 dark:border-gray-800' : ''} ${className}`}>
             {/* ========================================
           SECTION HEADER - Click to toggle
           ======================================== */}
             <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="
-          w-full
-          flex items-center justify-between
-          py-4 px-1
-          text-left
-          hover:bg-gray-50 dark:hover:bg-gray-800/50
-          transition-colors duration-200
-          rounded-lg
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-          dark:focus:ring-offset-gray-900
-        "
+                className="w-full flex items-center justify-between py-4 px-1 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
                 aria-expanded={isExpanded}
                 aria-label={`${title} filter section, ${isExpanded ? 'expanded' : 'collapsed'}`}
             >
@@ -68,11 +54,7 @@ export default function FilterSection({
                     )}
 
                     {/* Title with dual theme colors */}
-                    <span className="
-            font-semibold
-            text-sm sm:text-base
-            text-gray-900 dark:text-white
-          ">
+                    <span className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white">
                         {title}
                     </span>
                 </div>
@@ -90,13 +72,7 @@ export default function FilterSection({
             {/* ========================================
           SECTION CONTENT - Collapsible
           ======================================== */}
-            <div
-                className={`
-          overflow-hidden
-          transition-all duration-300 ease-in-out
-          ${isExpanded ? 'max-h-[1000px] opacity-100 mb-4' : 'max-h-0 opacity-0'}
-        `}
-            >
+            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[1000px] opacity-100 mb-4' : 'max-h-0 opacity-0'}`}>
                 <div className="px-1 pb-2">
                     {children}
                 </div>

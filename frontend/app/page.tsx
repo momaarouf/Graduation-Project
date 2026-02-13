@@ -67,45 +67,27 @@ export default function HomePage() {
         Dual theme section with separate colors
       */}
       <section
-        className="
-          py-8 sm:py-12 
-          bg-gray-50 dark:bg-gray-900          /* Dual background */
-          border-t 
-          border-gray-200 dark:border-gray-800 /* Dual border */
-        "
+        className="py-8 sm:py-12 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800"
         aria-label="Trusted partners"
       >
         <div className="container mx-auto px-4 text-center">
           {/* Section title - dual text colors */}
-          <p className="
-            text-xs sm:text-sm 
-            text-gray-500 dark:text-gray-400   /* Dual muted text */
-            uppercase tracking-wider mb-4
-          ">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
             TRUSTED PARTNERS
           </p>
 
           {/* Partner logos - dual colors */}
           <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-8">
             {/* Each logo has separate light/dark colors */}
-            <div className="
-              text-sm sm:text-base font-bold 
-              text-gray-400 dark:text-gray-600   /* Dual logo colors */
-            ">
+            <div className="text-sm sm:text-base font-bold text-gray-400 dark:text-gray-600">
               WHISH
             </div>
 
-            <div className="
-              text-sm sm:text-base font-semibold 
-              text-gray-400 dark:text-gray-600   /* Dual logo colors */
-            ">
+            <div className="text-sm sm:text-base font-semibold text-gray-400 dark:text-gray-600   /* Dual logo colors */">
               Tourism Lebanon
             </div>
 
-            <div className="
-              text-sm sm:text-base font-semibold 
-              text-gray-400 dark:text-gray-600   /* Dual logo colors */
-            ">
+            <div className="text-sm sm:text-base font-semibold text-gray-400 dark:text-gray-600   /* Dual logo colors */">
               Turkey Tourism
             </div>
           </div>
@@ -119,29 +101,17 @@ export default function HomePage() {
         Cards with complete dual theme support
       */}
       <section
-        className="
-          py-10 sm:py-16 
-          bg-white dark:bg-gray-950              /* Dual background */
-        "
+        className="py-10 sm:py-16 bg-white dark:bg-gray-950"
         aria-label="Upcoming features"
       >
         <div className="container mx-auto px-4 text-center">
           {/* Section heading - dual text colors */}
-          <h2 className="
-            text-xl sm:text-2xl md:text-3xl 
-            font-bold 
-            text-gray-900 dark:text-white        /* Dual heading colors */
-            mb-4
-          ">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
             More Features Coming Soon
           </h2>
 
           {/* Section description - dual text colors */}
-          <p className="
-            text-sm sm:text-base 
-            text-gray-600 dark:text-gray-400     /* Dual description colors */
-            mb-6 max-w-lg mx-auto
-          ">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 max-w-lg mx-auto">
             We're building a complete travel marketplace with advanced features.
           </p>
 
@@ -151,96 +121,45 @@ export default function HomePage() {
           */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-xl sm:max-w-4xl mx-auto">
             {/* Feature Card 1: Safety */}
-            <div className="
-              card-theme                           /* Dual theme card utility */
-              hover:shadow-lg transition-shadow    /* Hover effects */
-            ">
+            <div className="card-theme hover:shadow-lg transition-shadow">
               {/* Icon placeholder - dual colors */}
-              <div className="
-                w-12 h-12 rounded-lg 
-                flex items-center justify-center 
-                mb-4 mx-auto opacity-30
-              ">
-                <div className="
-                  w-6 h-6 rounded 
-                  bg-gray-400 dark:bg-gray-600     /* Dual icon colors */
-                " />
+              <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 mx-auto opacity-30">
+                <div className="w-6 h-6 rounded bg-gray-400 dark:bg-gray-600     /* Dual icon colors */" />
               </div>
 
               {/* Feature title - dual text colors */}
-              <h3 className="
-                font-semibold 
-                text-gray-900 dark:text-white      /* Dual title colors */
-                mb-2
-              ">
+              <h3 className="font-semibold text-gray-900 dark:text-white      /* Dual title colors */ mb-2">
                 Advanced Safety
               </h3>
 
               {/* Feature description - dual text colors */}
-              <p className="
-                text-sm 
-                text-gray-500 dark:text-gray-400   /* Dual description colors */
-              ">
+              <p className="text-sm text-gray-500 dark:text-gray-400   /* Dual description colors */">
                 Verified guides, secure payments, 48h refund guarantee
               </p>
             </div>
 
             {/* Feature Card 2: Categories */}
-            <div className="
-              card-theme                           /* Dual theme card utility */
-              hover:shadow-lg transition-shadow    /* Hover effects */
-            ">
-              <div className="
-                w-12 h-12 rounded-lg 
-                flex items-center justify-center 
-                mb-4 mx-auto opacity-30
-              ">
-                <div className="
-                  w-6 h-6 rounded 
-                  bg-gray-400 dark:bg-gray-600     /* Dual icon colors */
-                " />
+            <div className="card-theme hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 mx-auto opacity-30">
+                <div className="w-6 h-6 rounded bg-gray-400 dark:bg-gray-600     /* Dual icon colors */" />
               </div>
-              <h3 className="
-                font-semibold 
-                text-gray-900 dark:text-white      /* Dual title colors */
-                mb-2
-              ">
+              <h3 className="font-semibold text-gray-900 dark:text-white      /* Dual title colors */ mb-2">
                 Curated Categories
               </h3>
-              <p className="
-                text-sm 
-                text-gray-500 dark:text-gray-400   /* Dual description colors */
-              ">
+              <p className="text-sm text-gray-500 dark:text-gray-400   /* Dual description colors */">
                 Halal-friendly, hiking, historical, cultural experiences
               </p>
             </div>
 
             {/* Feature Card 3: Live Map */}
-            <div className="
-              card-theme                           /* Dual theme card utility */
-              hover:shadow-lg transition-shadow    /* Hover effects */
-            ">
-              <div className="
-                w-12 h-12 rounded-lg 
-                flex items-center justify-center 
-                mb-4 mx-auto opacity-30
-              ">
-                <div className="
-                  w-6 h-6 rounded 
-                  bg-gray-400 dark:bg-gray-600     /* Dual icon colors */
-                " />
+            <div className="card-theme hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 mx-auto opacity-30">
+                <div className="w-6 h-6 rounded bg-gray-400 dark:bg-gray-600     /* Dual icon colors */" />
               </div>
-              <h3 className="
-                font-semibold 
-                text-gray-900 dark:text-white      /* Dual title colors */
-                mb-2
-              ">
+              <h3 className="font-semibold text-gray-900 dark:text-white      /* Dual title colors */ mb-2">
                 Live Impact Map
               </h3>
-              <p className="
-                text-sm 
-                text-gray-500 dark:text-gray-400   /* Dual description colors */
-              ">
+              <p className="text-sm text-gray-500 dark:text-gray-400   /* Dual description colors */">
                 Real-time tour tracking and community impact visualization
               </p>
             </div>
@@ -255,19 +174,11 @@ export default function HomePage() {
         Dual theme footer
       */}
       <footer
-        className="
-          py-6 
-          bg-gray-50 dark:bg-gray-900              /* Dual background */
-          border-t 
-          border-gray-200 dark:border-gray-800     /* Dual border */
-        "
+        className="py-6 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800"
         aria-label="Footer"
       >
         <div className="container mx-auto px-4 text-center">
-          <p className="
-            text-sm 
-            text-gray-500 dark:text-gray-400       /* Dual text colors */
-          ">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             © {new Date().getFullYear()} SafariHub Travel Marketplace
           </p>
         </div>

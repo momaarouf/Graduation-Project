@@ -134,60 +134,30 @@ export default function TourDetailError({ error, reset }: ErrorProps) {
           {/* ========================================
               CENTERED ERROR CARD
               ======================================== */}
-          <div className="
-            min-h-[70vh]
-            flex items-center justify-center
-            py-12
-          ">
-            <div className="
-              max-w-md w-full
-              text-center
-              space-y-8
-            ">
+          <div className="min-h-[70vh] flex items-center justify-center py-12">
+            <div className="max-w-md w-full text-center space-y-8">
               {/* ========================================
                   ERROR ICON
                   ======================================== */}
-              <div className="
-                inline-flex items-center justify-center
-                w-20 h-20
-                bg-red-100 dark:bg-red-900/20
-                rounded-full
-                mx-auto
-              ">
-                <config.icon className="
-                  w-10 h-10
-                  text-red-600 dark:text-red-400
-                " />
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-full mx-auto">
+                <config.icon className="w-10 h-10 text-red-600 dark:text-red-400" />
               </div>
 
               {/* ========================================
                   ERROR MESSAGE
                   ======================================== */}
               <div className="space-y-3">
-                <h1 className="
-                  text-2xl sm:text-3xl
-                  font-bold
-                  text-gray-900 dark:text-white
-                ">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                   {config.title}
                 </h1>
                 
-                <p className="
-                  text-sm sm:text-base
-                  text-gray-600 dark:text-gray-400
-                  leading-relaxed
-                ">
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 leading-relaxed">
                   {config.message}
                 </p>
 
                 {/* Error digest (for support) */}
                 {error.digest && (
-                  <p className="
-                    text-xs
-                    font-mono
-                    text-gray-500 dark:text-gray-500
-                    pt-2
-                  ">
+                  <p className="text-xs font-mono text-gray-500 dark:text-gray-500 pt-2">
                     Error ID: {error.digest}
                   </p>
                 )}
@@ -196,28 +166,12 @@ export default function TourDetailError({ error, reset }: ErrorProps) {
               {/* ========================================
                   ACTION BUTTONS
                   ======================================== */}
-              <div className="
-                flex flex-col sm:flex-row
-                gap-3
-                justify-center
-                pt-4
-              ">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
                 {/* Primary action (retry/sign in) */}
                 {'onClick' in config ? (
                   <button
                     onClick={config.onClick}
-                    className="
-                      inline-flex items-center justify-center
-                      gap-2
-                      px-6 py-3
-                      bg-blue-600 dark:bg-blue-700
-                      text-white
-                      font-semibold
-                      rounded-xl
-                      hover:bg-blue-700 dark:hover:bg-blue-800
-                      transition-colors
-                      shadow-lg hover:shadow-xl
-                    "
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 dark:bg-blue-700 text-white font-semibold rounded-xl hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors shadow-lg hover:shadow-xl"
                   >
                     <RefreshCw className="w-4 h-4" />
                     {config.action}
@@ -225,18 +179,7 @@ export default function TourDetailError({ error, reset }: ErrorProps) {
                 ) : (
                   <Link
                     href={config.href || '/'}
-                    className="
-                      inline-flex items-center justify-center
-                      gap-2
-                      px-6 py-3
-                      bg-blue-600 dark:bg-blue-700
-                      text-white
-                      font-semibold
-                      rounded-xl
-                      hover:bg-blue-700 dark:hover:bg-blue-800
-                      transition-colors
-                      shadow-lg hover:shadow-xl
-                    "
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 dark:bg-blue-700 text-white font-semibold rounded-xl hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors shadow-lg hover:shadow-xl"
                   >
                     {config.action === 'Sign In' ? (
                       <Shield className="w-4 h-4" />
@@ -250,17 +193,7 @@ export default function TourDetailError({ error, reset }: ErrorProps) {
                 {/* Secondary action (go back) */}
                 <button
                   onClick={() => router.back()}
-                  className="
-                    inline-flex items-center justify-center
-                    gap-2
-                    px-6 py-3
-                    bg-gray-100 dark:bg-gray-800
-                    text-gray-700 dark:text-gray-300
-                    font-semibold
-                    rounded-xl
-                    hover:bg-gray-200 dark:hover:bg-gray-700
-                    transition-colors
-                  "
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   Go Back
@@ -270,19 +203,11 @@ export default function TourDetailError({ error, reset }: ErrorProps) {
               {/* ========================================
                   SUPPORT LINK
                   ======================================== */}
-              <p className="
-                text-xs
-                text-gray-500 dark:text-gray-500
-                pt-4
-              ">
+              <p className="text-xs text-gray-500 dark:text-gray-500 pt-4">
                 Need help?{' '}
                 <Link
                   href="/contact"
-                  className="
-                    text-blue-600 dark:text-blue-400
-                    hover:underline
-                    font-medium
-                  "
+                  className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
                 >
                   Contact Support
                 </Link>

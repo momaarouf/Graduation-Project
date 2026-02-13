@@ -206,18 +206,8 @@ export default function RevokedRegistryClient({
                     <div className="relative w-full sm:w-64">
                         <Listbox value={selectedReason} onChange={handleFilterChange}>
                             <div className="relative">
-                                <ListboxButton className="
-                  w-full flex items-center justify-between gap-2
-                  px-4 py-2.5 sm:py-2
-                  bg-white dark:bg-gray-900 
-                  border border-gray-200 dark:border-gray-800
-                  rounded-xl text-sm
-                  text-gray-900 dark:text-white
-                  hover:border-blue-500/50 dark:hover:border-blue-400/50
-                  focus:outline-none focus:ring-2 focus:ring-blue-500/10
-                  transition-all duration-200
-                  text-left
-                ">
+                                {/* this where you can style the drop down button */}
+                                <ListboxButton className=" w-full flex items-center justify-between gap-2 px-4 py-2.5 sm:py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-sm text-gray-900 dark:text-white hover:border-blue-500/50 dark:hover:border-blue-400/50 focus:outline-none focus:ring-2 focus:ring-blue-500/10 transition-all duration-200 text-left ">
                                     <div className="flex items-center gap-2 truncate">
                                         <Filter className="w-4 h-4 text-gray-400" />
                                         <span className="truncate">
@@ -233,22 +223,10 @@ export default function RevokedRegistryClient({
                                     leaveFrom="opacity-100"
                                     leaveTo="opacity-0"
                                 >
-                                    <ListboxOptions className="
-                    absolute z-50 mt-1.5
-                    max-h-60 w-full overflow-auto
-                    rounded-xl bg-white dark:bg-gray-900
-                    py-1.5 text-sm
-                    shadow-xl ring-1 ring-black/5 dark:ring-white/10
-                    focus:outline-none
-                  ">
+                                    <ListboxOptions className="absolute z-50 mt-1.5 max-h-60 w-full overflow-auto rounded-xl bg-white dark:bg-gray-900 py-1.5 text-sm shadow-xl ring-1 ring-black/5 dark:ring-white/10 focus:outline-none ">
                                         <ListboxOption
                                             value="all"
-                                            className={({ focus, selected }) => `
-                        relative cursor-default select-none
-                        py-2.5 pl-10 pr-4 transition-colors
-                        ${focus ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-gray-200'}
-                        ${selected ? 'font-semibold' : 'font-normal'}
-                      `}
+                                            className={({ focus, selected }) => `relative cursor-default select-none py-2.5 pl-10 pr-4 transition-colors ${focus ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-gray-200'} ${selected ? 'font-semibold' : 'font-normal'} `}
                                         >
                                             {({ selected }) => (
                                                 <>
@@ -268,12 +246,7 @@ export default function RevokedRegistryClient({
                                             <ListboxOption
                                                 key={reason}
                                                 value={reason}
-                                                className={({ focus, selected }) => `
-                          relative cursor-default select-none
-                          py-2.5 pl-10 pr-4 transition-colors
-                          ${focus ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-gray-200'}
-                          ${selected ? 'font-semibold' : 'font-normal'}
-                        `}
+                                                className={({ focus, selected }) => `relative cursor-default select-none py-2.5 pl-10 pr-4 transition-colors ${focus ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-gray-200'} ${selected ? 'font-semibold' : 'font-normal'} `}
                                             >
                                                 {({ selected }) => (
                                                     <>

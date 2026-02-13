@@ -152,25 +152,14 @@ export default function BookingCard({
     // ========================================
 
     return (
-        <div className="
-      bg-white dark:bg-gray-900
-      rounded-xl
-      border border-gray-200 dark:border-gray-800
-      shadow-lg
-      overflow-hidden
-      sticky top-24
-    ">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-lg overflow-hidden sticky top-24">
             {/* ========================================
           HEADER - PRICE & AVAILABILITY
           ======================================== */}
             <div className="p-6 border-b border-gray-200 dark:border-gray-800">
                 <div className="flex items-baseline justify-between mb-2">
                     <div>
-                        <span className="
-              text-2xl sm:text-3xl
-              font-bold
-              text-gray-900 dark:text-white
-            ">
+                        <span className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                             {currency === 'USD' && '$'}
                             {currency === 'TRY' && '₺'}
                             {currency === 'LBP' && 'ل.ل '}
@@ -182,15 +171,7 @@ export default function BookingCard({
                     </div>
 
                     {/* Availability badge */}
-                    <div className={`
-            px-2 py-1
-            rounded-full
-            text-xs font-medium
-            ${isAvailable
-                            ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
-                            : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
-                        }
-          `}>
+                    <div className={`px-2 py-1 rounded-full text-xs font-medium ${isAvailable ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'}`}>
                         {isAvailable ? `${availableSpots} spots left` : 'Fully booked'}
                     </div>
                 </div>

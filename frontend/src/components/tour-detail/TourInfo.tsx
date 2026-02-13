@@ -61,12 +61,7 @@ export default function TourInfo({
           HALAL CERTIFICATION DETAILS
           ======================================== */}
             {isHalalCertified && halalCertificationDetails && (
-                <section className="
-          p-5
-          bg-emerald-50 dark:bg-emerald-950/20
-          border border-emerald-100 dark:border-emerald-900/30
-          rounded-2xl
-        ">
+                <section className="p-5 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 rounded-2xl">
                     <div className="flex items-start gap-3">
                         <div className="
               w-10 h-10
@@ -107,11 +102,7 @@ export default function TourInfo({
                         <div key={stop.id} className="relative flex gap-4 pb-8 last:pb-0">
                             {/* Connector line */}
                             {index !== itinerary.length - 1 && (
-                                <div className="
-                  absolute left-[15px] top-[30px] bottom-0
-                  w-0.5
-                  bg-gray-200 dark:bg-gray-800
-                " />
+                                <div className="absolute left-[15px] top-[30px] bottom-0 w-0.5 bg-gray-200 dark:bg-gray-800" />
                             )}
 
                             {/* Order number */}

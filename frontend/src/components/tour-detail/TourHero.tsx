@@ -96,20 +96,7 @@ export default function TourHero({
                     {/* Navigation arrows (desktop) */}
                     <button
                         onClick={(e) => { e.stopPropagation(); handlePrevImage() }}
-                        className="
-              absolute left-4 top-1/2 -translate-y-1/2
-              w-10 h-10
-              bg-white/90 dark:bg-gray-900/90
-              backdrop-blur-sm
-              rounded-full
-              flex items-center justify-center
-              text-gray-800 dark:text-gray-200
-              hover:bg-white dark:hover:bg-gray-900
-              transition-all
-              shadow-lg
-              opacity-0 lg:opacity-100
-              group-hover:opacity-100
-            "
+                        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-900 transition-all shadow-lg opacity-0 lg:opacity-100 group-hover:opacity-100"
                         aria-label="Previous image"
                     >
                         <ChevronLeft className="w-5 h-5" />
@@ -117,20 +104,7 @@ export default function TourHero({
 
                     <button
                         onClick={(e) => { e.stopPropagation(); handleNextImage() }}
-                        className="
-              absolute right-4 top-1/2 -translate-y-1/2
-              w-10 h-10
-              bg-white/90 dark:bg-gray-900/90
-              backdrop-blur-sm
-              rounded-full
-              flex items-center justify-center
-              text-gray-800 dark:text-gray-200
-              hover:bg-white dark:hover:bg-gray-900
-              transition-all
-              shadow-lg
-              opacity-0 lg:opacity-100
-              group-hover:opacity-100
-            "
+                        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-900 transition-all shadow-lg opacity-0 lg:opacity-100 group-hover:opacity-100"
                         aria-label="Next image"
                     >
                         <ChevronRight className="w-5 h-5" />
@@ -139,33 +113,14 @@ export default function TourHero({
                     {/* Top-left badges */}
                     <div className="absolute top-4 left-4 flex flex-wrap gap-2">
                         {/* Country flag */}
-                        <span className="
-              inline-flex items-center gap-1.5
-              px-3 py-1.5
-              bg-white/95 dark:bg-gray-900/95
-              backdrop-blur-sm
-              rounded-full
-              text-sm font-medium
-              text-gray-700 dark:text-gray-300
-              shadow-lg
-            ">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-full text-sm font-medium text-gray-700 dark:text-gray-300 shadow-lg">
                             <span className="text-base">{getCountryFlag(country)}</span>
                             <span>{location}</span>
                         </span>
 
                         {/* Halal certified badge */}
                         {isHalalCertified && (
-                            <span className="
-                inline-flex items-center gap-1.5
-                px-3 py-1.5
-                bg-emerald-50/95 dark:bg-emerald-950/95
-                backdrop-blur-sm
-                rounded-full
-                text-sm font-medium
-                text-emerald-700 dark:text-emerald-300
-                border border-emerald-200/50 dark:border-emerald-800/50
-                shadow-lg
-              ">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50/95 dark:bg-emerald-950/95 backdrop-blur-sm rounded-full text-sm font-medium text-emerald-700 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/50 shadow-lg">
                                 <Leaf className="w-4 h-4" />
                                 <span>Halal Certified</span>
                             </span>

@@ -170,20 +170,7 @@ export default function PriceRangeFilter({
                         placeholder="Min"
                         min={absoluteMin}
                         max={maxPrice || absoluteMax}
-                        className="
-              w-full
-              pl-7 pr-3 py-2
-              text-sm
-              bg-white dark:bg-gray-900
-              border border-gray-300 dark:border-gray-700
-              rounded-lg
-              text-gray-900 dark:text-white
-              placeholder-gray-500 dark:placeholder-gray-400
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-              [appearance:textfield]
-              [&::-webkit-outer-spin-button]:appearance-none
-              [&::-webkit-inner-spin-button]:appearance-none
-            "
+                        className="w-full pl-7 pr-3 py-2 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         aria-label="Minimum price"
                     />
                 </div>
@@ -202,20 +189,7 @@ export default function PriceRangeFilter({
                         placeholder="Max"
                         min={minPrice || absoluteMin}
                         max={absoluteMax}
-                        className="
-              w-full
-              pl-7 pr-3 py-2
-              text-sm
-              bg-white dark:bg-gray-900
-              border border-gray-300 dark:border-gray-700
-              rounded-lg
-              text-gray-900 dark:text-white
-              placeholder-gray-500 dark:placeholder-gray-400
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-              [appearance:textfield]
-              [&::-webkit-outer-spin-button]:appearance-none
-              [&::-webkit-inner-spin-button]:appearance-none
-            "
+                        className="w-full pl-7 pr-3 py-2 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         aria-label="Maximum price"
                     />
                 </div>
@@ -235,16 +209,7 @@ export default function PriceRangeFilter({
                         <button
                             key={index}
                             onClick={() => handleQuickRange(range.min, range.max)}
-                            className={`
-                px-3 py-1.5
-                text-xs font-medium
-                rounded-full
-                transition-colors duration-200
-                ${isActive
-                                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                                }
-              `}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors duration-200 ${isActive ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                         >
                             {range.label}
                         </button>
@@ -258,12 +223,7 @@ export default function PriceRangeFilter({
             {(localMin !== '' || localMax !== '') && (
                 <button
                     onClick={handleClear}
-                    className="
-            text-xs
-            text-gray-500 dark:text-gray-400
-            hover:text-gray-700 dark:hover:text-gray-300
-            transition-colors
-          "
+                    className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
                 >
                     Clear price range
                 </button>

@@ -28,17 +28,17 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { 
+import {
   // Halal & Religious
-  Star, 
+  Star,
   // Hiking & Adventure
-  Mountain, 
+  Mountain,
   // Historical
-  Landmark, 
+  Landmark,
   // Cultural
-  Palette, 
+  Palette,
   // Food
-  Utensils, 
+  Utensils,
   // Family
   Users,
   // Beach/Water
@@ -212,23 +212,7 @@ function CategoryTile({ category }: CategoryTileProps) {
   return (
     <Link
       href={category.href}
-      className={`
-        group
-        relative
-        flex flex-col
-        p-5 sm:p-6
-        rounded-xl
-        border-2
-        transition-all duration-300
-        ${category.borderColor} ${category.darkBorderColor}
-        bg-gradient-to-br ${category.bgGradient} ${category.darkBgGradient}
-        ${category.hoverBg} ${category.darkHoverBg}
-        hover:shadow-lg
-        hover:-translate-y-1
-        focus:outline-none focus:ring-2 focus:ring-offset-2
-        ${category.lightColor.replace('text-', 'focus:ring-')} 
-        dark:focus:ring-offset-gray-900
-      `}
+      className={`group relative flex flex-col p-5 sm:p-6 rounded-xl border-2 transition-all duration-300 ${category.borderColor} ${category.darkBorderColor} bg-gradient-to-br ${category.bgGradient} ${category.darkBgGradient} ${category.hoverBg} ${category.darkHoverBg} hover:shadow-lg hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 ${category.lightColor.replace('text-', 'focus:ring-')} dark:focus:ring-offset-gray-900`}
       aria-label={`Browse ${category.name} tours, ${category.count} available`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -236,92 +220,36 @@ function CategoryTile({ category }: CategoryTileProps) {
       {/* ========================================
            DECORATIVE BACKGROUND ELEMENT
            ======================================== */}
-      <div className="
-        absolute top-0 right-0 
-        w-16 h-16 
-        opacity-0 group-hover:opacity-10
-        transition-opacity duration-300
-        rounded-bl-full
-        bg-current
-      " />
-      
+      <div className="absolute top-0 right-0 w-16 h-16 opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-bl-full bg-current" />
+
       {/* ========================================
            ICON CONTAINER
            ======================================== */}
-      <div className="
-        relative
-        flex items-center justify-center
-        w-12 h-12 sm:w-14 sm:h-14
-        mb-3 sm:mb-4
-        rounded-lg
-        bg-white dark:bg-gray-900
-        shadow-sm
-        transition-transform duration-300
-        group-hover:scale-110
-      ">
-        <Icon className={`
-          w-6 h-6 sm:w-7 sm:h-7
-          ${category.lightColor} ${category.darkColor}
-          transition-transform duration-300
-          ${isHovered ? 'rotate-3 scale-110' : ''}
-        `} />
-        
+      <div className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 mb-3 sm:mb-4 rounded-lg bg-white dark:bg-gray-900 shadow-sm transition-transform duration-300 group-hover:scale-110">
+        <Icon className={`w-6 h-6 sm:w-7 sm:h-7 ${category.lightColor} ${category.darkColor} transition-transform duration-300 ${isHovered ? 'rotate-3 scale-110' : ''}`} />
+
         {/* Animated ring on hover */}
-        <div className="
-          absolute inset-0
-          rounded-lg
-          border-2 border-transparent
-          group-hover:border-current
-          transition-all duration-300
-          opacity-0 group-hover:opacity-30
-          ${category.lightColor} ${category.darkColor}
-        " />
+        <div className={`absolute inset-0 rounded-lg border-2 border-transparent group-hover:border-current transition-all duration-300 opacity-0 group-hover:opacity-30 ${category.lightColor} ${category.darkColor}`} />
       </div>
 
       {/* ========================================
            CATEGORY NAME & COUNT
            ======================================== */}
       <div className="relative">
-        <h3 className={`
-          font-semibold
-          text-base sm:text-lg
-          text-gray-900 dark:text-white
-          mb-1
-          group-hover:${category.lightColor} 
-          group-hover:${category.darkColor}
-          transition-colors duration-300
-        `}>
+        <h3 className={`font-semibold text-base sm:text-lg text-gray-900 dark:text-white mb-1 group-hover:${category.lightColor} group-hover:${category.darkColor} transition-colors duration-300`}>
           {category.name}
         </h3>
-        
-        <p className="
-          text-xs sm:text-sm
-          text-gray-500 dark:text-gray-400
-          mb-2
-          line-clamp-2
-        ">
+
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2 line-clamp-2">
           {category.description}
         </p>
-        
-        <div className="
-          flex items-center justify-between
-          mt-2
-        ">
-          <span className={`
-            text-xs font-medium
-            ${category.lightColor} ${category.darkColor}
-            group-hover:underline
-          `}>
+
+        <div className="flex items-center justify-between mt-2">
+          <span className={`text-xs font-medium ${category.lightColor} ${category.darkColor} group-hover:underline`}>
             Explore →
           </span>
-          
-          <span className="
-            text-xs
-            px-2 py-1
-            rounded-full
-            bg-gray-100 dark:bg-gray-800
-            text-gray-600 dark:text-gray-300
-          ">
+
+          <span className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
             {category.count}
           </span>
         </div>
@@ -359,13 +287,13 @@ export default function CategoryTiles() {
             <div className="h-8 w-48 bg-gray-200 dark:bg-gray-800 rounded-lg mx-auto mb-4" />
             <div className="h-4 w-96 max-w-full bg-gray-200 dark:bg-gray-800 rounded-lg mx-auto" />
           </div>
-          
+
           {/* Grid Skeleton */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div 
-                key={i} 
-                className="h-48 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" 
+              <div
+                key={i}
+                className="h-48 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse"
               />
             ))}
           </div>
@@ -375,51 +303,26 @@ export default function CategoryTiles() {
   }
 
   return (
-    <section 
-      className="
-        py-12 sm:py-16 
-        bg-white dark:bg-gray-950
-        scroll-mt-16
-      "
-      aria-label="Tour categories"
-    >
+    <section className="py-12 sm:py-16 bg-white dark:bg-gray-950 scroll-mt-16" aria-label="Tour categories">
       <div className="container-safe mx-auto">
-        
+
         {/* ========================================
              SECTION HEADER
              ======================================== */}
         <div className="text-center mb-8 sm:mb-12">
           {/* Pre-header badge */}
-          <span className="
-            inline-block
-            px-3 py-1
-            mb-4
-            text-xs sm:text-sm font-medium
-            text-blue-600 dark:text-blue-400
-            bg-blue-50 dark:bg-blue-900/20
-            border border-blue-200 dark:border-blue-800
-            rounded-full
-          ">
+          <span className="inline-block px-3 py-1 mb-4 text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-full">
             Discover Experiences
           </span>
-          
+
           {/* Main heading */}
-          <h2 className="
-            text-2xl sm:text-3xl md:text-4xl
-            font-bold
-            text-gray-900 dark:text-white
-            mb-3
-          ">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
             Curated Categories
           </h2>
-          
+
           {/* Subheading */}
-          <p className="
-            text-sm sm:text-base
-            text-gray-600 dark:text-gray-400
-            max-w-2xl mx-auto
-          ">
-            Explore tours by interest, from Halal-friendly adventures 
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Explore tours by interest, from Halal-friendly adventures
             to historical landmarks and cultural experiences
           </p>
         </div>
@@ -433,17 +336,11 @@ export default function CategoryTiles() {
              - Desktop: 4 columns
              - Large desktop: 4 columns (max width)
         */}
-        <div className="
-          grid 
-          grid-cols-2 
-          md:grid-cols-3 
-          lg:grid-cols-4 
-          gap-4 sm:gap-6
-        ">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {CATEGORIES.map((category) => (
-            <CategoryTile 
-              key={category.id} 
-              category={category} 
+            <CategoryTile
+              key={category.id}
+              category={category}
             />
           ))}
         </div>
@@ -451,31 +348,10 @@ export default function CategoryTiles() {
         {/* ========================================
              BROWSE ALL LINK
              ======================================== */}
-        <div className="
-          flex justify-center
-          mt-10 sm:mt-12
-        ">
-          <Link
-            href="/tours"
-            className="
-              group
-              inline-flex items-center gap-2
-              px-6 py-3
-              bg-gray-900 dark:bg-white
-              text-white dark:text-gray-900
-              rounded-full
-              font-medium
-              text-sm sm:text-base
-              hover:bg-gray-800 dark:hover:bg-gray-100
-              transition-colors duration-300
-              shadow-md hover:shadow-lg
-            "
-          >
+        <div className="flex justify-center mt-10 sm:mt-12">
+          <Link href="/tours" className="group inline-flex items-center gap-2 px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-full font-medium text-sm sm:text-base hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors duration-300 shadow-md hover:shadow-lg">
             Browse All Tours
-            <span className="
-              group-hover:translate-x-1
-              transition-transform duration-300
-            ">
+            <span className="group-hover:translate-x-1 transition-transform duration-300">
               →
             </span>
           </Link>
@@ -511,7 +387,7 @@ export default function CategoryTiles() {
 // ============================================================================
 // USAGE INSTRUCTIONS:
 // ============================================================================
-// 
+//
 // 1. Import in page.tsx:
 //    import CategoryTiles from '@/src/components/landing/CategoryTiles'
 //

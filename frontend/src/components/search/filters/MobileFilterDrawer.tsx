@@ -155,14 +155,7 @@ export default function MobileFilterDrawer({
                             leaveFrom="opacity-100 translate-y-0"
                             leaveTo="opacity-0 translate-y-full"
                         >
-                            <Dialog.Panel className="
-                relative
-                w-full max-w-lg
-                max-h-[90vh] overflow-y-auto
-                bg-white dark:bg-gray-950
-                rounded-t-2xl
-                shadow-xl
-              ">
+                            <Dialog.Panel className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-950 rounded-t-2xl shadow-xl">
                                 {/* 
                   ========================================
                   DRAWER HEADER
@@ -171,13 +164,7 @@ export default function MobileFilterDrawer({
                   Sticky header with title, filter count, and close button
                   Stays at top while scrolling through filters
                 */}
-                                <div className="
-                  sticky top-0 z-10
-                  flex items-center justify-between
-                  px-4 py-3
-                  bg-white dark:bg-gray-950
-                  border-b border-gray-200 dark:border-gray-800
-                ">
+                                <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
                                     <div className="flex items-center gap-2">
                                         <Filter className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                                         <Dialog.Title className="font-semibold text-gray-900 dark:text-white">
@@ -186,13 +173,7 @@ export default function MobileFilterDrawer({
 
                                         {/* Active filter count badge */}
                                         {onFilterCountChange && (
-                                            <span className="
-                        px-1.5 py-0.5
-                        text-xs font-medium
-                        bg-blue-600 dark:bg-blue-500
-                        text-white
-                        rounded-full
-                      ">
+                                            <span className="px-1.5 py-0.5 text-xs font-medium bg-blue-600 dark:bg-blue-500 text-white rounded-full">
                                                 {/* Count will be updated via callback */}
                                             </span>
                                         )}
@@ -201,33 +182,13 @@ export default function MobileFilterDrawer({
                                     <div className="flex items-center gap-2">
                                         {/* Clear all button - only show if filters active */}
                                         {Object.keys(filters).length > 0 && (
-                                            <button
-                                                onClick={handleClearAll}
-                                                className="
-                          text-xs
-                          text-gray-500 dark:text-gray-400
-                          hover:text-gray-700 dark:hover:text-gray-300
-                          transition-colors
-                          px-2 py-1
-                          rounded-md
-                          hover:bg-gray-100 dark:hover:bg-gray-800
-                        "
-                                            >
+                                            <button onClick={handleClearAll} className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800">
                                                 Clear all
                                             </button>
                                         )}
 
                                         {/* Close button */}
-                                        <button
-                                            onClick={onClose}
-                                            className="
-                        p-1.5
-                        rounded-lg
-                        hover:bg-gray-100 dark:hover:bg-gray-800
-                        transition-colors
-                      "
-                                            aria-label="Close filters"
-                                        >
+                                        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Close filters">
                                             <X className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                                         </button>
                                     </div>
@@ -257,27 +218,8 @@ export default function MobileFilterDrawer({
                   Sticky at bottom of drawer
                   Always visible, even when scrolling
                 */}
-                                <div className="
-                  sticky bottom-0
-                  p-4
-                  bg-white dark:bg-gray-950
-                  border-t border-gray-200 dark:border-gray-800
-                ">
-                                    <button
-                                        onClick={onClose}
-                                        className="
-                      w-full
-                      px-4 py-3
-                      bg-blue-600 dark:bg-blue-700
-                      text-white
-                      font-semibold
-                      rounded-lg
-                      hover:bg-blue-700 dark:hover:bg-blue-800
-                      transition-colors
-                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                      dark:focus:ring-offset-gray-900
-                    "
-                                    >
+                                <div className="sticky bottom-0 p-4 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800">
+                                    <button onClick={onClose} className="w-full px-4 py-3 bg-blue-600 dark:bg-blue-700 text-white font-semibold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
                                         Show Results
                                     </button>
                                 </div>

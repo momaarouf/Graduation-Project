@@ -33,41 +33,36 @@ import { ReactNode } from 'react'
 import Navigation from './Navigation'
 
 interface PageLayoutProps {
-  children: ReactNode
-  /** Optional: Hide footer on certain pages (e.g., checkout) */
-  hideFooter?: boolean
+    children: ReactNode
+    /** Optional: Hide footer on certain pages (e.g., checkout) */
+    hideFooter?: boolean
 }
 
-export default function PageLayout({ 
-  children, 
-  hideFooter = false 
+export default function PageLayout({
+    children,
+    hideFooter = false
 }: PageLayoutProps) {
-  return (
-    // ========================================
-    // MINIMAL LAYOUT CONTAINER
-    // ========================================
-    // 
-    // WHAT IT DOES:
-    // - Provides Navigation bar at top
-    // - Provides Footer at bottom (optional)
-    // - Uses flex col to push footer down
-    // - NO PADDING, NO CONTAINERS, NO MARGINS
-    // 
-    // WHAT IT DOES NOT DO:
-    // - ❌ No pt-14/pt-16 (page handles this)
-    // - ❌ No container-safe (page handles this)
-    // - ❌ No max-width constraints (page handles this)
-    // ========================================
-    <div className="
-      min-h-screen 
-      w-full 
-      flex flex-col 
-      bg-white dark:bg-gray-950
-    ">
-      {/* Navigation - fixed position, no layout impact */}
-      <Navigation />
-      
-      {/* 
+    return (
+        // ========================================
+        // MINIMAL LAYOUT CONTAINER
+        // ========================================
+        // 
+        // WHAT IT DOES:
+        // - Provides Navigation bar at top
+        // - Provides Footer at bottom (optional)
+        // - Uses flex col to push footer down
+        // - NO PADDING, NO CONTAINERS, NO MARGINS
+        // 
+        // WHAT IT DOES NOT DO:
+        // - ❌ No pt-14/pt-16 (page handles this)
+        // - ❌ No container-safe (page handles this)
+        // - ❌ No max-width constraints (page handles this)
+        // ========================================
+        <div className="min-h-screen w-full flex flex-col bg-white dark:bg-gray-950">
+            {/* Navigation - fixed position, no layout impact */}
+            <Navigation />
+
+            {/* 
         ========================================
         MAIN CONTENT AREA
         ========================================
@@ -85,11 +80,11 @@ export default function PageLayout({
         Each page knows its own layout best.
         ========================================
       */}
-      <main className="flex-1 w-full">
-        {children}
-      </main>
-      
-      {/* 
+            <main className="flex-1 w-full">
+                {children}
+            </main>
+
+            {/* 
         ========================================
         FOOTER - Optional
         ========================================
@@ -97,46 +92,42 @@ export default function PageLayout({
         Some pages (checkout, auth) don't need a footer.
         Hide it via hideFooter prop.
       */}
-      {!hideFooter && (
-        <footer className="
-          py-6 
-          bg-gray-50 dark:bg-gray-900 
-          border-t border-gray-200 dark:border-gray-800
-        ">
-          <div className="container-safe mx-auto text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              © {new Date().getFullYear()} SafariHub Travel Marketplace
-            </p>
-          </div>
-        </footer>
-      )}
-    </div>
-  )
+            {!hideFooter && (
+                <footer className="py-6 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+                    <div className="container-safe mx-auto text-center">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                            © {new Date().getFullYear()} SafariHub Travel Marketplace
+                        </p>
+                    </div>
+                </footer>
+            )}
+        </div>
+    )
 }
 
 // ============================================================================
 // USAGE GUIDE:
 // ============================================================================
-// 
+//
 // ✅ CORRECT USAGE (Tours Page):
 // <PageLayout>
 //   <div className="pt-14 sm:pt-16"> {/* Page adds its own padding */}
 //     {/* Page content */}
 //   </div>
 // </PageLayout>
-// 
+//
 // ✅ CORRECT USAGE (Home Page):
 // <PageLayout>
 //   <HeroSection /> {/* Hero has its own padding, no pt needed */}
 // </PageLayout>
-// 
+//
 // ✅ CORRECT USAGE (Checkout):
 // <PageLayout hideFooter>
 //   <div className="pt-14 sm:pt-16">
 //     {/* Checkout content, no footer */}
 //   </div>
 // </PageLayout>
-// 
+//
 // ❌ INCORRECT USAGE (What caused the black bars):
 // <PageLayout>
 //   <div className="pt-14 sm:pt-16">

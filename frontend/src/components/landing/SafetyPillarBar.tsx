@@ -112,39 +112,18 @@ export default function SafetyPillarBar() {
   }
 
   return (
-    <section 
-      className="
-        py-8 sm:py-10 
-        bg-white dark:bg-gray-950
-        border-y 
-        border-gray-200 dark:border-gray-800
-      "
-      aria-label="Safety guarantees and trust signals"
-    >
+    <section className="py-8 sm:py-10 bg-white dark:bg-gray-950 border-y border-gray-200 dark:border-gray-800" aria-label="Safety guarantees and trust signals">
       <div className="container-safe mx-auto">
-        
+
         {/* ========================================
             SECTION HEADER (Optional)
             ======================================== */}
         <div className="text-center mb-6 sm:mb-8">
-          <span className="
-            inline-flex items-center gap-2
-            px-3 py-1.5 
-            bg-blue-50 dark:bg-blue-900/20
-            border border-blue-200 dark:border-blue-800
-            rounded-full
-            text-xs sm:text-sm font-medium
-            text-blue-700 dark:text-blue-300
-          ">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-full text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-300">
             <Shield className="w-3.5 h-3.5" />
             Your Safety Is Our Priority
           </span>
-          <h2 className="
-            sr-only 
-            text-2xl sm:text-3xl font-bold 
-            text-gray-900 dark:text-white 
-            mt-4
-          ">
+          <h2 className="sr-only text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-4">
             Trust & Safety Guarantees
           </h2>
         </div>
@@ -157,94 +136,42 @@ export default function SafetyPillarBar() {
             - Tablet: 2 columns
             - Desktop: 4 columns
         */}
-        <div className="
-          grid 
-          grid-cols-2 
-          lg:grid-cols-4 
-          gap-4 sm:gap-6
-        ">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {SAFETY_PILLARS.map((pillar, index) => {
             const Icon = pillar.icon
-            
+
             return (
-              <div
-                key={index}
-                className={`
-                  group
-                  relative
-                  flex flex-col
-                  p-4 sm:p-5
-                  rounded-xl
-                  transition-all duration-300
-                  hover:shadow-md
-                  ${pillar.bgLight} ${pillar.bgDark}
-                  border
-                  ${pillar.borderLight} ${pillar.borderDark}
-                `}
-              >
+              <div key={index} className={`group relative flex flex-col p-4 sm:p-5 rounded-xl transition-all duration-300 hover:shadow-md ${pillar.bgLight} ${pillar.bgDark} border ${pillar.borderLight} ${pillar.borderDark}`}>
                 {/* ========================================
                     ICON CONTAINER
                     ======================================== */}
                 <div className="flex items-center justify-between mb-3">
-                  <div className={`
-                    p-2.5 
-                    rounded-lg
-                    bg-white dark:bg-gray-900
-                    shadow-sm
-                    transition-transform duration-300
-                    group-hover:scale-110
-                  `}>
-                    <Icon className={`
-                      w-5 h-5 sm:w-6 sm:h-6
-                      ${pillar.lightColor} ${pillar.darkColor}
-                    `} />
+                  <div className="p-2.5 rounded-lg bg-white dark:bg-gray-900 shadow-sm transition-transform duration-300 group-hover:scale-110">
+                    <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${pillar.lightColor} ${pillar.darkColor}`} />
                   </div>
-                  
+
                   {/* ========================================
                       DECORATIVE CORNER ACCENT
                       ======================================== */}
-                  <div className={`
-                    w-1.5 h-1.5 
-                    rounded-full 
-                    opacity-50
-                    ${pillar.lightColor} ${pillar.darkColor}
-                  `} />
+                  <div className={`w-1.5 h-1.5 rounded-full opacity-50 ${pillar.lightColor} ${pillar.darkColor}`} />
                 </div>
 
                 {/* ========================================
                     TITLE & DESCRIPTION
                     ======================================== */}
-                <h3 className={`
-                  font-semibold 
-                  text-base sm:text-lg
-                  text-gray-900 dark:text-white
-                  mb-1.5
-                `}>
+                <h3 className="font-semibold text-base sm:text-lg text-gray-900 dark:text-white mb-1.5">
                   {pillar.title}
                 </h3>
-                
-                <p className={`
-                  text-xs sm:text-sm
-                  text-gray-600 dark:text-gray-400
-                  leading-relaxed
-                `}>
+
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                   {pillar.description}
                 </p>
 
                 {/* ========================================
                     HOVER TOOLTIP (Optional)
                     ======================================== */}
-                <div className="
-                  absolute inset-x-0 -bottom-2 
-                  opacity-0 group-hover:opacity-100
-                  transition-opacity duration-300
-                  pointer-events-none
-                ">
-                  <div className="
-                    mx-auto w-2 h-2 
-                    bg-gray-900 dark:bg-gray-100
-                    rotate-45
-                  " />
+                <div className="absolute inset-x-0 -bottom-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                  <div className="mx-auto w-2 h-2 bg-gray-900 dark:bg-gray-100 rotate-45" />
                 </div>
               </div>
             )
@@ -254,12 +181,7 @@ export default function SafetyPillarBar() {
         {/* ========================================
             MICRO-TRUST BADGES (Additional trust signals)
             ======================================== */}
-        <div className="
-          mt-6 sm:mt-8 
-          flex flex-wrap items-center justify-center gap-3 sm:gap-4
-          text-xs sm:text-sm
-          text-gray-500 dark:text-gray-400
-        ">
+        <div className="mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             100% ID Verification
@@ -285,7 +207,7 @@ export default function SafetyPillarBar() {
 // ============================================================================
 // USAGE NOTES:
 // ============================================================================
-// 
+//
 // 1. Add to page.tsx after HeroSection:
 //    <HeroSection />
 //    <SafetyPillarBar />
@@ -295,7 +217,7 @@ export default function SafetyPillarBar() {
 //
 // 3. Mobile responsive: 2 columns on mobile, 4 on desktop
 //
-// 4. Accessibility: 
+// 4. Accessibility:
 //    - Proper aria-label on section
 //    - Semantic heading structure
 //    - Sufficient color contrast

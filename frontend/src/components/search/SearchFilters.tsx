@@ -288,14 +288,7 @@ export default function SearchFilters({
                 {/* Active filter count badge */}
                 {activeFilterCount > 0 && (
                     <div className="mb-4 text-center">
-                        <span className="
-                            inline-flex items-center justify-center
-                            w-8 h-8
-                            bg-blue-600 dark:bg-blue-500
-                            text-white
-                            text-sm font-bold
-                            rounded-full
-                        ">
+                        <span className="inline-flex items-center justify-center w-8 h-8 bg-blue-600 dark:bg-blue-500 text-white text-sm font-bold rounded-full">
                             {activeFilterCount}
                         </span>
                         <button
@@ -313,14 +306,7 @@ export default function SearchFilters({
                     {/* Halal filter - icon only */}
                     <button
                         onClick={() => toggleBooleanFilter('isHalalCertified')}
-                        className={`
-                            relative w-full flex justify-center p-2 rounded-lg
-                            transition-all duration-200
-                            ${filters.isHalalCertified
-                                ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
-                                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
-                            }
-                        `}
+                        className={`relative w-full flex justify-center p-2 rounded-lg transition-all duration-200 ${filters.isHalalCertified ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'}`}
                         title="Halal Certified"
                     >
                         <Leaf className="w-5 h-5" />
@@ -329,14 +315,7 @@ export default function SearchFilters({
                     {/* Instant Book - icon only */}
                     <button
                         onClick={() => toggleBooleanFilter('hasInstantBook')}
-                        className={`
-                            relative w-full flex justify-center p-2 rounded-lg
-                            transition-all duration-200
-                            ${filters.hasInstantBook
-                                ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
-                                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
-                            }
-                        `}
+                        className={`relative w-full flex justify-center p-2 rounded-lg transition-all duration-200 ${filters.hasInstantBook ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'}`}
                         title="Instant Booking"
                     >
                         <Zap className="w-5 h-5" />
@@ -345,14 +324,7 @@ export default function SearchFilters({
                     {/* Verified Guide - icon only */}
                     <button
                         onClick={() => toggleBooleanFilter('isGuideVerified')}
-                        className={`
-                            relative w-full flex justify-center p-2 rounded-lg
-                            transition-all duration-200
-                            ${filters.isGuideVerified
-                                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
-                            }
-                        `}
+                        className={`relative w-full flex justify-center p-2 rounded-lg transition-all duration-200 ${filters.isGuideVerified ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'}`}
                         title="Verified Guides Only"
                     >
                         <Shield className="w-5 h-5" />
@@ -361,14 +333,7 @@ export default function SearchFilters({
                     {/* Group Discount - icon only */}
                     <button
                         onClick={() => toggleBooleanFilter('hasGroupDiscount')}
-                        className={`
-                            relative w-full flex justify-center p-2 rounded-lg
-                            transition-all duration-200
-                            ${filters.hasGroupDiscount
-                                ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                                : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
-                            }
-                        `}
+                        className={`relative w-full flex justify-center p-2 rounded-lg transition-all duration-200 ${filters.hasGroupDiscount ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'}`}
                         title="Group Discount"
                     >
                         <Users className="w-5 h-5" />
@@ -379,16 +344,7 @@ export default function SearchFilters({
                 <div className="my-4 border-t border-gray-200 dark:border-gray-800" />
 
                 {/* Expand button to show full filters */}
-                <button
-                    onClick={() => toggleSidebar?.()}  // ← 🔴 FIXED: Now expands sidebar!
-                    className="
-                        w-full flex justify-center p-2
-                        text-gray-600 dark:text-gray-400
-                        hover:text-blue-600 dark:hover:text-blue-400
-                        transition-colors
-                    "
-                    title="Expand filters"
-                >
+                <button onClick={() => toggleSidebar?.()} className="w-full flex justify-center p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" title="Expand filters">
                     <ChevronDown className="w-5 h-5" />
                 </button>
             </div>
@@ -400,11 +356,7 @@ export default function SearchFilters({
     // ========================================
 
     return (
-        <div className={`
-            w-full h-full
-            bg-white dark:bg-gray-950
-            ${isMobile ? 'fixed inset-0 z-50 overflow-y-auto' : 'relative'}
-        `}>
+        <div className={`w-full h-full bg-white dark:bg-gray-950 ${isMobile ? 'fixed inset-0 z-50 overflow-y-auto' : 'relative'}`}>
 
             {/* ========================================
                 HEADER - Mobile drawer header
@@ -423,13 +375,7 @@ export default function SearchFilters({
                         Filters
                     </h2>
                     {activeFilterCount > 0 && (
-                        <span className="
-                            px-1.5 py-0.5
-                            text-xs font-medium
-                            bg-blue-600 dark:bg-blue-500
-                            text-white
-                            rounded-full
-                        ">
+                        <span className="px-1.5 py-0.5 text-xs font-medium bg-blue-600 dark:bg-blue-500 text-white rounded-full">
                             {activeFilterCount}
                         </span>
                     )}
@@ -437,28 +383,11 @@ export default function SearchFilters({
 
                 <div className="flex items-center gap-2">
                     {activeFilterCount > 0 && (
-                        <button
-                            onClick={handleClearAll}
-                            className="
-                                text-xs
-                                text-gray-500 dark:text-gray-400
-                                hover:text-gray-700 dark:hover:text-gray-300
-                                transition-colors
-                            "
-                        >
+                        <button onClick={handleClearAll} className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
                             Clear all
                         </button>
                     )}
-                    <button
-                        onClick={onClose}
-                        className="
-                            p-1.5
-                            rounded-lg
-                            hover:bg-gray-100 dark:hover:bg-gray-800
-                            transition-colors
-                        "
-                        aria-label="Close filters"
-                    >
+                    <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Close filters">
                         <X className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                     </button>
                 </div>
@@ -477,15 +406,7 @@ export default function SearchFilters({
                         <span className="text-sm text-gray-600 dark:text-gray-400">
                             {activeFilterCount} active {activeFilterCount === 1 ? 'filter' : 'filters'}
                         </span>
-                        <button
-                            onClick={handleClearAll}
-                            className="
-                                text-xs font-medium
-                                text-blue-600 dark:text-blue-400
-                                hover:text-blue-700 dark:hover:text-blue-300
-                                transition-colors
-                            "
-                        >
+                        <button onClick={handleClearAll} className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
                             Clear all
                         </button>
                     </div>
@@ -527,20 +448,7 @@ export default function SearchFilters({
                                     <div className="relative min-w-[120px]">
                                         <Listbox value={selectedCountry || ''} onChange={(val) => setSelectedCountry(val as Country || null)}>
                                             <div className="relative">
-                                                <ListboxButton className="
-                                                    relative w-full
-                                                    flex items-center justify-between
-                                                    gap-2
-                                                    px-2 py-1
-                                                    bg-gray-50 dark:bg-gray-800
-                                                    border border-gray-200 dark:border-gray-700
-                                                    rounded-lg
-                                                    text-[11px] font-medium
-                                                    text-gray-700 dark:text-gray-300
-                                                    hover:border-blue-400 dark:hover:border-blue-500
-                                                    focus:outline-none focus:ring-2 focus:ring-blue-500/20
-                                                    transition-all duration-200
-                                                ">
+                                                <ListboxButton className="relative w-full flex items-center justify-between gap-2 px-2 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-[11px] font-medium text-gray-700 dark:text-gray-300 hover:border-blue-400 dark:hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
                                                     <span className="block truncate">
                                                         {selectedCountry ? CountryLabels[selectedCountry] : 'All countries'}
                                                     </span>
@@ -552,15 +460,7 @@ export default function SearchFilters({
                                                     leaveFrom="opacity-100"
                                                     leaveTo="opacity-0"
                                                 >
-                                                    <ListboxOptions className="
-                                                        absolute z-50 mt-1
-                                                        max-h-60 w-48 overflow-auto
-                                                        right-0
-                                                        rounded-xl bg-white dark:bg-gray-900
-                                                        py-1 text-xs
-                                                        shadow-xl ring-1 ring-black/5 dark:ring-white/10
-                                                        focus:outline-none
-                                                    ">
+                                                    <ListboxOptions className="absolute z-50 mt-1 max-h-60 w-48 overflow-auto right-0 rounded-xl bg-white dark:bg-gray-900 py-1 text-xs shadow-xl ring-1 ring-black/5 dark:ring-white/10 focus:outline-none">
                                                         <ListboxOption
                                                             value=""
                                                             className={({ focus, selected }) => `
@@ -641,23 +541,8 @@ export default function SearchFilters({
                                 <Leaf className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                                 Halal Certified
                             </span>
-                            <button
-                                onClick={() => toggleBooleanFilter('isHalalCertified')}
-                                className={`
-                                    relative inline-flex h-5 w-9 items-center rounded-full
-                                    transition-colors duration-200
-                                    ${filters.isHalalCertified
-                                        ? 'bg-emerald-600 dark:bg-emerald-500'
-                                        : 'bg-gray-300 dark:bg-gray-700'
-                                    }
-                                `}
-                            >
-                                <span
-                                    className={`
-                                        inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200
-                                        ${filters.isHalalCertified ? 'translate-x-5' : 'translate-x-0.5'}
-                                    `}
-                                />
+                            <button onClick={() => toggleBooleanFilter('isHalalCertified')} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ${filters.isHalalCertified ? 'bg-emerald-600 dark:bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
+                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${filters.isHalalCertified ? 'translate-x-5' : 'translate-x-0.5'}`} />
                             </button>
                         </label>
 
@@ -667,23 +552,8 @@ export default function SearchFilters({
                                 <Zap className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                                 Instant Booking
                             </span>
-                            <button
-                                onClick={() => toggleBooleanFilter('hasInstantBook')}
-                                className={`
-                                    relative inline-flex h-5 w-9 items-center rounded-full
-                                    transition-colors duration-200
-                                    ${filters.hasInstantBook
-                                        ? 'bg-amber-600 dark:bg-amber-500'
-                                        : 'bg-gray-300 dark:bg-gray-700'
-                                    }
-                                `}
-                            >
-                                <span
-                                    className={`
-                                        inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200
-                                        ${filters.hasInstantBook ? 'translate-x-5' : 'translate-x-0.5'}
-                                    `}
-                                />
+                            <button onClick={() => toggleBooleanFilter('hasInstantBook')} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ${filters.hasInstantBook ? 'bg-amber-600 dark:bg-amber-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
+                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${filters.hasInstantBook ? 'translate-x-5' : 'translate-x-0.5'}`} />
                             </button>
                         </label>
 
@@ -693,23 +563,8 @@ export default function SearchFilters({
                                 <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                                 Group Discount
                             </span>
-                            <button
-                                onClick={() => toggleBooleanFilter('hasGroupDiscount')}
-                                className={`
-                                    relative inline-flex h-5 w-9 items-center rounded-full
-                                    transition-colors duration-200
-                                    ${filters.hasGroupDiscount
-                                        ? 'bg-purple-600 dark:bg-purple-500'
-                                        : 'bg-gray-300 dark:bg-gray-700'
-                                    }
-                                `}
-                            >
-                                <span
-                                    className={`
-                                        inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200
-                                        ${filters.hasGroupDiscount ? 'translate-x-5' : 'translate-x-0.5'}
-                                    `}
-                                />
+                            <button onClick={() => toggleBooleanFilter('hasGroupDiscount')} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ${filters.hasGroupDiscount ? 'bg-purple-600 dark:bg-purple-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
+                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${filters.hasGroupDiscount ? 'translate-x-5' : 'translate-x-0.5'}`} />
                             </button>
                         </label>
 
@@ -719,23 +574,8 @@ export default function SearchFilters({
                                 <Home className="w-4 h-4 text-pink-600 dark:text-pink-400" />
                                 Family Friendly
                             </span>
-                            <button
-                                onClick={() => toggleBooleanFilter('isFamilyFriendly')}
-                                className={`
-                                    relative inline-flex h-5 w-9 items-center rounded-full
-                                    transition-colors duration-200
-                                    ${filters.isFamilyFriendly
-                                        ? 'bg-pink-600 dark:bg-pink-500'
-                                        : 'bg-gray-300 dark:bg-gray-700'
-                                    }
-                                `}
-                            >
-                                <span
-                                    className={`
-                                        inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200
-                                        ${filters.isFamilyFriendly ? 'translate-x-5' : 'translate-x-0.5'}
-                                    `}
-                                />
+                            <button onClick={() => toggleBooleanFilter('isFamilyFriendly')} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ${filters.isFamilyFriendly ? 'bg-pink-600 dark:bg-pink-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
+                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${filters.isFamilyFriendly ? 'translate-x-5' : 'translate-x-0.5'}`} />
                             </button>
                         </label>
                     </div>
@@ -795,17 +635,7 @@ export default function SearchFilters({
                                 placeholder="Min"
                                 min={GROUP_SIZE_RANGE.MIN}
                                 max={filters.maxGroupSize || GROUP_SIZE_RANGE.MAX}
-                                className="
-                                    w-full
-                                    px-3 py-2
-                                    text-sm
-                                    bg-white dark:bg-gray-900
-                                    border border-gray-300 dark:border-gray-700
-                                    rounded-lg
-                                    text-gray-900 dark:text-white
-                                    placeholder-gray-500 dark:placeholder-gray-400
-                                    focus:outline-none focus:ring-2 focus:ring-blue-500
-                                "
+                                className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 aria-label="Minimum group size"
                             />
                             <span className="text-gray-500 dark:text-gray-400">—</span>
@@ -818,17 +648,7 @@ export default function SearchFilters({
                                 placeholder="Max"
                                 min={filters.minGroupSize || GROUP_SIZE_RANGE.MIN}
                                 max={GROUP_SIZE_RANGE.MAX}
-                                className="
-                                    w-full
-                                    px-3 py-2
-                                    text-sm
-                                    bg-white dark:bg-gray-900
-                                    border border-gray-300 dark:border-gray-700
-                                    rounded-lg
-                                    text-gray-900 dark:text-white
-                                    placeholder-gray-500 dark:placeholder-gray-400
-                                    focus:outline-none focus:ring-2 focus:ring-blue-500
-                                "
+                                className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 aria-label="Maximum group size"
                             />
                         </div>
@@ -839,14 +659,7 @@ export default function SearchFilters({
                                 type="checkbox"
                                 checked={filters.hasAvailableSpots || false}
                                 onChange={() => toggleBooleanFilter('hasAvailableSpots')}
-                                className="
-                                    w-4 h-4
-                                    text-blue-600
-                                    bg-white dark:bg-gray-900
-                                    border-gray-300 dark:border-gray-700
-                                    rounded
-                                    focus:ring-blue-500
-                                "
+                                className="w-4 h-4 text-blue-600 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 rounded focus:ring-blue-500"
                             />
                             <span className="text-sm text-gray-700 dark:text-gray-300">
                                 Only show available spots
@@ -870,23 +683,8 @@ export default function SearchFilters({
                                 <Shield className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                                 Verified Guides Only
                             </span>
-                            <button
-                                onClick={() => toggleBooleanFilter('isGuideVerified')}
-                                className={`
-                                    relative inline-flex h-5 w-9 items-center rounded-full
-                                    transition-colors duration-200
-                                    ${filters.isGuideVerified
-                                        ? 'bg-blue-600 dark:bg-blue-500'
-                                        : 'bg-gray-300 dark:bg-gray-700'
-                                    }
-                                `}
-                            >
-                                <span
-                                    className={`
-                                        inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200
-                                        ${filters.isGuideVerified ? 'translate-x-5' : 'translate-x-0.5'}
-                                    `}
-                                />
+                            <button onClick={() => toggleBooleanFilter('isGuideVerified')} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ${filters.isGuideVerified ? 'bg-blue-600 dark:bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
+                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${filters.isGuideVerified ? 'translate-x-5' : 'translate-x-0.5'}`} />
                             </button>
                         </label>
 
@@ -928,13 +726,7 @@ export default function SearchFilters({
                                     value={option.id}
                                     checked={filters.minRating === option.id}
                                     onChange={() => handleFilterChange({ minRating: option.id as MinRating })}
-                                    className="
-                                        w-4 h-4
-                                        text-blue-600
-                                        bg-white dark:bg-gray-900
-                                        border-gray-300 dark:border-gray-700
-                                        focus:ring-blue-500
-                                    "
+                                    className="w-4 h-4 text-blue-600 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 focus:ring-blue-500"
                                 />
                                 <span className="text-sm text-gray-700 dark:text-gray-300">
                                     {option.label}
@@ -964,13 +756,7 @@ export default function SearchFilters({
                                     value={option.id}
                                     checked={filters.availability === option.id}
                                     onChange={() => handleFilterChange({ availability: option.id as Availability })}
-                                    className="
-                                        w-4 h-4
-                                        text-blue-600
-                                        bg-white dark:bg-gray-900
-                                        border-gray-300 dark:border-gray-700
-                                        focus:ring-blue-500
-                                    "
+                                    className="w-4 h-4 text-blue-600 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 focus:ring-blue-500"
                                 />
                                 <span className="text-sm text-gray-700 dark:text-gray-300">
                                     {option.label}
@@ -993,23 +779,8 @@ export default function SearchFilters({
                             <Star className="w-4 h-4 text-amber-500" />
                             Premium Tours Only
                         </span>
-                        <button
-                            onClick={() => toggleBooleanFilter('isPremium')}
-                            className={`
-                                relative inline-flex h-5 w-9 items-center rounded-full
-                                transition-colors duration-200
-                                ${filters.isPremium
-                                    ? 'bg-amber-600 dark:bg-amber-500'
-                                    : 'bg-gray-300 dark:bg-gray-700'
-                                }
-                            `}
-                        >
-                            <span
-                                className={`
-                                    inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200
-                                    ${filters.isPremium ? 'translate-x-5' : 'translate-x-0.5'}
-                                `}
-                            />
+                        <button onClick={() => toggleBooleanFilter('isPremium')} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ${filters.isPremium ? 'bg-amber-600 dark:bg-amber-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${filters.isPremium ? 'translate-x-5' : 'translate-x-0.5'}`} />
                         </button>
                     </label>
                 </FilterSection>
@@ -1019,26 +790,8 @@ export default function SearchFilters({
                 MOBILE APPLY BUTTON
                 ======================================== */}
             {isMobile && (
-                <div className="
-                    sticky bottom-0
-                    p-4
-                    bg-white dark:bg-gray-950
-                    border-t border-gray-200 dark:border-gray-800
-                ">
-                    <button
-                        onClick={onClose}
-                        className="
-                            w-full
-                            px-4 py-3
-                            bg-blue-600 dark:bg-blue-700
-                            text-white
-                            font-semibold
-                            rounded-lg
-                            hover:bg-blue-700 dark:hover:bg-blue-800
-                            transition-colors
-                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                        "
-                    >
+                <div className="sticky bottom-0 p-4 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800">
+                    <button onClick={onClose} className="w-full px-4 py-3 bg-blue-600 dark:bg-blue-700 text-white font-semibold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                         Show Results
                         {activeFilterCount > 0 && (
                             <span className="ml-2 px-1.5 py-0.5 bg-white/20 rounded-full text-xs">

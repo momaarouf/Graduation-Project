@@ -54,24 +54,10 @@ function DesktopSidebar() {
 
   return (
     <aside
-      className={`
-        group relative
-        hidden lg:block
-        flex-shrink-0
-        transition-all duration-300 ease-in-out
-        ${isCollapsed ? 'w-20' : 'w-80 xl:w-96'}
-      `}
+      className={`group relative hidden lg:block flex-shrink-0 transition-all duration-300 ease-in-out ${isCollapsed ? 'w-20' : 'w-80 xl:w-96'}`}
       aria-label="Tour filters sidebar"
     >
-      <div className="
-        h-full
-        overflow-y-auto
-        overflow-x-hidden
-        overscroll-contain
-        bg-white dark:bg-gray-950
-        border-r border-gray-200 dark:border-gray-800
-        pb-4
-      ">
+      <div className="h-full overflow-y-auto overflow-x-hidden overscroll-contain bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 pb-4">
         {/* 
           ========================================
           SIDEBAR HEADER - DUAL THEME
@@ -82,15 +68,7 @@ function DesktopSidebar() {
           Matches the mobile X button design exactly.
         */}
         {!isCollapsed && (
-          <div className="
-            sticky top-0 z-20
-            flex items-center justify-between
-            px-4 py-3
-            bg-white/80 dark:bg-gray-950/80
-            backdrop-blur-sm
-            border-b border-gray-100 dark:border-gray-900
-            mb-2
-          ">
+          <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-3 bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm border-b border-gray-100 dark:border-gray-900 mb-2">
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-gray-700 dark:text-gray-300" />
               <span className="font-semibold text-gray-900 dark:text-white">
@@ -100,15 +78,7 @@ function DesktopSidebar() {
 
             <button
               onClick={toggleSidebar}
-              className="
-                p-1.5
-                rounded-lg
-                text-gray-500 dark:text-gray-400
-                hover:bg-blue-50 dark:hover:bg-blue-900/20
-                hover:text-blue-600 dark:hover:text-blue-400
-                transition-all duration-200
-                focus:outline-none focus:ring-2 focus:ring-blue-500/20
-              "
+              className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               aria-label="Collapse filters"
               title="Collapse filters"
             >
@@ -126,10 +96,7 @@ function DesktopSidebar() {
           isCollapsed=true  → px-2 (tight)
           isCollapsed=false → px-4 (normal)
         */}
-        <div className={`
-          transition-all duration-300
-          ${isCollapsed ? 'px-2' : 'px-4'}
-        `}>
+        <div className={`transition-all duration-300 ${isCollapsed ? 'px-2' : 'px-4'}`}>
           <SearchFilters
             onActiveFilterCountChange={setActiveFilterCount}
             isCollapsed={isCollapsed}
@@ -188,13 +155,7 @@ function ToursPageContent() {
     // No other padding should be added at this level
     // ========================================
     <PageLayout hideFooter>
-      <div className="
-        h-[calc(100vh-0rem)]
-        w-full
-        bg-white dark:bg-gray-950
-        overflow-hidden
-        flex flex-col
-      ">
+      <div className="h-[calc(100vh-0rem)] w-full bg-white dark:bg-gray-950 overflow-hidden flex flex-col">
         {/* 
           ========================================
           MAIN LAYOUT CONTAINER
@@ -205,13 +166,7 @@ function ToursPageContent() {
           overflow-hidden: Prevent global scrollbar
           pt-14/sm:pt-16: Offset the fixed navbar
         */}
-        <div className="
-          flex flex-row
-          w-full
-          h-full
-          pt-14 sm:pt-16
-          overflow-hidden
-        ">
+        <div className="flex flex-row w-full h-full pt-14 sm:pt-16 overflow-hidden">
           {/* DESKTOP SIDEBAR - Hidden on mobile */}
           <DesktopSidebar />
 
@@ -224,15 +179,7 @@ function ToursPageContent() {
             h-full: Fill parent height
             overflow-y-auto: Independent scrolling for results
           */}
-          <main className="
-            flex-1
-            h-full
-            min-w-0
-            px-4 sm:px-6 lg:px-8
-            py-4 sm:py-6
-            overflow-y-auto
-            overscroll-contain
-          ">
+          <main className="flex-1 h-full min-w-0 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 overflow-y-auto overscroll-contain">
             {/* 
               ========================================
               MOBILE FILTER BUTTON
@@ -245,32 +192,13 @@ function ToursPageContent() {
             <div className="lg:hidden mb-4">
               <button
                 onClick={handleOpenMobileFilters}
-                className="
-                  w-full
-                  flex items-center justify-center gap-2
-                  px-4 py-3
-                  bg-white dark:bg-gray-900
-                  border border-gray-200 dark:border-gray-800
-                  rounded-lg
-                  text-gray-700 dark:text-gray-300
-                  font-medium
-                  hover:bg-gray-50 dark:hover:bg-gray-800
-                  transition-colors
-                  shadow-sm
-                "
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm"
                 aria-label="Open filters"
               >
                 <Filter className="w-4 h-4" />
                 Filters
                 {activeFilterCount > 0 && (
-                  <span className="
-                    px-1.5 py-0.5
-                    bg-blue-600 dark:bg-blue-500
-                    text-white
-                    text-xs
-                    rounded-full
-                    animate-in fade-in
-                  ">
+                  <span className="px-1.5 py-0.5 bg-blue-600 dark:bg-blue-500 text-white text-xs rounded-full animate-in fade-in">
                     {activeFilterCount}
                   </span>
                 )}

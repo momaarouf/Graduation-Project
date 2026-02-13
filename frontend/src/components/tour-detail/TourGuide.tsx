@@ -39,13 +39,7 @@ export default function TourGuide({ guide }: GuideProfileCardProps) {
             ======================================== */}
                 <div className="flex flex-col sm:flex-row items-start gap-6">
                     <div className="relative">
-                        <div className="
-              w-24 h-24
-              ring-4 ring-white dark:ring-gray-900
-              rounded-2xl
-              overflow-hidden
-              shadow-xl
-            ">
+                        <div className="w-24 h-24 ring-4 ring-white dark:ring-gray-900 rounded-2xl overflow-hidden shadow-xl">
                             <Image
                                 src={guide.avatar}
                                 alt={guide.name}
@@ -54,13 +48,7 @@ export default function TourGuide({ guide }: GuideProfileCardProps) {
                             />
                         </div>
                         {/* Status dot */}
-                        <div className="
-              absolute -bottom-1 -right-1
-              w-5 h-5
-              bg-emerald-500
-              rounded-full
-              border-2 border-white dark:border-gray-900
-            " />
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-white dark:border-gray-900" />
                     </div>
 
                     <div className="space-y-2 flex-1">

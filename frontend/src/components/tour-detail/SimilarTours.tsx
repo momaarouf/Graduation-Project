@@ -83,15 +83,7 @@ export default function SimilarTours({
                                 {/* Badge Overlay */}
                                 <div className="absolute top-3 left-3 flex gap-2">
                                     {tour.halalCertified && (
-                                        <div className="
-                      w-8 h-8
-                      bg-white/90 dark:bg-gray-900/90
-                      backdrop-blur-sm
-                      rounded-full
-                      flex items-center justify-center
-                      text-emerald-600 dark:text-emerald-400
-                      shadow-sm
-                    ">
+                                        <div className="w-8 h-8 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-sm">
                                             <Leaf className="w-4 h-4" />
                                         </div>
                                     )}
