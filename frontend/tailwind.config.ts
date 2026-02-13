@@ -156,6 +156,9 @@ const config: Config = {
         'elevated-light': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
         'elevated-dark': '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3)',
       },
+      scale: {
+        '102':'1.02',
+      },
     },
   },
   
