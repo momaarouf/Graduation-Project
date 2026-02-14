@@ -495,14 +495,14 @@ const TourDetailsModal = ({ isOpen, onClose, tour, onApprove, onReject }: any) =
             <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Categories & Languages</h5>
             <div className="space-y-2">
               <div className="flex flex-wrap gap-2">
-                {tour.categories.map(cat => (
+                {tour.categories.map((cat: string) => (
                   <span key={cat} className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded-lg">
                     {cat}
                   </span>
                 ))}
               </div>
               <div className="flex flex-wrap gap-2">
-                {tour.languages.map(lang => (
+                {tour.languages.map((lang: string) => (
                   <span key={lang} className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded-lg">
                     {lang}
                   </span>
@@ -519,7 +519,7 @@ const TourDetailsModal = ({ isOpen, onClose, tour, onApprove, onReject }: any) =
                 Alerts
               </h5>
               <div className="space-y-2">
-                {tour.alerts.map((alert, idx) => (
+                {tour.alerts.map((alert: any, idx: number) => (
                   <p key={idx} className="text-sm text-amber-600 dark:text-amber-500">{alert.message}</p>
                 ))}
               </div>
