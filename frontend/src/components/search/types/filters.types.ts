@@ -195,6 +195,7 @@ export const AvailabilityLabels: Record<Availability, string> = {
  * - isGuideVerified: Yes/No toggle
  */
 export interface FilterState {
+    searchQuery?: string/*text search query */
     // ========== LOCATION FILTERS ==========
     /** Selected countries (Lebanon/Turkey) */
     countries?: Country[]

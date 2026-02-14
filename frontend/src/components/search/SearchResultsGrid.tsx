@@ -53,13 +53,14 @@ import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } fro
 // IMPORTS
 // ============================================================================
 import { useFilterState, useFilterDispatch } from '@/src/lib/contexts/FilterContext'
-import { Country, FilterState } from './types/filters.types'
+import { Country, FilterState, City } from './types/filters.types'
 
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
 
 export interface TourCardData {
+    description?: string  // ← ADD THIS (optional for backward compatibility)
     id: string
     title: string
     location: string
@@ -108,7 +109,7 @@ export const MOCK_TOURS: TourCardData[] = [
     {
         id: '1',
         title: 'Ottoman Heritage: Topkapi Palace & Hagia Sophia',
-        location: 'Istanbul',
+        location: City.ISTANBUL,
         country: Country.TURKEY,
         mainImage: '/images/tours/istanbul-ottoman.jpg',
         guideName: 'Mehmet Yilmaz',
@@ -136,7 +137,7 @@ export const MOCK_TOURS: TourCardData[] = [
     {
         id: '2',
         title: 'Beirut Street Food & Cultural Walk',
-        location: 'Beirut',
+        location: City.BEIRUT,
         country: Country.LEBANON,
         mainImage: '/images/tours/beirut-food.jpg',
         guideName: 'Layla Hassan',
@@ -163,7 +164,7 @@ export const MOCK_TOURS: TourCardData[] = [
     {
         id: '3',
         title: 'Cappadocia Sunrise Balloon & Valley Hike',
-        location: 'Cappadocia',
+        location: City.CAPPADOCIA,
         country: Country.TURKEY,
         mainImage: '/images/tours/cappadocia-balloon.jpg',
         guideName: 'Ahmet Demir',
@@ -192,7 +193,7 @@ export const MOCK_TOURS: TourCardData[] = [
     {
         id: '4',
         title: 'Byblos Ancient Ruins & Archaeological Tour',
-        location: 'Byblos',
+        location: City.BYBLOS,
         country: Country.LEBANON,
         mainImage: '/images/tours/byblos-ruins.jpg',
         guideName: 'Elias Khoury',
@@ -213,7 +214,7 @@ export const MOCK_TOURS: TourCardData[] = [
     {
         id: '5',
         title: 'Bosphorus Sunset Cruise with Dinner',
-        location: 'Istanbul',
+        location: City.ISTANBUL,
         country: Country.TURKEY,
         mainImage: '/images/tours/bosphorus-cruise.jpg',
         guideName: 'Zeynep Kaya',
@@ -239,7 +240,7 @@ export const MOCK_TOURS: TourCardData[] = [
     {
         id: '6',
         title: 'Bekaa Valley Heritage & Nature Tour',
-        location: 'Bekaa Valley',
+        location: City.BEKAA,
         country: Country.LEBANON,
         mainImage: '/images/tours/bekaa-heritage.jpg',
         guideName: 'Nadine Abboud',
@@ -334,7 +335,16 @@ const renderRating = (rating: number, reviewCount: number) => {
 
 function filterTours(tours: TourCardData[], filters: FilterState): TourCardData[] {
     return tours.filter(tour => {
-
+        // ========== SEARCH QUERY FILTER ==========
+    if (filters.searchQuery) {
+      const query = filters.searchQuery.toLowerCase().trim()
+      
+      const titleMatch = tour.title.toLowerCase().includes(query)
+      const locationMatch = tour.location.toLowerCase().includes(query)
+      const guideMatch = tour.guideName.toLowerCase().includes(query)
+      
+      if (!titleMatch && !locationMatch && !guideMatch) return false
+    }
         // Location filters
         if (filters.countries && filters.countries.length > 0) {
             if (!filters.countries.includes(tour.country)) {
@@ -727,18 +737,25 @@ function EmptySearchResults({ onClearFilters }: EmptySearchResultsProps) {
 // ============================================================================
 
 interface SearchResultsGridProps {
-    /** Optional initial tours (for SSR) */
-    initialTours?: TourCardData[]
-    /** External loading state */
-    isLoading?: boolean
-    /** Callback for filter count changes (for mobile badge) */
-    onFilterCountChange?: (count: number) => void
+     /** Optional initial tours (for SSR) */
+  initialTours?: TourCardData[]
+  /** External loading state */
+  isLoading?: boolean
+  /** Callback for filter count changes (for mobile badge) */
+  onFilterCountChange?: (count: number) => void
+  /** Callback for power search button click */
+  onPowerSearchClick?: () => void
+  /** Active filter count for badge */
+  activeFilterCount?: number
+  onClearAll?: () => void
 }
 
 export default function SearchResultsGrid({
     initialTours,
     isLoading: externalLoading = false,
-    onFilterCountChange
+    onFilterCountChange,
+    onPowerSearchClick,
+    activeFilterCount,
 }: SearchResultsGridProps) {
     // ========================================
     // STATE
@@ -858,14 +875,47 @@ export default function SearchResultsGrid({
               
               DO NOT add another sort dropdown anywhere else!
             */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
-                {/* Results count */}
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                        {sortedAndFilteredTours.length}
-                    </span>{' '}
-                    {sortedAndFilteredTours.length === 1 ? 'tour' : 'tours'} found
-                </p>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+  {/* Results count */}
+  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+    <span className="font-semibold text-gray-900 dark:text-white">
+      {sortedAndFilteredTours.length}
+    </span>{' '}
+    {sortedAndFilteredTours.length === 1 ? 'tour' : 'tours'} found
+  </p>
+
+  {/* Sort and Power Search */}
+  <div className="flex items-center gap-2 w-full sm:w-auto">
+    {/* Power Search Button */}
+    {onPowerSearchClick && (
+      <button
+        onClick={onPowerSearchClick}
+        className="
+          group
+          relative
+          px-4 py-2.5 sm:py-2
+          bg-gradient-to-r from-purple-600 to-pink-600
+          dark:from-purple-700 dark:to-pink-700
+          text-white font-medium
+          rounded-xl
+          hover:from-purple-700 hover:to-pink-700
+          dark:hover:from-purple-800 dark:hover:to-pink-800
+          transition-all
+          shadow-md hover:shadow-lg
+          flex items-center gap-2
+          text-sm
+          whitespace-nowrap
+        "
+      >
+        <Sparkles className="w-4 h-4" />
+        <span className="hidden sm:inline">Power Search</span>
+        {activeFilterCount && activeFilterCount > 0 && (
+          <span className="ml-1 px-1.5 py-0.5 bg-white/20 text-white text-xs rounded-full">
+            {activeFilterCount}
+          </span>
+        )}
+      </button>
+    )}
 
                 {/* Sort dropdown - FULLY FUNCTIONAL */}
                 <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -916,7 +966,7 @@ export default function SearchResultsGrid({
                     </div>
                 </div>
             </div>
-
+</div>
             {/* Tour cards grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
                 {sortedAndFilteredTours.map((tour) => (

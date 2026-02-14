@@ -361,14 +361,7 @@ export default function SearchFilters({
             {/* ========================================
                 HEADER - Mobile drawer header
                 ======================================== */}
-            <div className={`
-                sticky top-0 z-10
-                flex items-center justify-between
-                px-4 py-3
-                bg-white dark:bg-gray-950
-                border-b border-gray-200 dark:border-gray-800
-                ${isMobile ? '' : 'hidden'}
-            `}>
+            <div className={`sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 ${isMobile ? '' : 'hidden'}`}>
                 <div className="flex items-center gap-2">
                     <Filter className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                     <h2 className="font-semibold text-gray-900 dark:text-white">
@@ -463,12 +456,7 @@ export default function SearchFilters({
                                                     <ListboxOptions className="absolute z-50 mt-1 max-h-60 w-48 overflow-auto right-0 rounded-xl bg-white dark:bg-gray-900 py-1 text-xs shadow-xl ring-1 ring-black/5 dark:ring-white/10 focus:outline-none">
                                                         <ListboxOption
                                                             value=""
-                                                            className={({ focus, selected }) => `
-                                                                relative cursor-default select-none
-                                                                py-2 pl-8 pr-4 transition-colors
-                                                                ${focus ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-gray-200'}
-                                                                ${selected ? 'font-semibold' : 'font-normal'}
-                                                            `}
+                                                            className={({ focus, selected }) => `relative cursor-default select-none py-2 pl-8 pr-4 transition-colors ${focus ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-gray-200'} ${selected ? 'font-semibold' : 'font-normal'}`}
                                                         >
                                                             {({ selected }) => (
                                                                 <>
@@ -487,12 +475,7 @@ export default function SearchFilters({
                                                             <ListboxOption
                                                                 key={country}
                                                                 value={country}
-                                                                className={({ focus, selected }) => `
-                                                                    relative cursor-default select-none
-                                                                    py-2 pl-8 pr-4 transition-colors
-                                                                    ${focus ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-gray-200'}
-                                                                    ${selected ? 'font-semibold' : 'font-normal'}
-                                                                `}
+                                                                className={({ focus, selected }) => `relative cursor-default select-none py-2 pl-8 pr-4 transition-colors ${focus ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-gray-200'} ${selected ? 'font-semibold' : 'font-normal'}`}
                                                             >
                                                                 {({ selected }) => (
                                                                     <>
