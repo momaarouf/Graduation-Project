@@ -32,7 +32,7 @@ export default function Navigation() {
 
     const NAV_LINKS = [
         { href: '/tours', label: 'Tours' },
-        { href: '/guides', label: 'Guides' },
+        { href: '/guides/onboarding', label: 'Guides' },
         { href: '/how-it-works', label: 'How It Works' },
     ] as const
 
