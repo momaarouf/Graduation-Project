@@ -167,22 +167,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 
-        ============================================
-        SECTION 5: FOOTER
-        ============================================
-        Dual theme footer
-      */}
-      <footer
-        className="py-6 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800"
-        aria-label="Footer"
-      >
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            © {new Date().getFullYear()} SafariHub Travel Marketplace
-          </p>
-        </div>
-      </footer>
+      {/* Footer is rendered by the root layout */}
     </>
   )
 }

@@ -148,7 +148,7 @@ function ToursPageContent() {
   }
 
   return (
-    <PageLayout hideFooter>
+    <PageLayout>
       <UrlParamHandler />
 
       <div className="h-[calc(100vh-0rem)] w-full bg-white dark:bg-gray-950 overflow-hidden flex flex-col">

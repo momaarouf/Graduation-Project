@@ -15,6 +15,7 @@ import { ThemeProvider } from '@/src/lib/providers/ThemeProvider'
 import { FilterProvider } from '@/src/lib/contexts/FilterContext'
 import { Toaster } from 'react-hot-toast'
 import './globals.css'
+import Footer from '@/src/components/layout/Footer'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -67,6 +68,7 @@ export default function RootLayout({
                 className: 'dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700',
               }}
             />
+            <Footer />
           </FilterProvider>
         </ThemeProvider>
       </body>

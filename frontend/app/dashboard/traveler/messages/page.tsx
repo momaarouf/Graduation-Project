@@ -941,7 +941,7 @@ export default function TravelerMessagesPage() {
     }
 
     return (
-        <PageLayout hideFooter>
+        <PageLayout>
             {/* Page offset if you want the page to be for you need to controll this sm:h-[calc(100vh-4rem-5px)] in this measures the footer appear and without scroll bar because you are subtracting from height  and there is 2 one for mobile other for desktop*/}
             <div className="pt-14 sm:pt-16 h-[calc(100vh)] sm:h-[calc(100vh)] bg-gray-50 dark:bg-gray-950 overflow-hidden">
                 <div className="h-full flex flex-col">
