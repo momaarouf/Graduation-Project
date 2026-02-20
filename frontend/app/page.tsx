@@ -100,72 +100,7 @@ export default function HomePage() {
         ============================================
         Cards with complete dual theme support
       */}
-      <section
-        className="py-10 sm:py-16 bg-white dark:bg-gray-950"
-        aria-label="Upcoming features"
-      >
-        <div className="container mx-auto px-4 text-center">
-          {/* Section heading - dual text colors */}
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            More Features Coming Soon
-          </h2>
-
-          {/* Section description - dual text colors */}
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 max-w-lg mx-auto">
-            We're building a complete travel marketplace with advanced features.
-          </p>
-
-          {/* 
-            FEATURE CARDS - DUAL THEME IMPLEMENTATION
-            Each card has separate styles for light/dark
-          */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-xl sm:max-w-4xl mx-auto">
-            {/* Feature Card 1: Safety */}
-            <div className="card-theme hover:shadow-lg transition-shadow">
-              {/* Icon placeholder - dual colors */}
-              <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 mx-auto opacity-30">
-                <div className="w-6 h-6 rounded bg-gray-400 dark:bg-gray-600     /* Dual icon colors */" />
-              </div>
-
-              {/* Feature title - dual text colors */}
-              <h3 className="font-semibold text-gray-900 dark:text-white      /* Dual title colors */ mb-2">
-                Advanced Safety
-              </h3>
-
-              {/* Feature description - dual text colors */}
-              <p className="text-sm text-gray-500 dark:text-gray-400   /* Dual description colors */">
-                Verified guides, secure payments, 48h refund guarantee
-              </p>
-            </div>
-
-            {/* Feature Card 2: Categories */}
-            <div className="card-theme hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 mx-auto opacity-30">
-                <div className="w-6 h-6 rounded bg-gray-400 dark:bg-gray-600     /* Dual icon colors */" />
-              </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white      /* Dual title colors */ mb-2">
-                Curated Categories
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400   /* Dual description colors */">
-                Halal-friendly, hiking, historical, cultural experiences
-              </p>
-            </div>
-
-            {/* Feature Card 3: Live Map */}
-            <div className="card-theme hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 mx-auto opacity-30">
-                <div className="w-6 h-6 rounded bg-gray-400 dark:bg-gray-600     /* Dual icon colors */" />
-              </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white      /* Dual title colors */ mb-2">
-                Live Impact Map
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400   /* Dual description colors */">
-                Real-time tour tracking and community impact visualization
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Footer is rendered by the root layout */}
     </>
