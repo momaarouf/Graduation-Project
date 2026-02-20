@@ -91,7 +91,13 @@ const NAV_ITEMS = [
     href: '/dashboard/admin/audit',
     icon: History,
     color: 'gray'
-  }
+  },
+  {
+    name: 'Settings',
+    href: '/dashboard/admin/settings',
+    icon: Settings,
+    color: 'gray'
+},
 ]
 
 // ============================================================================
