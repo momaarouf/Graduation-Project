@@ -340,7 +340,7 @@ const formatHoursRemaining = (hours: number) => {
                 </div>
                 <div className="space-y-2">
                   <Link
-                    href={`/dashboard/traveler/messages?guide=${booking.guideId}`}
+                    href={`/messages/new?user=${booking.guideId}`}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
                   >
                     <MessageSquare className="w-4 h-4" />
