@@ -145,30 +145,30 @@ function SignupContent() {
                     />
                 )
 
-            case SignupStep.PROFILE_SETUP:
-                if (data.role === UserRole.TRAVELER) {
-                    return (
-                        <TravelerProfileForm
-                            onNext={nextStep}
-                            onBack={prevStep}
-                        />
-                    )
-                } else {
-                    return (
-                        <GuideProfileForm
-                            onNext={nextStep}
-                            onBack={prevStep}
-                        />
-                    )
-                }
+            // case SignupStep.PROFILE_SETUP:
+            //     if (data.role === UserRole.TRAVELER) {
+            //         return (
+            //             <TravelerProfileForm
+            //                 onNext={nextStep}
+            //                 onBack={prevStep}
+            //             />
+            //         )
+            //     } else {
+            //         return (
+            //             <GuideProfileForm
+            //                 onNext={nextStep}
+            //                 onBack={prevStep}
+            //             />
+            //         )
+            //     }
 
-            case SignupStep.VERIFICATION:
-                return (
-                    <GuideVerificationForm
-                        onNext={nextStep}
-                        onBack={prevStep}
-                    />
-                )
+            // case SignupStep.VERIFICATION:
+            //     return (
+            //         <GuideVerificationForm
+            //             onNext={nextStep}
+            //             onBack={prevStep}
+            //         />
+            //     )
 
             case SignupStep.COMPLETED:
                 return (

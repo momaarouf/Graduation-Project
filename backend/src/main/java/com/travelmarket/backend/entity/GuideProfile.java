@@ -1,0 +1,99 @@
+package com.travelmarket.backend.entity;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+
+@Entity
+@Table(name = "guide_profiles")
+@Getter
+@Setter
+public class GuideProfile {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
+
+    @Column(name = "id_verified")
+    private Boolean idVerified = false;
+
+    @Column(name = "id_verified_at_utc")
+    private Instant idVerifiedAtUtc;
+
+    @Column(name = "whish_account")
+    private String whishAccount;
+
+    @Column(name = "impact_score", precision = 5, scale = 2)
+    private BigDecimal impactScore = BigDecimal.ZERO;
+
+    @Column(name = "current_fee_multiplier", precision = 3, scale = 2)
+    private BigDecimal currentFeeMultiplier = BigDecimal.ONE;
+
+    @Column(name = "total_guided_trips")
+    private Integer totalGuidedTrips = 0;
+
+    @Column(name = "is_active")
+    private Boolean isActive = true;
+
+    @Column(name = "created_at_utc", updatable = false)
+    private Instant createdAtUtc;
+
+    @Column(name = "updated_at_utc")
+    private Instant updatedAtUtc;
+
+    @Column(name = "deleted_at_utc")
+    private Instant deletedAtUtc;
+
+    @Column(name = "base_country", length = 60)
+    private String baseCountry;
+
+    @Column(name = "base_city", length = 80)
+    private String baseCity;
+
+    @Column(name = "bio", columnDefinition = "TEXT")
+    private String bio;
+
+    @Column(name = "expertise_json")
+    private String expertiseJson;
+
+    // ===== Verification documents (Lebanon-first, upgradeable) =====
+    @Column(name = "id_document_type", length = 30)
+    private String idDocumentType; // NATIONAL_ID or PASSPORT
+
+    @Column(name = "id_front_image")
+    private String idFrontImage;
+
+    @Column(name = "id_back_image")
+    private String idBackImage;
+
+    @Column(name = "verification_submitted_at_utc")
+    private Instant verificationSubmittedAtUtc;
+
+    @Column(name = "verification_rejected_reason", length = 255)
+    private String verificationRejectedReason;
+
+    // ===== Backward compatibility with V1 columns =====
+    @Column(name = "id_verification_image")
+    private String idVerificationImage;
+
+    @Column(name = "selfie_image")
+    private String selfieImage;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAtUtc = Instant.now();
+        updatedAtUtc = Instant.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAtUtc = Instant.now();
+    }
+}

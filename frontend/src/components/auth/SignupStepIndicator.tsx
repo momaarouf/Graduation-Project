@@ -42,16 +42,16 @@ const getStepsForRole = (role: UserRole | null): Array<{
                 label: 'Account',
                 description: 'Create account'
             },
-            {
-                step: SignupStep.PROFILE_SETUP,
-                label: 'Profile',
-                description: 'Tell us about yourself'
-            },
-            {
-                step: SignupStep.VERIFICATION,
-                label: 'Verification',
-                description: 'Verify identity'
-            },
+            // {
+            //     step: SignupStep.PROFILE_SETUP,
+            //     label: 'Profile',
+            //     description: 'Tell us about yourself'
+            // },
+            // {
+            //     step: SignupStep.VERIFICATION,
+            //     label: 'Verification',
+            //     description: 'Verify identity'
+            // },
             {
                 step: SignupStep.COMPLETED,
                 label: 'Complete',
@@ -72,11 +72,11 @@ const getStepsForRole = (role: UserRole | null): Array<{
             label: 'Account',
             description: 'Create account'
         },
-        {
-            step: SignupStep.PROFILE_SETUP,
-            label: 'Preferences',
-            description: 'Set preferences'
-        },
+        // {
+        //     step: SignupStep.PROFILE_SETUP,
+        //     label: 'Preferences',
+        //     description: 'Set preferences'
+        // },
         {
             step: SignupStep.COMPLETED,
             label: 'Complete',

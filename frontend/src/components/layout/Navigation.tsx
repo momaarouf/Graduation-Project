@@ -32,8 +32,8 @@ import {
 
 // Mock auth state - replace with real auth in Phase 3
 const MOCK_USER = {
-  isLoggedIn: true,
-  role: 'guide' as 'traveler' | 'guide' | 'admin' | null,
+  isLoggedIn: false,
+  role: 'null' as 'traveler' | 'guide' | 'admin' | null,
   name: 'Mehmet Yilmaz',
   avatar: '/images/guides/mehmet.jpg'
 }

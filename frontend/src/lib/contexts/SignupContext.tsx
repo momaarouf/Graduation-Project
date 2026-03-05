@@ -61,8 +61,8 @@ const getStepsForRole = (role: UserRole | null) => {
         return [
             { step: SignupStep.ROLE_SELECTION },
             { step: SignupStep.ACCOUNT_DETAILS },
-            { step: SignupStep.PROFILE_SETUP },
-            { step: SignupStep.VERIFICATION },
+            // { step: SignupStep.PROFILE_SETUP },
+            // { step: SignupStep.VERIFICATION },
             { step: SignupStep.COMPLETED }
         ]
     }
@@ -71,7 +71,7 @@ const getStepsForRole = (role: UserRole | null) => {
     return [
         { step: SignupStep.ROLE_SELECTION },
         { step: SignupStep.ACCOUNT_DETAILS },
-        { step: SignupStep.PROFILE_SETUP },
+        // { step: SignupStep.PROFILE_SETUP },
         { step: SignupStep.COMPLETED }
     ]
 }
@@ -127,23 +127,23 @@ const validateStep = (data: SignupFormData, step: SignupStep): SignupErrors => {
             }
             break
 
-        case SignupStep.PROFILE_SETUP:
-            if (data.role === UserRole.TRAVELER) {
-                if (data.phone && !VALIDATION_RULES.phone.pattern?.test(data.phone)) {
-                    errors.phone = VALIDATION_RULES.phone.message
-                }
-            } else {
-                if (!data.bio || data.bio.length < 50) {
-                    errors.bio = 'Please write a bio of at least 50 characters'
-                }
-                if (!data.languages || data.languages.length === 0) {
-                    errors.languages = 'Please add at least one language'
-                }
-                if (!data.expertise || data.expertise.length === 0) {
-                    errors.expertise = 'Please add at least one area of expertise'
-                }
-            }
-            break
+        // case SignupStep.PROFILE_SETUP:
+        //     if (data.role === UserRole.TRAVELER) {
+        //         if (data.phone && !VALIDATION_RULES.phone.pattern?.test(data.phone)) {
+        //             errors.phone = VALIDATION_RULES.phone.message
+        //         }
+        //     } else {
+        //         if (!data.bio || data.bio.length < 50) {
+        //             errors.bio = 'Please write a bio of at least 50 characters'
+        //         }
+        //         if (!data.languages || data.languages.length === 0) {
+        //             errors.languages = 'Please add at least one language'
+        //         }
+        //         if (!data.expertise || data.expertise.length === 0) {
+        //             errors.expertise = 'Please add at least one area of expertise'
+        //         }
+        //     }
+        //     break
 
         case SignupStep.COMPLETED:
             if (!data.agreedToTerms) {

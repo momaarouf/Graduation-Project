@@ -7,6 +7,9 @@ CREATE TABLE users (
     is_email_verified BOOLEAN DEFAULT FALSE,
     preferred_language VARCHAR(10) DEFAULT 'en',
     timezone VARCHAR(50) DEFAULT 'UTC',
+    full_name VARCHAR(120) NOT NULL,
+    phone_e164 VARCHAR(20) NOT NULL UNIQUE,
+    is_phone_verified BOOLEAN NOT NULL DEFAULT FALSE,
     last_login_at TIMESTAMP,
     created_at_utc TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at_utc TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -123,7 +126,19 @@ CREATE TABLE pricing_rules (
     created_at_utc TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at_utc TIMESTAMP
 );
-
+-- 17. promo_codes
+CREATE TABLE promo_codes (
+                             id BIGSERIAL PRIMARY KEY,
+                             guide_id BIGINT REFERENCES guide_profiles(id),
+                             code VARCHAR(50) NOT NULL UNIQUE,
+                             discount_percent DECIMAL(5,2) NOT NULL,
+                             guide_funded BOOLEAN DEFAULT FALSE,
+                             max_uses INT,
+                             used_count INT DEFAULT 0,
+                             expires_at_utc TIMESTAMP,
+                             created_at_utc TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                             deleted_at_utc TIMESTAMP
+);
 -- 11. bookings
 CREATE TABLE bookings (
     id BIGSERIAL PRIMARY KEY,
@@ -220,19 +235,7 @@ CREATE TABLE reviews (
     deleted_at_utc TIMESTAMP
 );
 
--- 17. promo_codes
-CREATE TABLE promo_codes (
-    id BIGSERIAL PRIMARY KEY,
-    guide_id BIGINT REFERENCES guide_profiles(id),
-    code VARCHAR(50) NOT NULL UNIQUE,
-    discount_percent DECIMAL(5,2) NOT NULL,
-    guide_funded BOOLEAN DEFAULT FALSE,
-    max_uses INT,
-    used_count INT DEFAULT 0,
-    expires_at_utc TIMESTAMP,
-    created_at_utc TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at_utc TIMESTAMP
-);
+
 
 -- 18. notifications
 CREATE TABLE notifications (

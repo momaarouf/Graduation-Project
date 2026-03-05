@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V11__expand_guide_language_proficiency.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V1__initial_schema.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V2__user_identities.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V3__agreements_and_profile_completion.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V4__user_account_status.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V5__profile_fields.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V6__guide_verification_front_back.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V7__fix_language_id_type.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V8__add_legacy_id_verification_image.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V9__ensure_guide_verification_columns.sql" dialect="PostgreSQL" />
+  </component>
+</project>
