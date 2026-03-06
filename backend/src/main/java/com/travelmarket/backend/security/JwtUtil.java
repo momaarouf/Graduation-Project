@@ -25,9 +25,22 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8));
     }
 
-    public String generateToken(UserDetails userDetails) {
+    /**
+     * Generate an access JWT including the token version claim ("tv").
+     * The filter will compare this claim with users.token_version from DB.
+     */
+    public String generateToken(UserDetails userDetails, int tokenVersion) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("tv", tokenVersion);
         return createToken(claims, userDetails.getUsername());
+    }
+
+    /**
+     * Backward-compatible method.
+     * Prefer the overload that includes tokenVersion.
+     */
+    public String generateToken(UserDetails userDetails) {
+        return generateToken(userDetails, 0);
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
@@ -47,6 +60,18 @@ public class JwtUtil {
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    /**
+     * Extract token version claim from JWT.
+     * Defaults to 0 if missing.
+     */
+    public Integer extractTokenVersion(String token) {
+        Object v = extractAllClaims(token).get("tv");
+        if (v == null) return 0;
+        if (v instanceof Integer i) return i;
+        if (v instanceof Number n) return n.intValue();
+        return Integer.parseInt(String.valueOf(v));
     }
 
     private Date extractExpiration(String token) {

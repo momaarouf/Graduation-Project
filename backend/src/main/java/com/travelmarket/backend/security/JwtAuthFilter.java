@@ -1,5 +1,7 @@
 package com.travelmarket.backend.security;
 
+import com.travelmarket.backend.entity.User;
+import com.travelmarket.backend.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +30,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
+    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(
@@ -67,6 +70,24 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     return;
                 }
 
+                // Strong logout enforcement:
+                // Each access JWT includes claim "tv" = token version.
+                // We compare it with users.token_version in DB.
+                // If mismatch, token is revoked immediately (logout-all).
+                User user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new RuntimeException("User not found"));
+
+                int claimTv = jwtUtil.extractTokenVersion(token);
+                int dbTv = (user.getTokenVersion() == null) ? 0 : user.getTokenVersion();
+
+                if (claimTv != dbTv) {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"message\":\"Token revoked\"}");
+                    return;
+                }
+
+                // Build authenticated principal
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,

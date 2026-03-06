@@ -3,43 +3,38 @@ package com.travelmarket.backend.controller;
 import com.travelmarket.backend.dto.AuthResponse;
 import com.travelmarket.backend.dto.LoginRequest;
 import com.travelmarket.backend.dto.RegisterRequest;
+import com.travelmarket.backend.dto.MeResponse;
 import com.travelmarket.backend.entity.GuideProfile;
+import com.travelmarket.backend.entity.RefreshToken;
 import com.travelmarket.backend.entity.TravelerProfile;
 import com.travelmarket.backend.entity.User;
 import com.travelmarket.backend.repository.GuideProfileRepository;
+import com.travelmarket.backend.repository.RefreshTokenRepository;
 import com.travelmarket.backend.repository.TravelerProfileRepository;
 import com.travelmarket.backend.repository.UserRepository;
 import com.travelmarket.backend.security.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.travelmarket.backend.dto.MeResponse;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import com.travelmarket.backend.entity.RefreshToken;
-import com.travelmarket.backend.repository.RefreshTokenRepository;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.HexFormat;
 import java.util.UUID;
-
-import java.time.Instant;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -121,7 +116,7 @@ public class AuthController {
             throw new RuntimeException("Email already in use");
         }
 
-        User.Role role = User.Role.valueOf(request.getRole()); // safe due to DTO pattern
+        User.Role role = User.Role.valueOf(request.getRole());
         if (role == User.Role.Admin) {
             throw new RuntimeException("Invalid role");
         }
@@ -131,28 +126,30 @@ public class AuthController {
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setRole(role);
 
-        // full name optional here
+        // Full name optional at registration
         if (request.getFullName() != null && !request.getFullName().trim().isEmpty()) {
             user.setFullName(request.getFullName().trim());
         }
 
-        // agreements
+        // Agreements
         user.setAgreedToTerms(request.isAgreedToTerms());
         user.setAgreedToPrivacy(request.isAgreedToPrivacy());
         user.setNewsletterOptIn(request.isNewsletterOptIn());
         user.setMarketingOptIn(request.isMarketingOptIn());
         user.setAgreementsAcceptedAtUtc(Instant.now());
 
-        // profile completion false until complete-profile step
+        // Profile completion remains false until complete-profile step
         user.setProfileCompleted(false);
 
-        // defaults
+        // Defaults
         user.setIsEmailVerified(false);
         user.setPreferredLanguage("en");
         user.setTimezone("UTC");
 
+        // tokenVersion defaults to 0 automatically
         user = userRepository.save(user);
 
+        // Create role profile row
         if (role == User.Role.Traveler) {
             TravelerProfile tp = new TravelerProfile();
             tp.setUser(user);
@@ -164,33 +161,42 @@ public class AuthController {
             guideProfileRepository.save(gp);
         }
 
+        // Build access JWT including tokenVersion claim
         UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())
                 .password(user.getPasswordHash())
                 .roles(user.getRole().name())
                 .build();
 
-        String token = jwtUtil.generateToken(userDetails);
+        String token = jwtUtil.generateToken(userDetails, user.getTokenVersion() == null ? 0 : user.getTokenVersion());
+
+        // Default refresh TTL on register
         Duration ttl = REFRESH_TTL_DEFAULT;
-        String refreshRaw = issueRefreshToken(user,ttl);
-        response.addHeader(HttpHeaders.SET_COOKIE, buildRefreshCookie(refreshRaw,ttl).toString());
+        String refreshRaw = issueRefreshToken(user, ttl);
+        response.addHeader(HttpHeaders.SET_COOKIE, buildRefreshCookie(refreshRaw, ttl).toString());
 
         return new AuthResponse(token, user.getEmail(), user.getRole().name());
     }
+
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         String email = request.getEmail().trim().toLowerCase();
+
         // Authenticate using email and password
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, request.getPassword())
         );
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String token = jwtUtil.generateToken(userDetails);
 
-        // Fetch user to get role
+        // Load user from DB (needed for role + tokenVersion)
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Access JWT includes tokenVersion claim
+        String token = jwtUtil.generateToken(userDetails, user.getTokenVersion() == null ? 0 : user.getTokenVersion());
+
+        // Remember-me affects refresh token lifetime
         Duration ttl = Boolean.TRUE.equals(request.getRememberMe())
                 ? REFRESH_TTL_REMEMBER
                 : REFRESH_TTL_DEFAULT;
@@ -200,6 +206,7 @@ public class AuthController {
 
         return new AuthResponse(token, user.getEmail(), user.getRole().name());
     }
+
     @GetMapping("/me")
     public MeResponse me(@AuthenticationPrincipal UserDetails principal) {
 
@@ -221,6 +228,7 @@ public class AuthController {
 
         return new MeResponse(user.getId(), user.getEmail(), user.getRole().name(), travelerProfileId, guideProfileId);
     }
+
     @PostMapping("/refresh")
     public AuthResponse refresh(HttpServletRequest request, HttpServletResponse response) {
 
@@ -243,28 +251,32 @@ public class AuthController {
             response.addHeader(HttpHeaders.SET_COOKIE, clearRefreshCookie().toString());
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token expired");
         }
+
         Duration remaining = Duration.between(Instant.now(), rt.getExpiresAtUtc());
         if (remaining.isNegative() || remaining.isZero()) {
             response.addHeader(HttpHeaders.SET_COOKIE, clearRefreshCookie().toString());
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh token expired");
         }
+
         User user = rt.getUser();
 
-        // Rotate: revoke old, issue new
+        // Rotate refresh token: revoke old, issue new with the remaining TTL (preserves remember-me duration)
         refreshTokenRepository.revokeOne(rt.getId(), Instant.now());
         String newRaw = issueRefreshToken(user, remaining);
         response.addHeader(HttpHeaders.SET_COOKIE, buildRefreshCookie(newRaw, remaining).toString());
 
-        // New access token
+        // Issue new access JWT including tokenVersion claim
         UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())
                 .password(user.getPasswordHash())
                 .roles(user.getRole().name())
                 .build();
 
-        String access = jwtUtil.generateToken(userDetails);
+        String access = jwtUtil.generateToken(userDetails, user.getTokenVersion() == null ? 0 : user.getTokenVersion());
+
         return new AuthResponse(access, user.getEmail(), user.getRole().name());
     }
+
     @PostMapping("/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) {
 
@@ -275,8 +287,11 @@ public class AuthController {
                     .ifPresent(rt -> refreshTokenRepository.revokeOne(rt.getId(), Instant.now()));
         }
 
+        // This clears refresh token cookie.
+        // Access token remains valid until expiry (normal JWT behavior).
         response.addHeader(HttpHeaders.SET_COOKIE, clearRefreshCookie().toString());
     }
+
     @PostMapping("/logout-all")
     public void logoutAll(HttpServletRequest request, HttpServletResponse response) {
 
@@ -291,7 +306,15 @@ public class AuthController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token"));
 
         User user = rt.getUser();
+        User dbUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        // Revoke all refresh tokens for this user (all devices)
         refreshTokenRepository.revokeAllForUser(user.getId(), Instant.now());
+
+        // Strong logout: invalidate all access JWTs immediately by incrementing tokenVersion.
+        int current = (dbUser.getTokenVersion() == null) ? 0 : dbUser.getTokenVersion();
+        dbUser.setTokenVersion(current + 1);
+        userRepository.save(dbUser);
 
         response.addHeader(HttpHeaders.SET_COOKIE, clearRefreshCookie().toString());
     }

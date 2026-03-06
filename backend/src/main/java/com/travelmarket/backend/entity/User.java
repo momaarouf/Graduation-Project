@@ -83,6 +83,19 @@ public class User {
     @Column(name = "deleted_at_utc")
     private Instant deletedAtUtc;
 
+    /**
+     * Strong logout mechanism:
+     * - Each access JWT includes claim "tv" (token version).
+     * - On every request, we compare claim tv with users.token_version from DB.
+     * - If mismatch -> token is considered revoked immediately (401).
+     *
+     * Increment this number when you want to revoke all currently issued access tokens.
+     * Most common place to increment: /api/auth/logout-all.
+     */
+    @Column(name = "token_version", nullable = false)
+    private Integer tokenVersion = 0;
+
+
     @PrePersist
     protected void onCreate() {
         createdAtUtc = Instant.now();
