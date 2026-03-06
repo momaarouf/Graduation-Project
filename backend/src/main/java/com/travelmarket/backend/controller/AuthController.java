@@ -13,6 +13,11 @@ import com.travelmarket.backend.repository.RefreshTokenRepository;
 import com.travelmarket.backend.repository.TravelerProfileRepository;
 import com.travelmarket.backend.repository.UserRepository;
 import com.travelmarket.backend.security.JwtUtil;
+import com.travelmarket.backend.dto.ForgotPasswordRequest;
+import com.travelmarket.backend.dto.ResetPasswordRequest;
+import com.travelmarket.backend.dto.ForgotPasswordDevResponse;
+import com.travelmarket.backend.entity.PasswordResetToken;
+import com.travelmarket.backend.repository.PasswordResetTokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -48,10 +53,12 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
     private static final String REFRESH_COOKIE = "refresh_token";
     private static final Duration REFRESH_TTL_DEFAULT = Duration.ofDays(7);
     private static final Duration REFRESH_TTL_REMEMBER = Duration.ofDays(30);
+    private static final Duration RESET_TTL = Duration.ofMinutes(15);
 
     private String sha256Hex(String raw) {
         try {
@@ -317,5 +324,70 @@ public class AuthController {
         userRepository.save(dbUser);
 
         response.addHeader(HttpHeaders.SET_COOKIE, clearRefreshCookie().toString());
+    }
+    @PostMapping("/password/forgot")
+    public Object forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
+
+        String email = req.getEmail().trim().toLowerCase();
+
+        // Always respond 200 to avoid email enumeration
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return new ForgotPasswordDevResponse("If the email exists, a reset link was issued.", null);
+        }
+
+        // Create raw token and store only its hash
+        String rawToken = UUID.randomUUID().toString() + "-" + UUID.randomUUID();
+        String hash = sha256Hex(rawToken);
+
+        PasswordResetToken prt = new PasswordResetToken();
+        prt.setUser(user);
+        prt.setTokenHash(hash);
+        prt.setCreatedAtUtc(Instant.now());
+        prt.setExpiresAtUtc(Instant.now().plus(RESET_TTL));
+        prt.setUsedAtUtc(null);
+
+        passwordResetTokenRepository.save(prt);
+
+        // Dev-friendly: return token so you can test reset via Postman.
+        // In production, you will send email instead and return null token.
+        return new ForgotPasswordDevResponse("If the email exists, a reset link was issued.", rawToken);
+    }
+
+    @PostMapping("/password/reset")
+    public void resetPassword(@Valid @RequestBody ResetPasswordRequest req) {
+
+        String raw = req.getToken().trim();
+        String hash = sha256Hex(raw);
+
+        PasswordResetToken prt = passwordResetTokenRepository.findByTokenHash(hash)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid reset token"));
+
+        if (prt.getUsedAtUtc() != null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Reset token already used");
+        }
+
+        if (prt.getExpiresAtUtc().isBefore(Instant.now())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Reset token expired");
+        }
+
+        User user = prt.getUser();
+
+        // Update password
+        user.setPasswordHash(passwordEncoder.encode(req.getNewPassword()));
+
+        // Strong logout: increment tokenVersion to revoke all existing access JWTs immediately
+        int current = (user.getTokenVersion() == null) ? 0 : user.getTokenVersion();
+        user.setTokenVersion(current + 1);
+
+        userRepository.save(user);
+
+        // Mark token used (one-time)
+        prt.setUsedAtUtc(Instant.now());
+        passwordResetTokenRepository.save(prt);
+
+        // Optional but recommended:
+        // If you have refreshTokenRepository, revoke all refresh tokens here too:
+        refreshTokenRepository.revokeAllForUser(user.getId(), Instant.now());
     }
 }

@@ -45,7 +45,7 @@ public class SecurityConfig {
 
                         // Public auth endpoints
                         .requestMatchers("/api/auth/register", "/api/auth/login",
-                                "/api/auth/refresh", "/api/auth/logout", "/api/auth/logout-all").permitAll()
+                                "/api/auth/refresh", "/api/auth/logout", "/api/auth/logout-all", "/api/auth/password/forgot", "/api/auth/password/reset").permitAll()
 
                         // OAuth2 endpoints must be public
                         .requestMatchers("/api/auth/oauth2/**").permitAll()
