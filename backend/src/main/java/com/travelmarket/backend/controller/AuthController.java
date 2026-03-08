@@ -15,6 +15,7 @@ import com.travelmarket.backend.repository.PasswordResetTokenRepository;
 import com.travelmarket.backend.entity.EmailVerificationToken;
 import com.travelmarket.backend.repository.EmailVerificationTokenRepository;
 import com.travelmarket.backend.service.EmailService;
+import com.travelmarket.backend.security.RateLimiterService;
 import org.springframework.beans.factory.annotation.Value;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -53,6 +54,7 @@ public class AuthController {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
+    private final RateLimiterService rateLimiterService;
 
     private static final String REFRESH_COOKIE = "refresh_token";
     private static final Duration REFRESH_TTL_DEFAULT = Duration.ofDays(7);
@@ -72,6 +74,16 @@ public class AuthController {
 
     @Value("${app.password-reset.dev-return:false}")
     private boolean passwordResetDevReturn;
+
+    private String getClientIp(HttpServletRequest request) {
+        // If behind proxy later, X-Forwarded-For is common.
+        String xff = request.getHeader("X-Forwarded-For");
+        if (xff != null && !xff.isBlank()) {
+            // first IP in the list
+            return xff.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
+    }
 
     private String generate6DigitCode() {
         int n = (int)(Math.random() * 900000) + 100000;
@@ -204,8 +216,37 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
-        String email = request.getEmail().trim().toLowerCase();
+    public AuthResponse login(@Valid @RequestBody LoginRequest request, HttpServletResponse response, HttpServletRequest httpRequest) {
+        String ip = getClientIp(httpRequest);
+        String email = request.getEmail() == null ? "" : request.getEmail().trim().toLowerCase();
+
+        // 5 attempts / 10 minutes per IP
+        rateLimiterService.check(
+                "auth:login:ip:" + ip,
+                100,
+                Duration.ofMinutes(10),
+                "Too many login attempts. Try again later."
+        );
+
+        // 5 attempts / 10 minutes per email
+        if (!email.isBlank()) {
+            rateLimiterService.check(
+                    "auth:login:email:" + email,
+                    5,
+                    Duration.ofMinutes(10),
+                    "Too many login attempts. Try again later."
+            );
+        }
+        // Combined key (most fair): limits attempts for this specific email from this specific IP
+        if(!email.isBlank()) {
+            rateLimiterService.check(
+                    "auth:login:email-ip:" + email + ":" + ip,
+                    5,
+                    Duration.ofMinutes(10),
+                    "Too many login attempts. Try again later."
+            );
+        }
+
 
         // Authenticate using email and password
         Authentication authentication = authenticationManager.authenticate(
@@ -256,6 +297,14 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public AuthResponse refresh(HttpServletRequest request, HttpServletResponse response) {
+
+        String ip = getClientIp(request);
+        rateLimiterService.check(
+                "auth:refresh:ip:" + ip,
+                20,
+                Duration.ofMinutes(10),
+                "Too many requests. Try again later."
+        );
 
         String raw = readCookie(request, REFRESH_COOKIE);
         if (raw == null || raw.isBlank()) {
@@ -344,9 +393,28 @@ public class AuthController {
         response.addHeader(HttpHeaders.SET_COOKIE, clearRefreshCookie().toString());
     }
     @PostMapping("/password/forgot")
-    public Object forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
+    public Object forgotPassword(@Valid @RequestBody ForgotPasswordRequest req, HttpServletRequest httpRequest) {
 
-        String email = req.getEmail().trim().toLowerCase();
+        String ip = getClientIp(httpRequest);
+        String email = req.getEmail() == null ? "" : req.getEmail().trim().toLowerCase();
+
+        // 3 / 15 min per IP
+        rateLimiterService.check(
+                "auth:forgot:ip:" + ip,
+                3,
+                Duration.ofMinutes(15),
+                "Too many requests. Try again later."
+        );
+
+        // 3 / 15 min per email
+        if (!email.isBlank()) {
+            rateLimiterService.check(
+                    "auth:forgot:email:" + email,
+                    3,
+                    Duration.ofMinutes(15),
+                    "Too many requests. Try again later."
+            );
+        }
 
         // Always respond 200 to avoid email enumeration
         User user = userRepository.findByEmail(email).orElse(null);
@@ -425,9 +493,28 @@ public class AuthController {
     }
 
     @PostMapping("/email/verify/request")
-    public EmailVerifyDevResponse requestEmailVerification(@Valid @RequestBody EmailVerifyRequest req) {
+    public EmailVerifyDevResponse requestEmailVerification(@Valid @RequestBody EmailVerifyRequest req, HttpServletRequest httpRequest) {
 
-        String email = req.getEmail().trim().toLowerCase();
+        String ip = getClientIp(httpRequest);
+        String email = req.getEmail() == null ? "" : req.getEmail().trim().toLowerCase();
+
+        // 3 / 15 min per IP
+        rateLimiterService.check(
+                "auth:verify:ip:" + ip,
+                3,
+                Duration.ofMinutes(15),
+                "Too many requests. Try again later."
+        );
+
+        // 3 / 15 min per email
+        if (!email.isBlank()) {
+            rateLimiterService.check(
+                    "auth:verify:email:" + email,
+                    3,
+                    Duration.ofMinutes(15),
+                    "Too many requests. Try again later."
+            );
+        }
 
         // Do not enumerate emails. Always return 200 with a generic message.
         User user = userRepository.findByEmail(email).orElse(null);
