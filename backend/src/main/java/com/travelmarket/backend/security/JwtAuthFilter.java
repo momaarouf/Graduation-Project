@@ -1,7 +1,5 @@
 package com.travelmarket.backend.security;
 
-import com.travelmarket.backend.entity.User;
-import com.travelmarket.backend.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +28,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
-    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(
@@ -41,7 +38,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String header = request.getHeader("Authorization");
 
-        // No token -> continue. SecurityConfig will enforce authentication when required.
+        // No Bearer token -> continue. SecurityConfig will enforce auth/roles.
         if (header == null || !header.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -50,64 +47,47 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = header.substring("Bearer ".length()).trim();
 
         try {
-            // Extract username (email) from token.
-            // If token is malformed/signature invalid/expired, this will throw -> we catch below.
+            // If token is malformed/signature invalid/expired, extractUsername will throw.
             String email = jwtUtil.extractUsername(token);
 
-            // Only authenticate if not already authenticated
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-                // Load user details from DB:
-                // This is where banned/suspended/deactivated should be blocked by throwing:
-                // DisabledException / LockedException / AccountExpiredException
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-                // Validate token against userDetails and expiry
-                if (!jwtUtil.validateToken(token, userDetails)) {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"message\":\"Invalid token\"}");
-                    return;
-                }
-
-                // Strong logout enforcement:
-                // Each access JWT includes claim "tv" = token version.
-                // We compare it with users.token_version in DB.
-                // If mismatch, token is revoked immediately (logout-all).
-                User user = userRepository.findByEmail(email)
-                        .orElseThrow(() -> new RuntimeException("User not found"));
-
-                int claimTv = jwtUtil.extractTokenVersion(token);
-                int dbTv = (user.getTokenVersion() == null) ? 0 : user.getTokenVersion();
-
-                if (claimTv != dbTv) {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.setContentType("application/json");
-                    response.getWriter().write("{\"message\":\"Token revoked\"}");
-                    return;
-                }
-
-                // Build authenticated principal
-                UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
-
-                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(auth);
+            if (email == null || email.isBlank()) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"message\":\"Unauthorized\"}");
+                return;
             }
+
+            // Load user details (this also enforces banned/suspended/deactivated in your CustomUserDetailsService)
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+            // Validate token signature + expiry
+            if (!jwtUtil.validateToken(token, userDetails)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"message\":\"Invalid token\"}");
+                return;
+            }
+
+            // Important behavior change:
+            // If a Bearer token is present, we always set JWT authentication,
+            // even if a session/OAuth2 authentication already exists.
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+
+            auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(auth);
 
             filterChain.doFilter(request, response);
 
         } catch (DisabledException | LockedException | AccountExpiredException e) {
-            // Token might be valid, but account is blocked -> 403
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json");
             response.getWriter().write("{\"message\":\"" + e.getMessage() + "\"}");
         } catch (Exception e) {
-            // Anything else here is token parsing/signature/expiration/etc. -> 401
             log.error("JWT auth filter error", e);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");

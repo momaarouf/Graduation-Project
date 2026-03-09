@@ -6,13 +6,16 @@ import com.travelmarket.backend.dto.AdminUserListResponse;
 import com.travelmarket.backend.dto.AdminUserResponse;
 import com.travelmarket.backend.entity.User;
 import com.travelmarket.backend.repository.UserRepository;
+import com.travelmarket.backend.service.AdminAuditService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/users")
@@ -20,9 +23,19 @@ import java.util.List;
 public class AdminUserController {
 
     private final UserRepository userRepository;
+    private final AdminAuditService adminAuditService;
+
+    private User currentAdmin(Authentication auth) {
+        if (auth == null || auth.getName() == null) {
+            throw new RuntimeException("Unauthorized");
+        }
+        return userRepository.findByEmail(auth.getName())
+                .orElseThrow(() -> new RuntimeException("Admin user not found"));
+    }
 
     /**
      * Optional filter by email substring. Useful for admin search.
+     * If you don't have findByEmailContainingIgnoreCase in UserRepository, remove that part.
      */
     @GetMapping
     public AdminUserListResponse list(@RequestParam(required = false) String email) {
@@ -43,53 +56,94 @@ public class AdminUserController {
 
     /**
      * Soft delete / archive.
-     * This should not be used as "terminate". Terminate is ban.
      */
     @PatchMapping("/{id}/deactivate")
     public AdminUserResponse deactivate(@PathVariable Long id, Authentication auth) {
+        User admin = currentAdmin(auth);
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         guardAdminActions(user, auth);
+
+        Instant oldDeletedAt = user.getDeletedAtUtc();
 
         if (user.getDeletedAtUtc() == null) {
             user.setDeletedAtUtc(Instant.now());
             userRepository.save(user);
         }
 
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("oldDeletedAtUtc", oldDeletedAt);
+        details.put("newDeletedAtUtc", user.getDeletedAtUtc());
+
+        adminAuditService.log(
+                admin,
+                "USER_DEACTIVATE",
+                "USER",
+                user.getId(),
+                "Deactivated user: " + user.getEmail(),
+                details
+        );
+
         return toDto(user);
     }
 
     /**
-     * Undo soft delete. Recommended for admin panels.
+     * Undo soft delete.
      */
     @PatchMapping("/{id}/reactivate")
     public AdminUserResponse reactivate(@PathVariable Long id, Authentication auth) {
+        User admin = currentAdmin(auth);
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         guardAdminActions(user, auth);
 
+        Instant oldDeletedAt = user.getDeletedAtUtc();
+
         user.setDeletedAtUtc(null);
         userRepository.save(user);
+
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("oldDeletedAtUtc", oldDeletedAt);
+        details.put("newDeletedAtUtc", user.getDeletedAtUtc());
+
+        adminAuditService.log(
+                admin,
+                "USER_REACTIVATE",
+                "USER",
+                user.getId(),
+                "Reactivated user: " + user.getEmail(),
+                details
+        );
+
         return toDto(user);
     }
 
     /**
      * Suspend a user.
-     * - untilUtc == null => indefinite suspension (manual activate required)
-     * - untilUtc != null => timed suspension (access automatically restored after time passes)
+     * - untilUtc == null => indefinite suspension
+     * - untilUtc != null => timed suspension
      */
     @PatchMapping("/{id}/suspend")
     public AdminUserResponse suspend(@PathVariable Long id,
                                      @Valid @RequestBody AdminSuspendUserRequest req,
                                      Authentication auth) {
+        User admin = currentAdmin(auth);
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         guardAdminActions(user, auth);
 
-        // Business rule: if a timestamp is provided, it must be in the future.
+        // Snapshot before changes
+        String oldStatus = user.getAccountStatus();
+        Instant oldUntil = user.getSuspendedUntilUtc();
+        String oldReason = user.getStatusReason();
+
+        // Rule: if timestamp provided, must be in the future.
         if (req.untilUtc() != null && !req.untilUtc().isAfter(Instant.now())) {
             throw new IllegalArgumentException("untilUtc must be in the future");
         }
@@ -99,37 +153,78 @@ public class AdminUserController {
         user.setSuspendedUntilUtc(req.untilUtc());
         userRepository.save(user);
 
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("oldStatus", oldStatus);
+        details.put("newStatus", user.getAccountStatus());
+        details.put("oldSuspendedUntilUtc", oldUntil);
+        details.put("newSuspendedUntilUtc", user.getSuspendedUntilUtc());
+        details.put("oldReason", oldReason);
+        details.put("newReason", user.getStatusReason());
+
+        adminAuditService.log(
+                admin,
+                "USER_SUSPEND",
+                "USER",
+                user.getId(),
+                "Suspended user: " + user.getEmail(),
+                details
+        );
+
         return toDto(user);
     }
 
     /**
      * Activate user back to normal.
-     * Clears suspension metadata and ban metadata.
-     * Does not clear deletedAtUtc (that is reactivate).
+     * Clears suspension metadata and status reason.
      */
     @PatchMapping("/{id}/activate")
     public AdminUserResponse activate(@PathVariable Long id, Authentication auth) {
+        User admin = currentAdmin(auth);
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         guardAdminActions(user, auth);
+
+        // Snapshot before changes
+        String oldStatus = user.getAccountStatus();
+        Instant oldUntil = user.getSuspendedUntilUtc();
+        String oldReason = user.getStatusReason();
 
         user.setAccountStatus("ACTIVE");
         user.setSuspendedUntilUtc(null);
         user.setStatusReason(null);
         userRepository.save(user);
 
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("oldStatus", oldStatus);
+        details.put("newStatus", user.getAccountStatus());
+        details.put("oldSuspendedUntilUtc", oldUntil);
+        details.put("newSuspendedUntilUtc", user.getSuspendedUntilUtc());
+        details.put("oldReason", oldReason);
+        details.put("newReason", user.getStatusReason());
+
+        adminAuditService.log(
+                admin,
+                "USER_ACTIVATE",
+                "USER",
+                user.getId(),
+                "Activated user: " + user.getEmail(),
+                details
+        );
+
         return toDto(user);
     }
 
     /**
      * Ban a user (terminate access permanently).
-     * Data stays for audit and disputes.
      */
     @PatchMapping("/{id}/ban")
     public AdminUserResponse ban(@PathVariable Long id,
                                  @Valid @RequestBody AdminBanUserRequest req,
                                  Authentication auth) {
+        User admin = currentAdmin(auth);
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -139,18 +234,40 @@ public class AdminUserController {
             throw new IllegalArgumentException("reason is required");
         }
 
+        // Snapshot before changes
+        String oldStatus = user.getAccountStatus();
+        Instant oldUntil = user.getSuspendedUntilUtc();
+        String oldReason = user.getStatusReason();
+
         user.setAccountStatus("BANNED");
         user.setStatusReason(req.reason().trim());
         user.setSuspendedUntilUtc(null);
         userRepository.save(user);
+
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("oldStatus", oldStatus);
+        details.put("newStatus", user.getAccountStatus());
+        details.put("oldSuspendedUntilUtc", oldUntil);
+        details.put("newSuspendedUntilUtc", user.getSuspendedUntilUtc());
+        details.put("oldReason", oldReason);
+        details.put("newReason", user.getStatusReason());
+
+        adminAuditService.log(
+                admin,
+                "USER_BAN",
+                "USER",
+                user.getId(),
+                "Banned user: " + user.getEmail(),
+                details
+        );
 
         return toDto(user);
     }
 
     /**
      * Prevent dangerous admin actions.
-     * - Do not allow modifying other admins.
-     * - Do not allow modifying your own account status (avoids locking yourself out).
+     * - Do not allow modifying other admins
+     * - Do not allow modifying your own account status
      */
     private void guardAdminActions(User target, Authentication auth) {
         if (target.getRole() == User.Role.Admin) {
