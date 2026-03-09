@@ -89,6 +89,10 @@ public class AuthController {
         int n = (int)(Math.random() * 900000) + 100000;
         return String.valueOf(n);
     }
+    private String generate8DigitCode() {
+        int n = (int) (Math.random() * 90000000) + 10000000;
+        return String.valueOf(n);
+    }
 
     private String sha256Hex(String raw) {
         try {
@@ -423,8 +427,18 @@ public class AuthController {
         }
 
         // Create raw token and store only its hash
-        String rawToken = UUID.randomUUID().toString() + "-" + UUID.randomUUID();
+        //String rawToken = UUID.randomUUID().toString() + "-" + UUID.randomUUID();
+        // Numeric reset code is more convenient while frontend is not deployed.
+        // Still treated as the "token" in the reset endpoint.
+        String rawToken = generate8DigitCode();
         String hash = sha256Hex(rawToken);
+
+        // Optional: retry a few times if collision happens (unique token_hash)
+        for (int i = 0; i < 3; i++) {
+            if (passwordResetTokenRepository.findByTokenHash(hash).isEmpty()) break;
+            rawToken = generate8DigitCode();
+            hash = sha256Hex(rawToken);
+        }
 
         PasswordResetToken prt = new PasswordResetToken();
         prt.setUser(user);
@@ -436,13 +450,31 @@ public class AuthController {
         passwordResetTokenRepository.save(prt);
 
         // Send real email (Brevo SMTP via JavaMailSender)
-        String resetLink = frontendBaseUrl + "/reset-password?token=" + rawToken;
-        String subject = "Reset your password";
+//        String resetLink = frontendBaseUrl + "/reset-password?token=" + rawToken;
+//        String subject = "Reset your password";
+//        String body =
+//                "We received a request to reset your password.\n\n"
+//                        + "Reset link:\n" + resetLink + "\n\n"
+//                        + "This link expires in 15 minutes.\n"
+//                        + "If you did not request this, you can ignore this email.";
+//
+//        emailService.send(user.getEmail(), subject, body);
+        // Code-first email because frontend is not deployed yet.
+        // Keep link logic commented for later deployment.
+        // String resetLink = frontendBaseUrl + "/reset-password?token=" + rawToken;
+
+        String subject = "Your password reset code";
         String body =
-                "We received a request to reset your password.\n\n"
-                        + "Reset link:\n" + resetLink + "\n\n"
-                        + "This link expires in 15 minutes.\n"
-                        + "If you did not request this, you can ignore this email.";
+                "Your password reset code is:\n\n"
+                        + rawToken + "\n\n"
+                        + "This code expires in 15 minutes.\n\n"
+                        + "Security note:\n"
+                        + "- Do not share this code with anyone.\n"
+                        + "- Our team will never ask you for this code.\n\n"
+                        + "If you did not request this, you can ignore this email.\n";
+
+        // Later when deployed:
+        // body += "\nReset link:\n" + resetLink + "\n";
 
         emailService.send(user.getEmail(), subject, body);
 
@@ -545,17 +577,35 @@ public class AuthController {
         evt.setUsedAtUtc(null);
 
         emailVerificationTokenRepository.save(evt);
-        // Send real email (Brevo SMTP)
-        String verifyLink = frontendBaseUrl + "/verify-email?token=" + rawToken;
+        // Code-first email because frontend is not deployed yet.
+        // Keep link logic commented for later deployment.
+        // String verifyLink = frontendBaseUrl + "/verify-email?token=" + rawToken;
 
-        String subject = "Verify your email";
+        String subject = "Your email verification code";
         String body =
-                "Please verify your email.\n\n"
-                        + "Verification link:\n" + verifyLink + "\n\n"
-                        + "Or enter this code in the app:\n" + rawCode + "\n\n"
-                        + "This token/code expires in " + emailVerifyTtlMinutes + " minutes.";
+                "Your verification code is:\n\n"
+                        + rawCode + "\n\n"
+                        + "This code expires in " + emailVerifyTtlMinutes + " minutes.\n\n"
+                        + "Security note:\n"
+                        + "- Do not share this code with anyone.\n"
+                        + "- Our team will never ask you for this code.\n\n"
+                        + "If you did not request this, ignore this email.\n";
+
+        // Later when deployed:
+        // body += "\nVerification link:\n" + verifyLink + "\n";
 
         emailService.send(user.getEmail(), subject, body);
+        // Send real email (Brevo SMTP)
+//        String verifyLink = frontendBaseUrl + "/verify-email?token=" + rawToken;
+//
+//        String subject = "Verify your email";
+//        String body =
+//                "Please verify your email.\n\n"
+//                        + "Verification link:\n" + verifyLink + "\n\n"
+//                        + "Or enter this code in the app:\n" + rawCode + "\n\n"
+//                        + "This token/code expires in " + emailVerifyTtlMinutes + " minutes.";
+//
+//        emailService.send(user.getEmail(), subject, body);
         // Production plan (later):
         // - Send email containing either:
         //   1) Link with rawToken: https://your-frontend/verify-email?token=rawToken
