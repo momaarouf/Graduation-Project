@@ -66,7 +66,7 @@ export default async function ResetPasswordPage({ searchParams }: ResetPasswordP
                         className="inline-flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
                     >
                         <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-                        <span>Back to Login</span>
+                        <span>Return to SafariHub</span>
                     </Link>
                 </div>
 
@@ -115,13 +115,13 @@ export default async function ResetPasswordPage({ searchParams }: ResetPasswordP
                         <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg flex items-start gap-3">
                             <Shield className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                             <p className="text-sm text-amber-800 dark:text-amber-300">
-                                Password reset links expire after 1 hour for security.
+                                Reset codes expire in 15 minutes for security.
                             </p>
                         </div>
                     </div>
 
                     {/* Right Column - Form */}
-                    <div className="w-full max-w-md mx-auto lg:mx-0">
+                    <div className="w-full max-w-lg mx-auto lg:mx-0">
                         
                         {/* Mobile Header */}
                         <div className="lg:hidden text-center mb-8">
@@ -132,15 +132,6 @@ export default async function ResetPasswordPage({ searchParams }: ResetPasswordP
                                 Enter your new password below
                             </p>
                         </div>
-
-                        {/* Token Warning if missing */}
-                        {!token && (
-                            <div className="mb-6 p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg">
-                                <p className="text-sm text-red-700 dark:text-red-300 text-center">
-                                    Invalid or missing reset token. Please request a new password reset link.
-                                </p>
-                            </div>
-                        )}
 
                         {/* Form with Suspense */}
                         <Suspense fallback={<ResetPasswordLoading />}>

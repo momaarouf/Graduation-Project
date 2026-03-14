@@ -35,8 +35,9 @@ import {
   Loader2,
   Shield
 } from 'lucide-react'
-import PageLayout from '@/src/components/layout/PageLayout'
 import toast from 'react-hot-toast'
+import { useAuth } from '@/src/lib/contexts/AuthContext'
+import { authLogout } from '@/src/lib/api/auth'
 
 // ============================================================================
 // PASSWORD STRENGTH INDICATOR
@@ -102,6 +103,7 @@ const NOTIFICATION_FREQUENCIES = [
 
 export default function GuideSettingsPage() {
   const router = useRouter()
+  const { user, forgotPassword } = useAuth()
   
   // ========================================
   // STATE
@@ -165,6 +167,24 @@ export default function GuideSettingsPage() {
     }
   }
 
+  const handleForgotPassword = async () => {
+    if (!user?.email) {
+      toast.error('User email not found')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      await forgotPassword(user.email)
+      toast.success('Reset code sent to your email!')
+      router.push(`/auth/reset-password?email=${encodeURIComponent(user.email)}`)
+    } catch (error) {
+      toast.error('Failed to send reset code')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   const handleSavePreferences = async () => {
     setIsSaving(true)
     
@@ -194,7 +214,7 @@ export default function GuideSettingsPage() {
   }
 
   return (
-    <PageLayout>
+    <>
       <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
         <div className="container-safe mx-auto max-w-4xl py-8 sm:py-10">
           
@@ -287,6 +307,13 @@ export default function GuideSettingsPage() {
                             {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
                         </div>
+                        <button
+                          onClick={handleForgotPassword}
+                          disabled={isSaving}
+                          className="mt-1 text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
+                        >
+                          Forgot Password?
+                        </button>
                       </div>
 
                       <div>
@@ -670,6 +697,6 @@ export default function GuideSettingsPage() {
           </div>
         </div>
       </div>
-    </PageLayout>
+    </>
   )
 }

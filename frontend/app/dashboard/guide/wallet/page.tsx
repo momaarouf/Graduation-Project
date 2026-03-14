@@ -70,7 +70,6 @@ import {
     ChevronDown,
     Check
 } from 'lucide-react'
-import PageLayout from '@/src/components/layout/PageLayout'
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from '@headlessui/react'
 
 // ============================================================================
@@ -866,7 +865,7 @@ export default function GuideWalletPage() {
     }
 
     return (
-        <PageLayout>
+        <>
             {/* Page offset */}
             <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
 
@@ -1191,6 +1190,6 @@ export default function GuideWalletPage() {
                     </div>
                 </div>
             </div>
-        </PageLayout>
+        </>
     )
 }

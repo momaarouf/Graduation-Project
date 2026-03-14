@@ -40,8 +40,37 @@ import {
     ChevronRight,
     AlertCircle
 } from 'lucide-react'
-import { MOCK_GUIDE_ONBOARDING, GuideOnboardingStep, GuideOnboardingStepLabels } from '@/src/types/auth.types'
+export enum GuideOnboardingStep {
+    ACCOUNT_CREATION = 'ACCOUNT_CREATION',
+    PROFILE_SETUP = 'PROFILE_SETUP',
+    ID_VERIFICATION = 'ID_VERIFICATION',
+    TOUR_CREATION = 'TOUR_CREATION',
+    COMPLETED = 'COMPLETED'
+}
 
+export const GuideOnboardingStepLabels: Record<GuideOnboardingStep, string> = {
+    [GuideOnboardingStep.ACCOUNT_CREATION]: 'Create Account',
+    [GuideOnboardingStep.PROFILE_SETUP]: 'Complete Profile',
+    [GuideOnboardingStep.ID_VERIFICATION]: 'Verify Identity',
+    [GuideOnboardingStep.TOUR_CREATION]: 'Create First Tour',
+    [GuideOnboardingStep.COMPLETED]: 'Ready to Earn'
+}
+
+const MOCK_GUIDE_ONBOARDING = {
+    estimatedTimeMinutes: 15,
+    steps: [
+        { step: GuideOnboardingStep.ACCOUNT_CREATION, label: 'Create Account', description: 'Basic details and role selection', estimatedTime: '2 min' },
+        { step: GuideOnboardingStep.PROFILE_SETUP, label: 'Complete Profile', description: 'Add your bio, languages, and expertise', estimatedTime: '5 min' },
+        { step: GuideOnboardingStep.ID_VERIFICATION, label: 'Verify Identity', description: 'Upload government ID and selfie', estimatedTime: '3 min' },
+        { step: GuideOnboardingStep.TOUR_CREATION, label: 'Create First Tour', description: 'Design your first experience offering', estimatedTime: '5 min' }
+    ],
+    benefits: [
+        { title: 'Earn on Your Terms', description: 'Set your own schedule and prices. Keep up to 92% of what you charge.' },
+        { title: 'Global Reach', description: 'Connect with travelers seeking authentic local experiences.' },
+        { title: 'Secure Platform', description: 'Guaranteed payouts, verified travelers, and 24/7 support.' },
+        { title: 'Growth Tools', description: 'Access analytics, scheduling tools, and marketing support.' }
+    ]
+}
 interface GuideOnboardingPreviewProps {
     /** Show compact version */
     compact?: boolean

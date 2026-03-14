@@ -26,7 +26,16 @@ import {
     BadgeCheck,
     Ticket
 } from 'lucide-react'
-import { MOCK_TRAVELER_BENEFITS } from '@/src/types/auth.types'
+
+// Define local mock data since it doesn't exist in auth.types.ts
+const MOCK_TRAVELER_BENEFITS = {
+    features: [
+        { title: 'Verified Experiences', description: 'Every guide goes through identity and background checks.' },
+        { title: 'Local Immersion', description: 'Go beyond the main tourist spots with genuine local insights.' },
+        { title: 'Secure Booking', description: 'Your funds are held safely until after your tour is complete.' },
+        { title: '24/7 Support', description: 'Round-the-clock customer service for any issues on your trip.' }
+    ]
+}
 
 interface TravelerBenefitsPreviewProps {
     /** Show compact version */

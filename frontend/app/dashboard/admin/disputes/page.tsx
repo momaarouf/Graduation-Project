@@ -69,7 +69,6 @@ import {
   MapPin,
   Camera
 } from 'lucide-react'
-import PageLayout from '@/src/components/layout/PageLayout'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -1035,7 +1034,7 @@ export default function AdminDisputeCourtPage() {
   }
 
   return (
-    <PageLayout>
+    <>
       <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
         <div className="container-safe mx-auto max-w-7xl py-8 sm:py-10">
           
@@ -1271,6 +1270,6 @@ export default function AdminDisputeCourtPage() {
           onResolve={handleResolve}
         />
       )}
-    </PageLayout>
+    </>
   )
 }

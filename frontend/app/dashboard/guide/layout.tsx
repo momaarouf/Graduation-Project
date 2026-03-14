@@ -25,10 +25,12 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  QrCode,
   PlusCircle,
-  LogOut as LogOutIcon
+  LogOut as LogOutIcon,
+  Settings
 } from 'lucide-react'
+import { useAuth } from '@/src/lib/contexts/AuthContext'
+import Navigation from '@/src/components/layout/Navigation'
 
 // ============================================================================
 // NAVIGATION ITEMS - COMPLETE LIST
@@ -38,8 +40,6 @@ const NAV_ITEMS = [
   // Primary
   { href: '/dashboard/guide', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/guide/tours', label: 'My Tours', icon: Calendar },
-  { href: '/dashboard/guide/tours/new', label: 'Create Tour', icon: PlusCircle },
-  { href: '/dashboard/guide/on-tour', label: 'On-Tour Toolkit', icon: QrCode },
   
   // Divider
   { type: 'divider' as const },
@@ -50,23 +50,14 @@ const NAV_ITEMS = [
   
   // Earnings
   { href: '/dashboard/guide/wallet', label: 'Wallet', icon: Wallet },
-  { href: '/dashboard/guide/wallet/payouts', label: 'Payout History', icon: DollarSign },
-  { href: '/dashboard/guide/reports', label: 'Earnings Reports', icon: BarChart3 },
   
   // Divider
   { type: 'divider' as const },
   
   // Profile & Settings
   { href: '/dashboard/guide/profile', label: 'Profile', icon: User },
-  { href: '/dashboard/guide/impact', label: 'Impact Score', icon: Award },
-  { href: '/dashboard/guide/promos', label: 'Promo Codes', icon: Sparkles },
   { href: '/dashboard/guide/verification', label: 'Verification', icon: Shield },
-  
-  // Divider
-  { type: 'divider' as const },
-  
-  // Support
-  { href: '/contact', label: 'Help & Support', icon: HelpCircle },
+  { href: '/dashboard/guide/settings', label: 'Settings', icon: Settings },
 ]
 
 type NavItem = {
@@ -150,6 +141,7 @@ export default function GuideDashboardLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const { user, logout } = useAuth()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -177,12 +169,13 @@ export default function GuideDashboardLayout({
   }
 
   if (!mounted) {
-    return <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">{children}</div>
+    return <div className="min-h-screen bg-gray-50 dark:bg-gray-950">{children}</div>
   }
 
   return (
-    <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
-      
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col">
+      <Navigation />
+      <div className="flex-1 flex relative pt-16">
       {/* ========================================
           MOBILE HEADER
           ======================================== */}
@@ -197,17 +190,14 @@ export default function GuideDashboardLayout({
         </button>
       </div>
 
-      <div className="flex relative">
-        {/* ========================================
-            SIDEBAR - DESKTOP (Collapsible)
-            ======================================== */}
+      {/* ========================================
+          SIDEBAR - DESKTOP (Collapsible)
+          ======================================== */}
         <aside className={`
           hidden lg:block fixed left-0 top-16 h-[calc(100vh-4rem)]
           bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800
-          transition-all duration-300 overflow-x-hidden overflow-y-auto
-          ${isCollapsed ? 'w-20' : 'w-64'}
-          z-40
-        `}>
+          transition-all duration-300 overflow-x-hidden overflow-y-auto z-30
+        `} style={{ width: isCollapsed ? '5rem' : '16rem' }}>
           <div className="h-full flex flex-col">
             
             {/* Toggle Button */}
@@ -245,10 +235,31 @@ export default function GuideDashboardLayout({
               })}
             </nav>
 
+            {/* User Profile Card */}
+            {user && (
+              <div className="p-3 border-t border-gray-200 dark:border-gray-800">
+                <div className={`flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/50 ${isCollapsed ? 'justify-center' : ''}`}>
+                  <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center flex-shrink-0 text-emerald-600 dark:text-emerald-400 font-bold">
+                    {user.email?.charAt(0).toUpperCase() || 'G'}
+                  </div>
+                  {!isCollapsed && (
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        Local Guide
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {user.email}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Logout Button */}
-            <div className="p-3 border-t border-gray-200 dark:border-gray-800">
+            <div className="p-3 pt-0">
               <button
-                onClick={() => {/* handle logout */}}
+                onClick={logout}
                 className={`
                   flex items-center gap-3 px-3 py-2 w-full rounded-lg transition-colors
                   text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30
@@ -335,7 +346,7 @@ export default function GuideDashboardLayout({
                   {/* Mobile Logout */}
                   <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
                     <button
-                      onClick={() => {/* handle logout */}}
+                      onClick={logout}
                       className="flex items-center gap-3 px-3 py-2 w-full text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
                     >
                       <LogOutIcon className="w-4 h-4" />
@@ -351,10 +362,14 @@ export default function GuideDashboardLayout({
         {/* ========================================
             MAIN CONTENT
             ======================================== */}
-        <main className={`
-          flex-1 min-w-0 transition-all duration-300
-          lg:ml-${isCollapsed ? '20' : '64'}
-        `}>
+        <main className="flex-1 min-w-0 transition-all duration-300 w-full" style={{ marginLeft: isCollapsed ? '5rem' : '16rem' }}>
+          {/* Mobile Header in Main Content */}
+          <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 mb-4">
+            <h1 className="font-bold text-gray-900 dark:text-white">Guide Dashboard</h1>
+            <button onClick={() => setIsSidebarOpen(true)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
           {children}
         </main>
       </div>

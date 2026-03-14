@@ -24,15 +24,7 @@ public class TravelerController {
     private final TravelerProfileRepository travelerProfileRepository;
     private final BookingRepository bookingRepository;
 
-    @GetMapping("/profile")
-    public TravelerProfile getProfile(@AuthenticationPrincipal UserDetails userDetails) {
-        // 1. Find the User by email
-        User user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        // 2. Get the associated TravelerProfile
-        return travelerProfileRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new RuntimeException("Traveler profile not found"));
-    }
+    // getProfile moved to TravelerProfileController
 
     @GetMapping("/bookings/upcoming")
     public List<Booking> getUpcomingBookings(@AuthenticationPrincipal UserDetails userDetails) {

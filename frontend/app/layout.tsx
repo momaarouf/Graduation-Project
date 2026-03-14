@@ -16,6 +16,7 @@ import { FilterProvider } from '@/src/lib/contexts/FilterContext'
 import { Toaster } from 'react-hot-toast'
 import './globals.css'
 import Footer from '@/src/components/layout/Footer'
+import { AuthProvider } from '@/src/lib/contexts/AuthContext'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -51,6 +52,7 @@ export default function RootLayout({
               If you only need filters on /tours, you can keep it there
               I recommend root level for future expansion (guides page, etc.)
           */}
+          <AuthProvider>
           <FilterProvider>
             {children}
             <Toaster
@@ -70,6 +72,7 @@ export default function RootLayout({
             />
             <Footer />
           </FilterProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

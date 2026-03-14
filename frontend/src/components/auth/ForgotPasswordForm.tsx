@@ -4,27 +4,31 @@
 // FORGOT PASSWORD FORM
 // ============================================================================
 // LOCATION: /frontend/src/components/auth/ForgotPasswordForm.tsx
-// 
+//
 // PURPOSE: Handle email submission for password reset
-// 
+//
 // FEATURES:
 // - Email validation
 // - Success state with instructions
 // - Loading states
 // - Error handling
-// - Mock API for Phase 1
+// - Integration with backend password reset flow
 // ============================================================================
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Mail, ArrowRight, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useAuth } from '@/src/lib/contexts/AuthContext'
 
 export default function ForgotPasswordForm() {
     // ========================================
     // STATE
     // ========================================
+    const { requestPasswordReset } = useAuth()
+    const router = useRouter()
     const [email, setEmail] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [isSubmitted, setIsSubmitted] = useState(false)
@@ -47,7 +51,7 @@ export default function ForgotPasswordForm() {
     // ========================================
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        
+
         if (!isValid) {
             setTouched(true)
             return
@@ -57,30 +61,33 @@ export default function ForgotPasswordForm() {
         setError('')
 
         try {
-            // ========================================
-            // PHASE 3: Replace with actual API call
-            // ========================================
-            await new Promise(resolve => setTimeout(resolve, 1500))
-            
-            // Mock success
-            console.log('Reset password requested for:', email)
-            
-            setIsSubmitted(true)
-            toast.success('Reset link sent! Check your email.', {
+            // Call backend to request password reset
+            // Backend sends email to user with reset code + token
+            const response = await requestPasswordReset(email)
+
+            // In dev mode, response includes code and token for testing
+            if (response.code || response.token) {
+                console.log('Dev mode - Reset Code:', response.code, 'Token:', response.token)
+            }
+
+            toast.success('Reset code sent! Check your email.', {
                 duration: 5000,
                 icon: '📧'
             })
 
-        } catch (err) {
-            setError('Failed to send reset link. Please try again.')
-            toast.error('Something went wrong')
+            // Auto-redirect to the reset-password page where they enter the code
+            router.push(`/auth/reset-password?email=${encodeURIComponent(email)}`)
+        } catch (err: any) {
+            const errorMessage = err?.response?.data?.message || 'Failed to send reset code. Please try again.'
+            setError(errorMessage)
+            toast.error(errorMessage)
         } finally {
             setIsLoading(false)
         }
     }
 
     // ========================================
-    // RENDER SUCCESS STATE
+    // RENDER SUCCESS STATE (Fallback if redirect takes a moment)
     // ========================================
     if (isSubmitted) {
         return (
@@ -101,7 +108,7 @@ export default function ForgotPasswordForm() {
                             Check your email
                         </h2>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                            We've sent a password reset link to:<br />
+                            We've sent an 8-digit reset code to:<br />
                             <span className="font-medium text-gray-900 dark:text-white">
                                 {email}
                             </span>
@@ -113,21 +120,19 @@ export default function ForgotPasswordForm() {
                         <p className="text-xs text-blue-800 dark:text-blue-300">
                             <span className="font-bold">Next steps:</span>
                             <br />
-                            1. Click the link in the email (check spam folder)
+                            1. Check your email for the 8-digit code (check spam folder)
                             <br />
-                            2. You'll be redirected to create a new password
-                            <br />
-                            3. Link expires in 1 hour for security
+                            2. Enter the code on the next page to set a new password
                         </p>
                     </div>
 
                     {/* Actions */}
                     <div className="space-y-3 pt-4">
                         <Link
-                            href="/auth/login"
+                            href={`/auth/reset-password?email=${encodeURIComponent(email)}`}
                             className="block w-full px-4 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-center"
                         >
-                            Return to Login
+                            Enter Reset Code
                         </Link>
                         <button
                             onClick={() => {
@@ -229,11 +234,11 @@ export default function ForgotPasswordForm() {
                     {isLoading ? (
                         <>
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            <span>Sending...</span>
+                            <span>Sending code...</span>
                         </>
                     ) : (
                         <>
-                            <span>Send Reset Link</span>
+                            <span>Request Reset Code</span>
                             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </>
                     )}

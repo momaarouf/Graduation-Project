@@ -236,7 +236,7 @@ public class AuthController {
         if (!email.isBlank()) {
             rateLimiterService.check(
                     "auth:login:email:" + email,
-                    5,
+                    70,
                     Duration.ofMinutes(10),
                     "Too many login attempts. Try again later."
             );
@@ -245,7 +245,7 @@ public class AuthController {
         if(!email.isBlank()) {
             rateLimiterService.check(
                     "auth:login:email-ip:" + email + ":" + ip,
-                    5,
+                    70,
                     Duration.ofMinutes(10),
                     "Too many login attempts. Try again later."
             );
@@ -296,7 +296,16 @@ public class AuthController {
                     .orElse(null);
         }
 
-        return new MeResponse(user.getId(), user.getEmail(), user.getRole().name(), travelerProfileId, guideProfileId);
+        return new MeResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getRole().name(),
+                travelerProfileId,
+                guideProfileId,
+                Boolean.TRUE.equals(user.getProfileCompleted()),
+                Boolean.TRUE.equals(user.getIsEmailVerified()),
+                Boolean.TRUE.equals(user.getAgreedToTerms()));
     }
 
     @PostMapping("/refresh")
@@ -683,5 +692,27 @@ public class AuthController {
 
         // Note for later:
         // You should rate-limit attempts to this endpoint (by IP/email) to prevent brute forcing 6-digit codes.
+    }
+
+    /**
+     * POST /api/auth/accept-terms
+     *
+     * Called by the frontend after OAuth signup to record that the user
+     * has accepted Terms of Service and Privacy Policy.
+     * Requires a valid JWT (the user must already be authenticated).
+     */
+    @PostMapping("/accept-terms")
+    public void acceptTerms(@AuthenticationPrincipal UserDetails principal) {
+
+        User user = userRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        user.setAgreedToTerms(true);
+        user.setAgreedToPrivacy(true);
+        if (user.getAgreementsAcceptedAtUtc() == null) {
+            user.setAgreementsAcceptedAtUtc(Instant.now());
+        }
+        user.setUpdatedAtUtc(Instant.now());
+        userRepository.save(user);
     }
 }

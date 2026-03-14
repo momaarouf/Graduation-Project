@@ -2,6 +2,7 @@ package com.travelmarket.backend.config;
 
 import com.travelmarket.backend.security.JwtAuthFilter;
 import com.travelmarket.backend.security.OAuth2LoginSuccessHandler;
+import com.travelmarket.backend.security.OAuth2LoginFailureHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +31,8 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter; // Inject our custom filter
-    private final ObjectProvider<OAuth2LoginSuccessHandler>  oAuth2LoginSuccessHandler;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -50,7 +52,7 @@ public class SecurityConfig {
 
                         // OAuth2 endpoints must be public
                         .requestMatchers("/api/auth/oauth2/**").permitAll()
-                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**", "/login", "/error").permitAll()
 
                         // /me must be authenticated
                         .requestMatchers("/api/auth/me").authenticated()
@@ -75,11 +77,12 @@ public class SecurityConfig {
                         })
                 )
 
-                // OAuth2 login wiring (add your handler bean)
+                // OAuth2 login wiring
                 .oauth2Login(oauth -> oauth
-                        .successHandler(((request, response, authentication) ->
-                                oAuth2LoginSuccessHandler.getObject()
-                                        .onAuthenticationSuccess(request, response, authentication)))  // add this field in the class
+                        .successHandler((request, response, authentication) ->
+                                oAuth2LoginSuccessHandler.onAuthenticationSuccess(request, response, authentication))
+                        .failureHandler((request, response, exception) ->
+                                oAuth2LoginFailureHandler.onAuthenticationFailure(request, response, exception))
                 )
 
                 // JWT filter still applies to API requests after OAuth2 is done
@@ -88,11 +91,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

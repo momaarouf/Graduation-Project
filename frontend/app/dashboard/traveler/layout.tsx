@@ -24,6 +24,8 @@ import {
   ChevronRight,
   LogOut as LogOutIcon
 } from 'lucide-react'
+import { useAuth } from '@/src/lib/contexts/AuthContext'
+import Navigation from '@/src/components/layout/Navigation'
 
 // ============================================================================
 // NAVIGATION ITEMS - COMPLETE LIST
@@ -33,7 +35,6 @@ const NAV_ITEMS = [
   // Primary
   { href: '/dashboard/traveler', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/traveler/bookings', label: 'My Bookings', icon: Calendar },
-  { href: '/wishlist', label: 'Wishlist', icon: Heart },
   { href: '/dashboard/traveler/messages', label: 'Messages', icon: MessageSquare, badge: 3 },
   
   // Divider - visual only
@@ -41,15 +42,7 @@ const NAV_ITEMS = [
   
   // Secondary
   { href: '/dashboard/traveler/profile', label: 'Profile', icon: User },
-  { href: '/dashboard/traveler/settings/notifications', label: 'Notifications', icon: Bell },
   { href: '/dashboard/traveler/settings', label: 'Settings', icon: Settings },
-  
-  // Divider
-  { type: 'divider' as const },
-  
-  // Support
-  { href: '/contact', label: 'Help & Support', icon: HelpCircle },
-  { href: '/faq', label: 'FAQ', icon: FileQuestion },
 ]
 
 type NavItem = {
@@ -133,6 +126,7 @@ export default function TravelerDashboardLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const { user, logout } = useAuth()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -160,12 +154,13 @@ export default function TravelerDashboardLayout({
   }
 
   if (!mounted) {
-    return <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">{children}</div>
+    return <div className="min-h-screen bg-gray-50 dark:bg-gray-950">{children}</div>
   }
 
   return (
-    <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
-      
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col">
+      <Navigation />
+      <div className="flex-1 flex relative pt-16">
       {/* ========================================
           MOBILE HEADER
           ======================================== */}
@@ -180,17 +175,14 @@ export default function TravelerDashboardLayout({
         </button>
       </div>
 
-      <div className="flex relative">
-        {/* ========================================
-            SIDEBAR - DESKTOP (Collapsible)
-            ======================================== */}
+      {/* ========================================
+          SIDEBAR - DESKTOP (Collapsible)
+          ======================================== */}
         <aside className={`
           hidden lg:block fixed left-0 top-16 h-[calc(100vh-4rem)]
           bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800
-          transition-all duration-300 overflow-x-hidden overflow-y-auto
-          ${isCollapsed ? 'w-20' : 'w-64'}
-          z-40
-        `}>
+          transition-all duration-300 overflow-x-hidden overflow-y-auto z-30
+        `} style={{ width: isCollapsed ? '5rem' : '16rem' }}>
           <div className="h-full flex flex-col">
             
             {/* Toggle Button */}
@@ -228,10 +220,31 @@ export default function TravelerDashboardLayout({
               })}
             </nav>
 
+            {/* User Profile Card */}
+            {user && (
+              <div className="p-3 border-t border-gray-200 dark:border-gray-800">
+                <div className={`flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/50 ${isCollapsed ? 'justify-center' : ''}`}>
+                  <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center flex-shrink-0 text-blue-600 dark:text-blue-400 font-bold">
+                    {user.email?.charAt(0).toUpperCase() || 'T'}
+                  </div>
+                  {!isCollapsed && (
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        Traveler
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {user.email}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Logout Button */}
-            <div className="p-3 border-t border-gray-200 dark:border-gray-800">
+            <div className="p-3 pt-0">
               <button
-                onClick={() => {/* handle logout */}}
+                onClick={logout}
                 className={`
                   flex items-center gap-3 px-3 py-2 w-full rounded-lg transition-colors
                   text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30
@@ -318,7 +331,7 @@ export default function TravelerDashboardLayout({
                   {/* Mobile Logout */}
                   <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
                     <button
-                      onClick={() => {/* handle logout */}}
+                      onClick={logout}
                       className="flex items-center gap-3 px-3 py-2 w-full text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
                     >
                       <LogOutIcon className="w-4 h-4" />
@@ -334,10 +347,14 @@ export default function TravelerDashboardLayout({
         {/* ========================================
             MAIN CONTENT
             ======================================== */}
-        <main className={`
-          flex-1 min-w-0 transition-all duration-300
-          lg:ml-${isCollapsed ? '20' : '64'}
-        `}>
+        <main className="flex-1 min-w-0 transition-all duration-300 w-full" style={{ marginLeft: isCollapsed ? '5rem' : '16rem' }}>
+          {/* Mobile Header in Main Content */}
+          <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 mb-4">
+            <h1 className="font-bold text-gray-900 dark:text-white">Traveler Dashboard</h1>
+            <button onClick={() => setIsSidebarOpen(true)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
           {children}
         </main>
       </div>

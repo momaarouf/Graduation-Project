@@ -1,0 +1,102 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< com.travelmarket:backend >----------------------
+[INFO] Building backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ backend ---
+[INFO] Deleting C:\Users\10User\Documents\GitHub\Graduation-Project\backend\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ backend ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 15 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ backend ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 69 source files with javac [debug parameters release 21] to target\classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/GuideProfileController.java:[34,122] cannot find symbol
+  symbol:   method findByGuideId(java.lang.Long)
+  location: variable guideLanguageRepository of type com.travelmarket.backend.repository.GuideLanguageRepository
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/GuideProfileController.java:[45,19] cannot find symbol
+  symbol:   method getCountry()
+  location: variable gp of type com.travelmarket.backend.entity.GuideProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/GuideProfileController.java:[46,19] cannot find symbol
+  symbol:   method getCity()
+  location: variable gp of type com.travelmarket.backend.entity.GuideProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/TravelerProfileController.java:[38,19] cannot find symbol
+  symbol:   method getCountry()
+  location: variable tp of type com.travelmarket.backend.entity.TravelerProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/TravelerProfileController.java:[39,19] cannot find symbol
+  symbol:   method getCity()
+  location: variable tp of type com.travelmarket.backend.entity.TravelerProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/TravelerProfileController.java:[41,19] cannot find symbol
+  symbol:   method getEmergencyContactName()
+  location: variable tp of type com.travelmarket.backend.entity.TravelerProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/TravelerProfileController.java:[42,19] cannot find symbol
+  symbol:   method getEmergencyContactPhone()
+  location: variable tp of type com.travelmarket.backend.entity.TravelerProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/TravelerProfileController.java:[43,19] cannot find symbol
+  symbol:   method getTravelPreferences()
+  location: variable tp of type com.travelmarket.backend.entity.TravelerProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/TravelerProfileController.java:[43,78] cannot find symbol
+  symbol:   method getTravelPreferences()
+  location: variable tp of type com.travelmarket.backend.entity.TravelerProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/TravelerProfileController.java:[44,19] cannot find symbol
+  symbol:   method getDietaryRestrictions()
+  location: variable tp of type com.travelmarket.backend.entity.TravelerProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/TravelerProfileController.java:[44,80] cannot find symbol
+  symbol:   method getDietaryRestrictions()
+  location: variable tp of type com.travelmarket.backend.entity.TravelerProfile
+[INFO] 11 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  11.060 s
+[INFO] Finished at: 2026-03-13T05:40:17+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.14.1:compile (default-compile) on project backend: Compilation failure: Compilation failure: 
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/GuideProfileController.java:[34,122] cannot find symbol
+[ERROR]   symbol:   method findByGuideId(java.lang.Long)
+[ERROR]   location: variable guideLanguageRepository of type com.travelmarket.backend.repository.GuideLanguageRepository
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/GuideProfileController.java:[45,19] cannot find symbol
+[ERROR]   symbol:   method getCountry()
+[ERROR]   location: variable gp of type com.travelmarket.backend.entity.GuideProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/GuideProfileController.java:[46,19] cannot find symbol
+[ERROR]   symbol:   method getCity()
+[ERROR]   location: variable gp of type com.travelmarket.backend.entity.GuideProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/TravelerProfileController.java:[38,19] cannot find symbol
+[ERROR]   symbol:   method getCountry()
+[ERROR]   location: variable tp of type com.travelmarket.backend.entity.TravelerProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/TravelerProfileController.java:[39,19] cannot find symbol
+[ERROR]   symbol:   method getCity()
+[ERROR]   location: variable tp of type com.travelmarket.backend.entity.TravelerProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/TravelerProfileController.java:[41,19] cannot find symbol
+[ERROR]   symbol:   method getEmergencyContactName()
+[ERROR]   location: variable tp of type com.travelmarket.backend.entity.TravelerProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/TravelerProfileController.java:[42,19] cannot find symbol
+[ERROR]   symbol:   method getEmergencyContactPhone()
+[ERROR]   location: variable tp of type com.travelmarket.backend.entity.TravelerProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/TravelerProfileController.java:[43,19] cannot find symbol
+[ERROR]   symbol:   method getTravelPreferences()
+[ERROR]   location: variable tp of type com.travelmarket.backend.entity.TravelerProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/TravelerProfileController.java:[43,78] cannot find symbol
+[ERROR]   symbol:   method getTravelPreferences()
+[ERROR]   location: variable tp of type com.travelmarket.backend.entity.TravelerProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/TravelerProfileController.java:[44,19] cannot find symbol
+[ERROR]   symbol:   method getDietaryRestrictions()
+[ERROR]   location: variable tp of type com.travelmarket.backend.entity.TravelerProfile
+[ERROR] /C:/Users/10User/Documents/GitHub/Graduation-Project/backend/src/main/java/com/travelmarket/backend/controller/TravelerProfileController.java:[44,80] cannot find symbol
+[ERROR]   symbol:   method getDietaryRestrictions()
+[ERROR]   location: variable tp of type com.travelmarket.backend.entity.TravelerProfile
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

@@ -33,9 +33,13 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/src/lib/contexts/AuthContext'
+import apiClient from '@/src/lib/api/client'
+import toast from 'react-hot-toast'
 import {
   User,
   Users,
@@ -72,13 +76,12 @@ import {
   AlertCircle,
   Info
 } from 'lucide-react'
-import PageLayout from '@/src/components/layout/PageLayout'
 
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
 
-type VerificationStatus = 'pending' | 'verified' | 'rejected'
+type VerificationStatus = 'pending' | 'approved' | 'rejected' | 'not_submitted' | 'verified' // 'verified' kept for legacy mock compatibility
 type LanguageProficiency = 'beginner' | 'intermediate' | 'advanced' | 'native'
 
 interface GuideProfile {
@@ -220,6 +223,8 @@ interface VerificationBadgeProps {
 }
 
 function VerificationBadge({ status }: VerificationBadgeProps) {
+  const normalizedStatus = (status?.toLowerCase() || 'not_submitted') as VerificationStatus
+  
   const config = {
     pending: {
       bg: 'bg-amber-100 dark:bg-amber-950/30',
@@ -235,16 +240,31 @@ function VerificationBadge({ status }: VerificationBadgeProps) {
       icon: CheckCircle,
       label: 'Identity Verified'
     },
+    approved: {
+      bg: 'bg-emerald-100 dark:bg-emerald-950/30',
+      text: 'text-emerald-700 dark:text-emerald-300',
+      border: 'border-emerald-200 dark:border-emerald-800',
+      icon: CheckCircle,
+      label: 'Identity Verified'
+    },
     rejected: {
       bg: 'bg-red-100 dark:bg-red-950/30',
       text: 'text-red-700 dark:text-red-300',
       border: 'border-red-200 dark:border-red-800',
       icon: AlertCircle,
       label: 'Verification Failed'
+    },
+    not_submitted: {
+      bg: 'bg-gray-100 dark:bg-gray-800',
+      text: 'text-gray-600 dark:text-gray-400',
+      border: 'border-gray-200 dark:border-gray-700',
+      icon: Shield,
+      label: 'Not Verified'
     }
   }
 
-  const { bg, text, border, icon: Icon, label } = config[status]
+  const badgeConfig = config[normalizedStatus] || config.not_submitted
+  const { bg, text, border, icon: Icon, label } = badgeConfig
 
   return (
     <div className={`
@@ -1207,14 +1227,73 @@ function GuideInfoCard({ profile }: GuideInfoCardProps) {
 // ============================================================================
 
 export default function GuideProfilePage() {
+  const router = useRouter()
+  const { user } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
   const [profile, setProfile] = useState(MOCK_GUIDE_PROFILE)
+  const [isLoadingData, setIsLoadingData] = useState(true)
+
+  useEffect(() => {
+    if (!user || user.role !== 'Guide') {
+      setIsLoadingData(false)
+      return
+    }
+    
+    const loadProfile = async () => {
+      try {
+        setIsLoadingData(true)
+        const res = await apiClient.get('/api/guide/profile')
+        const data = res.data
+
+        setProfile(prev => ({
+          ...prev,
+          firstName: data.fullName?.split(' ')[0] || prev.firstName,
+          lastName: data.fullName?.split(' ').slice(1).join(' ') || prev.lastName,
+          phone: data.phoneE164 || prev.phone,
+          country: data.country || prev.country,
+          location: data.city || prev.location,
+          bio: data.bio || prev.bio,
+          expertise: data.expertise?.length ? data.expertise : prev.expertise,
+          languages: data.languages?.length 
+            ? data.languages.map((l: any) => ({ language: l.name, proficiency: l.proficiency }))
+            : prev.languages,
+          email: data.email || prev.email,
+          memberSince: data.memberSince || prev.memberSince,
+          verifiedSince: data.verifiedSince || prev.verifiedSince,
+          totalTrips: data.totalTrips ?? prev.totalTrips,
+          totalTravelers: data.totalTravelers ?? prev.totalTravelers,
+          impactScore: data.impactScore ?? prev.impactScore,
+          verificationStatus: data.verificationStatus || prev.verificationStatus
+        }))
+      } catch (error) {
+        console.error("Failed to load guide profile", error)
+      } finally {
+        setIsLoadingData(false)
+      }
+    }
+
+    loadProfile()
+  }, [user])
 
   const handleEdit = () => setIsEditing(true)
-  const handleSave = () => {
-    // In Phase 4: API call to save profile
-    console.log('Saving profile:', profile)
-    setIsEditing(false)
+  const handleSave = async () => {
+    try {
+      const payload = {
+        fullName: `${profile.firstName} ${profile.lastName}`.trim(),
+        phoneE164: profile.phone,
+        country: profile.country,
+        city: profile.location,
+        bio: profile.bio,
+        expertise: profile.expertise,
+        languages: profile.languages.map(l => ({ name: l.language, proficiency: l.proficiency }))
+      }
+      await apiClient.post('/api/guide/profile/complete', payload)
+      toast.success("Profile saved successfully")
+      setIsEditing(false)
+    } catch (error: any) {
+      console.error("Failed to save profile", error)
+      toast.error(error?.response?.data?.message || "Failed to save profile")
+    }
   }
   const handleCancel = () => {
     setProfile(MOCK_GUIDE_PROFILE)
@@ -1298,8 +1377,16 @@ export default function GuideProfilePage() {
     }))
   }
 
+  if (isLoadingData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600" />
+      </div>
+    )
+  }
+
   return (
-    <PageLayout>
+    <>
       {/* Page offset */}
       <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
         
@@ -1451,6 +1538,6 @@ export default function GuideProfilePage() {
           </div>
         </div>
       </div>
-    </PageLayout>
+    </>
   )
 }

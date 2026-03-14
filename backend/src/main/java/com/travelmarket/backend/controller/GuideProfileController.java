@@ -1,7 +1,9 @@
 package com.travelmarket.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.travelmarket.backend.dto.GuideCompleteProfileRequest;
+import com.travelmarket.backend.dto.GuideProfileResponse;
 import com.travelmarket.backend.entity.*;
 import com.travelmarket.backend.repository.*;
 import jakarta.transaction.Transactional;
@@ -11,6 +13,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/guide/profile")
@@ -24,24 +29,84 @@ public class GuideProfileController {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    @GetMapping
+    public GuideProfileResponse getProfile(@AuthenticationPrincipal UserDetails principal) throws Exception {
+        User user = userRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getRole() != User.Role.Guide) {
+            throw new AccessDeniedException("Forbidden");
+        }
+
+        GuideProfile gp = guideProfileRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Guide profile missing"));
+
+        GuideProfileResponse res = new GuideProfileResponse();
+        res.setFullName(user.getFullName());
+        res.setPhoneE164(user.getPhoneE164());
+        res.setCountry(gp.getBaseCountry());
+        res.setCity(gp.getBaseCity());
+        res.setBio(gp.getBio());
+
+        if (gp.getExpertiseJson() != null && !gp.getExpertiseJson().isBlank()) {
+            res.setExpertise(objectMapper.readValue(gp.getExpertiseJson(), new TypeReference<List<String>>() {}));
+        } else {
+            res.setExpertise(List.of());
+        }
+
+        List<GuideLanguage> glList = guideLanguageRepository.findByGuide_Id(gp.getId());
+        List<GuideProfileResponse.LanguageItem> languages = glList.stream().map(gl -> {
+            GuideProfileResponse.LanguageItem item = new GuideProfileResponse.LanguageItem();
+            item.setName(gl.getLanguage().getName());
+            item.setProficiency(gl.getProficiency());
+            return item;
+        }).collect(Collectors.toList());
+
+        res.setLanguages(languages);
+
+        res.setEmail(user.getEmail());
+        res.setMemberSince(user.getCreatedAtUtc() != null ? user.getCreatedAtUtc().toString() : "");
+        res.setVerifiedSince(gp.getIdVerifiedAtUtc() != null ? gp.getIdVerifiedAtUtc().toString() : "");
+        res.setTotalTrips(gp.getTotalGuidedTrips() != null ? gp.getTotalGuidedTrips() : 0);
+        res.setTotalTravelers(0); // placeholder for now since no entity property
+        res.setImpactScore(gp.getImpactScore());
+
+        if (Boolean.TRUE.equals(gp.getIdVerified())) {
+            res.setVerificationStatus("approved");
+        } else if (gp.getVerificationRejectedReason() != null && !gp.getVerificationRejectedReason().isBlank()) {
+            res.setVerificationStatus("rejected");
+            res.setRejectionReason(gp.getVerificationRejectedReason());
+        } else if (gp.getVerificationSubmittedAtUtc() != null) {
+            res.setVerificationStatus("pending");
+        } else {
+            res.setVerificationStatus("not_submitted");
+        }
+
+        res.setIdDocumentType(gp.getIdDocumentType());
+
+        return res;
+    }
+
     /**
      * Completes the guide profile.
      *
      * Responsibilities:
-     * - Update user identity fields that come from the onboarding form (fullName, phone)
+     * - Update user identity fields that come from the onboarding form (fullName,
+     * phone)
      * - Update guide profile fields (country/city/bio + expertise JSON)
      * - Upsert guide languages
      * - Mark users.profile_completed based on your business rules
      *
      * Notes:
      * - Uses @Transactional so "delete then insert languages" is atomic.
-     *   If anything fails mid-way, the transaction rolls back and languages won't be wiped.
+     * If anything fails mid-way, the transaction rolls back and languages won't be
+     * wiped.
      * - Uses AccessDeniedException so wrong-role becomes 403 (not 400).
      */
     @PostMapping("/complete")
     @Transactional
     public void complete(@AuthenticationPrincipal UserDetails principal,
-                         @Valid @RequestBody GuideCompleteProfileRequest req) throws Exception {
+            @Valid @RequestBody GuideCompleteProfileRequest req) throws Exception {
 
         // Load current user by email (username in Spring Security).
         User user = userRepository.findByEmail(principal.getUsername())
@@ -107,20 +172,19 @@ public class GuideProfileController {
         // -------------------------
         // 4) Decide if profile is complete
         // -------------------------
-        // Your rule: guide profile completion requires agreements + identity fields + bio/location + ID docs submitted.
-        boolean agreementsOk =
-                isTrue(user.getAgreedToTerms()) &&
-                        isTrue(user.getAgreedToPrivacy()) &&
-                        user.getAgreementsAcceptedAtUtc() != null;
+        // Your rule: guide profile completion requires agreements + identity fields +
+        // bio/location + ID docs submitted.
+        boolean agreementsOk = isTrue(user.getAgreedToTerms()) &&
+                isTrue(user.getAgreedToPrivacy()) &&
+                user.getAgreementsAcceptedAtUtc() != null;
 
-        boolean requiredOk =
-                notBlank(user.getFullName()) &&
-                        notBlank(user.getPhoneE164()) &&
-                        notBlank(gp.getBaseCountry()) &&
-                        notBlank(gp.getBaseCity()) &&
-                        notBlank(gp.getBio()) &&
-                        req.getLanguages() != null &&
-                        !req.getLanguages().isEmpty();
+        boolean requiredOk = notBlank(user.getFullName()) &&
+                notBlank(user.getPhoneE164()) &&
+                notBlank(gp.getBaseCountry()) &&
+                notBlank(gp.getBaseCity()) &&
+                notBlank(gp.getBio()) &&
+                req.getLanguages() != null &&
+                !req.getLanguages().isEmpty();
 
         // Use new verification fields, but allow legacy fallback for older schema.
         boolean idSubmitted = hasSubmittedIdDocs(gp);
@@ -165,15 +229,17 @@ public class GuideProfileController {
     /**
      * Generates a short code that fits VARCHAR(5).
      * Examples:
-     * - "Arabic"  -> "AR"
+     * - "Arabic" -> "AR"
      * - "English" -> "EN"
-     * - "French"  -> "FR"
+     * - "French" -> "FR"
      * - Weird input -> "LANG"
      */
     private static String generateLanguageCode(String name) {
         String letters = (name == null) ? "" : name.trim().toUpperCase().replaceAll("[^A-Z]", "");
-        if (letters.length() >= 2) return letters.substring(0, 2);
-        if (letters.length() == 1) return letters + "X";
+        if (letters.length() >= 2)
+            return letters.substring(0, 2);
+        if (letters.length() == 1)
+            return letters + "X";
         return "LANG";
     }
 
@@ -191,7 +257,8 @@ public class GuideProfileController {
         boolean hasFront = notBlank(gp.getIdFrontImage()) || notBlank(gp.getIdVerificationImage());
         boolean hasSelfie = notBlank(gp.getSelfieImage());
 
-        if (!hasFront || !hasSelfie) return false;
+        if (!hasFront || !hasSelfie)
+            return false;
 
         String docType = gp.getIdDocumentType() == null ? "" : gp.getIdDocumentType().trim();
 

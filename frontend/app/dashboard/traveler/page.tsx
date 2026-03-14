@@ -1,443 +1,75 @@
-// ============================================================================
-// TRAVELER HOME DASHBOARD - CARD 11
-// ============================================================================
-// LOCATION: /frontend/src/app/dashboard/traveler/page.tsx
-// 
-// PURPOSE: Central hub for travelers to manage their trips and profile
-// 
-// BUSINESS REQUIREMENTS (from project spec):
-// ✓ Upcoming trip countdown
-// ✓ Booking history
-// ✓ QR ticket for upcoming tours
-// ✓ Loyalty tier badge (Bronze/Silver/Gold/Platinum)
-// ✓ Quick shortcuts to bookings, messages, profile
-// 
-// COLOR PSYCHOLOGY:
-// - Blue: Trust, primary actions
-// - Gold: Loyalty, premium tiers
-// - Green: Success, completed actions
-// - Orange: Call-to-action, adventure
-// 
-// DUAL THEME: Full light/dark mode support
-// ============================================================================
+'use client'
 
-import { Metadata } from 'next'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
     Calendar,
     Clock,
     MapPin,
     User,
-    CreditCard,
-    MessageSquare,
-    Settings,
-    LogOut,
     ChevronRight,
     Star,
     Award,
     TrendingUp,
     Ticket,
-    Heart,
-    Shield,
-    Bell,
     Compass,
     Users,
-    Camera,
-    Gift,
-    Sparkles
+    Sparkles,
+    Shield,
+    ArrowRight,
+    Search
 } from 'lucide-react'
-import PageLayout from '@/src/components/layout/PageLayout'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useAuth } from '@/src/lib/contexts/AuthContext'
+import { travelerGetProfile, TravelerProfileResponse } from '@/src/lib/api/traveler'
+import OnboardingBannerWrapper from '@/src/components/dashboard/OnboardingBannerWrapper'
+import { toast } from 'react-hot-toast'
 
 // ============================================================================
-// METADATA - Protected page, noindex
+// PREMIUM COMPONENTS
 // ============================================================================
 
-export const metadata: Metadata = {
-    title: 'Traveler Dashboard | SafariHub',
-    description: 'Manage your bookings, view upcoming trips, and track your loyalty rewards.',
-    robots: {
-        index: false, // Don't index dashboard pages
-        follow: false,
-    }
-}
-
-// ============================================================================
-// MOCK DATA - Will be replaced with API calls in Phase 3
-// ============================================================================
-
-const MOCK_TRAVELER = {
-    id: 'trav-123',
-    name: 'Ahmed Khan',
-    email: 'ahmed.khan@example.com',
-    avatar: '/images/travelers/ahmed.jpg',
-    memberSince: '2025-06-15',
-    loyaltyTier: 'gold' as const,
-    streakCount: 12,
-    totalTrips: 24,
-    reviewReminderEnabled: true,
-}
-
-const MOCK_UPCOMING_TRIPS = [
-    {
-        id: 'booking-1',
-        tourId: '1',
-        tourTitle: 'Ottoman Heritage: Topkapi Palace & Hagia Sophia',
-        tourImage: '/images/tours/istanbul-ottoman.jpg',
-        guideName: 'Mehmet Yilmaz',
-        guideAvatar: '/images/guides/mehmet.jpg',
-        date: '2026-03-15T09:00:00Z',
-        duration: '4 hours',
-        location: 'Istanbul',
-        country: 'Turkey',
-        bookingStatus: 'confirmed',
-        peopleCount: 2,
-        totalPrice: 178,
-        currency: 'USD',
-        hasQR: true,
-    },
-    {
-        id: 'booking-2',
-        tourId: '2',
-        tourTitle: 'Beirut Street Food & Cultural Walk',
-        tourImage: '/images/tours/beirut-food.jpg',
-        guideName: 'Layla Hassan',
-        guideAvatar: '/images/guides/layla.jpg',
-        date: '2026-03-22T11:00:00Z',
-        duration: '3 hours',
-        location: 'Beirut',
-        country: 'Lebanon',
-        bookingStatus: 'confirmed',
-        peopleCount: 4,
-        totalPrice: 171, // With group discount
-        currency: 'USD',
-        hasQR: true,
-    },
-    {
-        id: 'booking-3',
-        tourId: '3',
-        tourTitle: 'Cappadocia Sunrise Balloon & Valley Hike',
-        tourImage: '/images/tours/cappadocia-balloon.jpg',
-        guideName: 'Ahmet Demir',
-        guideAvatar: '/images/guides/ahmet.jpg',
-        date: '2026-04-05T04:30:00Z',
-        duration: '6 hours',
-        location: 'Cappadocia',
-        country: 'Turkey',
-        bookingStatus: 'pending',
-        peopleCount: 2,
-        totalPrice: 398,
-        currency: 'USD',
-        hasQR: false,
-    }
-]
-
-const MOCK_PAST_TRIPS = [
-    {
-        id: 'past-1',
-        tourTitle: 'Byblos Ancient Ruins & Archaeological Tour',
-        date: '2026-02-10T10:00:00Z',
-        location: 'Byblos',
-        country: 'Lebanon',
-        guideName: 'Elias Khoury',
-        rating: 5,
-        reviewLeft: true,
-    },
-    {
-        id: 'past-2',
-        tourTitle: 'Bosphorus Sunset Cruise with Dinner',
-        date: '2026-01-28T17:30:00Z',
-        location: 'Istanbul',
-        country: 'Turkey',
-        guideName: 'Zeynep Kaya',
-        rating: null,
-        reviewLeft: false,
-    }
-]
-
-const MOCK_LOYALTY_TIERS = {
-    bronze: { trips: 0, discount: 0, color: 'amber' },
-    silver: { trips: 3, discount: 3, color: 'gray' },
-    gold: { trips: 10, discount: 5, color: 'amber' },
-    platinum: { trips: 25, discount: 8, color: 'blue' }
-}
-
-// ============================================================================
-// TIER BADGE COMPONENT
-// ============================================================================
-
-interface TierBadgeProps {
-    tier: 'bronze' | 'silver' | 'gold' | 'platinum'
-}
-
-function TierBadge({ tier }: TierBadgeProps) {
-    const tierConfig = {
-        bronze: {
-            bg: 'bg-amber-100 dark:bg-amber-950/30',
-            text: 'text-amber-700 dark:text-amber-300',
-            border: 'border-amber-200 dark:border-amber-800',
-            icon: Award,
-            label: 'Bronze'
-        },
-        silver: {
-            bg: 'bg-gray-100 dark:bg-gray-800',
-            text: 'text-gray-700 dark:text-gray-300',
-            border: 'border-gray-200 dark:border-gray-700',
-            icon: Award,
-            label: 'Silver'
-        },
-        gold: {
-            bg: 'bg-amber-100 dark:bg-amber-950/30',
-            text: 'text-amber-700 dark:text-amber-300',
-            border: 'border-amber-200 dark:border-amber-800',
-            icon: Award,
-            label: 'Gold'
-        },
-        platinum: {
-            bg: 'bg-blue-100 dark:bg-blue-950/30',
-            text: 'text-blue-700 dark:text-blue-300',
-            border: 'border-blue-200 dark:border-blue-800',
-            icon: Star,
-            label: 'Platinum'
-        }
-    }
-
-    const config = tierConfig[tier]
-    const Icon = config.icon
-
+function GlassCard({ children, className = "" }: { children: React.ReactNode, className?: string }) {
     return (
-        <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 ${config.bg} ${config.border} border rounded-full ${config.text} text-xs font-semibold`}>
-            <Icon className="w-3.5 h-3.5" />
-            {config.label} Tier
+        <div className={`bg-white/70 dark:bg-gray-900/40 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 rounded-3xl shadow-xl shadow-blue-500/5 ${className}`}>
+            {children}
         </div>
     )
 }
 
-// ============================================================================
-// COUNTDOWN TIMER COMPONENT
-// ============================================================================
-
-interface CountdownTimerProps {
-    targetDate: string
-}
-
-function CountdownTimer({ targetDate }: CountdownTimerProps) {
-    // In a real app, this would update every minute
-    // For Phase 1, we'll just show static days
-
-    const date = new Date(targetDate)
-    const now = new Date()
-    const diffTime = date.getTime() - now.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-
-    return (
-        <div className="flex items-center gap-1.5 text-sm">
-            <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <span className="font-semibold text-gray-900 dark:text-white">
-                {diffDays} {diffDays === 1 ? 'day' : 'days'}
-            </span>
-            <span className="text-gray-500 dark:text-gray-400">to go</span>
-        </div>
-    )
-}
-
-// ============================================================================
-// UPCOMING TRIP CARD COMPONENT
-// ============================================================================
-
-interface UpcomingTripCardProps {
-    trip: typeof MOCK_UPCOMING_TRIPS[0]
-}
-
-function UpcomingTripCard({ trip }: UpcomingTripCardProps) {
-    const date = new Date(trip.date)
-    const formattedDate = date.toLocaleDateString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit'
-    })
-
-    return (
-        <div className="group relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-            <div className="flex flex-col sm:flex-row">
-                {/* Image section */}
-                <div className="relative w-full sm:w-48 h-32 sm:h-auto bg-gray-100 dark:bg-gray-800">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                    <div className="absolute bottom-2 left-2">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 ${trip.bookingStatus === 'confirmed' ? 'bg-emerald-600' : 'bg-amber-600'} text-white text-xs font-medium rounded-lg`}>
-                            {trip.bookingStatus === 'confirmed' ? 'Confirmed' : 'Pending'}
-                        </span>
-                    </div>
-                </div>
-
-                {/* Content section */}
-                <div className="flex-1 p-4">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
-                        <h3 className="font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                            {trip.tourTitle}
-                        </h3>
-                        <div className="flex items-center gap-2">
-                            <CountdownTimer targetDate={trip.date} />
-                            {trip.hasQR && (
-                                <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-lg flex items-center gap-1">
-                                    <Ticket className="w-3 h-3" />
-                                    QR Ready
-                                </span>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400 mb-3">
-                        <span className="flex items-center gap-1">
-                            <Calendar className="w-3.5 h-3.5" />
-                            {formattedDate}
-                        </span>
-                        <span className="flex items-center gap-1">
-                            <MapPin className="w-3.5 h-3.5" />
-                            {trip.location}, {trip.country}
-                        </span>
-                        <span className="flex items-center gap-1">
-                            <Users className="w-3.5 h-3.5" />
-                            {trip.peopleCount} {trip.peopleCount === 1 ? 'person' : 'people'}
-                        </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800" />
-                            <span className="text-sm text-gray-700 dark:text-gray-300">
-                                {trip.guideName}
-                            </span>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-lg font-bold text-gray-900 dark:text-white">
-                                ${trip.totalPrice}
-                            </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                                total
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Action buttons */}
-                    <div className="flex gap-2 mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
-                        <Link
-                            href={`/bookings/${trip.id}`}
-                            className="flex-1 text-center px-3 py-2 bg-blue-600 dark:bg-blue-700 text-white text-sm font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
-                        >
-                            View Details
-                        </Link>
-                        {trip.hasQR && (
-                            <Link
-                                href={`/bookings/${trip.id}/ticket`}
-                                className="px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center gap-1"
-                            >
-                                <Ticket className="w-4 h-4" />
-                                <span className="hidden sm:inline">QR Ticket</span>
-                            </Link>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-// ============================================================================
-// PAST TRIP CARD COMPONENT
-// ============================================================================
-
-interface PastTripCardProps {
-    trip: typeof MOCK_PAST_TRIPS[0]
-}
-
-function PastTripCard({ trip }: PastTripCardProps) {
-    const date = new Date(trip.date)
-    const formattedDate = date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-    })
-
-    return (
-        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-            <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700" />
-                <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white text-sm">
-                        {trip.tourTitle}
-                    </h4>
-                    <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <span>{formattedDate}</span>
-                        <span>•</span>
-                        <span>{trip.location}</span>
-                        <span>•</span>
-                        <span>{trip.guideName}</span>
-                    </div>
-                </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-                {trip.rating ? (
-                    <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">
-                            {trip.rating}
-                        </span>
-                    </div>
-                ) : (
-                    <Link
-                        href={`/bookings/${trip.id}/review`}
-                        className="px-3 py-1.5 bg-blue-600 dark:bg-blue-700 text-white text-xs font-medium rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
-                    >
-                        Write Review
-                    </Link>
-                )}
-            </div>
-        </div>
-    )
-}
-
-// ============================================================================
-// STAT CARD COMPONENT
-// ============================================================================
-
-interface StatCardProps {
-    icon: React.ElementType
-    label: string
-    value: string | number
-    change?: string
-    color: 'blue' | 'emerald' | 'amber' | 'purple'
-}
-
-function StatCard({ icon: Icon, label, value, change, color }: StatCardProps) {
-    const colorClasses = {
-        blue: 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400',
-        emerald: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400',
-        amber: 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400',
-        purple: 'bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400'
+function StatCard({ icon: Icon, label, value, color }: { icon: any, label: string, value: string | number, color: 'blue' | 'amber' | 'emerald' | 'purple' }) {
+    const colors: Record<string, string> = {
+        blue: 'from-blue-500 to-indigo-600 shadow-blue-500/20',
+        amber: 'from-amber-500 to-orange-600 shadow-amber-500/20',
+        emerald: 'from-emerald-500 to-teal-600 shadow-emerald-500/20',
+        purple: 'from-purple-500 to-pink-600 shadow-purple-500/20'
     }
 
     return (
-        <div className="p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
-            <div className="flex items-center justify-between mb-2">
-                <div className={`p-2 rounded-lg ${colorClasses[color]}`}>
-                    <Icon className="w-4 h-4" />
+        <motion.div
+            whileHover={{ y: -5 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            className="relative"
+        >
+            <GlassCard className="p-6 h-full flex flex-col justify-between overflow-hidden group">
+                <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${colors[color]} opacity-5 blur-2xl group-hover:opacity-10 transition-opacity`} />
+                
+                <div className="flex items-center justify-between mb-4 relative z-10">
+                    <div className={`p-3 rounded-2xl bg-gradient-to-br ${colors[color]} text-white shadow-lg`}>
+                        <Icon className="w-5 h-5" />
+                    </div>
                 </div>
-                {change && (
-                    <span className="text-xs text-emerald-600 dark:text-emerald-400">
-                        {change}
-                    </span>
-                )}
-            </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                {value}
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-                {label}
-            </div>
-        </div>
+                
+                <div className="relative z-10">
+                    <div className="text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-1">
+                        {value}
+                    </div>
+                    <div className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        {label}
+                    </div>
+                </div>
+            </GlassCard>
+        </motion.div>
     )
 }
 
@@ -446,237 +78,251 @@ function StatCard({ icon: Icon, label, value, change, color }: StatCardProps) {
 // ============================================================================
 
 export default function TravelerDashboardPage() {
-    // In Phase 3, this would fetch real data
-    // const { traveler, upcomingTrips, pastTrips } = await getTravelerDashboard()
+    const { user } = useAuth()
+    const [profile, setProfile] = useState<TravelerProfileResponse | null>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        async function fetchProfile() {
+            try {
+                const data = await travelerGetProfile()
+                setProfile(data)
+            } catch (error) {
+                console.error('Failed to fetch traveler profile:', error)
+                // Fallback to minimal data if profile fetch fails
+                toast.error('Could not load detailed stats')
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchProfile()
+    }, [])
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-gray-500 animate-pulse font-medium">Loading your adventure...</p>
+                </div>
+            </div>
+        )
+    }
 
     return (
-        <PageLayout>
-            {/* Page offset for navbar */}
-            <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950/50">
+            {/* Background Decorative Elements */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px]" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[30%] h-[30%] bg-purple-500/10 rounded-full blur-[100px]" />
+            </div>
 
-                <div className="container-safe mx-auto max-w-7xl py-8 sm:py-10">
+            <div className="relative pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-7xl mx-auto">
+                    
+                    <OnboardingBannerWrapper />
 
-                    {/* ========================================
-              HEADER - Welcome + Quick Actions
-              ======================================== */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                        <div>
-                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                                Welcome back, Ahmed! 👋
-                            </h1>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Member since June 2025 • 24 trips completed
-                            </p>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <TierBadge tier={MOCK_TRAVELER.loyaltyTier} />
-                            <div className="flex items-center gap-2">
-                                <button className="p-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors relative">
-                                    <Bell className="w-4 h-4" />
-                                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
-                                </button>
-                                <button className="p-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                    <Settings className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* ========================================
-              STATS GRID
-              ======================================== */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-                        <StatCard
-                            icon={Calendar}
-                            label="Upcoming Trips"
-                            value={MOCK_UPCOMING_TRIPS.length}
-                            color="blue"
-                        />
-                        <StatCard
-                            icon={Star}
-                            label="Loyalty Streak"
-                            value={`${MOCK_TRAVELER.streakCount} weeks`}
-                            change="+2"
-                            color="amber"
-                        />
-                        <StatCard
-                            icon={TrendingUp}
-                            label="Total Saved"
-                            value="$342"
-                            change="+$89"
-                            color="emerald"
-                        />
-                        <StatCard
-                            icon={Users}
-                            label="Traveled With"
-                            value="47 people"
-                            color="purple"
-                        />
-                    </div>
-
-                    {/* ========================================
-              UPCOMING TRIPS SECTION
-              ======================================== */}
+                    {/* HERO SECTION */}
                     <div className="mb-10">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                                Upcoming Trips
-                            </h2>
-                            <Link
-                                href="/bookings"
-                                className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
-                            >
-                                View all
-                                <ChevronRight className="w-4 h-4" />
-                            </Link>
-                        </div>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex flex-col md:flex-row md:items-end justify-between gap-6"
+                        >
+                            <div>
+                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+                                    <Sparkles className="w-3 h-3" />
+                                    Welcome Back
+                                </div>
+                                <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white tracking-tight leading-tight">
+                                    Hi, {user?.fullName?.split(' ')[0] || 'Traveler'}! <span className="text-blue-600">Explore</span> more.
+                                </h1>
+                                <p className="mt-2 text-lg text-gray-600 dark:text-gray-400 font-medium">
+                                    Ready for your next trip to {profile?.country || 'Lebanon'}?
+                                </p>
+                            </div>
 
-                        <div className="space-y-4">
-                            {MOCK_UPCOMING_TRIPS.map((trip) => (
-                                <UpcomingTripCard key={trip.id} trip={trip} />
-                            ))}
-                        </div>
+                            <div className="flex gap-3">
+                                <Link
+                                    href="/"
+                                    className="px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-3xl font-bold shadow-xl shadow-blue-500/30 transition-all flex items-center gap-3 group"
+                                >
+                                    <Search className="w-5 h-5" />
+                                    Find Tours
+                                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                </Link>
+                            </div>
+                        </motion.div>
                     </div>
 
-                    {/* ========================================
-              TWO COLUMN LAYOUT - Recent & Quick Actions
-              ======================================== */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Recent Activity / Past Trips */}
-                        <div className="lg:col-span-2">
-                            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h2 className="font-bold text-gray-900 dark:text-white">
-                                        Recent Trips
-                                    </h2>
-                                    <Link
-                                        href="/bookings/history"
-                                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                                    >
-                                        View history
+                    {/* STATS GRID */}
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.1 }}
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"
+                    >
+                        <StatCard 
+                            icon={Compass} 
+                            label="Completed Trips" 
+                            value={profile?.completedTrips || 0} 
+                            color="blue" 
+                        />
+                        <StatCard 
+                            icon={Award} 
+                            label="Loyalty Tier" 
+                            value={profile?.loyaltyTier || 'Bronze'} 
+                            color="amber" 
+                        />
+                        <StatCard 
+                            icon={TrendingUp} 
+                            label="Weekly Streak" 
+                            value={profile?.streakCount || 0} 
+                            color="emerald" 
+                        />
+                        <StatCard 
+                            icon={Shield} 
+                            label="Verification" 
+                            value={profile?.emailVerified ? 'Verified' : 'Pending'} 
+                            color="purple" 
+                        />
+                    </motion.div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* MAIN CONTENT AREA */}
+                        <div className="lg:col-span-2 space-y-8">
+                            
+                            {/* UPCOMING TRIPS PLACEHOLDER */}
+                            <GlassCard className="p-8">
+                                <div className="flex items-center justify-between mb-8">
+                                    <div>
+                                        <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Your Upcoming Trips</h2>
+                                        <p className="text-sm text-gray-500 font-medium">Get ready for your next adventure</p>
+                                    </div>
+                                    <Link href="/dashboard/traveler/bookings" className="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 group">
+                                        View All
+                                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                     </Link>
                                 </div>
 
-                                <div className="space-y-2">
-                                    {MOCK_PAST_TRIPS.map((trip) => (
-                                        <PastTripCard key={trip.id} trip={trip} />
-                                    ))}
+                                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-3xl p-12 text-center border-2 border-dashed border-gray-200 dark:border-gray-800">
+                                    <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                        <Calendar className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No upcoming trips yet</h3>
+                                    <p className="text-gray-500 dark:text-gray-400 max-w-xs mx-auto mb-6 font-medium">
+                                        Your passport is feeling lonely. Browse our curated tours and book your next escape!
+                                    </p>
+                                    <Link 
+                                        href="/" 
+                                        className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl text-sm font-black hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                    >
+                                        Explore Tours
+                                    </Link>
                                 </div>
+                            </GlassCard>
+
+                            {/* SAVED TOURS / RECENT TRIPS */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <GlassCard className="p-6">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="p-2 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-xl">
+                                            <Star className="w-5 h-5" />
+                                        </div>
+                                        <h3 className="font-bold text-gray-900 dark:text-white">Recent Activity</h3>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-blue-500" />
+                                            <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">Joined the {profile?.loyaltyTier} Tier</p>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                                            <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">Completed profile setup</p>
+                                        </div>
+                                    </div>
+                                </GlassCard>
+
+                                <GlassCard className="p-6">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="p-2 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-xl">
+                                            <Ticket className="w-5 h-5" />
+                                        </div>
+                                        <h3 className="font-bold text-gray-900 dark:text-white">Referral Reward</h3>
+                                    </div>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mb-4">
+                                        Invite a friend and get <span className="text-gray-900 dark:text-white font-bold">$20 credit.</span>
+                                    </p>
+                                    <button className="w-full py-2 bg-gray-950 dark:bg-white text-white dark:text-gray-950 rounded-xl text-xs font-black hover:opacity-90 transition-opacity">
+                                        Share Link
+                                    </button>
+                                </GlassCard>
                             </div>
                         </div>
 
-                        {/* Quick Actions & Info */}
-                        <div className="space-y-4">
-                            {/* Quick Actions */}
-                            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-                                <h2 className="font-bold text-gray-900 dark:text-white mb-3">
-                                    Quick Actions
-                                </h2>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <Link
-                                        href="/search"
-                                        className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                    >
-                                        <Compass className="w-5 h-5 mx-auto mb-1 text-blue-600 dark:text-blue-400" />
-                                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                                            Explore
-                                        </span>
-                                    </Link>
-                                    <Link
-                                        href="/messages"
-                                        className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                    >
-                                        <MessageSquare className="w-5 h-5 mx-auto mb-1 text-emerald-600 dark:text-emerald-400" />
-                                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                                            Messages
-                                        </span>
-                                    </Link>
-                                    <Link
-                                        href="/wishlist"
-                                        className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                    >
-                                        <Heart className="w-5 h-5 mx-auto mb-1 text-rose-600 dark:text-rose-400" />
-                                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                                            Wishlist
-                                        </span>
-                                    </Link>
-                                    <Link
-                                        href="/profile"
-                                        className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                    >
-                                        <User className="w-5 h-5 mx-auto mb-1 text-purple-600 dark:text-purple-400" />
-                                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                                            Profile
-                                        </span>
-                                    </Link>
-                                </div>
-                            </div>
-
-                            {/* Loyalty Progress */}
-                            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-5">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h2 className="font-bold text-gray-900 dark:text-white">
-                                        Next Tier
-                                    </h2>
-                                    <Gift className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                                </div>
-
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between text-sm">
-                                        <span className="text-gray-600 dark:text-gray-400">Gold → Platinum</span>
-                                        <span className="font-semibold text-gray-900 dark:text-white">14/25 trips</span>
-                                    </div>
-                                    <div className="h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-                                        <div className="h-full w-[56%] bg-gradient-to-r from-amber-500 to-blue-500 rounded-full" />
-                                    </div>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                                        11 more trips to unlock 8% discount
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Referral Card */}
-                            <div className="p-5 bg-gradient-to-br from-blue-600 to-indigo-700 dark:from-blue-700 dark:to-indigo-800 rounded-xl text-white">
-                                <div className="flex items-start justify-between mb-3">
-                                    <Sparkles className="w-5 h-5 text-amber-300" />
-                                    <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
-                                        Limited time
+                        {/* SIDEBAR AREA */}
+                        <div className="space-y-6">
+                            {/* LOYALTY PROGRESS */}
+                            <GlassCard className="p-6 overflow-hidden relative">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
+                                <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-wider text-xs mb-6">Loyalty Progress</h3>
+                                
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm font-bold text-gray-900 dark:text-white">{profile?.loyaltyTier} Status</span>
+                                    <span className="text-xs font-bold text-blue-600 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 rounded-full">
+                                        {profile?.completedTrips || 0} / 25 Trips
                                     </span>
                                 </div>
-                                <h3 className="font-bold text-lg mb-1">Refer & Earn</h3>
-                                <p className="text-sm text-blue-100 mb-4">
-                                    Get $20 credit for every friend who books their first tour
+                                <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-4">
+                                    <motion.div 
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${Math.min(((profile?.completedTrips || 0) / 25) * 100, 100)}%` }}
+                                        transition={{ duration: 1, ease: "easeOut" }}
+                                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full" 
+                                    />
+                                </div>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+                                    {Math.max(25 - (profile?.completedTrips || 0), 0)} more trips to unlock <span className="text-gray-900 dark:text-white font-bold">Platinum</span> benefits!
                                 </p>
-                                <button className="w-full py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors">
-                                    Share Invite Link
+                            </GlassCard>
+
+                            {/* QUICK LINKS */}
+                            <GlassCard className="p-6">
+                                <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-wider text-xs mb-4">Shortcuts</h3>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Link href="/dashboard/traveler/profile" className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group">
+                                        <User className="w-6 h-6 text-blue-600 group-hover:scale-110 transition-transform mb-2" />
+                                        <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400">Profile</span>
+                                    </Link>
+                                    <Link href="/dashboard/traveler/bookings" className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all group">
+                                        <Clock className="w-6 h-6 text-purple-600 group-hover:scale-110 transition-transform mb-2" />
+                                        <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400">Activity</span>
+                                    </Link>
+                                    <Link href="/dashboard/traveler/settings" className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all group">
+                                        <Users className="w-6 h-6 text-emerald-600 group-hover:scale-110 transition-transform mb-2" />
+                                        <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400">Account</span>
+                                    </Link>
+                                    <Link href="/auth/reset-password" className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all group">
+                                        <Shield className="w-6 h-6 text-amber-600 group-hover:scale-110 transition-transform mb-2" />
+                                        <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400">Security</span>
+                                    </Link>
+                                </div>
+                            </GlassCard>
+
+                            {/* NEWSLETTER/PROMO */}
+                            <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-[2.5rem] text-white relative overflow-hidden group shadow-2xl">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/30 transition-colors" />
+                                <Sparkles className="w-10 h-10 text-blue-400 mb-4" />
+                                <h3 className="text-xl font-black leading-tight mb-2">Beirut Edition Tours</h3>
+                                <p className="text-sm text-gray-400 mb-6 font-medium">Get exclusive early access to hidden gems in Byblos.</p>
+                                <button className="px-6 py-2.5 bg-white text-gray-950 rounded-xl text-xs font-black hover:bg-blue-50 transition-colors">
+                                    Notify Me
                                 </button>
                             </div>
-                        </div>
-                    </div>
-
-                    {/* ========================================
-              RECOMMENDATIONS (Future Phase)
-              ======================================== */}
-                    <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
-                        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                            Recommended for You
-                        </h2>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                            {[1, 2, 3, 4].map((i) => (
-                                <div
-                                    key={i}
-                                    className="p-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl hover:shadow-md transition-shadow"
-                                >
-                                    <div className="w-full h-20 bg-gray-100 dark:bg-gray-800 rounded-lg mb-2" />
-                                    <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-3/4 mb-1" />
-                                    <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-1/2" />
-                                </div>
-                            ))}
                         </div>
                     </div>
                 </div>
             </div>
-        </PageLayout>
+        </div>
     )
 }

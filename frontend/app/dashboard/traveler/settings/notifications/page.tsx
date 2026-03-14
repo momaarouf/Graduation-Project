@@ -41,7 +41,6 @@ import {
   VolumeX,
   RefreshCw
 } from 'lucide-react'
-import PageLayout from '@/src/components/layout/PageLayout'
 import toast from 'react-hot-toast'
 
 // ============================================================================
@@ -290,7 +289,7 @@ export default function TravelerNotificationSettingsPage() {
   const systemSettings = settings.filter(s => s.category === 'system')
 
   return (
-    <PageLayout>
+    <>
       <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
         <div className="container-safe mx-auto max-w-3xl py-8 sm:py-10">
           
@@ -552,6 +551,6 @@ export default function TravelerNotificationSettingsPage() {
           </div>
         </div>
       </div>
-    </PageLayout>
+    </>
   )
 }

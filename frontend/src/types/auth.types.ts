@@ -5,8 +5,8 @@
 // ============================================================================
 
 export enum UserRole {
-    TRAVELER = 'traveler',
-    GUIDE = 'guide'
+    TRAVELER = 'Traveler',
+    GUIDE = 'Guide'
 }
 
 export const UserRoleLabels: Record<UserRole, string> = {
@@ -104,22 +104,14 @@ export interface SignupErrors {
 // Add this interface (around line 80-90, before the INITIAL_SIGNUP_DATA export)
 
 export interface SignupRequest {
-    role: UserRole
-    email: string
-    password: string
-    firstName: string
-    lastName: string
-    phone?: string
-    nationality?: string
-    dateOfBirth?: string
-    bio?: string
-    languages?: Array<{
-        language: string
-        proficiency: LanguageProficiency
-    }>
-    expertise?: string[]
-    newsletterOptIn: boolean
-    marketingOptIn: boolean
+  role: string; // 'Traveler' or 'Guide' as expected by backend
+  email: string;
+  password: string;
+  fullName?: string;           // optional
+  agreedToTerms: boolean;
+  agreedToPrivacy: boolean;
+  newsletterOptIn: boolean;
+  marketingOptIn: boolean;
 }
 // ============================================================================
 // INITIAL STATE

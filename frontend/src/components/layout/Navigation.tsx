@@ -5,6 +5,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useAuth } from '@/src/lib/contexts/AuthContext'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
@@ -39,6 +40,7 @@ const MOCK_USER = {
 }
 
 export default function Navigation() {
+  const{ user, isLoading, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -69,10 +71,10 @@ export default function Navigation() {
     { href: '/dashboard/traveler/profile', label: 'Profile', icon: User },
   ]
 
-  // Get current role
-  const isGuide = MOCK_USER.isLoggedIn && MOCK_USER.role === 'guide'
-  const isAdmin = MOCK_USER.isLoggedIn && MOCK_USER.role === 'admin'
-  const isTraveler = MOCK_USER.isLoggedIn && MOCK_USER.role === 'traveler'
+  // Get current role (backend returns uppercase roles)
+  const isGuide = user?.role === 'Guide'
+  const isAdmin = user?.role === 'Admin'
+  const isTraveler = user?.role === 'Traveler'
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
@@ -92,24 +94,22 @@ export default function Navigation() {
           {/* Desktop Navigation - Different for guides/admins */}
           <div className="hidden md:flex md:items-center md:space-x-4 lg:space-x-6">
             
-            {/* Public Links - Hide for guides/admins (they use sidebar) */}
-            {!isGuide && !isAdmin && (
-              <div className="flex space-x-4 lg:space-x-6">
-                {publicLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`text-sm lg:text-base transition-colors ${
-                      pathname === link.href
-                        ? 'text-blue-600 dark:text-blue-400 font-semibold'
-                        : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-            )}
+            {/* Public Links - visible to everyone */}
+            <div className="flex space-x-4 lg:space-x-6">
+              {publicLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`text-sm lg:text-base transition-colors ${
+                    pathname === link.href
+                      ? 'text-blue-600 dark:text-blue-400 font-semibold'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
 
             {/* Theme Toggle - Always visible */}
             <button
@@ -127,23 +127,17 @@ export default function Navigation() {
             </button>
 
             {/* User Menu - Same for everyone */}
-            {MOCK_USER.isLoggedIn ? (
+            {user ? (
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden">
-                    {MOCK_USER.avatar ? (
-                      <img src={MOCK_USER.avatar} alt={MOCK_USER.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <User className="w-4 h-4 text-gray-400" />
-                      </div>
-                    )}
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                    {(user.email || '?').charAt(0).toUpperCase()}
                   </div>
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden lg:block">
-                    {MOCK_USER.name}
+                    {user.email}
                   </span>
                   <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                 </button>
@@ -153,8 +147,8 @@ export default function Navigation() {
                     
                     {/* User Info */}
                     <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-                      <p className="font-medium text-gray-900 dark:text-white">{MOCK_USER.name}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{MOCK_USER.role}</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{user.email}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user.role}</p>
                     </div>
 
                     {/* Dashboard Links - Different for each role */}
@@ -184,7 +178,7 @@ export default function Navigation() {
                       {/* For guides/admins, just a link to dashboard (sidebar handles rest) */}
                       {(isGuide || isAdmin) && (
                         <Link
-                          href={`/dashboard/${MOCK_USER.role}`}
+                          href={`/dashboard/${user.role.toLowerCase()}`}
                           onClick={() => setIsUserMenuOpen(false)}
                           className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                         >
@@ -197,10 +191,7 @@ export default function Navigation() {
                     {/* Logout */}
                     <div className="border-t border-gray-200 dark:border-gray-800 pt-2">
                       <button
-                        onClick={() => {
-                          setIsUserMenuOpen(false)
-                          // Handle logout
-                        }}
+                        onClick={logout}
                         className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
                       >
                         <LogOut className="w-4 h-4" />
@@ -274,16 +265,16 @@ export default function Navigation() {
               ))}
 
               {/* User Info if logged in */}
-              {MOCK_USER.isLoggedIn && (
+              {user && (
                 <>
                   <div className="px-3 py-2 border-t border-gray-200 dark:border-gray-800 mt-2 pt-2">
-                    <p className="font-medium text-gray-900 dark:text-white">{MOCK_USER.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{MOCK_USER.role}</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{user.email}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user.role}</p>
                   </div>
 
                   {/* Dashboard Link */}
                   <Link
-                    href={`/dashboard/${MOCK_USER.role}`}
+                    href={`/dashboard/${user.role.toLowerCase()}`}
                     className="block px-3 py-2 rounded-lg text-base font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30"
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -292,10 +283,7 @@ export default function Navigation() {
 
                   {/* Logout */}
                   <button
-                    onClick={() => {
-                      setIsMenuOpen(false)
-                      // Handle logout
-                    }}
+                    onClick={logout}
                     className="w-full text-left px-3 py-2 rounded-lg text-base font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
                   >
                     Logout
@@ -304,7 +292,7 @@ export default function Navigation() {
               )}
 
               {/* Auth Links for non-logged in */}
-              {!MOCK_USER.isLoggedIn && (
+              {!user && (
                 <div className="pt-2 border-t border-gray-200 dark:border-gray-800 space-y-2">
                   <Link
                     href="/auth/login"

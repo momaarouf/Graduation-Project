@@ -69,7 +69,6 @@ import {
     ChevronDown,
     Check
 } from 'lucide-react'
-import PageLayout from '@/src/components/layout/PageLayout'
 import {
     Listbox,
     ListboxButton,
@@ -1530,7 +1529,7 @@ export default function GuidePromosPage() {
     }
 
     return (
-        <PageLayout>
+        <>
             {/* Page offset */}
             <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
 
@@ -1812,6 +1811,6 @@ export default function GuidePromosPage() {
                     onConfirm={confirmDelete}
                 />
             )}
-        </PageLayout>
+        </>
     )
 }

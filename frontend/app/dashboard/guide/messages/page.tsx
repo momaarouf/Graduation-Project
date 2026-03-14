@@ -57,7 +57,6 @@ import {
   TrendingUp,
   HelpCircle
 } from 'lucide-react'
-import PageLayout from '@/src/components/layout/PageLayout'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -1155,7 +1154,7 @@ useEffect(() => {
   }
 
   return (
-    <PageLayout>
+    <>
       {/* Main container - exactly viewport height minus navbar, no overflow, if you want the page to be for you need to controll this sm:h-[calc(100vh-4rem-5px)] in this measures the footer appear and without scroll bar because you are subtracting from height  */}
       <div className="pt-14 sm:pt-16 h-[calc(100vh)] sm:h-[calc(100vh)] bg-gray-50 dark:bg-gray-950 overflow-hidden">
         
@@ -1417,6 +1416,6 @@ useEffect(() => {
           </div>
         </div>
       </div>
-    </PageLayout>
+    </>
   )
 }

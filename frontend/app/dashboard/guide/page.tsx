@@ -1,40 +1,7 @@
-// ============================================================================
-// GUIDE DASHBOARD SCORE & ANALYTICS - CARD 22
-// ============================================================================
-// LOCATION: /frontend/src/app/dashboard/guide/page.tsx
-// 
-// PURPOSE: Central dashboard showing guide performance, impact score, and analytics
-// 
-// BUSINESS REQUIREMENTS (from project spec):
-// ✓ Weighted impact score
-// ✓ Completed trips count
-// ✓ Total travelers count
-// ✓ Earnings overview
-// ✓ Performance trends
-// ✓ Badges and achievements
-// ✓ Recent activity feed
-// 
-// IMPACT SCORE CALCULATION:
-// - Completed tours (40%)
-// - Average rating (30%)
-// - Response rate (15%)
-// - Repeat travelers (15%)
-// 
-// COLOR PSYCHOLOGY:
-// - Blue: Trust, primary metrics
-// - Gold: Impact score, achievements
-// - Green: Positive trends, completed
-// - Amber: Warnings, pending
-// - Purple: Premium, top performer
-// 
-// DUAL THEME: Full light/dark mode support
-// ============================================================================
-
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   Award,
   TrendingUp,
@@ -45,98 +12,40 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  ArrowUp,
-  ArrowDown,
   Shield,
   Sparkles,
-  Medal,
   Trophy,
-  Gem,
   Crown,
-  Heart,
-  MessageSquare,
-  Eye,
-  EyeOff,
   ChevronRight,
-  ChevronLeft,
-  MoreHorizontal,
-  Download,
-  Printer,
-  Filter,
-  RefreshCw,
+  ArrowRight,
+  PlusCircle,
   Info,
-  HelpCircle
+  Medal,
+  Gem,
+  LayoutDashboard
 } from 'lucide-react'
-import PageLayout from '@/src/components/layout/PageLayout'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useAuth } from '@/src/lib/contexts/AuthContext'
+import apiClient from '@/src/lib/api/client'
+import OnboardingBanner from '@/src/components/dashboard/OnboardingBanner'
+import { toast } from 'react-hot-toast'
 
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
 
-type TimeRange = 'week' | 'month' | 'year' | 'all'
-type TrendDirection = 'up' | 'down' | 'stable'
+type VerificationStatus = 'pending' | 'approved' | 'rejected' | 'not_submitted' | 'verified'
 
-interface ImpactScore {
-  overall: number
-  breakdown: {
-    completedTrips: number // 40% weight
-    averageRating: number // 30% weight
-    responseRate: number // 15% weight
-    repeatTravelers: number // 15% weight
-  }
-  trend: TrendDirection
-  change: number
-  rank: number
-  totalGuides: number
-}
-
-interface TripStats {
-  total: number
-  completed: number
-  cancelled: number
-  noShows: number
-  upcoming: number
-  pending: number
-  trend: TrendDirection
-  change: number
-}
-
-interface TravelerStats {
-  total: number
-  newThisMonth: number
-  repeatRate: number
-  averageGroupSize: number
-  topNationalities: {
-    country: string
-    count: number
-    flag: string
-  }[]
-}
-
-interface EarningsStats {
-  total: number
-  thisMonth: number
-  pending: number
-  averagePerTrip: number
-  platformFees: number
-  netEarnings: number
-  currency: string
-  trend: TrendDirection
-  change: number
-}
-
-interface RatingStats {
-  average: number
-  total: number
-  distribution: {
-    5: number
-    4: number
-    3: number
-    2: number
-    1: number
-  }
-  responseRate: number
-  averageResponseTime: string
+interface GuideProfileData {
+  fullName: string
+  email: string
+  memberSince: string
+  totalTrips: number
+  totalTravelers: number
+  impactScore: number
+  verificationStatus: VerificationStatus
+  languages: { name: string; proficiency: string }[]
+  expertise: string[]
 }
 
 interface Badge {
@@ -144,605 +53,97 @@ interface Badge {
   name: string
   description: string
   icon: React.ElementType
-  earnedAt: string
   color: 'blue' | 'amber' | 'emerald' | 'purple' | 'pink'
-  isNew?: boolean
 }
 
 interface Activity {
   id: string
-  type: 'booking' | 'review' | 'payout' | 'achievement' | 'message'
   title: string
   description: string
   timestamp: string
   icon: React.ElementType
   color: 'blue' | 'emerald' | 'amber' | 'purple' | 'pink'
-  link?: string
-}
-
-interface MonthlyPerformance {
-  month: string
-  trips: number
-  earnings: number
-  rating: number
 }
 
 // ============================================================================
 // MOCK DATA
 // ============================================================================
 
-const MOCK_IMPACT_SCORE: ImpactScore = {
-  overall: 87,
-  breakdown: {
-    completedTrips: 156,
-    averageRating: 4.9,
-    responseRate: 98,
-    repeatTravelers: 42
-  },
-  trend: 'up',
-  change: 5,
-  rank: 12,
-  totalGuides: 1243
-}
-
-const MOCK_TRIP_STATS: TripStats = {
-  total: 187,
-  completed: 156,
-  cancelled: 8,
-  noShows: 3,
-  upcoming: 12,
-  pending: 8,
-  trend: 'up',
-  change: 15
-}
-
-const MOCK_TRAVELER_STATS: TravelerStats = {
-  total: 1243,
-  newThisMonth: 89,
-  repeatRate: 34,
-  averageGroupSize: 2.4,
-  topNationalities: [
-    { country: 'United States', count: 342, flag: '🇺🇸' },
-    { country: 'United Kingdom', count: 287, flag: '🇬🇧' },
-    { country: 'Germany', count: 198, flag: '🇩🇪' },
-    { country: 'France', count: 156, flag: '🇫🇷' },
-    { country: 'Canada', count: 124, flag: '🇨🇦' }
-  ]
-}
-
-const MOCK_EARNINGS: EarningsStats = {
-  total: 32450,
-  thisMonth: 4250,
-  pending: 1250,
-  averagePerTrip: 187,
-  platformFees: 3245,
-  netEarnings: 29205,
-  currency: 'USD',
-  trend: 'up',
-  change: 12
-}
-
-const MOCK_RATING_STATS: RatingStats = {
-  average: 4.9,
-  total: 128,
-  distribution: {
-    5: 98,
-    4: 25,
-    3: 4,
-    2: 1,
-    1: 0
-  },
-  responseRate: 98,
-  averageResponseTime: '< 1 hour'
-}
-
 const MOCK_BADGES: Badge[] = [
-  {
-    id: '1',
-    name: 'Top Rated Guide',
-    description: 'Maintained 4.9+ rating for 6 months',
-    icon: Trophy,
-    earnedAt: '2025-12-01T00:00:00Z',
-    color: 'amber',
-    isNew: false
-  },
-  {
-    id: '2',
-    name: 'Super Guide',
-    description: 'Completed 100+ tours with 5-star reviews',
-    icon: Crown,
-    earnedAt: '2026-01-15T00:00:00Z',
-    color: 'purple',
-    isNew: false
-  },
-  {
-    id: '3',
-    name: 'Halal Specialist',
-    description: 'Certified in Halal tourism practices',
-    icon: Medal,
-    earnedAt: '2025-08-20T00:00:00Z',
-    color: 'emerald',
-    isNew: false
-  },
-  {
-    id: '4',
-    name: 'Family Expert',
-    description: 'Guided 50+ family tours',
-    icon: Heart,
-    earnedAt: '2026-02-10T00:00:00Z',
-    color: 'pink',
-    isNew: true
-  },
-  {
-    id: '5',
-    name: 'Early Adopter',
-    description: 'Joined in the first year',
-    icon: Sparkles,
-    earnedAt: '2023-06-01T00:00:00Z',
-    color: 'blue',
-    isNew: false
-  }
+  { id: '1', name: 'Top Rated Guide', description: '4.9+ rating', icon: Trophy, color: 'amber' },
+  { id: '2', name: 'Super Guide', description: '100+ tours', icon: Crown, color: 'purple' }
 ]
 
 const MOCK_ACTIVITIES: Activity[] = [
-  {
-    id: '1',
-    type: 'booking',
-    title: 'New Booking',
-    description: 'Ahmed Khan booked Ottoman Heritage Tour for 2 people',
-    timestamp: '2026-03-14T09:30:00Z',
-    icon: Calendar,
-    color: 'blue',
-    link: '/dashboard/guide/bookings/b1'
-  },
-  {
-    id: '2',
-    type: 'review',
-    title: 'New 5-Star Review',
-    description: 'Fatima Al-Zahra left a review: "Amazing tour, highly recommended!"',
-    timestamp: '2026-03-13T14:15:00Z',
-    icon: Star,
-    color: 'amber',
-    link: '/dashboard/guide/reviews/r1'
-  },
-  {
-    id: '3',
-    type: 'achievement',
-    title: 'New Badge Earned',
-    description: 'You earned the "Family Expert" badge!',
-    timestamp: '2026-03-12T10:00:00Z',
-    icon: Award,
-    color: 'pink',
-    link: '/dashboard/guide/profile#badges'
-  },
-  {
-    id: '4',
-    type: 'payout',
-    title: 'Payout Processed',
-    description: '$378.50 has been sent to your bank account',
-    timestamp: '2026-03-11T16:45:00Z',
-    icon: DollarSign,
-    color: 'emerald',
-    link: '/dashboard/guide/wallet'
-  },
-  {
-    id: '5',
-    type: 'message',
-    title: 'New Message',
-    description: 'Omar Farooq sent you a message about Cappadocia tour',
-    timestamp: '2026-03-11T11:20:00Z',
-    icon: MessageSquare,
-    color: 'purple',
-    link: '/dashboard/guide/messages/conv-3'
-  }
-]
-
-const MOCK_MONTHLY_PERFORMANCE: MonthlyPerformance[] = [
-  { month: 'Oct', trips: 12, earnings: 2250, rating: 4.8 },
-  { month: 'Nov', trips: 15, earnings: 2850, rating: 4.9 },
-  { month: 'Dec', trips: 18, earnings: 3420, rating: 4.9 },
-  { month: 'Jan', trips: 22, earnings: 4180, rating: 5.0 },
-  { month: 'Feb', trips: 25, earnings: 4750, rating: 4.9 },
-  { month: 'Mar', trips: 28, earnings: 5320, rating: 4.9 }
+  { id: '1', title: 'New Booking', description: 'Ahmed Khan booked Ottoman Heritage Tour', timestamp: '2 hours ago', icon: Calendar, color: 'blue' },
+  { id: '2', title: 'New Review', description: 'Fatima Al-Zahra left 5 stars', timestamp: '5 hours ago', icon: Star, color: 'amber' }
 ]
 
 // ============================================================================
-// IMPACT SCORE CARD COMPONENT
+// PREMIUM COMPONENTS
 // ============================================================================
 
-interface ImpactScoreCardProps {
-  score: ImpactScore
-}
-
-function ImpactScoreCard({ score }: ImpactScoreCardProps) {
-  const [showDetails, setShowDetails] = useState(false)
-
-  const getTrendIcon = () => {
-    if (score.trend === 'up') return <ArrowUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-    if (score.trend === 'down') return <ArrowDown className="w-4 h-4 text-red-600 dark:text-red-400" />
-    return null
-  }
-
+function GlassCard({ children, className = "" }: { children: React.ReactNode, className?: string }) {
   return (
-    <div className="
-      bg-gradient-to-br from-blue-600 to-indigo-700
-      dark:from-blue-700 dark:to-indigo-800
-      rounded-xl
-      p-6
-      text-white
-    ">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <Award className="w-5 h-5" />
-          <h2 className="font-semibold">Impact Score</h2>
-        </div>
-        <button
-          onClick={() => setShowDetails(!showDetails)}
-          className="p-1 hover:bg-white/20 rounded-lg transition-colors"
-        >
-          <Info className="w-4 h-4" />
-        </button>
-      </div>
-
-      <div className="mb-4">
-        <div className="text-4xl font-bold mb-1">
-          {score.overall}
-        </div>
-        <div className="flex items-center gap-2 text-blue-100">
-          <span>Rank #{score.rank} of {score.totalGuides}</span>
-          <span className="flex items-center gap-1">
-            {getTrendIcon()}
-            {score.change}% this month
-          </span>
-        </div>
-      </div>
-
-      {showDetails && (
-        <div className="space-y-3 pt-4 border-t border-white/20">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-blue-200">Completed Trips (40%)</span>
-              <span className="font-semibold">{score.breakdown.completedTrips}</span>
-            </div>
-            <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
-              <div className="h-full w-3/4 bg-white rounded-full" />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-blue-200">Average Rating (30%)</span>
-              <span className="font-semibold">{score.breakdown.averageRating}</span>
-            </div>
-            <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
-              <div className="h-full w-5/6 bg-white rounded-full" />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-blue-200">Response Rate (15%)</span>
-              <span className="font-semibold">{score.breakdown.responseRate}%</span>
-            </div>
-            <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
-              <div className="h-full w-11/12 bg-white rounded-full" />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-blue-200">Repeat Travelers (15%)</span>
-              <span className="font-semibold">{score.breakdown.repeatTravelers}%</span>
-            </div>
-            <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
-              <div className="h-full w-2/5 bg-white rounded-full" />
-            </div>
-          </div>
-        </div>
-      )}
+    <div className={`bg-white/70 dark:bg-gray-900/40 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 rounded-3xl shadow-xl shadow-blue-500/5 ${className}`}>
+      {children}
     </div>
   )
 }
 
-// ============================================================================
-// STAT CARD COMPONENT
-// ============================================================================
-
-interface StatCardProps {
-  icon: React.ElementType
-  label: string
-  value: string | number
-  subtext?: string
-  trend?: {
-    direction: TrendDirection
-    value: string
+function StatCard({ icon: Icon, label, value, color }: { icon: any, label: string, value: string | number, color: 'blue' | 'amber' | 'emerald' | 'purple' }) {
+  const colors: Record<string, string> = {
+    blue: 'from-blue-500 to-indigo-600 shadow-blue-500/20',
+    amber: 'from-amber-500 to-orange-600 shadow-amber-500/20',
+    emerald: 'from-emerald-500 to-teal-600 shadow-emerald-500/20',
+    purple: 'from-purple-500 to-pink-600 shadow-purple-500/20'
   }
-  color: 'blue' | 'emerald' | 'amber' | 'purple' | 'pink'
-  onClick?: () => void
-}
-
-function StatCard({ icon: Icon, label, value, subtext, trend, color, onClick }: StatCardProps) {
-  const colorClasses = {
-    blue: 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400',
-    emerald: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400',
-    amber: 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400',
-    purple: 'bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400',
-    pink: 'bg-pink-50 dark:bg-pink-950/30 text-pink-600 dark:text-pink-400'
-  }
-
-  const trendColors = {
-    up: 'text-emerald-600 dark:text-emerald-400',
-    down: 'text-red-600 dark:text-red-400',
-    stable: 'text-gray-600 dark:text-gray-400'
-  }
-
-  const TrendIcon = trend?.direction === 'up' ? ArrowUp : trend?.direction === 'down' ? ArrowDown : null
 
   return (
-    <div
-      onClick={onClick}
-      className={`
-        p-5
-        bg-white dark:bg-gray-900
-        border border-gray-200 dark:border-gray-800
-        rounded-xl
-        ${onClick ? 'cursor-pointer hover:shadow-lg transition-shadow' : ''}
-      `}
+    <motion.div
+      whileHover={{ y: -5 }}
+      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+      className="relative"
     >
-      <div className="flex items-start justify-between mb-3">
-        <div className={`
-          p-2.5
-          rounded-lg
-          ${colorClasses[color]}
-        `}>
-          <Icon className="w-5 h-5" />
-        </div>
-        {trend && (
-          <div className={`flex items-center gap-1 text-sm ${trendColors[trend.direction]}`}>
-            {TrendIcon && <TrendIcon className="w-3 h-3" />}
-            <span className="text-xs font-medium">{trend.value}</span>
+      <GlassCard className="p-6 h-full flex flex-col justify-between overflow-hidden group">
+        <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${colors[color]} opacity-5 blur-2xl group-hover:opacity-10 transition-opacity`} />
+        
+        <div className="flex items-center justify-between mb-4 relative z-10">
+          <div className={`p-3 rounded-2xl bg-gradient-to-br ${colors[color]} text-white shadow-lg`}>
+            <Icon className="w-5 h-5" />
           </div>
-        )}
-      </div>
-
-      <div className="space-y-1">
-        <div className="text-2xl font-bold text-gray-900 dark:text-white">
-          {value}
         </div>
-        <div className="text-xs text-gray-500 dark:text-gray-400">
-          {label}
-        </div>
-        {subtext && (
-          <div className="text-xs text-gray-400 dark:text-gray-500">
-            {subtext}
+        
+        <div className="relative z-10">
+          <div className="text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-1">
+            {value}
           </div>
-        )}
-      </div>
-    </div>
+          <div className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            {label}
+          </div>
+        </div>
+      </GlassCard>
+    </motion.div>
   )
 }
 
-// ============================================================================
-// BADGE CARD COMPONENT
-// ============================================================================
-
-interface BadgeCardProps {
-  badge: Badge
-}
-
-function BadgeCard({ badge }: BadgeCardProps) {
-  const Icon = badge.icon
-  const colorClasses = {
-    blue: 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800',
-    amber: 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800',
-    emerald: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
-    purple: 'bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800',
-    pink: 'bg-pink-50 dark:bg-pink-950/30 text-pink-600 dark:text-pink-400 border-pink-200 dark:border-pink-800'
+function VerificationBadge({ status }: { status: VerificationStatus }) {
+  const normalizedStatus = (status?.toLowerCase() || 'not_submitted') as VerificationStatus
+  
+  const config = {
+    pending: { bg: 'bg-amber-500/10', text: 'text-amber-600', icon: Clock, label: 'Pending' },
+    approved: { bg: 'bg-emerald-500/10', text: 'text-emerald-600', icon: CheckCircle, label: 'Verified' },
+    verified: { bg: 'bg-emerald-500/10', text: 'text-emerald-600', icon: CheckCircle, label: 'Verified' },
+    rejected: { bg: 'bg-red-500/10', text: 'text-red-600', icon: AlertCircle, label: 'Failed' },
+    not_submitted: { bg: 'bg-gray-500/10', text: 'text-gray-600', icon: Shield, label: 'Not Verified' }
   }
 
-  const date = new Date(badge.earnedAt).toLocaleDateString('en-US', {
-    month: 'short',
-    year: 'numeric'
-  })
+  const { bg, text, icon: Icon, label } = config[normalizedStatus] || config.not_submitted
 
   return (
-    <div className={`
-      relative
-      p-4
-      ${colorClasses[badge.color]}
-      border
-      rounded-xl
-      flex items-start gap-3
-    `}>
-      <div className={`
-        p-2
-        rounded-lg
-        bg-white dark:bg-gray-900
-        shadow-sm
-      `}>
-        <Icon className="w-4 h-4" />
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <h4 className="font-semibold text-sm truncate">
-            {badge.name}
-          </h4>
-          {badge.isNew && (
-            <span className="
-              px-1.5 py-0.5
-              bg-emerald-600
-              text-white text-[10px] font-bold
-              rounded-full
-              animate-pulse
-            ">
-              NEW
-            </span>
-          )}
-        </div>
-        <p className="text-xs opacity-80 mb-1 line-clamp-2">
-          {badge.description}
-        </p>
-        <p className="text-[10px] opacity-60">
-          Earned {date}
-        </p>
-      </div>
-    </div>
-  )
-}
-
-// ============================================================================
-// ACTIVITY ITEM COMPONENT
-// ============================================================================
-
-interface ActivityItemProps {
-  activity: Activity
-}
-
-function ActivityItem({ activity }: ActivityItemProps) {
-  const Icon = activity.icon
-  const colorClasses = {
-    blue: 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400',
-    emerald: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400',
-    amber: 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400',
-    purple: 'bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400',
-    pink: 'bg-pink-50 dark:bg-pink-950/30 text-pink-600 dark:text-pink-400'
-  }
-
-  const time = new Date(activity.timestamp).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit'
-  })
-
-  return (
-    <div className="
-      flex items-start gap-3
-      p-3
-      bg-white dark:bg-gray-900
-      border border-gray-200 dark:border-gray-800
-      rounded-xl
-      hover:shadow-md
-      transition-shadow
-    ">
-      <div className={`
-        p-2
-        rounded-lg
-        ${colorClasses[activity.color]}
-      `}>
-        <Icon className="w-4 h-4" />
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-2 mb-1">
-          <h4 className="font-semibold text-sm text-gray-900 dark:text-white">
-            {activity.title}
-          </h4>
-          <span className="text-[10px] text-gray-500 dark:text-gray-400 whitespace-nowrap">
-            {time}
-          </span>
-        </div>
-        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-          {activity.description}
-        </p>
-        {activity.link && (
-          <Link
-            href={activity.link}
-            className="
-              inline-flex items-center gap-1
-              text-xs text-blue-600 dark:text-blue-400
-              hover:underline
-            "
-          >
-            View details
-            <ChevronRight className="w-3 h-3" />
-          </Link>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ============================================================================
-// PERFORMANCE CHART COMPONENT
-// ============================================================================
-
-interface PerformanceChartProps {
-  data: MonthlyPerformance[]
-  type: 'trips' | 'earnings' | 'rating'
-}
-
-function PerformanceChart({ data, type }: PerformanceChartProps) {
-  const maxValue = type === 'trips'
-    ? Math.max(...data.map(d => d.trips))
-    : type === 'earnings'
-      ? Math.max(...data.map(d => d.earnings))
-      : 5
-
-  const getBarColor = (value: number) => {
-    if (type === 'rating') {
-      if (value >= 4.8) return 'bg-emerald-500'
-      if (value >= 4.5) return 'bg-blue-500'
-      if (value >= 4.0) return 'bg-amber-500'
-      return 'bg-red-500'
-    }
-    return 'bg-blue-600 dark:bg-blue-500'
-  }
-
-  const getValue = (item: MonthlyPerformance) => {
-    if (type === 'trips') return item.trips
-    if (type === 'earnings') return item.earnings / 100 // Scale for display
-    return item.rating
-  }
-
-  const getLabel = (item: MonthlyPerformance) => {
-    if (type === 'trips') return `${item.trips}`
-    if (type === 'earnings') return `$${item.earnings}`
-    return item.rating.toFixed(1)
-  }
-
-  return (
-    <div className="flex items-end justify-between gap-2 h-32">
-      {data.map((item, index) => {
-        const value = getValue(item)
-        const height = (value / maxValue) * 100
-        return (
-          <div key={index} className="flex-1 flex flex-col items-center gap-1 group">
-            <div className="relative w-full">
-              <div
-                className={`
-                  w-full
-                  ${getBarColor(value)}
-                  rounded-t-lg
-                  transition-all
-                  group-hover:opacity-80
-                `}
-                style={{ height: `${height}%` }}
-              />
-              {/* Tooltip */}
-              <div className="
-                absolute -top-8 left-1/2 -translate-x-1/2
-                px-2 py-1
-                bg-gray-900 dark:bg-white
-                text-white dark:text-gray-900
-                text-xs font-medium
-                rounded
-                opacity-0 group-hover:opacity-100
-                transition-opacity
-                pointer-events-none
-                whitespace-nowrap
-                z-10
-              ">
-                {item.month}: {getLabel(item)}
-              </div>
-            </div>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              {item.month}
-            </span>
-          </div>
-        )
-      })}
+    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${bg} ${text} text-[10px] font-black uppercase tracking-widest border border-current/10`}>
+      <Icon className="w-3 h-3" />
+      {label}
     </div>
   )
 }
@@ -752,395 +153,287 @@ function PerformanceChart({ data, type }: PerformanceChartProps) {
 // ============================================================================
 
 export default function GuideDashboardPage() {
-  const [timeRange, setTimeRange] = useState<TimeRange>('month')
-  const [showAllBadges, setShowAllBadges] = useState(false)
+  const { user } = useAuth()
+  const [loading, setLoading] = useState(true)
+  const [profile, setProfile] = useState<GuideProfileData | null>(null)
+  
+  useEffect(() => {
+    async function fetchDashboardData() {
+      try {
+        const res = await apiClient.get('/api/guide/profile')
+        setProfile(res.data)
+      } catch (err) {
+        console.error('Failed to fetch dashboard data:', err)
+        toast.error('Could not load some stats')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchDashboardData()
+  }, [])
 
-  const visibleBadges = showAllBadges ? MOCK_BADGES : MOCK_BADGES.slice(0, 3)
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-500 animate-pulse font-medium">Preparing your workspace...</p>
+        </div>
+      </div>
+    )
+  }
+
+  const impactScore = profile?.impactScore || 0
+  const isIdVerified = profile?.verificationStatus === 'approved'
 
   return (
-    <PageLayout>
-      {/* Page offset */}
-      <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
-        
-        <div className="container-safe mx-auto max-w-7xl py-8 sm:py-10">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950/50">
+      {/* Background Decorative Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[30%] h-[30%] bg-emerald-500/10 rounded-full blur-[100px]" />
+      </div>
+
+      <div className="relative pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
           
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                Guide Dashboard
-              </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Track your performance, earnings, and impact score
-              </p>
-            </div>
+          <OnboardingBanner 
+            role="Guide" 
+            profileCompleted={!!user?.profileCompleted}
+            emailVerified={!!user?.emailVerified} 
+            idVerified={isIdVerified} 
+            userEmail={user?.email}
+          />
 
-            {/* Time range selector */}
-            <div className="flex items-center gap-2">
-              <select
-                value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value as TimeRange)}
-                className="
-                  px-3 py-2
-                  bg-white dark:bg-gray-900
-                  border border-gray-200 dark:border-gray-800
-                  rounded-lg
-                  text-sm
-                  text-gray-900 dark:text-white
-                  focus:outline-none focus:ring-2 focus:ring-blue-500
-                "
-              >
-                <option value="week">This Week</option>
-                <option value="month">This Month</option>
-                <option value="year">This Year</option>
-                <option value="all">All Time</option>
-              </select>
-              <button className="
-                p-2
-                bg-white dark:bg-gray-900
-                border border-gray-200 dark:border-gray-800
-                rounded-lg
-                text-gray-500 hover:text-gray-700
-                dark:text-gray-400 dark:hover:text-gray-200
-                hover:bg-gray-100 dark:hover:bg-gray-800
-                transition-colors
-              ">
-                <RefreshCw className="w-4 h-4" />
-              </button>
-            </div>
+          {/* HERO SECTION */}
+          <div className="mb-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col md:flex-row md:items-end justify-between gap-6"
+            >
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full text-xs font-bold uppercase tracking-widest">
+                    <Sparkles className="w-3 h-3" />
+                    Good Morning
+                  </div>
+                  <VerificationBadge status={profile?.verificationStatus || 'not_submitted'} />
+                </div>
+                <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white tracking-tight leading-tight">
+                  Hi, {profile?.fullName.split(' ')[0] || 'Guide'}! <span className="text-blue-600">Growth</span> awaits.
+                </h1>
+                <p className="mt-2 text-lg text-gray-600 dark:text-gray-400 font-medium">
+                  Your impact score is up <span className="text-emerald-600 font-bold">+2.4%</span> this week.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <Link
+                  href="/dashboard/guide/tours/new"
+                  className="px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-3xl font-bold shadow-xl shadow-blue-500/30 transition-all flex items-center gap-3 group"
+                >
+                  <PlusCircle className="w-5 h-5" />
+                  Create New Tour
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+            </motion.div>
           </div>
 
-          {/* Impact Score and Key Stats Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
-            {/* Impact Score - spans 2 columns */}
-            <div className="lg:col-span-2">
-              <ImpactScoreCard score={MOCK_IMPACT_SCORE} />
-            </div>
+          {/* STATS GRID */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"
+          >
+            <StatCard 
+              icon={Calendar} 
+              label="Total Trips" 
+              value={profile?.totalTrips || 0} 
+              color="blue" 
+            />
+            <StatCard 
+              icon={Award} 
+              label="Impact Score" 
+              value={`${impactScore}%`} 
+              color="amber" 
+            />
+            <StatCard 
+              icon={TrendingUp} 
+              label="Response Rate" 
+              value="98%" 
+              color="emerald" 
+            />
+            <StatCard 
+              icon={DollarSign} 
+              label="Pending Earnings" 
+              value="$0.00" 
+              color="purple" 
+            />
+          </motion.div>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-4 lg:col-span-2">
-              <StatCard
-                icon={Star}
-                label="Average Rating"
-                value={MOCK_RATING_STATS.average}
-                subtext={`${MOCK_RATING_STATS.total} reviews`}
-                trend={{ direction: 'up', value: '+0.2' }}
-                color="amber"
-                onClick={() => console.log('Navigate to reviews')}
-              />
-              <StatCard
-                icon={DollarSign}
-                label="This Month"
-                value={`$${MOCK_EARNINGS.thisMonth}`}
-                subtext={`${MOCK_EARNINGS.trend === 'up' ? '+' : '-'}${MOCK_EARNINGS.change}%`}
-                trend={{ direction: MOCK_EARNINGS.trend, value: `${MOCK_EARNINGS.change}%` }}
-                color="emerald"
-                onClick={() => console.log('Navigate to wallet')}
-              />
-            </div>
-          </div>
-
-          {/* Main Stats Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            <StatCard
-              icon={Calendar}
-              label="Total Trips"
-              value={MOCK_TRIP_STATS.total}
-              subtext={`${MOCK_TRIP_STATS.completed} completed`}
-              trend={{ direction: MOCK_TRIP_STATS.trend, value: `+${MOCK_TRIP_STATS.change}` }}
-              color="blue"
-              onClick={() => console.log('Navigate to trips')}
-            />
-            <StatCard
-              icon={Users}
-              label="Total Travelers"
-              value={MOCK_TRAVELER_STATS.total}
-              subtext={`${MOCK_TRAVELER_STATS.newThisMonth} this month`}
-              color="purple"
-              onClick={() => console.log('Navigate to travelers')}
-            />
-            <StatCard
-              icon={TrendingUp}
-              label="Response Rate"
-              value={`${MOCK_RATING_STATS.responseRate}%`}
-              subtext={MOCK_RATING_STATS.averageResponseTime}
-              trend={{ direction: 'up', value: '+2%' }}
-              color="emerald"
-            />
-            <StatCard
-              icon={Clock}
-              label="Upcoming"
-              value={MOCK_TRIP_STATS.upcoming}
-              subtext={`${MOCK_TRIP_STATS.pending} pending`}
-              color="amber"
-              onClick={() => console.log('Navigate to upcoming')}
-            />
-          </div>
-
-          {/* Performance Chart and Badges */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            {/* Performance Chart */}
-            <div className="lg:col-span-2">
-              <div className="
-                bg-white dark:bg-gray-900
-                border border-gray-200 dark:border-gray-800
-                rounded-xl
-                p-6
-              ">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    Performance Trend
-                  </h3>
-                  <div className="flex items-center gap-4 text-xs">
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-blue-600 rounded-full" />
-                      <span className="text-gray-500 dark:text-gray-400">Trips</span>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* MAIN CONTENT AREA */}
+            <div className="lg:col-span-2 space-y-8">
+              
+              {/* IMPACT SCORE DETAIL */}
+              <GlassCard className="p-8 overflow-hidden relative group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-full blur-3xl -mr-32 -mt-32 group-hover:scale-110 transition-transform duration-1000" />
+                
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-8">
+                    <div>
+                      <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Performance Deep Dive</h2>
+                      <p className="text-sm text-gray-500 font-medium">How your store is measured</p>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-emerald-600 rounded-full" />
-                      <span className="text-gray-500 dark:text-gray-400">Earnings</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-amber-500 rounded-full" />
-                      <span className="text-gray-500 dark:text-gray-400">Rating</span>
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-2xl">
+                      <TrendingUp className="w-6 h-6 text-blue-600" />
                     </div>
                   </div>
-                </div>
 
-                {/* Chart */}
-                <PerformanceChart data={MOCK_MONTHLY_PERFORMANCE} type="trips" />
-              </div>
-            </div>
-
-            {/* Badges */}
-            <div>
-              <div className="
-                bg-white dark:bg-gray-900
-                border border-gray-200 dark:border-gray-800
-                rounded-xl
-                p-6
-              ">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <Award className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    Badges & Achievements
-                  </h3>
-                  <button
-                    onClick={() => setShowAllBadges(!showAllBadges)}
-                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    {showAllBadges ? 'Show less' : `View all (${MOCK_BADGES.length})`}
-                  </button>
-                </div>
-
-                <div className="space-y-3">
-                  {visibleBadges.map(badge => (
-                    <BadgeCard key={badge.id} badge={badge} />
-                  ))}
-                </div>
-
-                {!showAllBadges && MOCK_BADGES.length > 3 && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 text-center">
-                    +{MOCK_BADGES.length - 3} more badges
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Recent Activity */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Activity Feed */}
-            <div className="lg:col-span-2">
-              <div className="
-                bg-white dark:bg-gray-900
-                border border-gray-200 dark:border-gray-800
-                rounded-xl
-                p-6
-              ">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    Recent Activity
-                  </h3>
-                  <button className="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                    View all
-                  </button>
-                </div>
-
-                <div className="space-y-3">
-                  {MOCK_ACTIVITIES.map(activity => (
-                    <ActivityItem key={activity.id} activity={activity} />
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Stats Sidebar */}
-            <div>
-              <div className="
-                bg-white dark:bg-gray-900
-                border border-gray-200 dark:border-gray-800
-                rounded-xl
-                p-6
-                space-y-4
-              ">
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  Quick Stats
-                </h3>
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Repeat Travelers</span>
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {MOCK_TRAVELER_STATS.repeatRate}%
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Avg. Group Size</span>
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {MOCK_TRAVELER_STATS.averageGroupSize}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Cancellation Rate</span>
-                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                      {((MOCK_TRIP_STATS.cancelled / MOCK_TRIP_STATS.total) * 100).toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">No-Show Rate</span>
-                    <span className="font-semibold text-amber-600 dark:text-amber-400">
-                      {((MOCK_TRIP_STATS.noShows / MOCK_TRIP_STATS.total) * 100).toFixed(1)}%
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
-                    Top Nationalities
-                  </h4>
-                  <div className="space-y-2">
-                    {MOCK_TRAVELER_STATS.topNationalities.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between text-sm">
-                        <span className="flex items-center gap-2">
-                          <span className="text-base">{item.flag}</span>
-                          <span className="text-gray-600 dark:text-gray-400">{item.country}</span>
-                        </span>
-                        <span className="font-medium text-gray-900 dark:text-white">
-                          {item.count}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
-                    Rating Distribution
-                  </h4>
-                  <div className="space-y-2">
-                    {[5, 4, 3, 2, 1].map(star => {
-                      const count = MOCK_RATING_STATS.distribution[star as keyof typeof MOCK_RATING_STATS.distribution]
-                      const percentage = (count / MOCK_RATING_STATS.total) * 100
-                      return (
-                        <div key={star} className="flex items-center gap-2 text-xs">
-                          <span className="w-8 text-gray-500 dark:text-gray-400">{star}★</span>
-                          <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-amber-500 rounded-full"
-                              style={{ width: `${percentage}%` }}
-                            />
-                          </div>
-                          <span className="w-8 text-right text-gray-600 dark:text-gray-400">
-                            {count}
-                          </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs font-black uppercase tracking-wider text-gray-500">
+                          <span>Completed Tours</span>
+                          <span className="text-blue-600">40% weight</span>
                         </div>
-                      )
-                    })}
+                        <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                          <motion.div initial={{ width: 0 }} animate={{ width: '85%' }} className="h-full bg-blue-600" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs font-black uppercase tracking-wider text-gray-500">
+                          <span>Average Rating</span>
+                          <span className="text-amber-600">30% weight</span>
+                        </div>
+                        <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                          <motion.div initial={{ width: 0 }} animate={{ width: '92%' }} className="h-full bg-amber-500" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-blue-500/5 dark:bg-white/5 rounded-3xl p-6 border border-blue-500/10">
+                      <div className="flex items-center gap-2 text-blue-600 font-black text-xs uppercase mb-4">
+                        <Info className="w-4 h-4" />
+                        Quick Tip
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                        Guide who respond to inquiries within 2 hours are 3x more likely to get the booking.
+                      </p>
+                    </div>
                   </div>
                 </div>
+              </GlassCard>
+
+              {/* UPCOMING TRIPS PLACEHOLDER (Guide Version) */}
+              <GlassCard className="p-8">
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Upcoming Schedule</h2>
+                    <p className="text-sm text-gray-500 font-medium">Manage your booked tour occurrences</p>
+                  </div>
+                  <Link href="/dashboard/guide/tours" className="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 group">
+                    View All
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-3xl p-12 text-center border-2 border-dashed border-gray-200 dark:border-gray-800">
+                  <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Calendar className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No booked tours yet</h3>
+                  <p className="text-gray-500 dark:text-gray-400 max-w-xs mx-auto mb-6 font-medium">
+                    You haven't received any bookings for the upcoming week. Promote your tours on social media!
+                  </p>
+                  <Link 
+                    href="/dashboard/guide/tours/new" 
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl text-sm font-black hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    Manage Templates
+                  </Link>
+                </div>
+              </GlassCard>
+            </div>
+
+            {/* SIDEBAR AREA */}
+            <div className="space-y-6">
+              {/* EARNINGS PROGRESS */}
+              <GlassCard className="p-6 overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
+                <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-wider text-xs mb-6">Wallet Balance</h3>
+                
+                <div className="mb-6">
+                  <div className="text-4xl font-black text-gray-900 dark:text-white mb-1 tracking-tight">$0.00</div>
+                  <p className="text-xs text-emerald-600 font-bold flex items-center gap-1">
+                    <CheckCircle className="w-3 h-3" /> Ready for withdrawal
+                  </p>
+                </div>
+
+                <button disabled className="w-full py-3 bg-gray-100 dark:bg-gray-800 text-gray-400 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-not-allowed">
+                  Withdraw Funds
+                </button>
+              </GlassCard>
+
+              {/* ACHIEVEMENTS */}
+              <GlassCard className="p-6">
+                <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-wider text-xs mb-4 text-center">Badges</h3>
+                <div className="flex justify-center gap-4 mb-6">
+                  <motion.div whileHover={{ scale: 1.1 }} className="p-3 rounded-2xl bg-amber-100 dark:bg-amber-900/30 text-amber-600">
+                    <Trophy className="w-6 h-6" />
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.1 }} className="p-3 rounded-2xl bg-purple-100 dark:bg-purple-900/30 text-purple-600">
+                    <Crown className="w-6 h-6" />
+                  </motion.div>
+                  <div className="p-3 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-300">
+                    <Medal className="w-6 h-6" />
+                  </div>
+                </div>
+                <button className="w-full text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-700">
+                  View All Achievements
+                </button>
+              </GlassCard>
+
+              {/* QUICK LINKS */}
+              <GlassCard className="p-6">
+                <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-wider text-xs mb-4">Shortcuts</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <Link href="/dashboard/guide/profile" className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group">
+                    <Users className="w-6 h-6 text-blue-600 group-hover:scale-110 transition-transform mb-2" />
+                    <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400">Profile</span>
+                  </Link>
+                  <Link href="/dashboard/guide/tours" className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all group">
+                    <Clock className="w-6 h-6 text-purple-600 group-hover:scale-110 transition-transform mb-2" />
+                    <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400">Activity</span>
+                  </Link>
+                  <Link href="/dashboard/guide/settings" className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all group">
+                    <LayoutDashboard className="w-6 h-6 text-emerald-600 group-hover:scale-110 transition-transform mb-2" />
+                    <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400">Account</span>
+                  </Link>
+                  <Link href="/auth/reset-password" className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all group">
+                    <Shield className="w-6 h-6 text-amber-600 group-hover:scale-110 transition-transform mb-2" />
+                    <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400">Security</span>
+                  </Link>
+                </div>
+              </GlassCard>
+
+              {/* PROMO / HANDBOOK */}
+              <div className="bg-gradient-to-br from-indigo-900 to-blue-900 p-8 rounded-[2.5rem] text-white relative overflow-hidden group shadow-2xl">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-400/20 rounded-full blur-3xl group-hover:bg-blue-400/30 transition-colors" />
+                <Gem className="w-10 h-10 text-blue-300 mb-4" />
+                <h3 className="text-xl font-black leading-tight mb-2">Guide Handbook</h3>
+                <p className="text-sm text-blue-200/80 mb-6 font-medium">Tips from top performers on how to 3x your tour bookings.</p>
+                <button className="px-6 py-2.5 bg-white text-gray-950 rounded-xl text-xs font-black hover:bg-blue-50 transition-colors">
+                  Open Guide Hub
+                </button>
               </div>
             </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <Link
-              href="/dashboard/guide/tours/new"
-              className="
-                p-4
-                bg-white dark:bg-gray-900
-                border border-gray-200 dark:border-gray-800
-                rounded-xl
-                text-center
-                hover:shadow-md
-                transition-shadow
-                group
-              "
-            >
-              <Calendar className="w-5 h-5 mx-auto mb-2 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Create Tour
-              </span>
-            </Link>
-            <Link
-              href="/dashboard/guide/wallet"
-              className="
-                p-4
-                bg-white dark:bg-gray-900
-                border border-gray-200 dark:border-gray-800
-                rounded-xl
-                text-center
-                hover:shadow-md
-                transition-shadow
-                group
-              "
-            >
-              <DollarSign className="w-5 h-5 mx-auto mb-2 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Withdraw
-              </span>
-            </Link>
-            <Link
-              href="/dashboard/guide/messages"
-              className="
-                p-4
-                bg-white dark:bg-gray-900
-                border border-gray-200 dark:border-gray-800
-                rounded-xl
-                text-center
-                hover:shadow-md
-                transition-shadow
-                group
-              "
-            >
-              <MessageSquare className="w-5 h-5 mx-auto mb-2 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Messages
-              </span>
-            </Link>
-            <Link
-              href="/dashboard/guide/promos"
-              className="
-                p-4
-                bg-white dark:bg-gray-900
-                border border-gray-200 dark:border-gray-800
-                rounded-xl
-                text-center
-                hover:shadow-md
-                transition-shadow
-                group
-              "
-            >
-              <Sparkles className="w-5 h-5 mx-auto mb-2 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Promo Codes
-              </span>
-            </Link>
           </div>
         </div>
       </div>
-    </PageLayout>
+    </div>
   )
 }

@@ -57,21 +57,10 @@ interface SignupContextState {
 
 // Define the steps for each role
 const getStepsForRole = (role: UserRole | null) => {
-    if (role === UserRole.GUIDE) {
-        return [
-            { step: SignupStep.ROLE_SELECTION },
-            { step: SignupStep.ACCOUNT_DETAILS },
-            // { step: SignupStep.PROFILE_SETUP },
-            // { step: SignupStep.VERIFICATION },
-            { step: SignupStep.COMPLETED }
-        ]
-    }
-    
-    // Traveler flow - no verification
+    // Both roles: role → account → terms. Profile/verification done from dashboard.
     return [
         { step: SignupStep.ROLE_SELECTION },
         { step: SignupStep.ACCOUNT_DETAILS },
-        // { step: SignupStep.PROFILE_SETUP },
         { step: SignupStep.COMPLETED }
     ]
 }
@@ -197,31 +186,25 @@ function signupReducer(
             }
 
         case 'NEXT_STEP': {
-    const steps = getStepsForRole(state.data.role)
-    const currentIndex = steps.findIndex(s => s.step === state.currentStep)
-    const nextStep = steps[currentIndex + 1]?.step
-    
-    if (!nextStep) return state
+            // Forms validate themselves before calling nextStep().
+            // We do NOT re-validate here to avoid silent failures where the
+            // context rejects but the form shows no error to the user.
+            const steps = getStepsForRole(state.data.role)
+            const currentIndex = steps.findIndex(s => s.step === state.currentStep)
+            const nextStep = steps[currentIndex + 1]?.step
 
-    const stepErrors = validateStep(state.data, state.currentStep)
-    
-    if (Object.keys(stepErrors).length > 0) {
-        return {
-            ...state,
-            errors: stepErrors
+            if (!nextStep) return state
+
+            return {
+                ...state,
+                currentStep: nextStep,
+                completedSteps: [...state.completedSteps, state.currentStep],
+                errors: {}
+            }
         }
-    }
-
-    return {
-        ...state,
-        currentStep: nextStep,
-        completedSteps: [...state.completedSteps, state.currentStep],
-        errors: {}
-    }
-}
 
         case 'PREV_STEP': {
-            const steps = Object.values(SignupStep)
+            const steps = getStepsForRole(state.data.role).map(s => s.step)
             const currentIndex = steps.indexOf(state.currentStep)
             const prevStep = steps[currentIndex - 1]
             

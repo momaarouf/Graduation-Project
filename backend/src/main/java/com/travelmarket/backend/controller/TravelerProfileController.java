@@ -1,7 +1,9 @@
 package com.travelmarket.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.travelmarket.backend.dto.TravelerCompleteProfileRequest;
+import com.travelmarket.backend.dto.TravelerProfileResponse;
 import com.travelmarket.backend.entity.TravelerProfile;
 import com.travelmarket.backend.entity.User;
 import com.travelmarket.backend.repository.TravelerProfileRepository;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/traveler/profile")
@@ -25,15 +28,56 @@ public class TravelerProfileController {
     private final TravelerProfileRepository travelerProfileRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    @GetMapping
+    public TravelerProfileResponse getProfile(@AuthenticationPrincipal UserDetails principal) throws Exception {
+        User user = userRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getRole() != User.Role.Traveler) {
+            throw new org.springframework.security.access.AccessDeniedException("Forbidden");
+        }
+
+        TravelerProfile tp = travelerProfileRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Traveler profile missing"));
+
+        TravelerProfileResponse res = new TravelerProfileResponse();
+        res.setFullName(user.getFullName());
+        res.setPhoneE164(user.getPhoneE164());
+        res.setCountry(tp.getHomeCountry());
+        res.setCity(tp.getHomeCity());
+        res.setNationality(tp.getNationality());
+
+        if (tp.getDateOfBirth() != null) {
+            res.setDateOfBirth(tp.getDateOfBirth().toString());
+        }
+
+        if (tp.getTravelPreferencesJson() != null && !tp.getTravelPreferencesJson().isBlank()) {
+            res.setPreferences(objectMapper.readValue(tp.getTravelPreferencesJson(), new TypeReference<List<String>>() {}));
+        } else {
+            res.setPreferences(List.of());
+        }
+
+        res.setEmail(user.getEmail());
+        res.setEmailVerified(user.getIsEmailVerified());
+        res.setPhoneVerified(user.getIsPhoneVerified());
+        res.setMemberSince(user.getCreatedAtUtc() != null ? user.getCreatedAtUtc().toString() : "");
+        res.setLoyaltyTier(tp.getLoyaltyTier() != null ? tp.getLoyaltyTier() : "Bronze");
+        res.setCompletedTrips(tp.getTotalCompletedTrips() != null ? tp.getTotalCompletedTrips() : 0);
+        res.setReviewReminderEnabled(tp.getReviewReminderEnabled() != null ? tp.getReviewReminderEnabled() : false);
+        res.setNewsletterOptIn(user.getNewsletterOptIn() != null ? user.getNewsletterOptIn() : false);
+
+        return res;
+    }
+
     @PostMapping("/complete")
     public void complete(@AuthenticationPrincipal UserDetails principal,
-                         @Valid @RequestBody TravelerCompleteProfileRequest req) throws Exception {
+            @Valid @RequestBody TravelerCompleteProfileRequest req) throws Exception {
 
         User user = userRepository.findByEmail(principal.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (user.getRole() != User.Role.Traveler) {
-            //  correct 403 (instead of RuntimeException -> 400)
+            // correct 403 (instead of RuntimeException -> 400)
             throw new org.springframework.security.access.AccessDeniedException("Forbidden");
         }
 
@@ -54,7 +98,8 @@ public class TravelerProfileController {
             try {
                 tp.setDateOfBirth(LocalDate.parse(req.getDateOfBirth()));
             } catch (java.time.format.DateTimeParseException e) {
-                // becomes 400 via your exception handler (IllegalArgumentException is better than a 500)
+                // becomes 400 via your exception handler (IllegalArgumentException is better
+                // than a 500)
                 throw new IllegalArgumentException("dateOfBirth must be in YYYY-MM-DD format");
             }
         }
@@ -66,18 +111,22 @@ public class TravelerProfileController {
         travelerProfileRepository.save(tp);
 
         // Profile completion rule (Traveler): agreements + name + phone + location
-        boolean completed =
-                isTrue(user.getAgreedToTerms()) &&
-                        isTrue(user.getAgreedToPrivacy()) &&
-                        notBlank(user.getFullName()) &&
-                        notBlank(user.getPhoneE164()) &&
-                        notBlank(tp.getHomeCountry()) &&
-                        notBlank(tp.getHomeCity());
+        boolean completed = isTrue(user.getAgreedToTerms()) &&
+                isTrue(user.getAgreedToPrivacy()) &&
+                notBlank(user.getFullName()) &&
+                notBlank(user.getPhoneE164()) &&
+                notBlank(tp.getHomeCountry()) &&
+                notBlank(tp.getHomeCity());
 
         user.setProfileCompleted(completed);
         userRepository.save(user);
     }
 
-    private static boolean notBlank(String s) { return s != null && !s.trim().isEmpty(); }
-    private static boolean isTrue(Boolean b) { return b != null && b; }
+    private static boolean notBlank(String s) {
+        return s != null && !s.trim().isEmpty();
+    }
+
+    private static boolean isTrue(Boolean b) {
+        return b != null && b;
+    }
 }

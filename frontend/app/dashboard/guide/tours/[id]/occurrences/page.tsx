@@ -45,7 +45,6 @@ import {
   Repeat,
   Download
 } from 'lucide-react'
-import PageLayout from '@/src/components/layout/PageLayout'
 import toast from 'react-hot-toast'
 
 // ============================================================================
@@ -472,7 +471,7 @@ export default function TourOccurrencesPage() {
   const pastOccurrences = filteredOccurrences.filter(occ => new Date(occ.date) < now)
 
   return (
-    <PageLayout>
+    <>
       <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
         <div className="container-safe mx-auto max-w-7xl py-8 sm:py-10">
           
@@ -631,6 +630,6 @@ export default function TourOccurrencesPage() {
           )}
         </div>
       </div>
-    </PageLayout>
+    </>
   )
 }

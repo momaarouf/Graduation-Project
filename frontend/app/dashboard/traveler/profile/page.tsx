@@ -29,9 +29,13 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/src/lib/contexts/AuthContext'
+import apiClient from '@/src/lib/api/client'
+import toast from 'react-hot-toast'
 import {
   User,
   Mail,
@@ -67,7 +71,6 @@ import {
   Medal,
   Trophy
 } from 'lucide-react'
-import PageLayout from '@/src/components/layout/PageLayout'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -991,8 +994,57 @@ function ReferralCard({ code, savedAmount }: ReferralCardProps) {
 // ============================================================================
 
 export default function TravelerProfilePage() {
+  const router = useRouter()
+  const { user } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
   const [profile, setProfile] = useState(MOCK_PROFILE)
+  const [isLoadingData, setIsLoadingData] = useState(true)
+
+  useEffect(() => {
+    if (!user || user.role !== 'Traveler') {
+      setIsLoadingData(false)
+      return
+    }
+
+    const loadProfile = async () => {
+      try {
+        setIsLoadingData(true)
+        const res = await apiClient.get('/api/traveler/profile')
+        const data = res.data
+
+        setProfile(prev => ({
+          ...prev,
+          firstName: data.fullName?.split(' ')[0] || prev.firstName,
+          lastName: data.fullName?.split(' ').slice(1).join(' ') || prev.lastName,
+          phone: data.phoneE164 || prev.phone,
+          nationality: data.nationality || prev.nationality,
+          dateOfBirth: data.dateOfBirth || prev.dateOfBirth,
+          email: data.email || prev.email,
+          emailVerified: data.emailVerified ?? prev.emailVerified,
+          phoneVerified: data.phoneVerified ?? prev.phoneVerified,
+          memberSince: data.memberSince || prev.memberSince,
+          loyaltyTier: data.loyaltyTier ? (data.loyaltyTier.toLowerCase()) : prev.loyaltyTier,
+          completedTrips: data.completedTrips ?? prev.completedTrips,
+          reviewReminderEnabled: data.reviewReminderEnabled ?? prev.reviewReminderEnabled,
+          newsletterOptIn: data.newsletterOptIn ?? prev.newsletterOptIn
+        }))
+      } catch (error) {
+        console.error("Failed to load traveler profile", error)
+      } finally {
+        setIsLoadingData(false)
+      }
+    }
+
+    loadProfile()
+  }, [user])
+
+  if (isLoadingData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600" />
+      </div>
+    )
+  }
 
   const handleToggleReminder = () => {
     setProfile(prev => ({
@@ -1016,7 +1068,7 @@ export default function TravelerProfilePage() {
   }
 
   return (
-    <PageLayout>
+    <>
       {/* Page offset for navbar */}
       <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
         
@@ -1027,7 +1079,7 @@ export default function TravelerProfilePage() {
               ======================================== */}
           <ProfileHeader
             profile={profile}
-            onEdit={() => setIsEditing(true)}
+            onEdit={() => router.push('/dashboard/traveler/complete-profile')}
           />
 
           {/* ========================================
@@ -1170,6 +1222,6 @@ export default function TravelerProfilePage() {
           </div>
         </div>
       </div>
-    </PageLayout>
+    </>
   )
 }

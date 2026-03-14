@@ -44,8 +44,10 @@ const validateEmail = (email: string): boolean => {
 }
 
 const validatePassword = (password: string): boolean => {
-    return password.length >= 8 && /[A-Za-z]/.test(password) && /[0-9]/.test(password)
-}
+  // At least 8 chars, at least one uppercase, one lowercase, one digit, one special character
+  const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/;
+  return re.test(password);
+};
 
 const validateName = (name: string): boolean => {
     return name.length >= 2
@@ -55,25 +57,29 @@ const validateName = (name: string): boolean => {
 // PASSWORD STRENGTH
 // ============================================================================
 
-const getPasswordStrength = (password: string): {
-    score: number
-    label: string
-    color: string
-} => {
-    if (!password) return { score: 0, label: '', color: 'bg-gray-200' }
-    
-    let score = 0
-    if (password.length >= 8) score++
-    if (password.length >= 12) score++
-    if (/[A-Z]/.test(password)) score++
-    if (/[0-9]/.test(password)) score++
-    if (/[^A-Za-z0-9]/.test(password)) score++
+// ============================================================================
+// PASSWORD STRENGTH
+// ============================================================================
 
-    if (score <= 2) return { score: 20, label: 'Weak', color: 'bg-red-500' }
-    if (score <= 3) return { score: 50, label: 'Fair', color: 'bg-orange-500' }
-    if (score <= 4) return { score: 75, label: 'Good', color: 'bg-blue-500' }
-    return { score: 100, label: 'Strong', color: 'bg-emerald-500' }
-}
+const getPasswordStrength = (password: string): {
+  score: number;
+  label: string;
+  color: string;
+} => {
+  if (!password) return { score: 0, label: '', color: 'bg-gray-200' };
+  
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^a-zA-Z0-9]/.test(password)) score++; // any non-alphanumeric
+
+  if (score <= 2) return { score: 20, label: 'Weak', color: 'bg-red-500' };
+  if (score <= 3) return { score: 50, label: 'Fair', color: 'bg-orange-500' };
+  if (score <= 4) return { score: 75, label: 'Good', color: 'bg-blue-500' };
+  return { score: 100, label: 'Strong', color: 'bg-emerald-500' };
+};
 
 // ============================================================================
 // MAIN COMPONENT
@@ -152,7 +158,7 @@ export default function AccountDetailsForm({ onNext, onBack }: AccountDetailsFor
         if (!data.password) {
             newErrors.password = 'Password is required'
         } else if (!validatePassword(data.password)) {
-            newErrors.password = 'Password must be at least 8 characters with letters and numbers'
+            newErrors.password = 'Password must be at least 8 characters with at least one uppercase, one lowercase, one number, and one special character'
         }
         
         if (!data.confirmPassword) {

@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/guide/verification")
@@ -20,6 +22,44 @@ public class GuideVerificationController {
 
     private final UserRepository userRepository;
     private final GuideProfileRepository guideProfileRepository;
+
+    /**
+     * GET /api/guide/verification/status
+     *
+     * Returns the guide's current verification state.
+     * Possible statuses:
+     *   - not_submitted: no documents uploaded yet
+     *   - pending: documents submitted, awaiting admin review
+     *   - approved: admin approved
+     *   - rejected: admin rejected (includes reason)
+     */
+    @GetMapping("/status")
+    public Map<String, Object> status(@AuthenticationPrincipal UserDetails principal) {
+        User user = userRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        GuideProfile gp = guideProfileRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Guide profile missing"));
+
+        Map<String, Object> result = new LinkedHashMap<>();
+
+        if (Boolean.TRUE.equals(gp.getIdVerified())) {
+            result.put("status", "approved");
+            result.put("verifiedAt", gp.getIdVerifiedAtUtc());
+        } else if (gp.getVerificationRejectedReason() != null
+                   && !gp.getVerificationRejectedReason().isBlank()) {
+            result.put("status", "rejected");
+            result.put("rejectionReason", gp.getVerificationRejectedReason());
+        } else if (gp.getVerificationSubmittedAtUtc() != null) {
+            result.put("status", "pending");
+        } else {
+            result.put("status", "not_submitted");
+        }
+
+        result.put("documentType", gp.getIdDocumentType());
+        result.put("submittedAt", gp.getVerificationSubmittedAtUtc());
+        return result;
+    }
 
     @PostMapping("/submit")
     public void submit(@AuthenticationPrincipal UserDetails principal,

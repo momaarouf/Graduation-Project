@@ -43,7 +43,6 @@ import {
   Flag,
   MoreVertical
 } from 'lucide-react'
-import PageLayout from '@/src/components/layout/PageLayout'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -282,7 +281,7 @@ export default function BookingDetailsPage({ params }: BookingDetailsPageProps) 
 
   if (!booking) {
     return (
-      <PageLayout>
+      <>
         <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
           <div className="text-center">
             <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
@@ -308,7 +307,7 @@ export default function BookingDetailsPage({ params }: BookingDetailsPageProps) 
             </button>
           </div>
         </div>
-      </PageLayout>
+      </>
     )
   }
 
@@ -361,7 +360,7 @@ export default function BookingDetailsPage({ params }: BookingDetailsPageProps) 
   }
 
   return (
-    <PageLayout>
+    <>
       {/* Page offset */}
       <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
         
@@ -828,6 +827,6 @@ export default function BookingDetailsPage({ params }: BookingDetailsPageProps) 
           </div>
         </div>
       </div>
-    </PageLayout>
+    </>
   )
 }

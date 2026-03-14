@@ -61,7 +61,6 @@ import {
   Repeat,
   CalendarRange
 } from 'lucide-react'
-import PageLayout from '@/src/components/layout/PageLayout'
 // ============================================================================
 // PROPS INTERFACE - ADD THIS AFTER IMPORTS
 // ============================================================================
@@ -1587,7 +1586,7 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
   }
 
   return (
-    <PageLayout>
+    <>
       {/* Page offset */}
       <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
         
@@ -1721,7 +1720,7 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
           )}
         </div>
       </div>
-    </PageLayout>
+    </>
   )
 
 }

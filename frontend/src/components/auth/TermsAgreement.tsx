@@ -49,13 +49,13 @@ import { UserRole } from '@/src/types/auth.types'
 // ============================================================================
 
 interface TermsAgreementProps {
-    /** Callback when form is successfully submitted */
-    onSubmit: () => Promise<void>
-    /** Callback to go back to previous step */
-    onBack: () => void
-    /** Is the form currently submitting */
-    isSubmitting?: boolean
+  onSubmit: () => Promise<void>;
+  onBack: () => void;
+  isSubmitting?: boolean;
+  serverErrors?: Record<string, string>;
 }
+
+
 
 // ============================================================================
 // CONSTANTS - Terms Sections
@@ -180,7 +180,8 @@ function TermsSection({ section, isExpanded, onToggle }: TermsSectionProps) {
 export default function TermsAgreement({ 
     onSubmit, 
     onBack, 
-    isSubmitting = false 
+    isSubmitting = false ,
+    serverErrors = {}
 }: TermsAgreementProps) {
     const { data, updateField, errors } = useSignup()
     
@@ -463,7 +464,15 @@ export default function TermsAgreement({
                             </p>
                         </div>
                     )}
-
+                    {/* ========================================
+    SERVER ERRORS
+    ======================================== */}
+{serverErrors?.general && (
+  <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2">
+    <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+    <p className="text-xs text-red-700 dark:text-red-300">{serverErrors.general}</p>
+  </div>
+)}
                     {/* ========================================
                         FORM ACTIONS
                         ======================================== */}

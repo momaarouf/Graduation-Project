@@ -22,7 +22,7 @@ public class TravelerCompleteProfileRequest {
     private String city;
 
     private String nationality;     // optional
-    @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "dateOfBirth must be in YYYY-MM-DD format")
+    @Pattern(regexp = "(^$|^\\d{4}-\\d{2}-\\d{2}$)", message = "dateOfBirth must be in YYYY-MM-DD format")
     private String dateOfBirth;     // optional yyyy-mm-dd
     private List<String> preferences; // optional
 }

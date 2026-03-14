@@ -45,7 +45,6 @@ import {
   Star,
   MoreVertical
 } from 'lucide-react'
-import PageLayout from '@/src/components/layout/PageLayout'
 import toast from 'react-hot-toast'
 
 // ============================================================================
@@ -286,7 +285,7 @@ export default function GuideBookingDetailPage() {
   const [showHeaderMenu, setShowHeaderMenu] = useState(false)
   if (!booking) {
     return (
-      <PageLayout>
+      <>
         <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
           <div className="text-center">
             <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
@@ -301,7 +300,7 @@ export default function GuideBookingDetailPage() {
             </button>
           </div>
         </div>
-      </PageLayout>
+      </>
     )
   }
 
@@ -412,7 +411,7 @@ This invoice is for your records.
   toast.success('Invoice downloaded!')
 }
   return (
-    <PageLayout>
+    <>
       <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
         <div className="container-safe mx-auto max-w-6xl py-8 sm:py-10">
           
@@ -803,6 +802,6 @@ This invoice is for your records.
           </div>
         </div>
       </div>
-    </PageLayout>
+    </>
   )
 }
