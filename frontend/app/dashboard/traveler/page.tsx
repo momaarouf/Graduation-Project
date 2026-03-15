@@ -22,6 +22,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import { travelerGetProfile, TravelerProfileResponse } from '@/src/lib/api/traveler'
+import { getGreeting } from '@/src/lib/greeting'
 import OnboardingBannerWrapper from '@/src/components/dashboard/OnboardingBannerWrapper'
 import { toast } from 'react-hot-toast'
 
@@ -132,7 +133,7 @@ export default function TravelerDashboardPage() {
                             <div>
                                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
                                     <Sparkles className="w-3 h-3" />
-                                    Welcome Back
+                                    {getGreeting()}
                                 </div>
                                 <h1 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white tracking-tight leading-tight">
                                     Hi, {user?.fullName?.split(' ')[0] || 'Traveler'}! <span className="text-blue-600">Explore</span> more.

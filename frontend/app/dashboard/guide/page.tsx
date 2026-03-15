@@ -27,6 +27,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import apiClient from '@/src/lib/api/client'
+import { getGreeting } from '@/src/lib/greeting'
 import OnboardingBanner from '@/src/components/dashboard/OnboardingBanner'
 import { toast } from 'react-hot-toast'
 
@@ -184,7 +185,7 @@ export default function GuideDashboardPage() {
   }
 
   const impactScore = profile?.impactScore || 0
-  const isIdVerified = profile?.verificationStatus === 'approved'
+  const isIdVerified = ['approved', 'verified', 'pending'].includes(profile?.verificationStatus || '')
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950/50">
@@ -216,7 +217,7 @@ export default function GuideDashboardPage() {
                 <div className="flex items-center gap-3 mb-4">
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full text-xs font-bold uppercase tracking-widest">
                     <Sparkles className="w-3 h-3" />
-                    Good Morning
+                    {getGreeting()}
                   </div>
                   <VerificationBadge status={profile?.verificationStatus || 'not_submitted'} />
                 </div>

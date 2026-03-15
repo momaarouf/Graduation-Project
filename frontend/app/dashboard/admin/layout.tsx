@@ -198,7 +198,7 @@ export default function AdminLayout({
   const pathname = usePathname()
   const router = useRouter()
   const { user, logout } = useAuth()
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(true)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [badges, setBadges] = useState<Record<string, number>>({})
@@ -219,7 +219,24 @@ export default function AdminLayout({
   // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true)
+    
+    // Load sidebar preference from localStorage
+    try {
+      const saved = localStorage.getItem('safaribub-admin-sidebar')
+      if (saved !== null) {
+        setIsCollapsed(JSON.parse(saved))
+      }
+    } catch (error) {
+      console.warn('Failed to load admin sidebar state:', error)
+    }
   }, [])
+
+  // Save sidebar preference
+  const toggleCollapse = () => {
+    const newState = !isCollapsed
+    setIsCollapsed(newState)
+    localStorage.setItem('safaribub-admin-sidebar', JSON.stringify(newState))
+  }
 
   const handleLogout = async () => {
     try {
@@ -247,7 +264,7 @@ export default function AdminLayout({
         <div className="flex flex-1 relative">
           {/* Sidebar - Desktop */}
           <aside className={`
-            hidden lg:block sticky top-0 h-screen
+            hidden lg:block fixed left-0 top-0 h-screen
             bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800
             transition-all duration-300 overflow-x-hidden overflow-y-auto
             ${isCollapsed ? 'w-20' : 'w-64'}
@@ -258,7 +275,7 @@ export default function AdminLayout({
               {/* Toggle Button */}
               <div className="flex justify-center p-3">
                 <button
-                  onClick={() => setIsCollapsed(!isCollapsed)}
+                  onClick={toggleCollapse}
                   className={`flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${isCollapsed ? 'mx-auto' : 'ml-auto mr-3'}`}
                 >
                   {isCollapsed ? (
@@ -395,7 +412,7 @@ export default function AdminLayout({
           )}
 
           {/* Main Content */}
-          <main className="flex-1 min-w-0 relative">
+          <main className="flex-1 min-w-0 relative" style={{ marginLeft: mounted && !isMobileOpen ? (isCollapsed ? '5rem' : '16rem') : '0' }}>
             {/* Mobile Header Toggle */}
             <div className="lg:hidden h-14 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center px-4 sticky top-0 z-30">
                <button onClick={() => setIsMobileOpen(true)} className="p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">

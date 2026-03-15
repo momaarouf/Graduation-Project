@@ -14,7 +14,8 @@ import {
   CheckCircle2,
   MoreVertical,
   Search,
-  History
+  History,
+  Sparkles
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -29,6 +30,7 @@ import {
   AuditEventResponse
 } from '@/src/lib/api/admin'
 import { toast } from 'react-hot-toast'
+import { getGreeting } from '@/src/lib/greeting'
 
 // ==================== STAT CARD COMPONENT ====================
 
@@ -137,6 +139,10 @@ export default function AdminDashboardPage() {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+            <Sparkles className="w-3 h-3" />
+            {getGreeting()}
+          </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Platform Overview</h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
             Real-time monitoring and administrative controls

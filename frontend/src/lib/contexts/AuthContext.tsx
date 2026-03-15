@@ -19,6 +19,7 @@ import {
   MeResponse,
   authMe,
 } from '@/src/lib/api/auth';
+import LoadingOverlay from '@/src/components/ui/LoadingOverlay';
 
 interface User {
   userId: string;
@@ -35,6 +36,8 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  isProcessing: boolean;
+  processingMessage: string;
   // Authentication methods
   register: (email: string, password: string, role: 'Traveler' | 'Guide', fullName: string, agreedToTerms: boolean, agreedToPrivacy: boolean, newsletterOptIn: boolean, marketingOptIn: boolean) => Promise<void>;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
@@ -68,6 +71,8 @@ const normalizeUser = (raw: MeResponse): User => ({
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingMessage, setProcessingMessage] = useState('Loading...');
   const router = useRouter();
 
   // Bootstrap on app mount: restore session from refresh token + access token if available
@@ -127,48 +132,70 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     newsletterOptIn: boolean,
     marketingOptIn: boolean
   ) => {
-    const response = await authRegister({
-      email,
-      password,
-      role,
-      fullName,
-      agreedToTerms,
-      agreedToPrivacy,
-      newsletterOptIn,
-      marketingOptIn,
-    });
-    setAccessToken(response.token);
-    // Fetch full user info after signup; normalize role from Pascal to uppercase
-    const userRes = await apiAuthMe();
-    const normalized = normalizeUser(userRes);
-    setUser(normalized);
-    // After signup, send to complete-profile so new users can fill in their details.
-    // profileCompleted is false for brand new users. If somehow already complete, go to dashboard.
-    if (normalized.role === 'Admin') {
-      router.push('/dashboard/admin');
-    } else if (normalized.role === 'Guide') {
-      router.push(normalized.profileCompleted ? '/dashboard/guide' : '/dashboard/guide/complete-profile');
-    } else {
-      router.push(normalized.profileCompleted ? '/dashboard/traveler' : '/dashboard/traveler/complete-profile');
+    try {
+      const response = await authRegister({
+        email,
+        password,
+        role,
+        fullName,
+        agreedToTerms,
+        agreedToPrivacy,
+        newsletterOptIn,
+        marketingOptIn,
+      });
+      
+      // Only show full-screen overlay AFTER the registration is accepted by the server
+      setProcessingMessage('Creating your adventure...');
+      setIsProcessing(true);
+
+      setAccessToken(response.token);
+      // Fetch full user info after signup; normalize role from Pascal to uppercase
+      const userRes = await apiAuthMe();
+      const normalized = normalizeUser(userRes);
+      setUser(normalized);
+      // After signup, send to complete-profile so new users can fill in their details.
+      // profileCompleted is false for brand new users. If somehow already complete, go to dashboard.
+      if (normalized.role === 'Admin') {
+        router.push('/dashboard/admin');
+      } else if (normalized.role === 'Guide') {
+        router.push(normalized.profileCompleted ? '/dashboard/guide' : '/dashboard/guide/complete-profile');
+      } else {
+        router.push(normalized.profileCompleted ? '/dashboard/traveler' : '/dashboard/traveler/complete-profile');
+      }
+    } finally {
+      // Don't set isProcessing(false) immediately because redirect might not be instant
+      // We'll let the next page mount handle the UI
+      setTimeout(() => setIsProcessing(false), 2000);
     }
   };
 
   // Login with email and password
   const login = async (email: string, password: string, rememberMe = false) => {
-    const response = await apiAuthLogin({ email, password, rememberMe });
-    setAccessToken(response.token);
-    // Fetch full user info after login; normalize role from Pascal to uppercase
-    const userRes = await apiAuthMe();
-    const normalized = normalizeUser(userRes);
-    setUser(normalized);
-    // Redirect based on role
-    if (normalized.role === 'Admin') router.push('/dashboard/admin');
-    else if (normalized.role === 'Guide') router.push('/dashboard/guide');
-    else router.push('/dashboard/traveler');
+    try {
+      const response = await apiAuthLogin({ email, password, rememberMe });
+      
+      // Only show full-screen overlay AFTER the login is accepted by the server
+      setProcessingMessage('Securing your session...');
+      setIsProcessing(true);
+
+      setAccessToken(response.token);
+      // Fetch full user info after login; normalize role from Pascal to uppercase
+      const userRes = await apiAuthMe();
+      const normalized = normalizeUser(userRes);
+      setUser(normalized);
+      // Redirect based on role
+      if (normalized.role === 'Admin') router.push('/dashboard/admin');
+      else if (normalized.role === 'Guide') router.push('/dashboard/guide');
+      else router.push('/dashboard/traveler');
+    } finally {
+      setTimeout(() => setIsProcessing(false), 2000);
+    }
   };
 
   // Logout from current device - revokes refresh token
   const logout = async () => {
+    setProcessingMessage('Logging out...');
+    setIsProcessing(true);
     try {
       await apiAuthLogout();
     } catch (error) {
@@ -177,6 +204,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       clearAccessToken();
       setUser(null);
       router.push('/auth/login');
+      setTimeout(() => setIsProcessing(false), 1500);
     }
   };
 
@@ -229,11 +257,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Reset password with token from email
   const resetPassword = async (token: string, newPassword: string) => {
-    await apiPasswordReset({ token, newPassword });
-    // User must login again with new password
-    clearAccessToken();
-    setUser(null);
-    router.push('/auth/login');
+    setProcessingMessage('Resetting your password...');
+    setIsProcessing(true);
+    try {
+      await apiPasswordReset({ token, newPassword });
+      // User must login again with new password
+      clearAccessToken();
+      setUser(null);
+      router.push('/auth/login');
+    } finally {
+      setTimeout(() => setIsProcessing(false), 2000);
+    }
   };
 
   // Change password while logged in
@@ -247,10 +281,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    * then fetches /me to fully hydrate the user in context.
    */
   const loginWithToken = async (token: string): Promise<void> => {
-    setAccessToken(token);
-    const userRes = await authMe();
-    const normalized = normalizeUser(userRes);
-    setUser(normalized);
+    setProcessingMessage('Authenticating...');
+    setIsProcessing(true);
+    try {
+      setAccessToken(token);
+      const userRes = await authMe();
+      const normalized = normalizeUser(userRes);
+      setUser(normalized);
+    } finally {
+      setTimeout(() => setIsProcessing(false), 2000);
+    }
   };
 
   /** Re-fetch user data from /api/auth/me to refresh client state */
@@ -278,8 +318,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         changePassword,
         loginWithToken,
         refetchUser,
+        isProcessing,
+        processingMessage,
       }}
     >
+      <LoadingOverlay isVisible={isProcessing} message={processingMessage} />
       {children}
     </AuthContext.Provider>
   );

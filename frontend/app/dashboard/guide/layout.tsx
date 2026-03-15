@@ -142,7 +142,7 @@ export default function GuideDashboardLayout({
 }) {
   const pathname = usePathname()
   const { user, logout } = useAuth()
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(true)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
 
@@ -362,7 +362,7 @@ export default function GuideDashboardLayout({
         {/* ========================================
             MAIN CONTENT
             ======================================== */}
-        <main className="flex-1 min-w-0 transition-all duration-300 w-full" style={{ marginLeft: isCollapsed ? '5rem' : '16rem' }}>
+        <main className="flex-1 min-w-0 transition-all duration-300 w-full" style={{ marginLeft: mounted && !isSidebarOpen ? (isCollapsed ? '5rem' : '16rem') : '0' }}>
           {/* Mobile Header in Main Content */}
           <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 mb-4">
             <h1 className="font-bold text-gray-900 dark:text-white">Guide Dashboard</h1>

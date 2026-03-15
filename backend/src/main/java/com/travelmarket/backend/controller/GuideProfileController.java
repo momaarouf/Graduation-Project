@@ -186,10 +186,7 @@ public class GuideProfileController {
                 req.getLanguages() != null &&
                 !req.getLanguages().isEmpty();
 
-        // Use new verification fields, but allow legacy fallback for older schema.
-        boolean idSubmitted = hasSubmittedIdDocs(gp);
-
-        user.setProfileCompleted(agreementsOk && requiredOk && idSubmitted);
+        user.setProfileCompleted(agreementsOk && requiredOk);
         userRepository.save(user);
     }
 
