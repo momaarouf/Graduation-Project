@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+import com.travelmarket.backend.tour.entity.TourOccurrence;
+
 @Entity
 @Table(name = "bookings")
 @Getter

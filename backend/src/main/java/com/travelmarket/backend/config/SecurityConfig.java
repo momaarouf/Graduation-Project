@@ -57,6 +57,9 @@ public class SecurityConfig {
                         // /me must be authenticated
                         .requestMatchers("/api/auth/me").authenticated()
 
+                        // Public tour browsing — no login required
+                        .requestMatchers("/api/public/**").permitAll()
+
                         // Role-based protection
                         .requestMatchers("/api/admin/**").hasRole("Admin")
                         .requestMatchers("/api/guide/**").hasRole("Guide")
