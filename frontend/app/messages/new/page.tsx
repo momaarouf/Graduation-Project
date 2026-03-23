@@ -45,7 +45,7 @@ interface Recipient {
   id: string
   name: string
   avatar?: string
-  role: 'guide' | 'traveler'
+  userRole: 'GUIDE' | 'TRAVELER'
   rating?: number
   location?: string
   verified?: boolean
@@ -62,7 +62,7 @@ const MOCK_RECIPIENTS: Record<string, Recipient> = {
     id: 'guide-123',
     name: 'Mehmet Yilmaz',
     avatar: '/images/guides/mehmet.jpg',
-    role: 'guide',
+    userRole: 'GUIDE',
     rating: 4.9,
     location: 'Istanbul, Turkey',
     verified: true
@@ -71,7 +71,7 @@ const MOCK_RECIPIENTS: Record<string, Recipient> = {
     id: 'guide-456',
     name: 'Layla Hassan',
     avatar: '/images/guides/layla.jpg',
-    role: 'guide',
+    userRole: 'GUIDE',
     rating: 4.8,
     location: 'Beirut, Lebanon',
     verified: true
@@ -80,7 +80,7 @@ const MOCK_RECIPIENTS: Record<string, Recipient> = {
     id: 'traveler-123',
     name: 'Ahmed Khan',
     avatar: '/images/travelers/ahmed.jpg',
-    role: 'traveler',
+    userRole: 'TRAVELER',
     location: 'Dubai, UAE',
     verified: true
   }
@@ -124,22 +124,14 @@ export default function NewMessagePage() {
     }
   }, [recipientId, tourParam])
 
-  const handleSend = () => {
-    if (!recipient) {
-      toast.error('Please select a recipient')
-      return
-    }
-
-    if (!message.trim()) {
-      toast.error('Please enter a message')
-      return
-    }
+    const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!message.trim() || !recipient || isSending) return
 
     setIsSending(true)
-
     // Simulate API call
     setTimeout(() => {
-      setIsSending(false)
+      setIsSending(true)
       toast.success('Message sent successfully')
       router.push('/messages')
     }, 1500)
@@ -226,14 +218,14 @@ export default function NewMessagePage() {
                     {recipient.name}
                   </h2>
                   <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-                    <span className="capitalize">{recipient.role}</span>
+                    <span className="capitalize">{recipient.userRole.toLowerCase()}</span>
                     {recipient.rating && (
                       <>
                         <span>•</span>
                         <span className="flex items-center gap-1">
                           <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                           {recipient.rating}
-                        </span>
+                        </span >
                       </>
                     )}
                     {recipient.location && (
@@ -246,7 +238,7 @@ export default function NewMessagePage() {
                 </div>
 
                 <Link
-                  href={`/${recipient.role === 'guide' ? 'guides' : 'travelers'}/${recipient.id}`}
+                  href={`/${recipient.userRole === 'GUIDE' ? 'guides' : 'travelers'}/${recipient.id}`}
                   className="px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
                 >
                   View Profile
@@ -310,7 +302,7 @@ export default function NewMessagePage() {
               )}
 
               {/* Quick Templates */}
-              {recipient.role === 'guide' && (
+              {recipient.userRole === 'GUIDE' && (
                 <div className="pt-2">
                   <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
                     Quick questions:

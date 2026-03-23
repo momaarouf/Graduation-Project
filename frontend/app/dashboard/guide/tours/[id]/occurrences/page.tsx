@@ -1,31 +1,12 @@
-// ============================================================================
-// TOUR OCCURRENCES - MANAGE RECURRING TOUR DATES
-// ============================================================================
-// LOCATION: /frontend/src/app/dashboard/guide/tours/[id]/occurrences/page.tsx
-// 
-// PURPOSE: Manage all occurrences of a recurring tour
-// 
-// FEATURES:
-// - List all occurrences (past and future)
-// - Filter by status (scheduled, completed, cancelled)
-// - Edit individual occurrence dates/capacity
-// - Cancel/reschedule occurrences
-// - View bookings per occurrence
-// - Add new occurrences
-// - Bulk actions for recurring patterns
-// ============================================================================
-
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   Calendar,
   Clock,
   Users,
-  DollarSign,
   CheckCircle,
   XCircle,
   AlertCircle,
@@ -35,194 +16,219 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
-  Filter,
   RefreshCw,
   MoreVertical,
-  Copy,
   PauseCircle,
   PlayCircle,
   CalendarRange,
   Repeat,
-  Download
+  DollarSign,
+  MapPin,
+  X,
+  PlusCircle
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import CalendarPicker from '@/src/components/ui/CalendarPicker'
+import { 
+  getGuideTour, 
+  getGuideOccurrences, 
+  createOccurrence, 
+  updateOccurrence, 
+  deleteOccurrence 
+} from '@/src/lib/api/tours'
+import { 
+  TourTemplateResponse, 
+  TourOccurrenceResponse, 
+  TourOccurrenceStatus,
+  CreateOccurrenceRequest
+} from '@/src/lib/types/tour.types'
 
 // ============================================================================
-// TYPE DEFINITIONS
+// UTILITIES
 // ============================================================================
 
-type OccurrenceStatus = 'scheduled' | 'completed' | 'cancelled' | 'paused'
-
-interface TourOccurrence {
-  id: string
-  date: string
-  startTime: string
-  endTime: string
-  status: OccurrenceStatus
-  minCapacity: number
-  maxCapacity: number
-  currentBookings: number
-  totalRevenue: number
-  guideEarnings: number
-  meetingPoint?: string
-  specialInstructions?: string
-  isWaitlistEnabled: boolean
-  waitlistCount: number
+const toUTC = (localDateTime: string) => {
+  if (!localDateTime) return ''
+  return new Date(localDateTime).toISOString()
 }
 
-interface TourInfo {
-  id: string
-  title: string
-  image: string
-  location: string
-  basePrice: number
-  currency: string
-  duration: string
-  isRecurring: boolean
-  recurrencePattern: 'daily' | 'weekly' | 'monthly' | 'custom'
-  recurringDays?: string[]
-  meetingPoint?: string
+const fromUTC = (utcDateTime: string) => {
+  if (!utcDateTime) return ''
+  const d = new Date(utcDateTime)
+  const pad = (n: number) => n.toString().padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
-// ============================================================================
-// MOCK DATA
-// ============================================================================
-
-const MOCK_TOUR: TourInfo = {
-  id: '1',
-  title: 'Ottoman Heritage: Topkapi Palace & Hagia Sophia',
-  image: '/images/tours/istanbul-ottoman.jpg',
-  location: 'Istanbul, Turkey',
-  basePrice: 89,
-  currency: 'USD',
-  duration: '4 hours',
-  isRecurring: true,
-  recurrencePattern: 'weekly',
-  recurringDays: ['Monday', 'Wednesday', 'Friday'],
-  meetingPoint: 'Sultanahmet Square Fountain'
+const formatDateTime = (isoString: string) => {
+  return new Date(isoString).toLocaleString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  })
 }
-
-const MOCK_OCCURRENCES: TourOccurrence[] = [
-  {
-    id: 'occ1',
-    date: '2026-04-15',
-    startTime: '09:00',
-    endTime: '13:00',
-    status: 'scheduled',
-    minCapacity: 2,
-    maxCapacity: 8,
-    currentBookings: 3,
-    totalRevenue: 267,
-    guideEarnings: 240,
-    meetingPoint: 'Sultanahmet Square Fountain',
-    isWaitlistEnabled: true,
-    waitlistCount: 2
-  },
-  {
-    id: 'occ2',
-    date: '2026-04-17',
-    startTime: '09:00',
-    endTime: '13:00',
-    status: 'scheduled',
-    minCapacity: 2,
-    maxCapacity: 8,
-    currentBookings: 5,
-    totalRevenue: 445,
-    guideEarnings: 400,
-    meetingPoint: 'Sultanahmet Square Fountain',
-    isWaitlistEnabled: true,
-    waitlistCount: 0
-  },
-  {
-    id: 'occ3',
-    date: '2026-04-19',
-    startTime: '09:00',
-    endTime: '13:00',
-    status: 'scheduled',
-    minCapacity: 2,
-    maxCapacity: 8,
-    currentBookings: 1,
-    totalRevenue: 89,
-    guideEarnings: 80,
-    meetingPoint: 'Sultanahmet Square Fountain',
-    isWaitlistEnabled: true,
-    waitlistCount: 0
-  },
-  {
-    id: 'occ4',
-    date: '2026-04-12',
-    startTime: '09:00',
-    endTime: '13:00',
-    status: 'completed',
-    minCapacity: 2,
-    maxCapacity: 8,
-    currentBookings: 6,
-    totalRevenue: 534,
-    guideEarnings: 480,
-    meetingPoint: 'Sultanahmet Square Fountain',
-    isWaitlistEnabled: false,
-    waitlistCount: 0
-  },
-  {
-    id: 'occ5',
-    date: '2026-04-10',
-    startTime: '09:00',
-    endTime: '13:00',
-    status: 'cancelled',
-    minCapacity: 2,
-    maxCapacity: 8,
-    currentBookings: 0,
-    totalRevenue: 0,
-    guideEarnings: 0,
-    meetingPoint: 'Sultanahmet Square Fountain',
-    isWaitlistEnabled: false,
-    waitlistCount: 0
-  }
-]
 
 // ============================================================================
 // STATUS BADGE COMPONENT
 // ============================================================================
 
-const StatusBadge = ({ status }: { status: OccurrenceStatus }) => {
-  const styles = {
-    scheduled: {
+const StatusBadge = ({ status }: { status: TourOccurrenceStatus }) => {
+  const styles: Record<TourOccurrenceStatus, { bg: string, text: string, border: string, icon: any }> = {
+    SCHEDULED: {
       bg: 'bg-emerald-50 dark:bg-emerald-500/10',
       text: 'text-emerald-700 dark:text-emerald-400',
       border: 'border-emerald-200 dark:border-emerald-800/50',
-      icon: Calendar,
-      label: 'Scheduled'
+      icon: Calendar
     },
-    completed: {
-      bg: 'bg-blue-50 dark:bg-blue-500/10',
-      text: 'text-blue-700 dark:text-blue-400',
-      border: 'border-blue-200 dark:border-blue-800/50',
-      icon: CheckCircle,
-      label: 'Completed'
-    },
-    cancelled: {
-      bg: 'bg-red-50 dark:bg-red-500/10',
-      text: 'text-red-700 dark:text-red-400',
-      border: 'border-red-200 dark:border-red-800/50',
-      icon: XCircle,
-      label: 'Cancelled'
-    },
-    paused: {
+    FULL: {
       bg: 'bg-amber-50 dark:bg-amber-500/10',
       text: 'text-amber-700 dark:text-amber-400',
       border: 'border-amber-200 dark:border-amber-800/50',
-      icon: PauseCircle,
-      label: 'Paused'
+      icon: Users
+    },
+    COMPLETED: {
+      bg: 'bg-blue-50 dark:bg-blue-500/10',
+      text: 'text-blue-700 dark:text-blue-400',
+      border: 'border-blue-200 dark:border-blue-800/50',
+      icon: CheckCircle
+    },
+    CANCELLED: {
+      bg: 'bg-red-50 dark:bg-red-500/10',
+      text: 'text-red-700 dark:text-red-400',
+      border: 'border-red-200 dark:border-red-800/50',
+      icon: XCircle
     }
   }
 
-  const { bg, text, border, icon: Icon, label } = styles[status]
+  const config = styles[status] || styles.SCHEDULED
 
   return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full border ${bg} ${text} ${border}`}>
-      <Icon className="w-3.5 h-3.5" />
-      {label}
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-full border ${config.bg} ${config.text} ${config.border}`}>
+      <config.icon className="w-3.5 h-3.5" />
+      {status}
     </span>
+  )
+}
+
+// ============================================================================
+// MODAL: ADD/EDIT OCCURRENCE
+// ============================================================================
+
+interface OccurrenceModalProps {
+  onClose: () => void
+  onSave: (data: CreateOccurrenceRequest) => Promise<void>
+  initialData?: TourOccurrenceResponse | null
+  template: TourTemplateResponse
+}
+
+const OccurrenceModal = ({ onClose, onSave, initialData, template }: OccurrenceModalProps) => {
+  const [loading, setLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    startTime: initialData ? fromUTC(initialData.startTimeUtc) : '',
+    endTime: initialData ? fromUTC(initialData.endTimeUtc) : ''
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!formData.startTime || !formData.endTime) {
+      toast.error('Both start and end times are required')
+      return
+    }
+
+    setLoading(true)
+    try {
+      await onSave({
+        startTimeUtc: toUTC(formData.startTime),
+        endTimeUtc: toUTC(formData.endTime)
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-md bg-white dark:bg-gray-950 rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800 animate-in zoom-in-95 duration-200">
+        <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-white/5">
+          <h3 className="text-xl font-black text-gray-900 dark:text-white">
+            {initialData ? 'Edit Date' : 'Schedule New Date'}
+          </h3>
+          <button onClick={onClose} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-500">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">
+                Start Date & Time
+              </label>
+              <div className="relative group">
+                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
+                <input
+                  type="datetime-local"
+                  required
+                  value={formData.startTime}
+                  onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                  className="w-full h-12 pl-12 pr-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl text-sm font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/50"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">
+                End Date & Time
+              </label>
+              <div className="relative group">
+                <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors pointer-events-none" />
+                <input
+                  type="datetime-local"
+                  required
+                  value={formData.endTime}
+                  onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                  className="w-full h-12 pl-12 pr-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl text-sm font-bold text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/50"
+                />
+              </div>
+              {formData.startTime && formData.endTime && new Date(formData.endTime) <= new Date(formData.startTime) && (
+                <p className="mt-2 text-[10px] font-bold text-red-500 uppercase tracking-wider">
+                  ⚠️ End time must be after start time
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="p-4 bg-blue-50/50 dark:bg-blue-500/10 rounded-2xl border border-blue-100 dark:border-blue-900/30">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase">Capacity Rule</span>
+              <Users className="w-3.5 h-3.5 text-blue-400" />
+            </div>
+            <p className="text-xs text-blue-700 dark:text-blue-300 font-bold">
+              Inherited from template: {template.minCapacity}-{template.maxCapacity} Guests
+            </p>
+          </div>
+
+          <div className="pt-4 flex gap-3">
+             <button
+               type="button"
+               onClick={onClose}
+               className="flex-1 h-12 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all text-sm"
+             >
+               Cancel
+             </button>
+              <button
+                type="submit"
+                disabled={Boolean(loading || (formData.startTime && formData.endTime && new Date(formData.endTime) <= new Date(formData.startTime)))}
+                className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              >
+               {loading ? <RefreshCw className="w-5 h-5 animate-spin mx-auto" /> : (initialData ? 'Update Date' : 'Schedule Date')}
+             </button>
+          </div>
+        </form>
+      </div>
+    </div>
   )
 }
 
@@ -230,177 +236,281 @@ const StatusBadge = ({ status }: { status: OccurrenceStatus }) => {
 // OCCURRENCE CARD COMPONENT
 // ============================================================================
 
-const OccurrenceCard = ({ occurrence, onAction }: { occurrence: TourOccurrence; onAction: (action: string, id: string) => void }) => {
+const OccurrenceCard = ({ 
+  occurrence, 
+  onAction 
+}: { 
+  occurrence: TourOccurrenceResponse; 
+  onAction: (action: string, id: number) => void 
+}) => {
   const [showMenu, setShowMenu] = useState(false)
-  
-  const date = new Date(occurrence.date)
-  const formattedDate = date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric'
-  })
-
-  const capacityPercentage = (occurrence.currentBookings / occurrence.maxCapacity) * 100
-  const isAlmostFull = capacityPercentage >= 80
-  const isBelowMinimum = occurrence.currentBookings < occurrence.minCapacity
+  const capacityPercentage = (occurrence.seatsReserved / occurrence.maxCapacity) * 100
+  const isFull = occurrence.status === 'FULL' || occurrence.availableSeats === 0
+  const isPast = new Date(occurrence.startTimeUtc) < new Date()
 
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden hover:shadow-lg transition-all">
+    <div className={`group bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 ${isPast ? 'opacity-70 grayscale-[0.3]' : ''}`}>
       <div className="p-5">
-        {/* Header */}
         <div className="flex items-start justify-between mb-4">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
-              <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <div className="flex items-start gap-4">
+             <div className="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-2xl flex flex-col items-center justify-center border border-gray-100 dark:border-gray-700 shadow-inner group-hover:scale-110 transition-transform">
+                <span className="text-[10px] font-black text-gray-400 uppercase leading-none mb-1">
+                  {new Date(occurrence.startTimeUtc).toLocaleDateString('en-US', { month: 'short' })}
+                </span>
+                <span className="text-lg font-black text-gray-900 dark:text-white leading-none">
+                  {new Date(occurrence.startTimeUtc).getDate()}
+                </span>
+             </div>
+             <div>
+                <h3 className="font-black text-gray-900 dark:text-white tracking-tight leading-tight mb-1">
+                  {new Date(occurrence.startTimeUtc).toLocaleDateString('en-US', { weekday: 'long' })}
+                </h3>
+                <div className="flex items-center gap-2 text-xs font-bold text-gray-500 dark:text-gray-400">
+                  <Clock className="w-3.5 h-3.5 text-blue-500" />
+                  {new Date(occurrence.startTimeUtc).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                  <span>—</span>
+                  {new Date(occurrence.endTimeUtc).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                </div>
+             </div>
+          </div>
+          <div className="flex items-center gap-2">
+             <StatusBadge status={occurrence.status} />
+             <div className="relative">
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-900 transition-colors"
+                >
+                  <MoreVertical className="w-4 h-4" />
+                </button>
+                {showMenu && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
+                    <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-20 py-1 font-bold text-sm overflow-hidden">
+                       <button
+                         onClick={() => { setShowMenu(false); onAction('edit', occurrence.id); }}
+                         className="w-full px-4 py-2.5 text-left hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 flex items-center gap-2 transition-colors"
+                       >
+                         <Edit className="w-4 h-4" /> Edit Time
+                       </button>
+                       <button
+                         onClick={() => { setShowMenu(false); onAction('cancel', occurrence.id); }}
+                         className="w-full px-4 py-2.5 text-left text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
+                       >
+                         <XCircle className="w-4 h-4" /> Cancel Run
+                       </button>
+                       <div className="border-t border-gray-100 dark:border-gray-800 my-1" />
+                       <button
+                         onClick={() => { setShowMenu(false); onAction('delete', occurrence.id); }}
+                         className="w-full px-4 py-2.5 text-left text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2 transition-colors"
+                       >
+                         <Trash2 className="w-4 h-4" /> Force Delete
+                       </button>
+                    </div>
+                  </>
+                )}
+             </div>
+          </div>
+        </div>
+
+        {/* Capacity Indicator */}
+        <div className="mb-4">
+           <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5">
+              <span>Attendance</span>
+              <span className={isFull ? 'text-red-600' : 'text-emerald-600'}>
+                {occurrence.seatsReserved} / {occurrence.maxCapacity} Booked
+              </span>
+           </div>
+           <div className="w-full h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner">
+             <div
+               className={`h-full rounded-full transition-all duration-500 ${
+                 isFull ? 'bg-red-500 shadow-sm shadow-red-500/50' : 'bg-emerald-500 shadow-sm shadow-emerald-500/50'
+               }`}
+               style={{ width: `${capacityPercentage}%` }}
+             />
+           </div>
+        </div>
+
+        {/* Action Link to Bookings */}
+        <Link
+          href={`/dashboard/guide/bookings?occurrence=${occurrence.id}`}
+          className="w-full py-2.5 bg-gray-50 dark:bg-white/5 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all border border-gray-100 dark:border-gray-800 hover:border-blue-100 dark:hover:border-blue-900/30"
+        >
+          <Users className="w-4 h-4" />
+          View Attendee List
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
+// MODAL: BULK SCHEDULE
+// ============================================================================
+
+interface BulkScheduleModalProps {
+  onClose: () => void
+  onSave: (dates: { startTimeUtc: string, endTimeUtc: string }[]) => Promise<void>
+  template: TourTemplateResponse
+}
+
+const BulkScheduleModal = ({ onClose, onSave, template }: BulkScheduleModalProps) => {
+  const [loading, setLoading] = useState(false)
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [startTime, setStartTime] = useState('09:00')
+  const [durationHours, setDurationHours] = useState(2)
+  const [durationMinutes, setDurationMinutes] = useState(0)
+  const [selectedDays, setSelectedDays] = useState<number[]>([]) // 0=Sun, 1=Mon, etc.
+  const [generatedDates, setGeneratedDates] = useState<Date[]>([])
+
+  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+
+  const generateDates = () => {
+    if (!startDate || !endDate || selectedDays.length === 0) {
+      toast.error('Please select range and days')
+      return
+    }
+
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const dates: Date[] = []
+
+    let current = new Date(start)
+    while (current <= end) {
+      if (selectedDays.includes(current.getDay())) {
+        dates.push(new Date(current))
+      }
+      current.setDate(current.getDate() + 1)
+    }
+
+    if (dates.length === 0) {
+      toast.error('No dates found in this range with selected days')
+    } else {
+      setGeneratedDates(dates)
+      toast.success(`Generated ${dates.length} departures`)
+    }
+  }
+
+  const handleSubmit = async () => {
+    if (generatedDates.length === 0) {
+      toast.error('No dates to schedule')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const payloads = generatedDates.map(date => {
+        const start = new Date(date)
+        const [h, m] = startTime.split(':').map(Number)
+        start.setHours(h, m, 0, 0)
+
+        const end = new Date(start)
+        end.setHours(start.getHours() + durationHours, start.getMinutes() + durationMinutes)
+
+        return {
+          startTimeUtc: start.toISOString(),
+          endTimeUtc: end.toISOString()
+        }
+      })
+      await onSave(payloads)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-4xl max-h-[90vh] bg-white dark:bg-gray-950 rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800 animate-in zoom-in-95 duration-200 flex flex-col">
+        <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-white/5">
+          <div className="flex items-center gap-3">
+             <Repeat className="w-6 h-6 text-blue-600" />
+             <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+               Bulk Scheduling Tool
+             </h3>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-500">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Controls */}
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Start Date</label>
+                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full h-11 px-4 bg-gray-50 dark:bg-gray-900 rounded-xl text-sm font-bold border-none focus:ring-2 focus:ring-blue-500/50 transition-all font-mono" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">End Date</label>
+                  <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full h-11 px-4 bg-gray-50 dark:bg-gray-900 rounded-xl text-sm font-bold border-none focus:ring-2 focus:ring-blue-500/50 transition-all font-mono" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Days of Week (Twice a week? Pick 2!)</label>
+                <div className="flex flex-wrap gap-2">
+                  {weekDays.map((day, i) => (
+                    <button
+                      key={day}
+                      onClick={() => setSelectedDays(prev => prev.includes(i) ? prev.filter(d => d !== i) : [...prev, i])}
+                      className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all border-2 ${selectedDays.includes(i) ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-transparent border-gray-100 dark:border-gray-800 text-gray-500'}`}
+                    >
+                      {day}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Departure Time</label>
+                  <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} className="w-full h-11 px-4 bg-gray-50 dark:bg-gray-900 rounded-xl text-sm font-bold border-none focus:ring-2 focus:ring-blue-500/50 transition-all font-mono" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Duration (Hours)</label>
+                  <input type="number" min="1" value={durationHours} onChange={e => setDurationHours(Number(e.target.value))} className="w-full h-11 px-4 bg-gray-50 dark:bg-gray-900 rounded-xl text-sm font-bold border-none focus:ring-2 focus:ring-blue-500/50 transition-all font-mono" />
+                </div>
+              </div>
+
+              <button
+                onClick={generateDates}
+                className="w-full h-12 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-black rounded-2xl text-xs uppercase tracking-widest hover:scale-[1.02] transition-all"
+              >
+                Generate Preview
+              </button>
             </div>
+
+            {/* Preview Calendar */}
             <div>
-              <h3 className="font-bold text-gray-900 dark:text-white">
-                {formattedDate}
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {occurrence.startTime} - {occurrence.endTime}
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Generated Schedule Preview</label>
+              <CalendarPicker
+                selectedDates={generatedDates}
+                onToggleDate={(date) => {
+                  setGeneratedDates(prev => {
+                    const exists = prev.some(d => d.getTime() === date.getTime())
+                    return exists ? prev.filter(d => d.getTime() !== date.getTime()) : [...prev, date]
+                  })
+                }}
+              />
+              <p className="mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">
+                Click a date on the calendar to manually add/remove it
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <StatusBadge status={occurrence.status} />
-            <div className="relative">
-              <button
-                onClick={() => setShowMenu(!showMenu)}
-                className="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-              >
-                <MoreVertical className="w-4 h-4" />
-              </button>
-
-              {showMenu && (
-                <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl z-10 py-1">
-                  <button
-                    onClick={() => {
-                      setShowMenu(false)
-                      onAction('edit', occurrence.id)
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
-                  >
-                    <Edit className="w-4 h-4" />
-                    Edit Occurrence
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowMenu(false)
-                      onAction('duplicate', occurrence.id)
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
-                  >
-                    <Copy className="w-4 h-4" />
-                    Duplicate
-                  </button>
-                  {occurrence.status === 'scheduled' && (
-                    <button
-                      onClick={() => {
-                        setShowMenu(false)
-                        onAction('pause', occurrence.id)
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 flex items-center gap-2"
-                    >
-                      <PauseCircle className="w-4 h-4" />
-                      Pause
-                    </button>
-                  )}
-                  {occurrence.status === 'paused' && (
-                    <button
-                      onClick={() => {
-                        setShowMenu(false)
-                        onAction('resume', occurrence.id)
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 flex items-center gap-2"
-                    >
-                      <PlayCircle className="w-4 h-4" />
-                      Resume
-                    </button>
-                  )}
-                  <button
-                    onClick={() => {
-                      setShowMenu(false)
-                      onAction('cancel', occurrence.id)
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2"
-                  >
-                    <XCircle className="w-4 h-4" />
-                    Cancel
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
 
-        {/* Capacity Bar */}
-        <div className="mb-4">
-          <div className="flex items-center justify-between text-sm mb-1">
-            <span className="text-gray-600 dark:text-gray-400">Capacity</span>
-            <span className="font-medium text-gray-900 dark:text-white">
-              {occurrence.currentBookings} / {occurrence.maxCapacity} booked
-            </span>
-          </div>
-          <div className="w-full h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all ${
-                isBelowMinimum ? 'bg-red-500' : isAlmostFull ? 'bg-amber-500' : 'bg-emerald-500'
-              }`}
-              style={{ width: `${capacityPercentage}%` }}
-            />
-          </div>
-          {isBelowMinimum && (
-            <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-              ⚠️ Below minimum capacity ({occurrence.minCapacity} needed)
-            </p>
-          )}
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-4 mb-4">
-          <div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">Revenue</div>
-            <div className="text-sm font-semibold text-gray-900 dark:text-white">
-              ${occurrence.totalRevenue}
-            </div>
-          </div>
-          <div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">Your Earnings</div>
-            <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-              ${occurrence.guideEarnings}
-            </div>
-          </div>
-          {occurrence.isWaitlistEnabled && occurrence.waitlistCount > 0 && (
-            <div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Waitlist</div>
-              <div className="text-sm font-semibold text-amber-600 dark:text-amber-400">
-                {occurrence.waitlistCount} people
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Meeting Point (if different) */}
-        {occurrence.meetingPoint && occurrence.meetingPoint !== MOCK_TOUR.meetingPoint && (
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-            📍 {occurrence.meetingPoint}
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className="flex gap-2 mt-2">
-          <Link
-            href={`/dashboard/guide/bookings?date=${occurrence.date}`}
-            className="flex-1 text-center px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-          >
-            View Bookings
-          </Link>
+        <div className="p-6 border-t border-gray-100 dark:border-gray-800 flex gap-4">
+          <button onClick={onClose} className="px-6 h-14 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-black rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all text-xs uppercase tracking-widest">
+            Cancel
+          </button>
           <button
-            onClick={() => onAction('edit', occurrence.id)}
-            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors"
+            onClick={handleSubmit}
+            disabled={loading || generatedDates.length === 0}
+            className="flex-1 h-14 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 transition-all disabled:opacity-50 text-xs uppercase tracking-widest flex items-center justify-center gap-2"
           >
-            Edit
+            {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <>Create {generatedDates.length} Departures <PlusCircle className="w-5 h-5" /></>}
           </button>
         </div>
       </div>
@@ -415,221 +525,315 @@ const OccurrenceCard = ({ occurrence, onAction }: { occurrence: TourOccurrence; 
 export default function TourOccurrencesPage() {
   const params = useParams()
   const router = useRouter()
-  const tourId = params.id as string
-  
-  const [filterStatus, setFilterStatus] = useState<OccurrenceStatus | 'all'>('all')
-  const [searchMonth, setSearchMonth] = useState('')
-  const [occurrences, setOccurrences] = useState(MOCK_OCCURRENCES)
-  const [showAddModal, setShowAddModal] = useState(false)
+  const tourId = parseInt(params.id as string)
 
-  // Filter occurrences
-  const filteredOccurrences = useMemo(() => {
-    return occurrences.filter(occ => {
-      if (filterStatus !== 'all' && occ.status !== filterStatus) return false
-      if (searchMonth) {
-        const occMonth = new Date(occ.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-        return occMonth.toLowerCase().includes(searchMonth.toLowerCase())
-      }
-      return true
-    })
-  }, [occurrences, filterStatus, searchMonth])
+  const [tour, setTour] = useState<TourTemplateResponse | null>(null)
+  const [occurrences, setOccurrences] = useState<TourOccurrenceResponse[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
+  const [showBulkModal, setShowBulkModal] = useState(false)
+  const [editingOccId, setEditingOccId] = useState<number | null>(null)
+  const [viewMode, setViewMode] = useState<'grid' | 'calendar'>('grid')
 
-  const handleAction = (action: string, id: string) => {
-    switch (action) {
-      case 'edit':
-        router.push(`/dashboard/guide/tours/${tourId}/occurrences/${id}/edit`)
-        break
-      case 'duplicate':
-        toast.success('Occurrence duplicated')
-        break
-      case 'pause':
-        setOccurrences(prev =>
-          prev.map(occ => occ.id === id ? { ...occ, status: 'paused' } : occ)
-        )
-        toast.success('Occurrence paused')
-        break
-      case 'resume':
-        setOccurrences(prev =>
-          prev.map(occ => occ.id === id ? { ...occ, status: 'scheduled' } : occ)
-        )
-        toast.success('Occurrence resumed')
-        break
-      case 'cancel':
-        if (confirm('Cancel this occurrence? All bookings will be refunded.')) {
-          setOccurrences(prev =>
-            prev.map(occ => occ.id === id ? { ...occ, status: 'cancelled' } : occ)
-          )
-          toast.success('Occurrence cancelled')
-        }
-        break
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      const [tourRes, occRes] = await Promise.all([
+        getGuideTour(tourId),
+        getGuideOccurrences(tourId)
+      ])
+      setTour(tourRes.data)
+      setOccurrences(occRes.data)
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to sync data')
+      router.push('/dashboard/guide/tours')
+    } finally {
+      setLoading(false)
     }
   }
 
-  // Split occurrences into upcoming and past
-  const now = new Date()
-  const upcomingOccurrences = filteredOccurrences.filter(occ => new Date(occ.date) >= now)
-  const pastOccurrences = filteredOccurrences.filter(occ => new Date(occ.date) < now)
+  useEffect(() => {
+    fetchData()
+  }, [tourId])
+
+  const handleAction = async (action: string, id: number) => {
+    if (action === 'edit') {
+      setEditingOccId(id)
+      setShowModal(true)
+      return
+    }
+
+    if (action === 'delete') {
+      if (confirm('Are you sure you want to delete this occurrence? This will orphan any existing bookings.')) {
+        try {
+          await deleteOccurrence(id)
+          toast.success('Occurrence deleted')
+          fetchData()
+        } catch (err: any) {
+          toast.error(err.response?.data?.message || 'Failed to delete')
+        }
+      }
+      return
+    }
+
+    if (action === 'cancel') {
+        try {
+            await updateOccurrence(id, { status: 'CANCELLED' })
+            toast.success('Occurrence cancelled')
+            fetchData()
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || 'Failed to cancel')
+        }
+        return
+    }
+  }
+
+  const handleSave = async (data: CreateOccurrenceRequest) => {
+    try {
+      if (editingOccId) {
+        await updateOccurrence(editingOccId, data)
+        toast.success('Date updated successfully')
+      } else {
+        await createOccurrence(tourId, data)
+        toast.success('Tour date scheduled')
+      }
+      setShowModal(false)
+      fetchData()
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Save failed')
+    }
+  }
+
+  // Grouping logic
+  const upcoming = useMemo(() => 
+    occurrences.filter(o => new Date(o.startTimeUtc) >= new Date() && o.status !== 'CANCELLED')
+    .sort((a,b) => a.startTimeUtc.localeCompare(b.startTimeUtc))
+  , [occurrences])
+
+  const pastAndCancelled = useMemo(() => 
+    occurrences.filter(o => new Date(o.startTimeUtc) < new Date() || o.status === 'CANCELLED')
+    .sort((a,b) => b.startTimeUtc.localeCompare(a.startTimeUtc))
+  , [occurrences])
+
+  const occurrenceDates = useMemo(() => 
+    occurrences.map(o => new Date(o.startTimeUtc))
+  , [occurrences])
+
+  const handleBulkSave = async (payloads: { startTimeUtc: string, endTimeUtc: string }[]) => {
+    try {
+      setLoading(true)
+      toast.loading(`Creating ${payloads.length} departures...`, { id: 'bulk-create' })
+      
+      // We can't do parallel calls easily because the backend might have rate limits or sequential processing requirements
+      // But we can try to batch them
+      for (const payload of payloads) {
+        await createOccurrence(tourId, payload)
+      }
+      
+      toast.success(`${payloads.length} dates scheduled successfully`, { id: 'bulk-create' })
+      setShowBulkModal(false)
+      fetchData()
+    } catch (err: any) {
+      toast.error('Partial failure during bulk scheduling', { id: 'bulk-create' })
+      fetchData()
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center gap-4">
+        <RefreshCw className="w-8 h-8 text-blue-500 animate-spin" />
+        <p className="text-sm font-medium text-gray-500 px-10 text-center font-bold uppercase tracking-widest opacity-50">Syncing Reservation Ledger...</p>
+      </div>
+    )
+  }
+
+  if (!tour) return null
 
   return (
-    <>
-      <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
-        <div className="container-safe mx-auto max-w-7xl py-8 sm:py-10">
+    <div className="pt-14 sm:pt-16 min-h-screen bg-transparent sm:bg-gray-50 dark:sm:bg-gray-950">
+      <div className="container-safe mx-auto max-w-5xl py-8 sm:py-10">
+        
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10">
+          <div>
+             <Link 
+               href={`/dashboard/guide/tours/${tourId}`}
+               className="inline-flex items-center gap-2 text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-4 hover:translate-x-[-4px] transition-transform"
+             >
+               <ChevronLeft className="w-4 h-4" />
+               Tour Summary
+             </Link>
+             <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
+               Schedule & <span className="text-blue-600">Dates</span>
+             </h1>
+             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium max-w-md">
+               Manage departures for <span className="font-black text-gray-900 dark:text-gray-200">"{tour.title}"</span>. 
+               Only published tours are visible to travelers.
+             </p>
+          </div>
           
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Link
-                  href={`/dashboard/guide/tours/${tourId}`}
-                  className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  ← Back to Tour
-                </Link>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                Tour Occurrences
-              </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {MOCK_TOUR.title} • {MOCK_TOUR.location}
-              </p>
-            </div>
+          <div className="flex flex-wrap items-center gap-3">
             <button
-              onClick={() => setShowAddModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all self-start"
+              onClick={() => { setEditingOccId(null); setShowModal(true); }}
+              disabled={tour.status !== 'PUBLISHED'}
+              className="group relative inline-flex items-center gap-3 px-6 py-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-2xl transition-all active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed font-black text-sm uppercase tracking-widest"
             >
-              <Plus className="w-4 h-4" />
-              Add Occurrence
+              <Plus className="w-5 h-5" />
+              Single Date
             </button>
-          </div>
-
-          {/* Recurrence Info */}
-          {MOCK_TOUR.isRecurring && (
-            <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl">
-              <div className="flex items-start gap-3">
-                <Repeat className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
-                    Recurring Tour Schedule
-                  </h3>
-                  <p className="text-sm text-blue-800 dark:text-blue-300">
-                    This tour repeats {MOCK_TOUR.recurrencePattern} on {MOCK_TOUR.recurringDays?.join(', ')}.
-                    Each occurrence can be managed individually.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as OccurrenceStatus | 'all')}
-              className="px-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-            >
-              <option value="all">All Status</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="paused">Paused</option>
-            </select>
-
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                value={searchMonth}
-                onChange={(e) => setSearchMonth(e.target.value)}
-                placeholder="Search by month (e.g., April 2026)..."
-                className="w-full pl-9 pr-4 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
 
             <button
-              onClick={() => {
-                setFilterStatus('all')
-                setSearchMonth('')
-              }}
-              className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center gap-2"
+              onClick={() => setShowBulkModal(true)}
+              disabled={tour.status !== 'PUBLISHED'}
+              className="group relative inline-flex items-center gap-3 px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-xl shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed font-black text-sm uppercase tracking-widest"
             >
-              <RefreshCw className="w-4 h-4" />
-              Reset
-            </button>
-          </div>
-
-          {/* Upcoming Occurrences */}
-          {upcomingOccurrences.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                Upcoming ({upcomingOccurrences.length})
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {upcomingOccurrences.map(occ => (
-                  <OccurrenceCard key={occ.id} occurrence={occ} onAction={handleAction} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Past Occurrences */}
-          {pastOccurrences.length > 0 && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <Clock className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                Past ({pastOccurrences.length})
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {pastOccurrences.map(occ => (
-                  <OccurrenceCard key={occ.id} occurrence={occ} onAction={handleAction} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Empty State */}
-          {filteredOccurrences.length === 0 && (
-            <div className="text-center py-16 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
-              <CalendarRange className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-700" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                No occurrences found
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                {searchMonth ? 'Try adjusting your search' : 'Add your first occurrence to get started'}
-              </p>
-              {!searchMonth && (
-                <button
-                  onClick={() => setShowAddModal(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add Occurrence
-                </button>
+              <Repeat className="w-5 h-5 text-blue-200" />
+              Schedule Multiple
+              {tour.status !== 'PUBLISHED' && (
+                <span className="absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1 bg-red-600 text-[10px] text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                  Tour must be PUBLISHED to schedule dates
+                </span>
               )}
-            </div>
-          )}
-
-          {/* Add Occurrence Modal - Simplified for now */}
-          {showAddModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-              <div className="w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                  Add New Occurrence
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  Modal implementation will be added in Phase 2.
-                </p>
-                <button
-                  onClick={() => setShowAddModal(false)}
-                  className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          )}
+            </button>
+          </div>
         </div>
+
+        {/* Dashboard Content */}
+        <div className="space-y-12">
+           
+           {/* Upcoming Runs */}
+           <section>
+               <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Upcoming Departures
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
+                      <button 
+                        onClick={() => setViewMode('grid')}
+                        className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm' : 'text-gray-400 opacity-60'}`}
+                      >
+                        List
+                      </button>
+                      <button 
+                        onClick={() => setViewMode('calendar')}
+                        className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'calendar' ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm' : 'text-gray-400 opacity-60'}`}
+                      >
+                        Calendar
+                      </button>
+                    </div>
+                    <span className="text-xs font-bold text-gray-400 ml-4">{upcoming.length} Found</span>
+                  </div>
+               </div>
+
+              {upcoming.length > 0 ? (
+                <>
+                  {viewMode === 'grid' ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {upcoming.map(occ => (
+                        <OccurrenceCard key={occ.id} occurrence={occ} onAction={handleAction} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 bg-white dark:bg-gray-900 p-8 rounded-3xl border border-gray-200 dark:border-gray-800">
+                       <div>
+                          <CalendarPicker 
+                            selectedDates={[]} 
+                            highlightedDates={occurrenceDates}
+                            onToggleDate={() => {}} 
+                          />
+                          <p className="mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">
+                            Green dots indicate scheduled departures
+                          </p>
+                       </div>
+                       <div className="space-y-4">
+                          <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Quick Legend</h4>
+                          <div className="space-y-3">
+                             {upcoming.slice(0, 5).map(occ => (
+                               <div key={occ.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-gray-800">
+                                 <div className="flex items-center gap-3">
+                                   <Calendar className="w-4 h-4 text-blue-500" />
+                                   <span className="text-xs font-bold text-gray-900 dark:text-white">{formatDateTime(occ.startTimeUtc)}</span>
+                                 </div>
+                                 <StatusBadge status={occ.status} />
+                               </div>
+                             ))}
+                             {upcoming.length > 5 && (
+                               <p className="text-[10px] font-bold text-gray-400 italic text-center">Plus {upcoming.length - 5} more departures scheduled</p>
+                             )}
+                          </div>
+                       </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="py-20 bg-white dark:bg-gray-900 border border-dashed border-gray-200 dark:border-gray-800 rounded-3xl flex flex-col items-center justify-center text-center">
+                   <CalendarRange className="w-12 h-12 text-gray-200 dark:text-gray-800 mb-4" />
+                   <h3 className="text-lg font-black text-gray-900 dark:text-white mb-2">No Future Runs Scheduled</h3>
+                   <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs mx-auto mb-8">
+                     Travelers can't book this tour until you add available dates to the schedule.
+                   </p>
+                   {tour.status === 'PUBLISHED' && (
+                     <div className="flex gap-4">
+                        <button
+                          onClick={() => { setEditingOccId(null); setShowModal(true); }}
+                          className="px-6 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-black text-xs uppercase tracking-widest rounded-xl hover:bg-gray-200 transition-colors"
+                        >
+                          Single Date
+                        </button>
+                        <button
+                          onClick={() => setShowBulkModal(true)}
+                          className="px-6 py-3 bg-blue-600 text-white font-black text-xs uppercase tracking-widest rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all"
+                        >
+                          Bulk Schedule
+                        </button>
+                     </div>
+                   )}
+                </div>
+              )}
+           </section>
+
+           {/* Past / History Section (Keep it collapsed or smaller) */}
+           {pastAndCancelled.length > 0 && (
+             <section className="pt-8 border-t border-gray-100 dark:border-gray-800">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-sm font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-3">
+                    <Clock className="w-4 h-4" />
+                    Archive & History
+                  </h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {pastAndCancelled.map(occ => (
+                    <OccurrenceCard key={occ.id} occurrence={occ} onAction={handleAction} />
+                  ))}
+                </div>
+             </section>
+           )}
+
+        </div>
+
+        {/* Modal Portals */}
+        {showModal && (
+          <OccurrenceModal
+            onClose={() => setShowModal(false)}
+            onSave={handleSave}
+            template={tour}
+            initialData={editingOccId ? occurrences.find(o => o.id === editingOccId) : null}
+          />
+        )}
+        {showBulkModal && (
+          <BulkScheduleModal
+            onClose={() => setShowBulkModal(false)}
+            onSave={handleBulkSave}
+            template={tour}
+          />
+        )}
+
       </div>
-    </>
+    </div>
   )
 }

@@ -17,6 +17,7 @@ import { Toaster } from 'react-hot-toast'
 import './globals.css'
 import Footer from '@/src/components/layout/Footer'
 import { AuthProvider } from '@/src/lib/contexts/AuthContext'
+import { WishlistProvider } from '@/src/lib/contexts/WishlistContext'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -53,6 +54,7 @@ export default function RootLayout({
               I recommend root level for future expansion (guides page, etc.)
           */}
           <AuthProvider>
+          <WishlistProvider>
           <FilterProvider>
             {children}
             <Toaster
@@ -72,6 +74,7 @@ export default function RootLayout({
             />
             <Footer />
           </FilterProvider>
+          </WishlistProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

@@ -27,13 +27,13 @@ export default function DashboardRedirectPage() {
 
     // Redirect to role-specific dashboard
     switch (user.role) {
-      case 'Admin':
+      case 'ADMIN':
         router.replace('/dashboard/admin')
         break
-      case 'Guide':
+      case 'GUIDE':
         router.replace('/dashboard/guide')
         break
-      case 'Traveler':
+      case 'TRAVELER':
         router.replace('/dashboard/traveler')
         break
       default:

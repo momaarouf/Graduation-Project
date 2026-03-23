@@ -196,6 +196,9 @@ export interface TourDetail {
     country: Country
     duration: string
     durationHours: number
+    durationMinutes: number
+    tags: string | null
+    languages: string | null
 
     // Media
     mainImage: string
@@ -288,6 +291,7 @@ export interface TourDetail {
 // ============================================================================
 
 export interface TourHeroProps {
+    id: number
     title: string
     location: string
     country: Country
@@ -298,6 +302,9 @@ export interface TourHeroProps {
     isHalalCertified: boolean
     bookingMode: BookingMode
     status: TourStatus
+    isPremium?: boolean
+    isFamilyFriendly?: boolean
+    hasGroupDiscount?: boolean
 }
 
 export interface TourInfoProps {
@@ -311,6 +318,10 @@ export interface TourInfoProps {
     safetyMeasures?: string[]
     isHalalCertified: boolean
     halalCertificationDetails?: string
+    tags?: string[]
+    languages?: string[]
+    durationHours?: number
+    durationMinutes?: number
 }
 
 export interface BookingCardProps {
@@ -326,9 +337,10 @@ export interface BookingCardProps {
     isWaitlistAvailable: boolean
     waitlistCount?: number
     cancellationPolicy: TourDetail['cancellationPolicy']
-    onBookNow: (date: string, people: number) => void
-    onRequestBooking: (date: string, people: number, message?: string) => void
+    onBookNow: (date: string, people: number, waiverSigned: boolean) => void
+    onRequestBooking: (date: string, people: number, waiverSigned: boolean, message?: string) => void
     onJoinWaitlist: (date: string, people: number) => void
+    isLoading?: boolean
 }
 
 export interface GuideProfileCardProps {
@@ -375,6 +387,9 @@ export const MOCK_TOUR_DETAIL: TourDetail = {
     country: Country.TURKEY,
     duration: '4 hours',
     durationHours: 4,
+    durationMinutes: 0,
+    tags: 'History,Culture,Architecture',
+    languages: 'English,Arabic,Turkish',
 
     mainImage: '/images/tours/istanbul-ottoman.jpg',
     gallery: [

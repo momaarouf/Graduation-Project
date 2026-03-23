@@ -31,7 +31,8 @@ import {
   Apple,
   Github,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  Loader2
 } from 'lucide-react';
 import { useAuth } from '@/src/lib/contexts/AuthContext';
 
@@ -75,8 +76,8 @@ export default function LoginForm() {
   // Redirect if already logged in (check user role and redirect to appropriate dashboard)
   useEffect(() => {
     if (user && !authLoading) {
-      if (user.role === 'Admin') router.push('/dashboard/admin');
-      else if (user.role === 'Guide') router.push('/dashboard/guide');
+      if (user.role === 'ADMIN') router.push('/dashboard/admin');
+      else if (user.role === 'GUIDE') router.push('/dashboard/guide');
       else router.push('/dashboard/traveler');
     }
   }, [user, authLoading, router]);
@@ -170,10 +171,11 @@ export default function LoginForm() {
     }
   };
 
+  const [isSocialLoading, setIsSocialLoading] = useState<string | null>(null);
+
   const handleSocialLogin = (provider: string) => {
-    // For Google OAuth, we need to redirect to the backend's OAuth start endpoint
     if (provider === 'Google') {
-      // We'll implement this in a later task
+      setIsSocialLoading('Google');
       window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/oauth2/google/start?role=Traveler`;
     } else {
       alert(`${provider} login coming in Phase 3`);
@@ -191,26 +193,7 @@ export default function LoginForm() {
       transition={{ duration: 0.5 }}
       className="w-full"
     >
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xl p-6 sm:p-8">
-
-        {/* ========================================
-            FORM HEADER
-            ======================================== */}
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Sign In
-          </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Don't have an account?{' '}
-            <Link
-              href="/auth/signup"
-              className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
-            >
-              Sign up
-            </Link>
-          </p>
-        </div>
-
+      <div className="bg-white/80 dark:bg-gray-900/40 backdrop-blur-xl rounded-[2.5rem] border border-white/20 dark:border-gray-800/50 shadow-2xl p-8 sm:p-12">
         {/* ========================================
             GENERAL ERROR MESSAGE
             ======================================== */}
@@ -395,82 +378,50 @@ export default function LoginForm() {
         {/* ========================================
             SOCIAL LOGIN DIVIDER
             ======================================== */}
-        <div className="relative my-6">
+        <div className="relative my-8">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200 dark:border-gray-800" />
+            <div className="w-full border-t border-gray-100 dark:border-gray-800" />
           </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">
-              Or continue with
+          <div className="relative flex justify-center text-[10px] tracking-widest uppercase font-black">
+            <span className="px-4 bg-transparent text-gray-400">
+              Or connect with
             </span>
           </div>
         </div>
 
         {/* ========================================
-            SOCIAL LOGIN BUTTONS
+            SOCIAL LOGIN BUTTONS - Minimalist Icons
             ======================================== */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="flex justify-center gap-6">
           <button
             onClick={() => handleSocialLogin('Google')}
-            disabled={isLoading}
-            className="
-              p-2.5
-              bg-white dark:bg-gray-800
-              border border-gray-300 dark:border-gray-700
-              rounded-lg
-              hover:bg-gray-50 dark:hover:bg-gray-700
-              transition-all
-              disabled:opacity-50 disabled:cursor-not-allowed
-              flex items-center justify-center
-              group
-            "
+            disabled={isLoading || isSocialLoading !== null}
+            className="w-12 h-12 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-sm hover:shadow-blue-500/10"
             aria-label="Sign in with Google"
           >
-            <Chrome className="w-5 h-5 text-gray-700 dark:text-gray-300 group-hover:scale-110 transition-transform" />
+            {isSocialLoading === 'Google' ? (
+              <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+            ) : (
+              <Chrome className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            )}
           </button>
           <button
             onClick={() => handleSocialLogin('Apple')}
             disabled={isLoading}
-            className="
-              p-2.5
-              bg-white dark:bg-gray-800
-              border border-gray-300 dark:border-gray-700
-              rounded-lg
-              hover:bg-gray-50 dark:hover:bg-gray-700
-              transition-all
-              disabled:opacity-50 disabled:cursor-not-allowed
-              flex items-center justify-center
-              group
-            "
+            className="w-12 h-12 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-sm hover:shadow-gray-500/10"
             aria-label="Sign in with Apple"
           >
-            <Apple className="w-5 h-5 text-gray-700 dark:text-gray-300 group-hover:scale-110 transition-transform" />
+            <Apple className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </button>
           <button
             onClick={() => handleSocialLogin('GitHub')}
             disabled={isLoading}
-            className="
-              p-2.5
-              bg-white dark:bg-gray-800
-              border border-gray-300 dark:border-gray-700
-              rounded-lg
-              hover:bg-gray-50 dark:hover:bg-gray-700
-              transition-all
-              disabled:opacity-50 disabled:cursor-not-allowed
-              flex items-center justify-center
-              group
-            "
+            className="w-12 h-12 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-sm hover:shadow-gray-500/10"
             aria-label="Sign in with GitHub"
           >
-            <Github className="w-5 h-5 text-gray-700 dark:text-gray-300 group-hover:scale-110 transition-transform" />
+            <Github className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </button>
         </div>
-
-        {/* Security Note */}
-        <p className="text-xs text-center text-gray-500 dark:text-gray-500 mt-6">
-          <Lock className="inline w-3 h-3 mr-1" />
-          Your credentials are encrypted and secure
-        </p>
       </div>
     </motion.div>
   );

@@ -25,7 +25,7 @@ interface User {
   userId: string;
   email: string;
   fullName?: string;
-  role: 'Admin' | 'Guide' | 'Traveler'; // Backend returns uppercase
+  role: 'ADMIN' | 'GUIDE' | 'TRAVELER'; // Normalized to uppercase
   travelerProfileId?: string;
   guideProfileId?: string;
   profileCompleted: boolean;
@@ -61,11 +61,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Backend enum is Traveler, Guide, Admin — Jackson serializes as Pascal case.
-// Keep it as-is; no transformation needed.
+// Backend returns Pascal case: Traveler, Guide, Admin.
+// We normalize to uppercase for consistency in the frontend.
 const normalizeUser = (raw: MeResponse): User => ({
   ...raw,
-  role: raw.role as User['role'],
+  role: raw.role.toUpperCase() as User['role'],
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -155,9 +155,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(normalized);
       // After signup, send to complete-profile so new users can fill in their details.
       // profileCompleted is false for brand new users. If somehow already complete, go to dashboard.
-      if (normalized.role === 'Admin') {
+      if (normalized.role === 'ADMIN') {
         router.push('/dashboard/admin');
-      } else if (normalized.role === 'Guide') {
+      } else if (normalized.role === 'GUIDE') {
         router.push(normalized.profileCompleted ? '/dashboard/guide' : '/dashboard/guide/complete-profile');
       } else {
         router.push(normalized.profileCompleted ? '/dashboard/traveler' : '/dashboard/traveler/complete-profile');
@@ -184,8 +184,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const normalized = normalizeUser(userRes);
       setUser(normalized);
       // Redirect based on role
-      if (normalized.role === 'Admin') router.push('/dashboard/admin');
-      else if (normalized.role === 'Guide') router.push('/dashboard/guide');
+      if (normalized.role === 'ADMIN') router.push('/dashboard/admin');
+      else if (normalized.role === 'GUIDE') router.push('/dashboard/guide');
       else router.push('/dashboard/traveler');
     } finally {
       setTimeout(() => setIsProcessing(false), 2000);

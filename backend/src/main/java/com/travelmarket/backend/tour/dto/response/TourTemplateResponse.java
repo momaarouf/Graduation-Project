@@ -24,21 +24,40 @@ public class TourTemplateResponse {
     // Location
     private String locationName;
     private String region;
+    private String city;
     private String countryCode;
     private String meetingPointName;
     private BigDecimal meetingLatitude;
     private BigDecimal meetingLongitude;
+    private String meetingPointAddress;
+    private String meetingPointInstructions;
+
+    // Content
+    private String itinerary;
+    private String inclusions;
+    private String exclusions;
+    private String requirements;
+    private String whatToBring;
+    private String tags;
+    private String languages;
 
     // Pricing & capacity
     private BigDecimal basePrice;
     private String currency;
     private Integer minCapacity;
     private Integer maxCapacity;
+    private Integer durationHours;
+    private Integer durationMinutes;
 
     // Booking behaviour
     private Boolean instantBook;
     private Boolean isRecurring;
     private String recurrencePattern;
+    private String recurringDays;
+    private Instant recurringUntil;
+    private String recurringDates;
+    private String excludedDates;
+    private Instant startDate;
 
     // Trust signals
     private Boolean halalFriendly;
@@ -61,4 +80,19 @@ public class TourTemplateResponse {
     private Instant createdAtUtc;
     private Instant updatedAtUtc;
     private Instant lastPublishedAtUtc;
+
+    // Aggregate stats (populated for convenience in dashboard)
+    private Integer completedRunCount;
+    private Integer totalTravelersCount;
+    private BigDecimal averageRating;
+    private Integer reviewCount;
+
+    private Boolean isPremium;
+    private Boolean isFamilyFriendly;
+    private Boolean hasGroupDiscount;
+    private Integer groupDiscountThreshold;
+    private java.math.BigDecimal groupDiscountPercent;
+
+    private String dynamicPricing;
+    private String halalDetails;
 }

@@ -33,7 +33,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -74,8 +74,13 @@ import {
   Trophy,
   Sparkles,
   AlertCircle,
-  Info
+  Info,
+  ArrowRight,
+  CheckCircle2
 } from 'lucide-react'
+import { getGuideProfile, getGuideBookings, getGuideTours, getGuidePortfolio, updateTour } from '@/src/lib/api/tours'
+import { GuideBookingResponse, BookingStatus, TourTemplateResponse } from '@/src/lib/types/tour.types'
+import { motion, AnimatePresence } from 'framer-motion'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -85,132 +90,76 @@ type VerificationStatus = 'pending' | 'approved' | 'rejected' | 'not_submitted' 
 type LanguageProficiency = 'beginner' | 'intermediate' | 'advanced' | 'native'
 
 interface GuideProfile {
-  id: string
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  avatar: string
-  coverImage: string
-  bio: string
-  tagline: string
-  location: string
-  country: string
-  languages: {
-    language: string
-    proficiency: LanguageProficiency
-  }[]
-  expertise: string[]
-  badges: {
-    id: string
-    name: string
-    icon: React.ElementType
-    earnedAt: string
-  }[]
-  impactScore: number
-  totalTrips: number
-  totalTravelers: number
-  averageRating: number
-  totalReviews: number
-  responseRate: number
-  responseTime: string
-  memberSince: string
-  verifiedSince?: string
-  verificationStatus: VerificationStatus
-  verificationDocuments: {
-    id: string
-    type: 'id' | 'selfie' | 'certificate'
-    status: 'pending' | 'approved' | 'rejected'
-    url: string
-  }[]
-  portfolio: {
-    id: string
-    type: 'image' | 'video'
-    url: string
-    thumbnail?: string
-    caption: string
-  }[]
-  socialLinks: {
-    instagram?: string
-    facebook?: string
-    twitter?: string
-    website?: string
-  }
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  location: string;
+  country: string;
+  bio: string;
+  tagline: string;
+  avatar: string;
+  coverImage: string;
+  memberSince: string;
+  verifiedSince: string;
+  totalTrips: number;
+  totalTravelers: number;
+  averageRating: number;
+  totalReviews: number;
+  impactScore: number;
+  responseRate: number;
+  responseTimeText: string;
+  verificationStatus: string;
+  expertise: string[];
+  languages: Array<{ language: string; proficiency: string }>;
+  socialLinks: Record<string, string>;
+  socialLinksJson?: string;
+  portfolio: any[];
+  badges: Array<{ id: string; name: string; icon: any; earnedAt: string }>;
   availability: {
-    monday?: string[]
-    tuesday?: string[]
-    wednesday?: string[]
-    thursday?: string[]
-    friday?: string[]
-    saturday?: string[]
-    sunday?: string[]
-  }
+    isAvailable: boolean;
+    timezone: string;
+    nextAvailableSlot: string;
+  };
 }
 
 // ============================================================================
-// MOCK DATA
+// INITIAL DATA (Real-first, no mock fallback)
 // ============================================================================
 
-const MOCK_GUIDE_PROFILE: GuideProfile = {
-  id: 'guide-123',
-  firstName: 'Mehmet',
-  lastName: 'Yilmaz',
-  email: 'mehmet.yilmaz@example.com',
-  phone: '+90 555 123 4567',
-  avatar: '/images/guides/mehmet.jpg',
-  coverImage: '/images/guides/mehmet-cover.jpg',
-  bio: `Salam! I'm Mehmet, a licensed historian and Istanbul native. I've been guiding travelers through the city's rich Islamic heritage for over 8 years. My passion is showing how Ottoman history connects to our modern understanding of faith and culture.
-
-I specialize in halal-friendly tours, ensuring Muslim travelers feel comfortable with prayer accommodations, halal food options, and gender-sensitive guiding when requested.
-
-Member of the Turkish Tourist Guides Association and certified in Ottoman Paleography.`,
-  tagline: 'Licensed Historian & Istanbul Native',
-  location: 'Istanbul',
-  country: 'Turkey',
-  languages: [
-    { language: 'English', proficiency: 'native' },
-    { language: 'Arabic', proficiency: 'advanced' },
-    { language: 'Turkish', proficiency: 'native' },
-    { language: 'French', proficiency: 'intermediate' }
-  ],
-  expertise: ['Ottoman History', 'Islamic Architecture', 'Halal Tourism', 'Cultural Heritage'],
-  badges: [
-    { id: '1', name: 'Top Rated Guide', icon: Star, earnedAt: '2024-06-01' },
-    { id: '2', name: 'Super Guide', icon: Trophy, earnedAt: '2024-12-01' },
-    { id: '3', name: 'Halal Specialist', icon: Medal, earnedAt: '2024-03-15' }
-  ],
-  impactScore: 87,
-  totalTrips: 156,
-  totalTravelers: 1243,
-  averageRating: 4.9,
-  totalReviews: 128,
-  responseRate: 98,
-  responseTime: '< 1 hour',
-  memberSince: '2023-06-01',
-  verifiedSince: '2024-01-15',
-  verificationStatus: 'verified',
-  verificationDocuments: [
-    { id: '1', type: 'id', status: 'approved', url: '/docs/id.jpg' },
-    { id: '2', type: 'selfie', status: 'approved', url: '/docs/selfie.jpg' }
-  ],
-  portfolio: [
-    { id: '1', type: 'image', url: '/images/portfolio/tour1.jpg', caption: 'Hagia Sophia tour' },
-    { id: '2', type: 'image', url: '/images/portfolio/tour2.jpg', caption: 'Topkapi Palace' },
-    { id: '3', type: 'video', url: '/images/portfolio/tour3.mp4', thumbnail: '/images/portfolio/tour3-thumb.jpg', caption: 'Bosphorus cruise' }
-  ],
-  socialLinks: {
-    instagram: '@mehmet_guides',
-    facebook: 'mehmet.guide',
-    website: 'mehmetexperiences.com'
-  },
+const EMPTY_GUIDE_PROFILE: GuideProfile = {
+  id: '',
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  location: '',
+  country: '',
+  bio: '',
+  tagline: '',
+  avatar: '',
+  coverImage: '',
+  memberSince: '',
+  verifiedSince: '',
+  totalTrips: 0,
+  totalTravelers: 0,
+  averageRating: 0,
+  totalReviews: 0,
+  impactScore: 0,
+  responseRate: 0,
+  responseTimeText: 'N/A',
+  verificationStatus: 'NOT_SUBMITTED',
+  expertise: [],
+  languages: [],
+  socialLinks: {},
+  socialLinksJson: '',
+  portfolio: [],
+  badges: [],
   availability: {
-    monday: ['09:00', '14:00'],
-    tuesday: ['09:00', '14:00'],
-    wednesday: ['09:00', '14:00'],
-    thursday: ['09:00', '14:00'],
-    friday: ['09:00', '12:00'],
-    saturday: ['10:00', '15:00'],
-    sunday: []
+    isAvailable: true,
+    timezone: 'UTC',
+    nextAvailableSlot: ''
   }
 }
 
@@ -267,16 +216,7 @@ function VerificationBadge({ status }: VerificationBadgeProps) {
   const { bg, text, border, icon: Icon, label } = badgeConfig
 
   return (
-    <div className={`
-      inline-flex items-center gap-2
-      px-3 py-1.5
-      ${bg}
-      ${border}
-      border
-      rounded-full
-      ${text}
-      text-sm font-medium
-    `}>
+    <div className={` inline-flex items-center gap-2 px-3 py-1.5 ${bg} ${border} border rounded-full ${text} text-sm font-medium `}>
       <Icon className="w-4 h-4" />
       {label}
     </div>
@@ -297,43 +237,35 @@ interface StatCardProps {
 
 function StatCard({ icon: Icon, label, value, change, color }: StatCardProps) {
   const colorClasses = {
-    blue: 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400',
-    emerald: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400',
-    amber: 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400',
-    purple: 'bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400',
-    pink: 'bg-pink-50 dark:bg-pink-950/30 text-pink-600 dark:text-pink-400'
+    blue: 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border-blue-100/50 dark:border-blue-800/40',
+    emerald: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-100/50 dark:border-emerald-800/40',
+    amber: 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border-amber-100/50 dark:border-amber-800/40',
+    purple: 'bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400 border-purple-100/50 dark:border-purple-800/40',
+    pink: 'bg-pink-50 dark:bg-pink-950/30 text-pink-600 dark:text-pink-400 border-pink-100/50 dark:border-pink-800/40'
   }
 
   return (
-    <div className="
-      p-4
-      bg-white dark:bg-gray-900
-      border border-gray-200 dark:border-gray-800
-      rounded-xl
-      hover:shadow-md
-      transition-shadow
-    ">
-      <div className="flex items-center justify-between mb-2">
-        <div className={`
-          p-2
-          rounded-lg
-          ${colorClasses[color]}
-        `}>
+    <motion.div 
+      whileHover={{ y: -4, boxShadow: '0 12px 20px -5px rgb(0 0 0 / 0.1)' }}
+      className="p-5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-white/5 rounded-2xl shadow-sm hover:shadow-xl hover:border-blue-500/30 transition-all duration-300"
+    >
+      <div className="flex items-center justify-between mb-3">
+        <div className={` p-2.5 rounded-xl border ${colorClasses[color]} `}>
           <Icon className="w-4 h-4" />
         </div>
         {change && (
-          <span className="text-xs text-emerald-600 dark:text-emerald-400">
+          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-md border border-emerald-100/50 dark:border-emerald-800/40">
             {change}
           </span>
         )}
       </div>
-      <div className="text-xl font-bold text-gray-900 dark:text-white">
+      <div className="text-2xl font-black text-gray-900 dark:text-white leading-none mb-1">
         {value}
       </div>
-      <div className="text-xs text-gray-500 dark:text-gray-400">
+      <div className="text-[10px] font-black uppercase tracking-widest text-gray-500">
         {label}
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -355,51 +287,34 @@ function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarC
   return (
     <div className="relative mb-16">
       {/* Cover image */}
-      <div className="relative h-48 sm:h-64 rounded-2xl overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-700 mb-6">
-        {profile.coverImage && (
+      <div className="relative h-48 sm:h-64 rounded-[2rem] overflow-hidden bg-gray-100 dark:bg-gray-900 mb-6 group border border-gray-100 dark:border-gray-800 shadow-xl">
+        {profile.coverImage ? (
           <Image
             src={profile.coverImage}
             alt="Profile cover"
             fill
-            className="object-cover opacity-70"
+            className="object-cover transition-transform duration-1000 group-hover:scale-110"
           />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-indigo-600/20" />
         )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
         
-        {/* Cover image edit button */}
-        {isEditing && (
-          <button
-            onClick={onCoverChange}
-            className="
-              absolute bottom-4 right-4
-              flex items-center gap-2
-              px-3 py-1.5
-              bg-white/90 dark:bg-gray-900/90
-              backdrop-blur-sm
-              text-gray-700 dark:text-gray-300
-              rounded-lg
-              hover:bg-white dark:hover:bg-gray-900
-              transition-colors
-              text-sm
-            "
-          >
-            <Camera className="w-4 h-4" />
-            Change Cover
-          </button>
-        )}
+        {/* Cover image edit button - Always accessible on hover */}
+        <button
+          onClick={onCoverChange}
+          className=" absolute bottom-4 right-4 flex items-center gap-2 px-4 py-2 bg-black/40 hover:bg-black/60 backdrop-blur-md text-white rounded-xl shadow-lg transition-all text-xs font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 "
+        >
+          <Camera className="w-4 h-4" />
+          Change Cover
+        </button>
       </div>
 
-      {/* Profile info overlay */}
-      <div className="absolute -bottom-16 left-4 sm:left-8 flex items-end gap-4">
+      {/* Profile info overlay - Lowered to -bottom-28 */}
+      <div className="absolute -bottom-28 left-4 sm:left-8 flex items-end gap-6">
         {/* Avatar with edit button */}
-        <div className="relative">
-          <div className="
-            w-24 h-24 sm:w-32 sm:h-32
-            rounded-2xl
-            border-4 border-white dark:border-gray-900
-            bg-white dark:bg-gray-900
-            overflow-hidden
-            shadow-xl
-          ">
+        <div className="relative group/avatar">
+          <div className=" relative w-24 h-24 sm:w-40 sm:h-40 rounded-3xl border-4 border-white dark:border-gray-950 bg-white dark:bg-gray-900 overflow-hidden shadow-2xl ring-2 ring-blue-500/10 transition-all duration-700 hover:scale-105 group-hover/avatar:ring-4 group-hover/avatar:ring-blue-500/30 ">
             {profile.avatar ? (
               <Image
                 src={profile.avatar}
@@ -414,56 +329,34 @@ function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarC
             )}
           </div>
           
-          {/* Avatar edit button */}
+          {/* Avatar edit button - Always accessible on hover */}
           <button
-            onClick={isEditing ? onAvatarChange : undefined}
-            className={`
-              absolute -bottom-1 -right-1
-              p-1.5
-              rounded-lg
-              shadow-lg
-              transition-colors
-              ${isEditing 
-                ? 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer' 
-                : 'bg-gray-400 cursor-not-allowed opacity-50'
-              }
-            `}
-            disabled={!isEditing}
-            title={isEditing ? 'Change profile picture' : 'Enter edit mode to change picture'}
+            onClick={onAvatarChange}
+            className=" absolute -bottom-2 -right-2 p-2.5 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition-all hover:scale-110 opacity-0 group-hover/avatar:opacity-100 z-10 "
+            title="Change profile picture"
           >
-            <Camera className="w-4 h-4" />
+            <Camera className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Name and title */}
-        <div className="mb-4">
-          <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg">
+        <div className="mb-6 space-y-1">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tight drop-shadow-sm group-hover:text-blue-600 transition-colors">
               {profile.firstName} {profile.lastName}
             </h1>
-            <VerificationBadge status={profile.verificationStatus} />
+            <VerificationBadge status={profile.verificationStatus as any} />
           </div>
           {isEditing ? (
             <input
               type="text"
               value={profile.tagline}
-              onChange={(e) => {/* Handle tagline change */}}
-              className="
-                bg-white/90 dark:bg-gray-900/90
-                backdrop-blur-sm
-                px-3 py-1
-                rounded-lg
-                text-white
-                text-sm
-                border border-white/20
-                focus:outline-none focus:ring-2 focus:ring-white/50
-                w-64
-              "
+              onChange={(e) => {/* Handle tagline change if needed */}}
+              className=" bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm px-3 py-1 rounded-lg text-white text-sm border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 w-64 "
               placeholder="Your tagline"
             />
           ) : (
-            <p className="text-white/90 drop-shadow">
-              {profile.tagline}
+            <p className="text-base font-black text-blue-600 dark:text-blue-300 drop-shadow-sm tracking-tight italic opacity-90 transition-colors">
+              {profile.tagline || 'Leading Local Expert'}
             </p>
           )}
         </div>
@@ -475,32 +368,14 @@ function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarC
           <>
             <button
               onClick={onSave}
-              className="
-                flex items-center gap-2
-                px-4 py-2
-                bg-emerald-600 hover:bg-emerald-700
-                text-white
-                rounded-lg
-                transition-colors
-                shadow-lg
-              "
+              className=" flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors shadow-lg "
             >
               <Save className="w-4 h-4" />
               <span className="hidden sm:inline">Save Changes</span>
             </button>
             <button
               onClick={onCancel}
-              className="
-                flex items-center gap-2
-                px-4 py-2
-                bg-white/90 dark:bg-gray-900/90
-                backdrop-blur-sm
-                text-gray-700 dark:text-gray-300
-                rounded-lg
-                hover:bg-white dark:hover:bg-gray-900
-                transition-colors
-                shadow-lg
-              "
+              className=" flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-lg hover:bg-white dark:hover:bg-gray-900 transition-colors shadow-lg "
             >
               <X className="w-4 h-4" />
               <span className="hidden sm:inline">Cancel</span>
@@ -509,17 +384,7 @@ function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarC
         ) : (
           <button
             onClick={onEdit}
-            className="
-              flex items-center gap-2
-              px-4 py-2
-              bg-white/90 dark:bg-gray-900/90
-              backdrop-blur-sm
-              text-gray-700 dark:text-gray-300
-              rounded-lg
-              hover:bg-white dark:hover:bg-gray-900
-              transition-colors
-              shadow-lg
-            "
+            className=" flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-lg hover:bg-white dark:hover:bg-gray-900 transition-colors shadow-lg "
           >
             <Edit2 className="w-4 h-4" />
             <span className="hidden sm:inline">Edit Profile</span>
@@ -528,18 +393,8 @@ function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarC
         
         {/* Preview button */}
         <Link
-          href={`/guides/${profile.id}/preview`}
-          className="
-            flex items-center gap-2
-            px-4 py-2
-            bg-white/90 dark:bg-gray-900/90
-            backdrop-blur-sm
-            text-gray-700 dark:text-gray-300
-            rounded-lg
-            hover:bg-white dark:hover:bg-gray-900
-            transition-colors
-            shadow-lg
-          "
+          href={`/guides/${profile.id}`}
+          className=" flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-lg hover:bg-white dark:hover:bg-gray-900 transition-colors shadow-lg "
         >
           <Eye className="w-4 h-4" />
           <span className="hidden sm:inline">Preview</span>
@@ -562,15 +417,13 @@ interface BioEditorProps {
 
 function BioEditor({ bio, tagline, isEditing, onChange }: BioEditorProps) {
   return (
-    <div className="
-      p-6
-      bg-white dark:bg-gray-900
-      border border-gray-200 dark:border-gray-800
-      rounded-xl
-    ">
-      <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-        <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-        About Me
+    <motion.div 
+      whileHover={{ y: -4 }}
+      className=" p-10 md:p-12 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] shadow-xl relative overflow-hidden group hover:shadow-blue-500/10 transition-all duration-300 "
+    >
+      <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 rounded-full -mr-16 -mt-16 blur-2xl" />
+      <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-6 tracking-tight flex items-center gap-2">
+        Biography
       </h3>
 
       {isEditing ? (
@@ -583,16 +436,7 @@ function BioEditor({ bio, tagline, isEditing, onChange }: BioEditorProps) {
               type="text"
               value={tagline}
               onChange={(e) => onChange('tagline', e.target.value)}
-              className="
-                w-full
-                px-3 py-2
-                bg-gray-50 dark:bg-gray-800
-                border border-gray-200 dark:border-gray-700
-                rounded-lg
-                text-sm
-                text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-              "
+              className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
               placeholder="e.g., Licensed Historian & Istanbul Native"
             />
           </div>
@@ -604,32 +448,22 @@ function BioEditor({ bio, tagline, isEditing, onChange }: BioEditorProps) {
               value={bio}
               onChange={(e) => onChange('bio', e.target.value)}
               rows={6}
-              className="
-                w-full
-                px-3 py-2
-                bg-gray-50 dark:bg-gray-800
-                border border-gray-200 dark:border-gray-700
-                rounded-lg
-                text-sm
-                text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-                resize-none
-              "
+              className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none "
               placeholder="Tell travelers about yourself, your expertise, and what makes your tours special..."
             />
           </div>
         </div>
       ) : (
-        <div className="space-y-3">
-          <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+        <div className="space-y-4">
+          <p className="text-lg font-black text-blue-600 dark:text-blue-400 italic">
             {tagline}
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
+          <div className="prose prose-lg dark:prose-invert max-w-none text-gray-700 dark:text-gray-400 leading-relaxed font-bold whitespace-pre-wrap">
             {bio}
-          </p>
+          </div>
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
 
@@ -649,28 +483,19 @@ function LanguagesEditor({ languages, isEditing, onAdd, onRemove, onChange }: La
   const proficiencyLevels: LanguageProficiency[] = ['beginner', 'intermediate', 'advanced', 'native']
 
   return (
-    <div className="
-      p-6
-      bg-white dark:bg-gray-900
-      border border-gray-200 dark:border-gray-800
-      rounded-xl
-    ">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <Languages className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-          Languages
+    <motion.div 
+      whileHover={{ y: -4 }}
+      className=" p-10 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] shadow-xl hover:shadow-blue-500/10 transition-all duration-300 "
+    >
+      <div className="flex items-center justify-between mb-8">
+        <h3 className="text-[10px] font-black text-gray-600 dark:text-gray-500 uppercase tracking-[0.25em] flex items-center gap-2">
+          <Globe className="w-4 h-4 text-blue-600 dark:text-blue-500" />
+          Available Languages
         </h3>
         {isEditing && (
           <button
             onClick={onAdd}
-            className="
-              flex items-center gap-1
-              px-3 py-1.5
-              bg-blue-600 hover:bg-blue-700
-              text-white text-sm
-              rounded-lg
-              transition-colors
-            "
+            className=" flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors "
           >
             <Plus className="w-4 h-4" />
             Add Language
@@ -687,31 +512,13 @@ function LanguagesEditor({ languages, isEditing, onAdd, onRemove, onChange }: La
                   type="text"
                   value={lang.language}
                   onChange={(e) => onChange(index, 'language', e.target.value)}
-                  className="
-                    flex-1
-                    px-3 py-2
-                    bg-gray-50 dark:bg-gray-800
-                    border border-gray-200 dark:border-gray-700
-                    rounded-lg
-                    text-sm
-                    text-gray-900 dark:text-white
-                    focus:outline-none focus:ring-2 focus:ring-blue-500
-                  "
+                  className=" flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
                   placeholder="e.g., English, Arabic, Turkish"
                 />
                 <select
                   value={lang.proficiency}
                   onChange={(e) => onChange(index, 'proficiency', e.target.value)}
-                  className="
-                    w-32
-                    px-3 py-2
-                    bg-gray-50 dark:bg-gray-800
-                    border border-gray-200 dark:border-gray-700
-                    rounded-lg
-                    text-sm
-                    text-gray-900 dark:text-white
-                    focus:outline-none focus:ring-2 focus:ring-blue-500
-                  "
+                  className=" w-32 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
                 >
                   {proficiencyLevels.map(level => (
                     <option key={level} value={level}>
@@ -721,14 +528,7 @@ function LanguagesEditor({ languages, isEditing, onAdd, onRemove, onChange }: La
                 </select>
                 <button
                   onClick={() => onRemove(index)}
-                  className="
-                    p-2
-                    text-red-600 hover:text-red-700
-                    dark:text-red-400 dark:hover:text-red-300
-                    hover:bg-red-50 dark:hover:bg-red-950/30
-                    rounded-lg
-                    transition-colors
-                  "
+                  className=" p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors "
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -746,13 +546,26 @@ function LanguagesEditor({ languages, isEditing, onAdd, onRemove, onChange }: La
           </div>
         ))}
 
+        {languages.length === 0 && isEditing && (
+          <div className="py-8 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30">
+            <Globe className="w-8 h-8 text-gray-300 dark:text-gray-600 mb-2" />
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">No languages listed yet</p>
+            <button
+              onClick={onAdd}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95"
+            >
+              Add Your First Language
+            </button>
+          </div>
+        )}
+
         {languages.length === 0 && !isEditing && (
           <p className="text-sm text-gray-500 dark:text-gray-400 italic">
             No languages added yet
           </p>
         )}
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -770,28 +583,19 @@ interface ExpertiseEditorProps {
 
 function ExpertiseEditor({ expertise, isEditing, onAdd, onRemove, onChange }: ExpertiseEditorProps) {
   return (
-    <div className="
-      p-6
-      bg-white dark:bg-gray-900
-      border border-gray-200 dark:border-gray-800
-      rounded-xl
-    ">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <Briefcase className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-          Expertise
+    <motion.div 
+      whileHover={{ y: -4 }}
+      className=" p-10 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] shadow-xl hover:shadow-blue-500/10 transition-all duration-300 "
+    >
+      <div className="flex items-center justify-between mb-8">
+        <h3 className="text-[10px] font-black text-gray-600 dark:text-gray-500 uppercase tracking-[0.25em] flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-amber-500" />
+          Core Expertise
         </h3>
         {isEditing && (
           <button
             onClick={onAdd}
-            className="
-              flex items-center gap-1
-              px-3 py-1.5
-              bg-blue-600 hover:bg-blue-700
-              text-white text-sm
-              rounded-lg
-              transition-colors
-            "
+            className=" flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors "
           >
             <Plus className="w-4 h-4" />
             Add Expertise
@@ -807,27 +611,11 @@ function ExpertiseEditor({ expertise, isEditing, onAdd, onRemove, onChange }: Ex
                 type="text"
                 value={item}
                 onChange={(e) => onChange(index, e.target.value)}
-                className="
-                  px-3 py-1.5
-                  bg-gray-50 dark:bg-gray-800
-                  border border-gray-200 dark:border-gray-700
-                  rounded-lg
-                  text-sm
-                  text-gray-900 dark:text-white
-                  focus:outline-none focus:ring-2 focus:ring-blue-500
-                  w-32
-                "
+                className=" px-3 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 w-32 "
               />
               <button
                 onClick={() => onRemove(index)}
-                className="
-                  p-1.5
-                  text-red-600 hover:text-red-700
-                  dark:text-red-400 dark:hover:text-red-300
-                  hover:bg-red-50 dark:hover:bg-red-950/30
-                  rounded-lg
-                  transition-colors
-                "
+                className=" p-1.5 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors "
               >
                 <X className="w-3 h-3" />
               </button>
@@ -835,18 +623,26 @@ function ExpertiseEditor({ expertise, isEditing, onAdd, onRemove, onChange }: Ex
           ) : (
             <span
               key={index}
-              className="
-                px-3 py-1.5
-                bg-blue-50 dark:bg-blue-950/30
-                text-blue-700 dark:text-blue-300
-                text-sm
-                rounded-lg
-              "
+              className=" px-3 py-1.5 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-sm rounded-lg "
             >
               {item}
             </span>
           )
         ))}
+
+        {expertise.length === 0 && isEditing && (
+          <div className="w-full py-8 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30">
+            <Sparkles className="w-8 h-8 text-gray-300 dark:text-gray-600 mb-2" />
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">No expertise tags added</p>
+            <button
+              onClick={onAdd}
+              type="button"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95"
+            >
+              Add Your First Tag
+            </button>
+          </div>
+        )}
 
         {expertise.length === 0 && !isEditing && (
           <p className="text-sm text-gray-500 dark:text-gray-400 italic">
@@ -854,192 +650,212 @@ function ExpertiseEditor({ expertise, isEditing, onAdd, onRemove, onChange }: Ex
           </p>
         )}
       </div>
-    </div>
+    </motion.div>
   )
 }
 
 // ============================================================================
-// PORTFOLIO GRID COMPONENT
+// PORTFOLIO // ============================================================================
+// PORTFOLIO SECTION - PROFESSIONAL CASE STUDIES
 // ============================================================================
 
-interface PortfolioGridProps {
-  items: GuideProfile['portfolio']
+interface PortfolioSectionProps {
+  portfolio: GuideProfile['portfolio']
+  guideId: string
   isEditing: boolean
   onAdd: () => void
   onRemove: (id: string) => void
 }
 
-function PortfolioGrid({ items, isEditing, onAdd, onRemove }: PortfolioGridProps) {
+function PortfolioSection({ portfolio, guideId, isEditing, onAdd, onRemove }: PortfolioSectionProps) {
   return (
-    <div className="
-      p-6
-      bg-white dark:bg-gray-900
-      border border-gray-200 dark:border-gray-800
-      rounded-xl
-    ">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <Camera className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-          Portfolio
+    <div className=" p-10 md:p-12 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] shadow-xl relative overflow-hidden group hover:translate-y-[-4px] hover:shadow-blue-500/10 transition-all duration-300 ">
+       <div className="absolute top-0 right-0 w-32 h-32 bg-orange-600/5 rounded-full -mr-16 -mt-16 blur-2xl" />
+       <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-gray-50 dark:border-gray-800">
+        <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight uppercase italic">
+          Professional Portfolio
         </h3>
         {isEditing && (
-          <button
+          <button 
             onClick={onAdd}
-            className="
-              flex items-center gap-1
-              px-3 py-1.5
-              bg-blue-600 hover:bg-blue-700
-              text-white text-sm
-              rounded-lg
-              transition-colors
-            "
+            className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-widest rounded-2xl shadow-lg transition-all hover:scale-105 active:scale-95"
           >
-            <Upload className="w-4 h-4" />
-            Upload Media
+            <Plus className="w-4 h-4" />
+            Add to Portfolio
           </button>
         )}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {items.map((item) => (
-          <div key={item.id} className="relative group aspect-square">
-            <div className="
-              w-full h-full
-              bg-gray-100 dark:bg-gray-800
-              rounded-lg
-              overflow-hidden
-            ">
-              {item.type === 'image' ? (
-                <Image
-                  src={item.url}
-                  alt={item.caption}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="relative w-full h-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {portfolio.length > 0 ? (
+          portfolio.map((item) => (
+            <div key={item.id} className=" group/item relative bg-gray-50 dark:bg-gray-800/50 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 hover:border-blue-500/50 transition-all shadow-sm hover:shadow-md ">
+              <div className="relative aspect-[16/9]">
+                {item.url ? (
                   <Image
-                    src={item.thumbnail || item.url}
-                    alt={item.caption}
+                    src={item.url}
+                    alt={item.caption || 'Portfolio item'}
                     fill
-                    className="object-cover"
+                    className="object-cover transition-transform duration-500 group-hover/item:scale-105"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                    <Video className="w-6 h-6 text-white" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+                    <Camera className="w-8 h-8 text-gray-400" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover/item:opacity-80 transition-opacity" />
+                
+                {/* View Story Overlay on Image Hover */}
+                <Link 
+                  href={`/guides/${guideId}/tours/${item.id}`}
+                  className="absolute inset-0 opacity-0 group-hover/item:opacity-100 transition-all duration-300 flex items-center justify-center z-10 cursor-pointer"
+                >
+                  <div className="bg-white/95 dark:bg-gray-900/95 px-5 py-2.5 rounded-2xl shadow-[0_0_20px_rgba(37,99,235,0.3)] dark:shadow-[0_0_25px_rgba(59,130,246,0.5)] border border-blue-100/50 dark:border-blue-500/20 flex items-center gap-2 transform translate-y-4 group-hover/item:translate-y-0 transition-transform duration-500">
+                    <Eye className="w-4 h-4 text-blue-600" />
+                    <span className="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-[0.2em]">View Story</span>
+                  </div>
+                </Link>
+                
+                {/* Category Badge */}
+                <div className="absolute top-4 left-4 z-20">
+                  <div className="px-3 py-1.5 bg-black/50 backdrop-blur-md text-white text-[9px] uppercase tracking-[0.2em] font-black rounded-full border border-white/20 shadow-xl flex items-center gap-1.5 transition-all group-hover/item:bg-blue-600/80 group-hover/item:border-blue-400/50">
+                    <Award className="w-3.5 h-3.5 text-amber-500" />
+                    Signature Experience
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Caption (on hover) */}
-            <div className="
-              absolute inset-x-0 bottom-0
-              p-2
-              bg-gradient-to-t from-black/70 to-transparent
-              opacity-0 group-hover:opacity-100
-              transition-opacity
-              rounded-b-lg
-            ">
-              <p className="text-xs text-white truncate">
-                {item.caption}
-              </p>
-            </div>
+              <div className="p-4 relative">
+                <h4 className="font-black text-sm text-gray-900 dark:text-white mb-2 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400 transition-colors uppercase tracking-tight">
+                  {item.caption || 'Untitled Project'}
+                </h4>
 
-            {/* Remove button (when editing) */}
+                <div className="flex items-center gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  <span className="flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                    Published
+                  </span>
+                </div>
+
+                {isEditing && (
+                  <button
+                    onClick={() => onRemove(item.id)}
+                    className=" absolute -top-12 right-2 p-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all shadow-xl hover:scale-110 active:scale-95 z-30 "
+                    title="Remove from Portfolio"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="sm:col-span-2 py-12 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-xl bg-gray-50/50 dark:bg-gray-800/30">
+            <Briefcase className="w-12 h-12 mb-3 opacity-20" />
+            <p className="text-sm font-medium">Your portfolio is empty.</p>
+            <p className="text-xs mt-1 mb-6">Add your best tours to showcase your expertise.</p>
             {isEditing && (
               <button
-                onClick={() => onRemove(item.id)}
-                className="
-                  absolute top-2 right-2
-                  p-1.5
-                  bg-red-600 hover:bg-red-700
-                  text-white
-                  rounded-lg
-                  opacity-0 group-hover:opacity-100
-                  transition-opacity
-                  shadow-lg
-                "
+                onClick={onAdd}
+                className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-widest rounded-2xl shadow-lg transition-all hover:scale-105 active:scale-95"
               >
-                <Trash2 className="w-3 h-3" />
+                <Plus className="w-4 h-4" />
+                Add to Portfolio
               </button>
             )}
           </div>
-        ))}
-
-        {/* Add placeholder */}
-        {isEditing && (
-          <button className="
-            aspect-square
-            border-2 border-dashed border-gray-300 dark:border-gray-700
-            rounded-lg
-            flex flex-col items-center justify-center
-            text-gray-500 dark:text-gray-400
-            hover:border-blue-500 hover:text-blue-500
-            transition-colors
-          ">
-            <Plus className="w-6 h-6 mb-1" />
-            <span className="text-xs">Add Media</span>
-          </button>
         )}
       </div>
     </div>
   )
 }
+
 
 // ============================================================================
 // VERIFICATION SECTION COMPONENT
 // ============================================================================
 
 interface VerificationSectionProps {
-  documents: GuideProfile['verificationDocuments']
-  status: VerificationStatus
+  status: string
+  rejectionReason?: string
 }
 
-function VerificationSection({ documents, status }: VerificationSectionProps) {
+function VerificationSection({ status, rejectionReason }: VerificationSectionProps) {
+  const { user } = useAuth()
+  
   return (
-    <div className="
-      p-6
-      bg-white dark:bg-gray-900
-      border border-gray-200 dark:border-gray-800
-      rounded-xl
-    ">
-      <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-        <Shield className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-        Identity Verification
-      </h3>
+    <motion.div 
+      whileHover={{ y: -4 }}
+      className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-[2rem] p-10 shadow-xl dark:shadow-2xl relative overflow-hidden group border border-gray-100 dark:border-white/5 transition-all duration-300 hover:shadow-2xl"
+    >
+       <Shield className="absolute -bottom-6 -right-6 w-24 h-24 text-blue-600/10 rotate-12 transition-transform duration-500" />
+       <h3 className="text-lg font-black mb-8 flex items-center gap-2">
+          <Shield className="w-5 h-5 text-emerald-500 fill-emerald-500/20" />
+          Digital Security
+       </h3>
 
-      <div className="space-y-4">
-        {documents.map((doc) => (
-          <div key={doc.id} className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {doc.type === 'id' && <User className="w-4 h-4 text-gray-400" />}
-              {doc.type === 'selfie' && <Camera className="w-4 h-4 text-gray-400" />}
-              {doc.type === 'certificate' && <GraduationCap className="w-4 h-4 text-gray-400" />}
-              <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">
-                {doc.type} {doc.type === 'id' ? 'Document' : ''}
-              </span>
+      <div className="space-y-4 relative z-10">
+        <div className="flex items-center justify-between bg-gray-50 dark:bg-white/5 p-4 rounded-xl border border-gray-100 dark:border-white/5 transition-all hover:bg-white dark:hover:bg-white/10 hover:shadow-md group/seal">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="w-4 h-4 text-emerald-500 group-hover/seal:scale-110 transition-transform" />
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white">Identity Status</span>
+              <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">KYC Verification</span>
             </div>
-            <span className={`
-              text-xs px-2 py-1 rounded-full
-              ${doc.status === 'approved' ? 'bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300' : ''}
-              ${doc.status === 'pending' ? 'bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300' : ''}
-              ${doc.status === 'rejected' ? 'bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-300' : ''}
-            `}>
-              {doc.status}
-            </span>
           </div>
-        ))}
+          <VerificationBadge status={status as any} />
+        </div>
 
-        {status === 'pending' && (
-          <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg flex items-start gap-2">
-            <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+        {/* Email Verification - Dynamic from profile */}
+        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5 transition-all hover:bg-white dark:hover:bg-white/10 hover:shadow-md group/seal">
+          <div className="flex items-center gap-3">
+             <CheckCircle className={`w-4 h-4 ${user?.emailVerified ? 'text-emerald-500' : 'text-gray-400'} group-hover/seal:scale-110 transition-transform`} />
+             <div className="flex flex-col">
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white">Email Verified</span>
+                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Account Security</span>
+             </div>
+          </div>
+          {user?.emailVerified && <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />}
+        </div>
+
+        {/* TFA - Shown as Disabled (it's not enabled now) */}
+        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5 transition-all hover:bg-white dark:hover:bg-white/10 hover:shadow-md group/seal">
+          <div className="flex items-center gap-3">
+             <Shield className="w-4 h-4 text-blue-400 group-hover/seal:scale-110 transition-transform" />
+             <div className="flex flex-col">
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white">Two-Factor Auth</span>
+                <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Advanced Protection</span>
+             </div>
+          </div>
+          <div className="text-[8px] font-black text-red-500 uppercase tracking-widest bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-md">Disabled</div>
+        </div>
+
+        {status === 'REJECTED' && rejectionReason && (
+          <div className="p-3 bg-red-50 dark:bg-red-950/30 rounded-lg border border-red-100 dark:border-red-900/50">
+            <p className="text-xs font-bold text-red-700 dark:text-red-400 mb-1">Reason for rejection:</p>
+            <p className="text-xs text-red-600 dark:text-red-300">{rejectionReason}</p>
+          </div>
+        )}
+
+        {status === 'PENDING' && (
+          <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg flex items-start gap-2">
+            <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-amber-800 dark:text-amber-300">
               Your documents are being reviewed. This usually takes 24-48 hours.
             </p>
           </div>
         )}
+
+        {status === 'NOT_SUBMITTED' && (
+          <Link 
+            href="/dashboard/guide/verification"
+            className="block text-center py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+          >
+            Submit Documents
+          </Link>
+        )}
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -1048,102 +864,114 @@ function VerificationSection({ documents, status }: VerificationSectionProps) {
 // ============================================================================
 
 interface SocialLinksProps {
-  links: GuideProfile['socialLinks']
+  links: Record<string, string>
   isEditing: boolean
-  onChange: (platform: string, value: string) => void
+  onChange: (links: Record<string, string>) => void
 }
 
 function SocialLinks({ links, isEditing, onChange }: SocialLinksProps) {
+  const [newPlatform, setNewPlatform] = useState('')
+  const [newUrl, setNewUrl] = useState('')
+
+  const handleAdd = () => {
+    if (newPlatform && newUrl) {
+      const updated = { ...links, [newPlatform.toLowerCase()]: newUrl }
+      onChange(updated)
+      setNewPlatform('')
+      setNewUrl('')
+    }
+  }
+
+  const handleRemove = (platform: string) => {
+    const updated = { ...links }
+    delete updated[platform]
+    onChange(updated)
+  }
+
+  const handleLinkChange = (platform: string, value: string) => {
+    onChange({ ...links, [platform]: value })
+  }
+
   return (
-    <div className="
-      p-6
-      bg-white dark:bg-gray-900
-      border border-gray-200 dark:border-gray-800
-      rounded-xl
-    ">
-      <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+    <div className=" p-10 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] shadow-xl hover:shadow-blue-500/10 transition-all duration-300 ">
+      <h3 className="text-[10px] font-black text-gray-600 dark:text-gray-500 mb-8 uppercase tracking-[0.25em] flex items-center gap-2">
         <Share2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-        Social Links
+        Social Presence
       </h3>
 
-      <div className="space-y-3">
-        {isEditing ? (
-          <>
-            <input
-              type="text"
-              value={links.instagram || ''}
-              onChange={(e) => onChange('instagram', e.target.value)}
-              placeholder="Instagram username (e.g., @username)"
-              className="
-                w-full
-                px-3 py-2
-                bg-gray-50 dark:bg-gray-800
-                border border-gray-200 dark:border-gray-700
-                rounded-lg
-                text-sm
-                text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-              "
-            />
-            <input
-              type="text"
-              value={links.facebook || ''}
-              onChange={(e) => onChange('facebook', e.target.value)}
-              placeholder="Facebook username"
-              className="
-                w-full
-                px-3 py-2
-                bg-gray-50 dark:bg-gray-800
-                border border-gray-200 dark:border-gray-700
-                rounded-lg
-                text-sm
-                text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-              "
-            />
-            <input
-              type="text"
-              value={links.website || ''}
-              onChange={(e) => onChange('website', e.target.value)}
-              placeholder="Personal website (e.g., mywebsite.com)"
-              className="
-                w-full
-                px-3 py-2
-                bg-gray-50 dark:bg-gray-800
-                border border-gray-200 dark:border-gray-700
-                rounded-lg
-                text-sm
-                text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-              "
-            />
-          </>
-        ) : (
-          <div className="space-y-2">
-            {links.instagram && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-500 dark:text-gray-400 w-20">Instagram:</span>
-                <a href={`https://instagram.com/${links.instagram.replace('@', '')}`} className="text-blue-600 dark:text-blue-400 hover:underline">
-                  {links.instagram}
-                </a>
-              </div>
-            )}
-            {links.facebook && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-500 dark:text-gray-400 w-20">Facebook:</span>
-                <a href={`https://facebook.com/${links.facebook}`} className="text-blue-600 dark:text-blue-400 hover:underline">
-                  {links.facebook}
-                </a>
-              </div>
-            )}
-            {links.website && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-gray-500 dark:text-gray-400 w-20">Website:</span>
-                <a href={`https://${links.website}`} className="text-blue-600 dark:text-blue-400 hover:underline">
-                  {links.website}
-                </a>
-              </div>
-            )}
+      <div className="space-y-4">
+        {/* Existing Links */}
+        <div className="space-y-3">
+          {Object.entries(links).map(([platform, value]) => (
+            <div key={platform} className="flex items-center gap-2">
+              {isEditing ? (
+                <div className="flex-1 flex items-center gap-2">
+                  <span className="text-xs font-medium text-gray-500 w-20 capitalize">{platform}:</span>
+                  <input
+                    type="text"
+                    value={value}
+                    onChange={(e) => handleLinkChange(platform, e.target.value)}
+                    placeholder={`${platform} profile`}
+                    className=" flex-1 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white "
+                  />
+                  <button
+                    onClick={() => handleRemove(platform)}
+                    className="p-1.5 text-gray-400 hover:text-red-500"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-gray-500 dark:text-gray-400 w-20 capitalize">{platform}:</span>
+                  <a 
+                    href={value.startsWith('http') ? value : `https://${value}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 dark:text-blue-400 hover:underline truncate max-w-[150px]"
+                  >
+                    {value}
+                  </a>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Add New Link Form */}
+        {isEditing && (
+          <div className="pt-4 border-t border-gray-100 dark:border-gray-800 space-y-3">
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Add New Link</p>
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                type="text"
+                value={newPlatform}
+                onChange={(e) => setNewPlatform(e.target.value)}
+                placeholder="Platform (e.g. TikTok)"
+                className=" px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs "
+              />
+              <input
+                type="text"
+                value={newUrl}
+                onChange={(e) => setNewUrl(e.target.value)}
+                placeholder="Username or URL"
+                className=" px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs "
+              />
+            </div>
+            <button
+              onClick={handleAdd}
+              disabled={!newPlatform || !newUrl}
+              className=" w-full py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-semibold hover:bg-blue-100 transition-colors disabled:opacity-50 "
+            >
+              Add social link
+            </button>
+          </div>
+        )}
+
+        {!isEditing && Object.keys(links).length === 0 && (
+          <div className="py-8 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-2xl bg-gray-50/50 dark:bg-gray-800/30">
+            <Share2 className="w-8 h-8 text-gray-300 dark:text-gray-600 mb-2" />
+            <p className="text-sm text-gray-500 italic">No social links added yet</p>
           </div>
         )}
       </div>
@@ -1157,19 +985,16 @@ function SocialLinks({ links, isEditing, onChange }: SocialLinksProps) {
 
 interface GuideInfoCardProps {
   profile: GuideProfile
+  totalTours: number
+  totalTravelers: number
 }
 
-function GuideInfoCard({ profile }: GuideInfoCardProps) {
+function GuideInfoCard({ profile, totalTours, totalTravelers }: GuideInfoCardProps) {
   return (
-    <div className="
-      p-6
-      bg-white dark:bg-gray-900
-      border border-gray-200 dark:border-gray-800
-      rounded-xl
-    ">
-      <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+    <div className=" p-10 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] shadow-xl hover:shadow-blue-500/10 transition-all duration-300 ">
+      <h3 className="text-[10px] font-black text-gray-600 dark:text-gray-500 mb-8 uppercase tracking-[0.25em] flex items-center gap-2">
         <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-        Guide Information
+        Expertise Data
       </h3>
       
       <div className="space-y-3">
@@ -1193,30 +1018,34 @@ function GuideInfoCard({ profile }: GuideInfoCardProps) {
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-600 dark:text-gray-400">Total Tours</span>
           <span className="font-semibold text-gray-900 dark:text-white">
-            {profile.totalTrips}
+            {totalTours}
           </span>
         </div>
         
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-600 dark:text-gray-400">Total Travelers</span>
           <span className="font-semibold text-gray-900 dark:text-white">
-            {profile.totalTravelers}
+            {totalTravelers}
           </span>
         </div>
         
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Response Rate</span>
-          <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-            {profile.responseRate}%
-          </span>
-        </div>
+        {profile.responseRate !== undefined && profile.responseRate > 0 && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600 dark:text-gray-400">Response Rate</span>
+            <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+              {profile.responseRate}%
+            </span>
+          </div>
+        )}
         
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Avg. Response Time</span>
-          <span className="font-semibold text-gray-900 dark:text-white">
-            {profile.responseTime}
-          </span>
-        </div>
+        {profile.responseTimeText && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600 dark:text-gray-400">Avg. Response Time</span>
+            <span className="font-semibold text-gray-900 dark:text-white">
+              {profile.responseTimeText}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -1230,56 +1059,142 @@ export default function GuideProfilePage() {
   const router = useRouter()
   const { user } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
-  const [profile, setProfile] = useState(MOCK_GUIDE_PROFILE)
+  const [profile, setProfile] = useState(EMPTY_GUIDE_PROFILE)
+  const [bookings, setBookings] = useState<GuideBookingResponse[]>([])
+  const [tours, setTours] = useState<TourTemplateResponse[]>([])
   const [isLoadingData, setIsLoadingData] = useState(true)
+  const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false)
+
+  const handlePortfolioToggle = async (tourId: number, currentStatus: boolean) => {
+    try {
+      await updateTour(tourId, { showInPortfolio: !currentStatus })
+      toast.success(currentStatus ? "Removed from portfolio" : "Added to portfolio")
+      
+      // Refresh tours list to reflect change in modal
+      const toursRes = await getGuideTours()
+      setTours(toursRes.data)
+      
+      // Refresh profile portfolio list (what's actually shown on profile)
+      if (user?.guideProfileId) {
+        const portfolioRes = await getGuidePortfolio(user.guideProfileId)
+        setProfile(prev => ({
+          ...prev,
+          portfolio: portfolioRes.data
+            .filter((t: any) => !!t.coverImageUrl)
+            .map((t: any) => ({
+              id: String(t.id),
+              type: 'image' as const,
+              url: t.coverImageUrl,
+              caption: t.title
+            }))
+        }))
+      }
+    } catch (error: any) {
+      console.error("Failed to toggle portfolio status", error)
+      if (error.response?.status === 409) {
+        toast.error("This tour is currently locked (e.g. under review or archived).")
+      } else {
+        toast.error("Failed to update portfolio")
+      }
+    }
+  }
 
   useEffect(() => {
-    if (!user || user.role !== 'Guide') {
+    if (!user || user.role !== 'GUIDE') {
       setIsLoadingData(false)
       return
     }
     
-    const loadProfile = async () => {
+    const loadData = async () => {
       try {
         setIsLoadingData(true)
-        const res = await apiClient.get('/api/guide/profile')
-        const data = res.data
+        const [profileRes, bookingsRes, toursRes] = await Promise.all([
+          getGuideProfile(),
+          getGuideBookings(),
+          getGuideTours()
+        ])
+        
+        const data = profileRes.data
+        setBookings(bookingsRes.data)
+        setTours(toursRes.data)
+        
+        // Fetch real portfolio data if guideProfileId exists
+        if (user.guideProfileId) {
+          try {
+            const portfolioRes = await getGuidePortfolio(user.guideProfileId)
+            if (portfolioRes.data.length > 0) {
+              setProfile(prev => ({
+                ...prev,
+                portfolio: portfolioRes.data
+                  .filter((tour: any) => !!tour.coverImageUrl)
+                  .map((tour: any) => ({
+                    id: String(tour.id),
+                    type: 'image' as const,
+                    url: tour.coverImageUrl,
+                    caption: tour.title
+                  }))
+              }))
+            }
+          } catch (pErr) {
+            console.error("Failed to load portfolio", pErr)
+          }
+        }
 
         setProfile(prev => ({
           ...prev,
+          id: String(data.id || user.guideProfileId || prev.id),
           firstName: data.fullName?.split(' ')[0] || prev.firstName,
           lastName: data.fullName?.split(' ').slice(1).join(' ') || prev.lastName,
           phone: data.phoneE164 || prev.phone,
           country: data.country || prev.country,
           location: data.city || prev.location,
           bio: data.bio || prev.bio,
+          tagline: data.tagline || prev.tagline || '',
+          avatar: data.avatarUrl || prev.avatar,
+          coverImage: data.coverImageUrl || prev.coverImage,
           expertise: data.expertise?.length ? data.expertise : prev.expertise,
           languages: data.languages?.length 
             ? data.languages.map((l: any) => ({ language: l.name, proficiency: l.proficiency }))
             : prev.languages,
           email: data.email || prev.email,
           memberSince: data.memberSince || prev.memberSince,
-          verifiedSince: data.verifiedSince || prev.verifiedSince,
+          verifiedSince: data.verifiedSince || prev.verifiedSince || '',
           totalTrips: data.totalTrips ?? prev.totalTrips,
           totalTravelers: data.totalTravelers ?? prev.totalTravelers,
           impactScore: data.impactScore ?? prev.impactScore,
-          verificationStatus: data.verificationStatus || prev.verificationStatus
+          verificationStatus: data.verificationStatus || prev.verificationStatus,
+          socialLinksJson: data.socialLinksJson,
+          responseRate: data.responseRate || 0,
+          responseTimeText: data.responseTimeText || 'N/A',
+          socialLinks: data.socialLinksJson ? JSON.parse(data.socialLinksJson) : prev.socialLinks
         }))
       } catch (error) {
-        console.error("Failed to load guide profile", error)
+        console.error("Failed to load guide data", error)
+        toast.error("Failed to sync profile data")
       } finally {
         setIsLoadingData(false)
       }
     }
 
-    loadProfile()
+    loadData()
   }, [user])
 
-  const handleEdit = () => setIsEditing(true)
+
+  // Derived dynamic metrics
+  const totalTravelers = bookings
+    .filter(b => b.status === BookingStatus.Completed || b.status === BookingStatus.Confirmed)
+    .reduce((acc, b) => acc + b.peopleCount, 0)
+  
+  const totalTours = tours.length
+
+  const handleEdit = () => {
+    setIsEditing(true)
+  }
+
   const handleSave = async () => {
     try {
       const payload = {
-        fullName: `${profile.firstName} ${profile.lastName}`.trim(),
+        fullName: (profile.firstName || profile.lastName) ? `${profile.firstName} ${profile.lastName}`.trim() : 'Guest Guide',
         phoneE164: profile.phone,
         country: profile.country,
         city: profile.location,
@@ -1287,7 +1202,21 @@ export default function GuideProfilePage() {
         expertise: profile.expertise,
         languages: profile.languages.map(l => ({ name: l.language, proficiency: l.proficiency }))
       }
+      
+      // Save base profile data
       await apiClient.post('/api/guide/profile/complete', payload)
+      
+      // Save professional branding metadata
+      const metaPayload = {
+        tagline: profile.tagline,
+        avatarUrl: profile.avatar,
+        coverImageUrl: profile.coverImage,
+        socialLinksJson: JSON.stringify(profile.socialLinks),
+        responseRate: profile.responseRate,
+        responseTimeText: profile.responseTimeText
+      }
+      await apiClient.put('/api/guide/profile/meta', metaPayload)
+
       toast.success("Profile saved successfully")
       setIsEditing(false)
     } catch (error: any) {
@@ -1296,22 +1225,45 @@ export default function GuideProfilePage() {
     }
   }
   const handleCancel = () => {
-    setProfile(MOCK_GUIDE_PROFILE)
     setIsEditing(false)
+    // In a real app, we might want to re-load data from backend here
+    // loadData() // But that would need to be accessible
   }
 
   const handleProfileChange = (field: string, value: any) => {
     setProfile(prev => ({ ...prev, [field]: value }))
   }
 
+  const avatarInputRef = useRef<HTMLInputElement>(null)
+  const coverInputRef = useRef<HTMLInputElement>(null)
+
   const handleAvatarChange = () => {
-    console.log('Change avatar')
-    // In Phase 4: Open file picker and upload
+    avatarInputRef.current?.click()
   }
 
   const handleCoverChange = () => {
-    console.log('Change cover image')
-    // In Phase 4: Open file picker and upload
+    coverInputRef.current?.click()
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'cover') => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Basic size check (e.g., 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image too large. Please select a file under 2MB")
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const base64 = reader.result as string
+      setProfile(prev => ({
+        ...prev,
+        [type === 'avatar' ? 'avatar' : 'coverImage']: base64
+      }))
+    }
+    reader.readAsDataURL(file)
   }
 
   const handleLanguageAdd = () => {
@@ -1358,24 +1310,10 @@ export default function GuideProfilePage() {
     }))
   }
 
-  const handleSocialChange = (platform: string, value: string) => {
-    setProfile(prev => ({
-      ...prev,
-      socialLinks: { ...prev.socialLinks, [platform]: value }
-    }))
+  const handleSocialChange = (links: Record<string, string>) => {
+    setProfile(prev => ({ ...prev, socialLinks: links }))
   }
 
-  const handlePortfolioAdd = () => {
-    console.log('Add portfolio item')
-    // In Phase 4: Open file picker and upload
-  }
-
-  const handlePortfolioRemove = (id: string) => {
-    setProfile(prev => ({
-      ...prev,
-      portfolio: prev.portfolio.filter(item => item.id !== id)
-    }))
-  }
 
   if (isLoadingData) {
     return (
@@ -1388,9 +1326,10 @@ export default function GuideProfilePage() {
   return (
     <>
       {/* Page offset */}
-      <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
+      <div className="pt-14 sm:pt-16 min-h-screen bg-white dark:bg-gray-950 relative overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-[600px] bg-theme-grid opacity-[0.03] dark:opacity-[0.02] pointer-events-none" />
         
-        <div className="container-safe mx-auto max-w-7xl py-8 sm:py-10">
+        <div className="container-safe mx-auto max-w-7xl py-8 sm:py-10 relative z-10">
           
           {/* Profile Header */}
           <ProfileHeader
@@ -1403,25 +1342,24 @@ export default function GuideProfilePage() {
             onCoverChange={handleCoverChange}
           />
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-32 sm:mt-28 mb-6">
+          {/* Stats Grid - Increased top margin for more space under profile pic */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-44 sm:mt-40 mb-6">
             <StatCard
               icon={Award}
               label="Impact Score"
-              value={profile.impactScore}
-              change="+5"
+              value={`${profile.impactScore}%`}
               color="amber"
             />
             <StatCard
               icon={Calendar}
-              label="Total Trips"
-              value={profile.totalTrips}
+              label="Total Tours"
+              value={totalTours}
               color="blue"
             />
             <StatCard
               icon={Users}
-              label="Travelers"
-              value={profile.totalTravelers}
+              label="Total Travelers"
+              value={totalTravelers}
               color="emerald"
             />
             <StatCard
@@ -1459,22 +1397,26 @@ export default function GuideProfilePage() {
                 onChange={handleExpertiseChange}
               />
 
-              <PortfolioGrid
-                items={profile.portfolio}
+              <PortfolioSection 
+                portfolio={profile.portfolio} 
+                guideId={profile.id}
                 isEditing={isEditing}
-                onAdd={handlePortfolioAdd}
-                onRemove={handlePortfolioRemove}
+                onAdd={() => setIsPortfolioModalOpen(true)}
+                onRemove={(id) => handlePortfolioToggle(Number(id), true)}
               />
             </div>
 
             {/* Right Column - Sidebar Info */}
             <div className="space-y-6">
               <VerificationSection
-                documents={profile.verificationDocuments}
                 status={profile.verificationStatus}
               />
 
-              <GuideInfoCard profile={profile} />
+              <GuideInfoCard 
+                profile={profile} 
+                totalTours={totalTours}
+                totalTravelers={totalTravelers}
+              />
 
               <SocialLinks
                 links={profile.socialLinks}
@@ -1483,15 +1425,10 @@ export default function GuideProfilePage() {
               />
 
               {/* Location */}
-              <div className="
-                p-6
-                bg-white dark:bg-gray-900
-                border border-gray-200 dark:border-gray-800
-                rounded-xl
-              ">
-                <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  Location
+              <div className=" p-10 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[2rem] shadow-xl hover:shadow-blue-500/10 transition-all duration-300 ">
+                <h3 className="text-[10px] font-black text-gray-600 dark:text-gray-500 mb-8 uppercase tracking-[0.25em] flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-orange-500" />
+                  Service Location
                 </h3>
                 {isEditing ? (
                   <div className="space-y-2">
@@ -1500,32 +1437,14 @@ export default function GuideProfilePage() {
                       value={profile.location}
                       onChange={(e) => handleProfileChange('location', e.target.value)}
                       placeholder="City"
-                      className="
-                        w-full
-                        px-3 py-2
-                        bg-gray-50 dark:bg-gray-800
-                        border border-gray-200 dark:border-gray-700
-                        rounded-lg
-                        text-sm
-                        text-gray-900 dark:text-white
-                        focus:outline-none focus:ring-2 focus:ring-blue-500
-                      "
+                      className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
                     />
                     <input
                       type="text"
                       value={profile.country}
                       onChange={(e) => handleProfileChange('country', e.target.value)}
                       placeholder="Country"
-                      className="
-                        w-full
-                        px-3 py-2
-                        bg-gray-50 dark:bg-gray-800
-                        border border-gray-200 dark:border-gray-700
-                        rounded-lg
-                        text-sm
-                        text-gray-900 dark:text-white
-                        focus:outline-none focus:ring-2 focus:ring-blue-500
-                      "
+                      className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
                     />
                   </div>
                 ) : (
@@ -1538,6 +1457,151 @@ export default function GuideProfilePage() {
           </div>
         </div>
       </div>
+      {/* Hidden file inputs */}
+      <input
+        type="file"
+        ref={avatarInputRef}
+        className="hidden"
+        accept="image/*"
+        onChange={(e) => handleFileChange(e, 'avatar')}
+      />
+      <input
+        type="file"
+        ref={coverInputRef}
+        className="hidden"
+        accept="image/*"
+        onChange={(e) => handleFileChange(e, 'cover')}
+      />
+      <PortfolioAddModal
+        isOpen={isPortfolioModalOpen}
+        onClose={() => setIsPortfolioModalOpen(false)}
+        tours={tours}
+        onToggle={handlePortfolioToggle}
+      />
     </>
+  )
+}
+
+// ============================================================================
+// PORTFOLIO ADD MODAL
+// ============================================================================
+
+interface PortfolioAddModalProps {
+  isOpen: boolean
+  onClose: () => void
+  tours: any[]
+  onToggle: (tourId: number, currentStatus: boolean) => Promise<void>
+}
+
+function PortfolioAddModal({ isOpen, onClose, tours, onToggle }: PortfolioAddModalProps) {
+  if (!isOpen) return null
+
+  // Sort: vetted tours first
+  const sortedTours = [...tours].sort((a, b) => {
+    if (a.lastPublishedAtUtc && !b.lastPublishedAtUtc) return -1
+    if (!a.lastPublishedAtUtc && b.lastPublishedAtUtc) return 1
+    return 0
+  })
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl border border-gray-200 dark:border-gray-800">
+        <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Manage Portfolio</h2>
+            <p className="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em] mt-1">
+              Feature your best tours as Signature Experiences
+            </p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-500">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-xl space-y-2">
+            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 font-black text-[10px] uppercase tracking-widest">
+              <Award className="w-4 h-4 text-amber-500" />
+              What is a Signature Experience?
+            </div>
+            <p className="text-[11px] text-blue-600/80 dark:text-blue-400/80 leading-relaxed font-bold">
+              Signature Experiences are featured tours that showcase your unique expertise and track record.
+              Only tours that have been **approved by admin** will appear in your public portfolio.
+            </p>
+          </div>
+
+          <div className="grid gap-3">
+            {sortedTours.length > 0 ? (
+              sortedTours.map((tour) => (
+                <div 
+                  key={tour.id} 
+                  className={`
+                    flex items-center justify-between p-4 rounded-xl border transition-all
+                    ${tour.showInPortfolio 
+                      ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800 shadow-sm' 
+                      : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'}
+                  `}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="relative w-16 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+                      {tour.media?.[0]?.url ? (
+                        <Image src={tour.media[0].url} alt={tour.title} fill className="object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Camera className="w-4 h-4 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white text-sm line-clamp-1">{tour.title}</h4>
+                      <div className="flex items-center gap-2 mt-1">
+                        {tour.lastPublishedAtUtc ? (
+                          <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
+                            <CheckCircle2 className="w-3 h-3" />
+                            Eligible
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider">
+                            <AlertCircle className="w-3 h-3" />
+                            Pending Approval
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => onToggle(tour.id, tour.showInPortfolio)}
+                    disabled={tour.status === 'ARCHIVED'}
+                    className={`
+                      px-4 py-1.5 rounded-lg text-xs font-bold transition-all
+                      ${tour.showInPortfolio
+                        ? 'bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100'
+                        : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'}
+                      disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:text-gray-400
+                    `}
+                  >
+                    {tour.showInPortfolio ? 'Remove' : 'Feature'}
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                <p>No tours found. Create a tour to build your portfolio.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="p-6 border-t border-gray-100 dark:border-gray-800 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-6 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-xl font-bold hover:opacity-90 transition-opacity shadow-lg"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }

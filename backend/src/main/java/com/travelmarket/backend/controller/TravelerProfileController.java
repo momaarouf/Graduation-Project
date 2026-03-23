@@ -26,7 +26,7 @@ public class TravelerProfileController {
 
     private final UserRepository userRepository;
     private final TravelerProfileRepository travelerProfileRepository;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @GetMapping
     public TravelerProfileResponse getProfile(@AuthenticationPrincipal UserDetails principal) throws Exception {
@@ -40,37 +40,11 @@ public class TravelerProfileController {
         TravelerProfile tp = travelerProfileRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("Traveler profile missing"));
 
-        TravelerProfileResponse res = new TravelerProfileResponse();
-        res.setFullName(user.getFullName());
-        res.setPhoneE164(user.getPhoneE164());
-        res.setCountry(tp.getHomeCountry());
-        res.setCity(tp.getHomeCity());
-        res.setNationality(tp.getNationality());
-
-        if (tp.getDateOfBirth() != null) {
-            res.setDateOfBirth(tp.getDateOfBirth().toString());
-        }
-
-        if (tp.getTravelPreferencesJson() != null && !tp.getTravelPreferencesJson().isBlank()) {
-            res.setPreferences(objectMapper.readValue(tp.getTravelPreferencesJson(), new TypeReference<List<String>>() {}));
-        } else {
-            res.setPreferences(List.of());
-        }
-
-        res.setEmail(user.getEmail());
-        res.setEmailVerified(user.getIsEmailVerified());
-        res.setPhoneVerified(user.getIsPhoneVerified());
-        res.setMemberSince(user.getCreatedAtUtc() != null ? user.getCreatedAtUtc().toString() : "");
-        res.setLoyaltyTier(tp.getLoyaltyTier() != null ? tp.getLoyaltyTier() : "Bronze");
-        res.setCompletedTrips(tp.getTotalCompletedTrips() != null ? tp.getTotalCompletedTrips() : 0);
-        res.setReviewReminderEnabled(tp.getReviewReminderEnabled() != null ? tp.getReviewReminderEnabled() : false);
-        res.setNewsletterOptIn(user.getNewsletterOptIn() != null ? user.getNewsletterOptIn() : false);
-
-        return res;
+        return mapToResponse(user, tp);
     }
 
     @PostMapping("/complete")
-    public void complete(@AuthenticationPrincipal UserDetails principal,
+    public TravelerProfileResponse complete(@AuthenticationPrincipal UserDetails principal,
             @Valid @RequestBody TravelerCompleteProfileRequest req) throws Exception {
 
         User user = userRepository.findByEmail(principal.getUsername())
@@ -83,6 +57,13 @@ public class TravelerProfileController {
 
         TravelerProfile tp = travelerProfileRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RuntimeException("Traveler profile missing"));
+
+        // Check for duplicate phone number
+        String newPhone = req.getPhoneE164().trim();
+        User existingUserWithPhone = userRepository.findByPhoneE164(newPhone);
+        if (existingUserWithPhone != null && !existingUserWithPhone.getId().equals(user.getId())) {
+            throw new IllegalArgumentException("This phone number is already associated with another account.");
+        }
 
         // Update shared identity fields (editable)
         user.setFullName(req.getFullName().trim());
@@ -108,7 +89,13 @@ public class TravelerProfileController {
             tp.setTravelPreferencesJson(objectMapper.writeValueAsString(req.getPreferences()));
         }
 
-        travelerProfileRepository.save(tp);
+        // New fields
+        tp.setTagline(req.getTagline());
+        tp.setBio(req.getBio());
+        tp.setAvatarUrl(req.getAvatarUrl());
+        tp.setCoverImageUrl(req.getCoverImageUrl());
+        
+        tp = travelerProfileRepository.save(tp);
 
         // Profile completion rule (Traveler): agreements + name + phone + location
         boolean completed = isTrue(user.getAgreedToTerms()) &&
@@ -119,7 +106,44 @@ public class TravelerProfileController {
                 notBlank(tp.getHomeCity());
 
         user.setProfileCompleted(completed);
-        userRepository.save(user);
+        user = userRepository.save(user);
+
+        return mapToResponse(user, tp);
+    }
+
+    private TravelerProfileResponse mapToResponse(User user, TravelerProfile tp) throws Exception {
+        TravelerProfileResponse res = new TravelerProfileResponse();
+        res.setFullName(user.getFullName());
+        res.setPhoneE164(user.getPhoneE164());
+        res.setCountry(tp.getHomeCountry());
+        res.setCity(tp.getHomeCity());
+        res.setNationality(tp.getNationality());
+
+        if (tp.getDateOfBirth() != null) {
+            res.setDateOfBirth(tp.getDateOfBirth().toString());
+        }
+
+        if (tp.getTravelPreferencesJson() != null && !tp.getTravelPreferencesJson().isBlank()) {
+            res.setPreferences(objectMapper.readValue(tp.getTravelPreferencesJson(), new TypeReference<List<String>>() {}));
+        } else {
+            res.setPreferences(List.of());
+        }
+
+        res.setEmail(user.getEmail());
+        res.setEmailVerified(user.getIsEmailVerified());
+        res.setPhoneVerified(user.getIsPhoneVerified());
+        res.setMemberSince(user.getCreatedAtUtc() != null ? user.getCreatedAtUtc().toString() : "");
+        res.setLoyaltyTier(tp.getLoyaltyTier() != null ? tp.getLoyaltyTier() : "Bronze");
+        res.setCompletedTrips(tp.getTotalCompletedTrips() != null ? tp.getTotalCompletedTrips() : 0);
+        res.setReviewReminderEnabled(tp.getReviewReminderEnabled() != null ? tp.getReviewReminderEnabled() : false);
+        res.setNewsletterOptIn(user.getNewsletterOptIn() != null ? user.getNewsletterOptIn() : false);
+        
+        res.setTagline(tp.getTagline());
+        res.setBio(tp.getBio());
+        res.setAvatarUrl(tp.getAvatarUrl());
+        res.setCoverImageUrl(tp.getCoverImageUrl());
+
+        return res;
     }
 
     private static boolean notBlank(String s) {

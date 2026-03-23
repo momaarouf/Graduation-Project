@@ -94,9 +94,9 @@ export default function OAuthCallbackPage() {
   }, [user]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const redirect = (role: string) => {
-    if (role === 'Guide') router.replace('/dashboard/guide')
-    else if (role === 'Traveler') router.replace('/dashboard/traveler')
-    else if (role === 'Admin') router.replace('/dashboard/admin')
+    if (user?.role === 'ADMIN') router.push('/dashboard/admin')
+    else if (user?.role === 'GUIDE') router.push('/dashboard/guide')
+    else if (user?.role === 'TRAVELER') router.push('/dashboard/traveler')
     else router.replace('/')
   }
 
@@ -231,13 +231,70 @@ export default function OAuthCallbackPage() {
     )
   }
 
-  // ── Loading state ─────────────────────────────────────────────────────────
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
-      <div className="text-center space-y-4">
-        <Loader2 className="w-10 h-10 animate-spin text-blue-600 mx-auto" />
-        <p className="text-sm text-gray-500 dark:text-gray-400">Completing sign-in…</p>
+  // ── Enhanced Loading state ────────────────────────────────────────────────
+  const [loadingStep, setLoadingStep] = useState(0);
+  const loadingMessages = [
+    "Connecting to Google...",
+    "Securing your session...",
+    "Fetching your profile...",
+    "Almost there..."
+  ];
+
+  useEffect(() => {
+    if (phase === 'loading') {
+      const interval = setInterval(() => {
+        setLoadingStep((prev) => (prev < loadingMessages.length - 1 ? prev + 1 : prev));
+      }, 800);
+      return () => clearInterval(interval);
+    }
+  }, [phase]);
+
+  if (phase === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] dark:bg-[#020617] relative overflow-hidden">
+        {/* Decorative background elements */}
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-400/10 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full animate-pulse delay-700" />
+        
+        <div className="relative z-10 w-full max-w-sm px-4">
+          <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 rounded-3xl shadow-2xl p-10 text-center">
+            <div className="relative mb-8">
+              {/* Outer spinning ring */}
+              <div className="absolute inset-0 scale-150 opacity-20">
+                <div className="w-full h-full border-4 border-blue-600 border-t-transparent rounded-full animate-[spin_3s_linear_infinite]" />
+              </div>
+              
+              <div className="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30">
+                <Loader2 className="w-10 h-10 animate-spin text-white" />
+              </div>
+            </div>
+
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+              Authenticating
+            </h2>
+            
+            <div className="space-y-4">
+              <p className="text-sm text-blue-600 dark:text-blue-400 font-medium animate-pulse">
+                {loadingMessages[loadingStep]}
+              </p>
+              
+              {/* Progress dots */}
+              <div className="flex justify-center gap-1.5">
+                {loadingMessages.map((_, i) => (
+                  <div 
+                    key={i}
+                    className={`h-1 rounded-full transition-all duration-500 ${
+                      i === loadingStep ? 'w-6 bg-blue-600' : 'w-1.5 bg-gray-200 dark:bg-gray-700'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  )
+    );
+  }
+
+  return null; // Should not reach here
 }

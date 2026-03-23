@@ -35,6 +35,9 @@ public class UpdateTourTemplateRequest {
     @Size(max = 100, message = "Region must not exceed 100 characters")
     private String region;
 
+    @Size(max = 100, message = "City must not exceed 100 characters")
+    private String city;
+
     @Size(max = 5, message = "Country code must not exceed 5 characters")
     private String countryCode;
 
@@ -49,6 +52,18 @@ public class UpdateTourTemplateRequest {
     @DecimalMax(value = "180.0",  message = "Invalid longitude")
     private BigDecimal meetingLongitude;
 
+    private String meetingPointAddress;
+    private String meetingPointInstructions;
+
+    private String itinerary;
+    private String inclusions;
+    private String exclusions;
+    private String requirements;
+    private String whatToBring;
+
+    private String tags;
+    private String languages;
+
     @DecimalMin(value = "0.01", message = "Base price must be greater than 0")
     private BigDecimal basePrice;
 
@@ -61,15 +76,33 @@ public class UpdateTourTemplateRequest {
     @Min(value = 1, message = "Max capacity must be at least 1")
     private Integer maxCapacity;
 
+    private Integer durationHours;
+    private Integer durationMinutes;
+
     private Boolean instantBook;
+    
+    private java.time.Instant startDate;
 
     private Boolean isRecurring;
 
     private RecurrencePattern recurrencePattern;
+    private String recurringDays;
+    private java.time.Instant recurringUntil;
+    private String recurringDates;
+    private String excludedDates;
 
     private Boolean halalFriendly;
 
     private Boolean autoCancelIfMinNotMet;
 
     private Boolean showInPortfolio;
+
+    private String dynamicPricing;
+    private String halalDetails;
+
+    private Boolean isPremium;
+    private Boolean isFamilyFriendly;
+    private Boolean hasGroupDiscount;
+    private Integer groupDiscountThreshold;
+    private java.math.BigDecimal groupDiscountPercent;
 }

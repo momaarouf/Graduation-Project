@@ -37,17 +37,18 @@ import {
     Clock,
     Users,
     Shield,
-    Leaf,
-    Zap,
     X,
     Filter,
     Languages,
     Calendar,
-    Home,
     Briefcase,
     ChevronDown,
     ChevronUp,
-    Check
+    Check,
+    MoonStar,
+    TicketCheck,
+    Baby,
+    BadgePercent
 } from 'lucide-react'
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from '@headlessui/react'
 
@@ -309,7 +310,7 @@ export default function SearchFilters({
                         className={`relative w-full flex justify-center p-2 rounded-lg transition-all duration-200 ${filters.isHalalCertified ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'}`}
                         title="Halal Certified"
                     >
-                        <Leaf className="w-5 h-5" />
+                        <MoonStar className="w-5 h-5" />
                     </button>
 
                     {/* Instant Book - icon only */}
@@ -318,16 +319,7 @@ export default function SearchFilters({
                         className={`relative w-full flex justify-center p-2 rounded-lg transition-all duration-200 ${filters.hasInstantBook ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'}`}
                         title="Instant Booking"
                     >
-                        <Zap className="w-5 h-5" />
-                    </button>
-
-                    {/* Verified Guide - icon only */}
-                    <button
-                        onClick={() => toggleBooleanFilter('isGuideVerified')}
-                        className={`relative w-full flex justify-center p-2 rounded-lg transition-all duration-200 ${filters.isGuideVerified ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'}`}
-                        title="Verified Guides Only"
-                    >
-                        <Shield className="w-5 h-5" />
+                        <TicketCheck className="w-5 h-5" />
                     </button>
 
                     {/* Group Discount - icon only */}
@@ -336,7 +328,25 @@ export default function SearchFilters({
                         className={`relative w-full flex justify-center p-2 rounded-lg transition-all duration-200 ${filters.hasGroupDiscount ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'}`}
                         title="Group Discount"
                     >
-                        <Users className="w-5 h-5" />
+                        <BadgePercent className="w-5 h-5" />
+                    </button>
+
+                    {/* Family Friendly - icon only */}
+                    <button
+                        onClick={() => toggleBooleanFilter('isFamilyFriendly')}
+                        className={`relative w-full flex justify-center p-2 rounded-lg transition-all duration-200 ${filters.isFamilyFriendly ? 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'}`}
+                        title="Family Friendly"
+                    >
+                        <Baby className="w-5 h-5" />
+                    </button>
+
+                    {/* Premium - icon only */}
+                    <button
+                        onClick={() => toggleBooleanFilter('isPremium')}
+                        className={`relative w-full flex justify-center p-2 rounded-lg transition-all duration-200 ${filters.isPremium ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'}`}
+                        title="Premium Tours"
+                    >
+                        <Star className={`w-5 h-5 ${filters.isPremium ? 'fill-amber-600' : ''}`} />
                     </button>
                 </div>
 
@@ -356,7 +366,7 @@ export default function SearchFilters({
     // ========================================
 
     return (
-        <div className={`w-full h-full bg-white dark:bg-gray-950 ${isMobile ? 'fixed inset-0 z-50 overflow-y-auto' : 'relative'}`}>
+        <div className={`w-full bg-white dark:bg-gray-950 ${isMobile ? 'fixed inset-0 z-50 overflow-y-auto' : ''}`}>
 
             {/* ========================================
                 HEADER - Mobile drawer header
@@ -389,7 +399,7 @@ export default function SearchFilters({
             {/* ========================================
                 FILTERS CONTENT
                 ======================================== */}
-            <div className="p-4 sm:p-5 space-y-1">
+            <div className="px-5 sm:px-6 pb-24">
 
                 {/* ========================================
                     ACTIVE FILTERS SUMMARY
@@ -411,7 +421,6 @@ export default function SearchFilters({
                 <FilterSection
                     title="Location"
                     icon={<MapPin className="w-4 h-4" />}
-                    defaultExpanded={!isCollapsed}
                 >
                     <div className="space-y-4">
                         {/* Country filter */}
@@ -515,50 +524,49 @@ export default function SearchFilters({
                 <FilterSection
                     title="Tour Features"
                     icon={<Briefcase className="w-4 h-4" />}
-                    defaultExpanded={!isCollapsed}
                 >
-                    <div className="space-y-3">
+                    <div className="space-y-1">
                         {/* Halal certified */}
-                        <label className="flex items-center justify-between cursor-pointer group">
-                            <span className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                                <Leaf className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                        <label className="flex items-center justify-between cursor-pointer group py-2">
+                            <span className="flex items-center gap-3 text-[15px] text-gray-700 dark:text-gray-300">
+                                <MoonStar className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                                 Halal Certified
                             </span>
-                            <button onClick={() => toggleBooleanFilter('isHalalCertified')} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ${filters.isHalalCertified ? 'bg-emerald-600 dark:bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
-                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${filters.isHalalCertified ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                            <button onClick={() => toggleBooleanFilter('isHalalCertified')} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${filters.isHalalCertified ? 'bg-emerald-600 dark:bg-emerald-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                                <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-200 shadow-sm ${filters.isHalalCertified ? 'translate-x-5' : 'translate-x-0.5'}`} />
                             </button>
                         </label>
-
+ 
                         {/* Instant Book */}
-                        <label className="flex items-center justify-between cursor-pointer group">
-                            <span className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                                <Zap className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                        <label className="flex items-center justify-between cursor-pointer group py-2">
+                            <span className="flex items-center gap-3 text-[15px] text-gray-700 dark:text-gray-300">
+                                <TicketCheck className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                                 Instant Booking
                             </span>
-                            <button onClick={() => toggleBooleanFilter('hasInstantBook')} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ${filters.hasInstantBook ? 'bg-amber-600 dark:bg-amber-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
-                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${filters.hasInstantBook ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                            <button onClick={() => toggleBooleanFilter('hasInstantBook')} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${filters.hasInstantBook ? 'bg-amber-600 dark:bg-amber-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                                <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-200 shadow-sm ${filters.hasInstantBook ? 'translate-x-5' : 'translate-x-0.5'}`} />
                             </button>
                         </label>
-
+ 
                         {/* Group Discount */}
-                        <label className="flex items-center justify-between cursor-pointer group">
-                            <span className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                                <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                        <label className="flex items-center justify-between cursor-pointer group py-2">
+                            <span className="flex items-center gap-3 text-[15px] text-gray-700 dark:text-gray-300">
+                                <BadgePercent className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                                 Group Discount
                             </span>
-                            <button onClick={() => toggleBooleanFilter('hasGroupDiscount')} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ${filters.hasGroupDiscount ? 'bg-purple-600 dark:bg-purple-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
-                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${filters.hasGroupDiscount ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                            <button onClick={() => toggleBooleanFilter('hasGroupDiscount')} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${filters.hasGroupDiscount ? 'bg-purple-600 dark:bg-purple-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                                <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-200 shadow-sm ${filters.hasGroupDiscount ? 'translate-x-5' : 'translate-x-0.5'}`} />
                             </button>
                         </label>
-
+ 
                         {/* Family Friendly */}
-                        <label className="flex items-center justify-between cursor-pointer group">
-                            <span className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                                <Home className="w-4 h-4 text-pink-600 dark:text-pink-400" />
+                        <label className="flex items-center justify-between cursor-pointer group py-2">
+                            <span className="flex items-center gap-3 text-[15px] text-gray-700 dark:text-gray-300">
+                                <Baby className="w-5 h-5 text-pink-600 dark:text-pink-400" />
                                 Family Friendly
                             </span>
-                            <button onClick={() => toggleBooleanFilter('isFamilyFriendly')} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ${filters.isFamilyFriendly ? 'bg-pink-600 dark:bg-pink-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
-                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${filters.isFamilyFriendly ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                            <button onClick={() => toggleBooleanFilter('isFamilyFriendly')} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${filters.isFamilyFriendly ? 'bg-pink-600 dark:bg-pink-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                                <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-200 shadow-sm ${filters.isFamilyFriendly ? 'translate-x-5' : 'translate-x-0.5'}`} />
                             </button>
                         </label>
                     </div>
@@ -570,7 +578,6 @@ export default function SearchFilters({
                 <FilterSection
                     title="Price"
                     icon={<DollarSign className="w-4 h-4" />}
-                    defaultExpanded={!isCollapsed}
                 >
                     <PriceRangeFilter
                         minPrice={filters.minPrice}
@@ -588,7 +595,6 @@ export default function SearchFilters({
                 <FilterSection
                     title="Duration"
                     icon={<Clock className="w-4 h-4" />}
-                    defaultExpanded={!isCollapsed}
                 >
                     <CheckboxFilter
                         options={durationOptions}
@@ -605,49 +611,88 @@ export default function SearchFilters({
                 <FilterSection
                     title="Group Size"
                     icon={<Users className="w-4 h-4" />}
-                    defaultExpanded={!isCollapsed}
                 >
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="number"
-                                value={filters.minGroupSize || ''}
-                                onChange={(e) => handleFilterChange({
-                                    minGroupSize: e.target.value ? Number(e.target.value) : undefined
-                                })}
-                                placeholder="Min"
-                                min={GROUP_SIZE_RANGE.MIN}
-                                max={filters.maxGroupSize || GROUP_SIZE_RANGE.MAX}
-                                className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                aria-label="Minimum group size"
-                            />
-                            <span className="text-gray-500 dark:text-gray-400">—</span>
-                            <input
-                                type="number"
-                                value={filters.maxGroupSize || ''}
-                                onChange={(e) => handleFilterChange({
-                                    maxGroupSize: e.target.value ? Number(e.target.value) : undefined
-                                })}
-                                placeholder="Max"
-                                min={filters.minGroupSize || GROUP_SIZE_RANGE.MIN}
-                                max={GROUP_SIZE_RANGE.MAX}
-                                className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                aria-label="Maximum group size"
-                            />
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-3 mt-2">
+                            {/* Small Group */}
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const isSelected = filters.maxGroupSize === 8 && !filters.minGroupSize;
+                                    handleFilterChange({
+                                        minGroupSize: undefined,
+                                        maxGroupSize: isSelected ? undefined : 8
+                                    });
+                                }}
+                                className={`px-4 py-3 rounded-xl text-sm font-medium transition-all border ${
+                                    filters.maxGroupSize === 8 && !filters.minGroupSize
+                                        ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white shadow-sm'
+                                        : 'bg-white dark:bg-transparent border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-900 dark:hover:border-white'
+                                }`}
+                            >
+                                Small (1-8)
+                            </button>
+
+                            {/* Medium Group */}
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const isSelected = filters.minGroupSize === 9 && filters.maxGroupSize === 20;
+                                    handleFilterChange({
+                                        minGroupSize: isSelected ? undefined : 9,
+                                        maxGroupSize: isSelected ? undefined : 20
+                                    });
+                                }}
+                                className={`px-4 py-3 rounded-xl text-sm font-medium transition-all border ${
+                                    filters.minGroupSize === 9 && filters.maxGroupSize === 20
+                                        ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white shadow-sm'
+                                        : 'bg-white dark:bg-transparent border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-900 dark:hover:border-white'
+                                }`}
+                            >
+                                Medium (9-20)
+                            </button>
+
+                            {/* Large Group */}
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const isSelected = filters.minGroupSize === 21 && !filters.maxGroupSize;
+                                    handleFilterChange({
+                                        minGroupSize: isSelected ? undefined : 21,
+                                        maxGroupSize: undefined
+                                    });
+                                }}
+                                className={`px-4 py-3 rounded-xl text-sm font-medium transition-all border col-span-2 ${
+                                    filters.minGroupSize === 21 && !filters.maxGroupSize
+                                        ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white shadow-sm'
+                                        : 'bg-white dark:bg-transparent border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-900 dark:hover:border-white'
+                                }`}
+                            >
+                                Large (21+)
+                            </button>
                         </div>
 
                         {/* Available spots only */}
-                        <label className="flex items-center gap-2 cursor-pointer group">
-                            <input
-                                type="checkbox"
-                                checked={filters.hasAvailableSpots || false}
-                                onChange={() => toggleBooleanFilter('hasAvailableSpots')}
-                                className="w-4 h-4 text-blue-600 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 rounded focus:ring-blue-500"
-                            />
-                            <span className="text-sm text-gray-700 dark:text-gray-300">
-                                Only show available spots
-                            </span>
-                        </label>
+                        <div className="pt-2">
+                            <label className="flex items-center gap-3 cursor-pointer group py-2">
+                                <div className="relative flex items-center justify-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={filters.hasAvailableSpots || false}
+                                        onChange={() => toggleBooleanFilter('hasAvailableSpots')}
+                                        className="peer absolute opacity-0 w-5 h-5 cursor-pointer"
+                                    />
+                                    <div className={`w-5 h-5 border-[1.5px] rounded-md transition-all duration-200 flex items-center justify-center ${filters.hasAvailableSpots ? 'bg-gray-900 dark:bg-white border-gray-900 dark:border-white' : 'bg-white dark:bg-gray-950 border-gray-300 dark:border-gray-700 group-hover:border-gray-500 dark:group-hover:border-gray-400'}`}>
+                                        {filters.hasAvailableSpots && (
+                                            <Check className="w-3.5 h-3.5 text-white dark:text-gray-900 stroke-[3]" />
+                                        )}
+                                    </div>
+                                </div>
+                                <span className="text-[15px] text-gray-700 dark:text-gray-300 transition-colors">
+                                    Only show available spots
+                                </span>
+                            </label>
+                        </div>
                     </div>
                 </FilterSection>
 
@@ -657,19 +702,8 @@ export default function SearchFilters({
                 <FilterSection
                     title="Guide Quality"
                     icon={<Shield className="w-4 h-4" />}
-                    defaultExpanded={!isCollapsed}
                 >
                     <div className="space-y-3">
-                        {/* Verified guides only */}
-                        <label className="flex items-center justify-between cursor-pointer group">
-                            <span className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                                <Shield className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                                Verified Guides Only
-                            </span>
-                            <button onClick={() => toggleBooleanFilter('isGuideVerified')} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ${filters.isGuideVerified ? 'bg-blue-600 dark:bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
-                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${filters.isGuideVerified ? 'translate-x-5' : 'translate-x-0.5'}`} />
-                            </button>
-                        </label>
 
                         {/* Languages */}
                         <div className="pt-2">
@@ -695,23 +729,29 @@ export default function SearchFilters({
                 <FilterSection
                     title="Rating"
                     icon={<Star className="w-4 h-4" />}
-                    defaultExpanded={!isCollapsed}
                 >
-                    <div className="space-y-2">
+                    <div className="space-y-3 mt-2">
                         {ratingOptions.map(option => (
                             <label
                                 key={option.id}
-                                className="flex items-center gap-2 cursor-pointer group"
+                                className="flex items-center gap-3 cursor-pointer group py-1.5"
                             >
-                                <input
-                                    type="radio"
-                                    name="rating"
-                                    value={option.id}
-                                    checked={filters.minRating === option.id}
-                                    onChange={() => handleFilterChange({ minRating: option.id as MinRating })}
-                                    className="w-4 h-4 text-blue-600 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 focus:ring-blue-500"
-                                />
-                                <span className="text-sm text-gray-700 dark:text-gray-300">
+                                <div className="relative flex items-center justify-center">
+                                    <input
+                                        type="radio"
+                                        name="rating"
+                                        value={option.id}
+                                        checked={filters.minRating === option.id}
+                                        onChange={() => handleFilterChange({ minRating: option.id as MinRating })}
+                                        className="peer absolute opacity-0 w-5 h-5 cursor-pointer"
+                                    />
+                                    <div className={`w-5 h-5 rounded-full border-[1.5px] flex items-center justify-center transition-all ${filters.minRating === option.id ? 'border-gray-900 dark:border-white' : 'border-gray-300 dark:border-gray-700 group-hover:border-gray-500 dark:group-hover:border-gray-400'}`}>
+                                        {filters.minRating === option.id && (
+                                            <div className="w-2.5 h-2.5 rounded-full bg-gray-900 dark:bg-white" />
+                                        )}
+                                    </div>
+                                </div>
+                                <span className={`text-[15px] ${filters.minRating === option.id ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-300'}`}>
                                     {option.label}
                                 </span>
                             </label>
@@ -719,35 +759,6 @@ export default function SearchFilters({
                     </div>
                 </FilterSection>
 
-                {/* ========================================
-                    SECTION 8: AVAILABILITY
-                    ======================================== */}
-                <FilterSection
-                    title="Availability"
-                    icon={<Calendar className="w-4 h-4" />}
-                    defaultExpanded={!isCollapsed}
-                >
-                    <div className="space-y-2">
-                        {availabilityOptions.map(option => (
-                            <label
-                                key={option.id}
-                                className="flex items-center gap-2 cursor-pointer group"
-                            >
-                                <input
-                                    type="radio"
-                                    name="availability"
-                                    value={option.id}
-                                    checked={filters.availability === option.id}
-                                    onChange={() => handleFilterChange({ availability: option.id as Availability })}
-                                    className="w-4 h-4 text-blue-600 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 focus:ring-blue-500"
-                                />
-                                <span className="text-sm text-gray-700 dark:text-gray-300">
-                                    {option.label}
-                                </span>
-                            </label>
-                        ))}
-                    </div>
-                </FilterSection>
 
                 {/* ========================================
                     SECTION 9: PREMIUM FEATURES
@@ -755,15 +766,14 @@ export default function SearchFilters({
                 <FilterSection
                     title="Premium"
                     icon={<Star className="w-4 h-4 text-amber-500" />}
-                    defaultExpanded={!isCollapsed}
                 >
-                    <label className="flex items-center justify-between cursor-pointer group">
-                        <span className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                            <Star className="w-4 h-4 text-amber-500" />
+                    <label className="flex items-center justify-between cursor-pointer group py-2">
+                        <span className="flex items-center gap-3 text-[15px] font-medium text-gray-900 dark:text-white">
+                            <Star className={`w-5 h-5 text-amber-500 ${filters.isPremium ? 'fill-amber-500' : ''}`} />
                             Premium Tours Only
                         </span>
-                        <button onClick={() => toggleBooleanFilter('isPremium')} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ${filters.isPremium ? 'bg-amber-600 dark:bg-amber-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
-                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${filters.isPremium ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                        <button onClick={() => toggleBooleanFilter('isPremium')} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${filters.isPremium ? 'bg-amber-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                            <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-200 shadow-sm ${filters.isPremium ? 'translate-x-5' : 'translate-x-0.5'}`} />
                         </button>
                     </label>
                 </FilterSection>

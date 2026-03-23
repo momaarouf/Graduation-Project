@@ -77,7 +77,7 @@ function SignupContent() {
       await authRegister(
         data.email,
         data.password,
-        data.role as 'Traveler' | 'Guide',
+        data.role!,
         fullName,
         data.agreedToTerms,
         data.agreedToPrivacy,
@@ -144,82 +144,90 @@ function SignupContent() {
   };
 
   return (
-    <div className="container-safe mx-auto max-w-4xl pt-20 sm:pt-24 py-8 sm:py-12">
-      
-      {/* BACK BUTTON */}
-      <div className="mb-4 sm:mb-6">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
-        >
-          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          <span>Back to Home</span>
-        </Link>
-      </div>
-      
-      {/* Header */}
-      <div className="text-center mb-8 sm:mb-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white rounded-full text-xs sm:text-sm font-medium shadow-lg shadow-blue-600/20">
-          <Compass className="w-3.5 h-3.5" />
-          <span>JOIN 15K+ TRAVELERS</span>
-        </div>
-
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-          Create Your{' '}
-          <span className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
-            Account
-          </span>
-        </h1>
-
-        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          Join SafariHub and start your journey with verified guides and authentic halal-friendly experiences.
-        </p>
+    <div className="min-h-screen relative flex flex-col items-center justify-center py-12 px-4 overflow-hidden">
+      {/* Background Decorative Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[30%] h-[30%] bg-indigo-500/10 rounded-full blur-[100px]" />
       </div>
 
-      {/* Step Indicator */}
-      {data.role && (
-        <div className="mb-8 sm:mb-10">
-          <SignupStepIndicator
-            currentStep={currentStep}
-            completedSteps={completedSteps}
-            role={data.role}
-          />
-        </div>
-      )}
-
-      {/* Step Content with Animation */}
-      <div className="relative min-h-[400px]">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
+      <div className="w-full max-w-4xl relative z-10">
+        {/* BACK BUTTON */}
+        <div className="mb-8">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-blue-600 transition-colors group"
           >
-            {renderStep()}
+            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Back to Home
+          </Link>
+        </div>
+        
+        {/* Header */}
+        <div className="text-center mb-10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full text-[10px] font-black uppercase tracking-widest mb-4"
+          >
+            <Sparkles className="w-3 h-3" />
+            Join our community
           </motion.div>
-        </AnimatePresence>
-      </div>
 
-      {/* Trust Badges */}
-      <div className="mt-10 flex flex-wrap items-center justify-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-        <span className="flex items-center gap-1.5">
-          <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          <span>256-bit SSL encryption</span>
-        </span>
-        <span className="flex items-center gap-1.5">
-          <Shield className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-          <span>GDPR compliant</span>
-        </span>
-        <span className="flex items-center gap-1.5">
-          <Shield className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-          <span>Secure payments</span>
-        </span>
-        <span className="flex items-center gap-1.5">
-          <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-          <span>Verified guides</span>
-        </span>
+          <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight mb-3">
+            Create Your <span className="text-blue-600">Account</span>
+          </h1>
+
+          <p className="text-gray-500 dark:text-gray-400 font-medium max-w-lg mx-auto">
+            Secure your spot in the marketplace and discover authentic halal-friendly experiences.
+          </p>
+        </div>
+
+        {/* Step Indicator */}
+        {data.role && (
+          <div className="mb-10 max-w-2xl mx-auto">
+            <SignupStepIndicator
+              currentStep={currentStep}
+              completedSteps={completedSteps}
+              role={data.role}
+            />
+          </div>
+        )}
+
+        {/* Step Content with Animation */}
+        <div className="relative min-h-[400px]">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              {renderStep()}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Minimal Footer Footer */}
+        <p className="mt-12 text-center text-sm text-gray-500 dark:text-gray-400 font-medium">
+          Already have an account?{' '}
+          <Link 
+            href="/auth/login" 
+            className="text-blue-600 font-black hover:underline"
+          >
+            Sign in
+          </Link>
+        </p>
+
+        <div className="mt-8 flex justify-center gap-6 text-[10px] font-black uppercase tracking-widest text-gray-400">
+          <span className="flex items-center gap-1.5">
+            <Shield className="w-3 h-3" />
+            Secure SSL
+          </span>
+          <Link href="/terms" className="hover:text-gray-600 dark:hover:text-gray-200 transition-colors">Terms</Link>
+          <Link href="/privacy" className="hover:text-gray-600 dark:hover:text-gray-200 transition-colors">Privacy</Link>
+        </div>
       </div>
     </div>
   );

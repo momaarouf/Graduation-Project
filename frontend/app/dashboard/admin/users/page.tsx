@@ -146,7 +146,7 @@ export default function AdminUsersPage() {
   const [banReason, setBanReason] = useState('')
 
   useEffect(() => {
-    if (!authLoading && (!user || user.role !== 'Admin')) router.push('/dashboard')
+    if (!authLoading && (!user || user.role !== 'ADMIN')) router.push('/dashboard')
   }, [user, authLoading, router])
 
   useEffect(() => { loadUsers() }, [])

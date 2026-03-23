@@ -18,6 +18,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import toast from 'react-hot-toast'
 import {
     Calendar,
     Users,
@@ -32,7 +33,7 @@ import {
     Hourglass,
     Star
 } from 'lucide-react'
-import type { BookingCardProps } from '@/src/types/tour-detail.types'
+import { BookingCardProps, BookingMode } from '@/src/types/tour-detail.types'
 
 export default function BookingCard({
     basePrice,
@@ -49,7 +50,8 @@ export default function BookingCard({
     cancellationPolicy,
     onBookNow,
     onRequestBooking,
-    onJoinWaitlist
+    onJoinWaitlist,
+    isLoading = false
 }: BookingCardProps) {
 
     // ========================================
@@ -61,6 +63,7 @@ export default function BookingCard({
     const [isPricingOpen, setIsPricingOpen] = useState(false)
     const [requestMessage, setRequestMessage] = useState('')
     const [isRequestMode, setIsRequestMode] = useState(false)
+    const [waiverSigned, setWaiverSigned] = useState(false)
 
     // ========================================
     // DERIVED VALUES
@@ -127,15 +130,15 @@ export default function BookingCard({
     // ========================================
 
     const handleBooking = () => {
-        if (!selectedDate) {
-            alert('Please select a date')
+        if (!waiverSigned) {
+            toast.error('You must agree to the liability waiver to book this tour')
             return
         }
 
         if (bookingMode === 'instant' || !isRequestMode) {
-            onBookNow(selectedDate, peopleCount)
+            onBookNow(selectedDate, peopleCount, waiverSigned)
         } else {
-            onRequestBooking(selectedDate, peopleCount, requestMessage)
+            onRequestBooking(selectedDate, peopleCount, waiverSigned, requestMessage)
         }
     }
 
@@ -171,8 +174,11 @@ export default function BookingCard({
                     </div>
 
                     {/* Availability badge */}
-                    <div className={`px-2 py-1 rounded-full text-xs font-medium ${isAvailable ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'}`}>
-                        {isAvailable ? `${availableSpots} spots left` : 'Fully booked'}
+                    <div className={`px-2 py-1 rounded-full text-xs font-medium ${availableSpots === undefined ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400' : isAvailable ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'}`}>
+                        {availableSpots === undefined 
+                            ? 'No dates scheduled' 
+                            : isAvailable ? `${availableSpots} spots left` : 'Fully booked'
+                        }
                     </div>
                 </div>
 
@@ -446,6 +452,20 @@ export default function BookingCard({
                     )}
                 </div>
 
+                {/* Waiver / Terms Checkbox */}
+                <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <input
+                        id="waiver-check"
+                        type="checkbox"
+                        checked={waiverSigned}
+                        onChange={(e) => setWaiverSigned(e.target.checked)}
+                        className="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                    />
+                    <label htmlFor="waiver-check" className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed cursor-pointer">
+                        I agree to the <span className="text-blue-600 hover:underline">liability waiver</span> and understand the tour requirements.
+                    </label>
+                </div>
+
                 {/* ========================================
             BOOKING ACTIONS
             ======================================== */}
@@ -485,7 +505,7 @@ export default function BookingCard({
                             {/* Main CTA button */}
                             <button
                                 onClick={handleBooking}
-                                disabled={!selectedDate}
+                                disabled={!selectedDate || isLoading}
                                 className="
                   w-full
                   px-6 py-4
@@ -502,9 +522,9 @@ export default function BookingCard({
                   shadow-lg hover:shadow-xl
                 "
                             >
-                                {bookingMode === 'instant' || !isRequestMode
-                                    ? 'Book Now'
-                                    : 'Request to Book'
+                                {bookingMode === BookingMode.INSTANT || !isRequestMode
+                                    ? (isLoading ? 'Processing...' : 'Book Now')
+                                    : (isLoading ? 'Sending Request...' : 'Request to Book')
                                 }
                             </button>
 
@@ -536,61 +556,10 @@ export default function BookingCard({
                     )}
                 </div>
 
-                {/* ========================================
-            CANCELLATION POLICY
-            ======================================== */}
-                <div className="
-          p-4
-          bg-gray-50 dark:bg-gray-800
-          rounded-lg
-          space-y-2
-          text-sm
-        ">
-                    <div className="flex items-start gap-2">
-                        <Shield className="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0 mt-0.5" />
-                        <div>
-                            <p className="font-medium text-gray-900 dark:text-white mb-1">
-                                Cancellation policy
-                            </p>
-                            <ul className="space-y-1 text-gray-600 dark:text-gray-400">
-                                <li className="flex items-start gap-1.5">
-                                    <span className="text-emerald-600 dark:text-emerald-400">✓</span>
-                                    <span>100% refund up to {cancellationPolicy.fullRefund}h before</span>
-                                </li>
-                                <li className="flex items-start gap-1.5">
-                                    <span className="text-amber-600 dark:text-amber-400">⚠</span>
-                                    <span>{cancellationPolicy.partialRefundPercent}% refund {cancellationPolicy.partialRefund}-{cancellationPolicy.fullRefund}h before</span>
-                                </li>
-                                <li className="flex items-start gap-1.5">
-                                    <span className="text-red-600 dark:text-red-400">✕</span>
-                                    <span>No refund within {cancellationPolicy.noRefund}h</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ========================================
-            TRUST BADGES
-            ======================================== */}
-                <div className="
-          flex flex-wrap items-center gap-3
-          pt-2
-          text-xs
-          text-gray-500 dark:text-gray-400
-        ">
-                    <span className="flex items-center gap-1">
-                        <CheckCircle className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                        Verified guide
-                    </span>
-                    <span className="flex items-center gap-1">
-                        <Shield className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                        Secure payment
-                    </span>
-                    <span className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                        48h payout freeze
-                    </span>
+                {/* Simplified Cancellation Policy */}
+                <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-xs text-gray-600 dark:text-gray-400">
+                    <Shield className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                    <span>Free cancellation up to {cancellationPolicy.fullRefund}h before start</span>
                 </div>
             </div>
         </div>

@@ -1,10 +1,12 @@
 package com.travelmarket.backend.security;
 
 import com.travelmarket.backend.entity.GuideProfile;
+import com.travelmarket.backend.entity.RefreshToken;
 import com.travelmarket.backend.entity.TravelerProfile;
 import com.travelmarket.backend.entity.User;
 import com.travelmarket.backend.entity.UserIdentity;
 import com.travelmarket.backend.repository.GuideProfileRepository;
+import com.travelmarket.backend.repository.RefreshTokenRepository;
 import com.travelmarket.backend.repository.TravelerProfileRepository;
 import com.travelmarket.backend.repository.UserIdentityRepository;
 import com.travelmarket.backend.repository.UserRepository;
@@ -15,6 +17,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,7 +30,10 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.time.Duration;
 import java.time.Instant;
+import java.util.HexFormat;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,6 +49,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenRepository refreshTokenRepository;
+
+    private static final String REFRESH_COOKIE = "refresh_token";
+    private static final Duration REFRESH_TTL_DEFAULT = Duration.ofDays(7);
 
     @Value("${app.oauth2.frontend-redirect}")
     private String frontendRedirect;
@@ -158,6 +169,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
             String jwt = jwtUtil.generateToken(userDetails);
 
+            // Issue refresh token as well for session persistence
+            String refreshRaw = issueRefreshToken(user, REFRESH_TTL_DEFAULT);
+            response.addHeader(HttpHeaders.SET_COOKIE, buildRefreshCookie(refreshRaw, REFRESH_TTL_DEFAULT).toString());
+
             // Clear role cookie
             clearCookie(response, "oauth_role");
 
@@ -175,6 +190,41 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             e.printStackTrace();
             String msg = e.getMessage() != null ? e.getMessage() : e.getClass().getName();
             response.sendRedirect(frontendRedirect + "?error=" + url("server_error") + "&msg=" + url(msg));
+        }
+    }
+
+    private String issueRefreshToken(User user, Duration ttl) {
+        String raw = UUID.randomUUID() + "-" + UUID.randomUUID();
+        String hash = sha256Hex(raw);
+
+        RefreshToken rt = new RefreshToken();
+        rt.setUser(user);
+        rt.setTokenHash(hash);
+        rt.setCreatedAtUtc(Instant.now());
+        rt.setExpiresAtUtc(Instant.now().plus(ttl));
+        rt.setRevokedAtUtc(null);
+
+        refreshTokenRepository.save(rt);
+        return raw;
+    }
+
+    private ResponseCookie buildRefreshCookie(String rawToken, Duration ttl) {
+        return ResponseCookie.from(REFRESH_COOKIE, rawToken)
+                .httpOnly(true)
+                .secure(false)
+                .path("/api/auth")
+                .sameSite("Lax")
+                .maxAge(ttl)
+                .build();
+    }
+
+    private String sha256Hex(String raw) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest(raw.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(digest);
+        } catch (Exception e) {
+            throw new RuntimeException("Hashing error");
         }
     }
 

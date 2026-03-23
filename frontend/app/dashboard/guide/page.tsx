@@ -9,6 +9,7 @@ import {
   Calendar,
   Star,
   DollarSign,
+  Wallet,
   Clock,
   CheckCircle,
   AlertCircle,
@@ -26,10 +27,12 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
-import apiClient from '@/src/lib/api/client'
 import { getGreeting } from '@/src/lib/greeting'
-import OnboardingBanner from '@/src/components/dashboard/OnboardingBanner'
+import OnboardingBannerWrapper from '@/src/components/dashboard/OnboardingBannerWrapper'
 import { toast } from 'react-hot-toast'
+import { getGuideProfile, getGuideBookings, getGuideTours } from '@/src/lib/api/tours'
+import { GuideProfileResponse } from '@/src/lib/types/guide.types'
+import { GuideBookingResponse, BookingStatus, TourTemplateResponse, TourTemplateStatus } from '@/src/lib/types/tour.types'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -128,7 +131,7 @@ function StatCard({ icon: Icon, label, value, color }: { icon: any, label: strin
   )
 }
 
-function VerificationBadge({ status }: { status: VerificationStatus }) {
+function VerificationBadge({ status }: { status: string }) {
   const normalizedStatus = (status?.toLowerCase() || 'not_submitted') as VerificationStatus
   
   const config = {
@@ -156,13 +159,22 @@ function VerificationBadge({ status }: { status: VerificationStatus }) {
 export default function GuideDashboardPage() {
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
-  const [profile, setProfile] = useState<GuideProfileData | null>(null)
+  const [profile, setProfile] = useState<GuideProfileResponse | null>(null)
+  const [bookings, setBookings] = useState<GuideBookingResponse[]>([])
+  const [tours, setTours] = useState<TourTemplateResponse[]>([])
   
   useEffect(() => {
     async function fetchDashboardData() {
       try {
-        const res = await apiClient.get('/api/guide/profile')
-        setProfile(res.data)
+        setLoading(true)
+        const [profileRes, bookingsRes, toursRes] = await Promise.all([
+          getGuideProfile(),
+          getGuideBookings(),
+          getGuideTours()
+        ])
+        setProfile(profileRes.data)
+        setBookings(bookingsRes.data)
+        setTours(toursRes.data)
       } catch (err) {
         console.error('Failed to fetch dashboard data:', err)
         toast.error('Could not load some stats')
@@ -185,7 +197,46 @@ export default function GuideDashboardPage() {
   }
 
   const impactScore = profile?.impactScore || 0
-  const isIdVerified = ['approved', 'verified', 'pending'].includes(profile?.verificationStatus || '')
+  const isIdVerified = profile?.verificationStatus === 'approved'
+
+  // Derived data
+  const upcomingBookings = bookings
+    .filter(b => b.status === BookingStatus.Confirmed || b.status === BookingStatus.PendingGuide)
+    .filter(b => new Date(b.startTimeUtc) > new Date())
+    .sort((a, b) => new Date(a.startTimeUtc).getTime() - new Date(b.startTimeUtc).getTime())
+    .slice(0, 3)
+
+  const recentActivities = bookings
+    .sort((a, b) => new Date(b.createdAtUtc).getTime() - new Date(a.createdAtUtc).getTime())
+    .slice(0, 5)
+    .map(b => ({
+      id: b.id.toString(),
+      title: b.status === BookingStatus.PendingGuide ? 'New Booking Request' : 'Booking Confirmed',
+      description: `${b.traveler?.fullName || 'Traveler'} booked ${b.tourTitle}`,
+      timestamp: new Date(b.createdAtUtc).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }),
+      icon: b.status === BookingStatus.PendingGuide ? AlertCircle : CheckCircle,
+      color: b.status === BookingStatus.PendingGuide ? 'amber' : 'emerald' as const
+    }))
+
+  const totalEarnings = bookings
+    .filter(b => b.status === BookingStatus.Completed || b.status === BookingStatus.Confirmed)
+    .reduce((acc, b) => acc + b.finalPrice, 0)
+
+  const tourStats = {
+    published: tours.filter(t => t.status === 'PUBLISHED').length,
+    pending: tours.filter(t => t.status === 'PENDING_REVIEW').length,
+    drafts: tours.filter(t => t.status === 'DRAFT').length,
+    rejected: tours.filter(t => t.status === 'REJECTED').length,
+    total: tours.length
+  }
+
+  const pendingRequests = bookings.filter(b => b.status === BookingStatus.PendingGuide).length
+  
+  const totalTravelers = bookings
+    .filter(b => b.status === BookingStatus.Completed || b.status === BookingStatus.Confirmed)
+    .reduce((acc, b) => acc + b.peopleCount, 0)
+
+  const activeTours = tours.filter(t => t.status === 'PUBLISHED').length
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950/50">
@@ -198,12 +249,8 @@ export default function GuideDashboardPage() {
       <div className="relative pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           
-          <OnboardingBanner 
-            role="Guide" 
-            profileCompleted={!!user?.profileCompleted}
-            emailVerified={!!user?.emailVerified} 
-            idVerified={isIdVerified} 
-            userEmail={user?.email}
+          <OnboardingBannerWrapper 
+            verificationStatus={profile?.verificationStatus || 'not_submitted'} 
           />
 
           {/* HERO SECTION */}
@@ -230,19 +277,45 @@ export default function GuideDashboardPage() {
               </div>
 
               <div className="flex gap-3">
-                <Link
-                  href="/dashboard/guide/tours/new"
-                  className="px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-3xl font-bold shadow-xl shadow-blue-500/30 transition-all flex items-center gap-3 group"
-                >
-                  <PlusCircle className="w-5 h-5" />
-                  Create New Tour
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
+                {(!user?.profileCompleted || !user?.emailVerified || profile?.verificationStatus !== 'approved') ? (
+                  <div className="relative group">
+                    <button
+                      disabled
+                      className="px-6 py-4 bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 rounded-3xl font-bold transition-all flex items-center gap-3 cursor-not-allowed border border-gray-300 dark:border-gray-700"
+                    >
+                      <PlusCircle className="w-5 h-5" />
+                      Create New Tour
+                      <Shield className="w-4 h-4 text-amber-500" />
+                    </button>
+                    <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-64 p-4 bg-gray-900 text-white text-xs rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-2xl z-50 border border-white/10">
+                      <p className="font-bold mb-1 text-amber-400 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> Verification Required
+                      </p>
+                      <div className="leading-relaxed opacity-80">
+                        To maintain marketplace trust, you must:
+                        <ul className="mt-1 list-disc list-inside space-y-0.5">
+                          {!user?.emailVerified && <li>Verify your email</li>}
+                          {!user?.profileCompleted && <li>Complete your profile</li>}
+                          {profile?.verificationStatus !== 'approved' && <li>Get ID approved</li>}
+                        </ul>
+                      </div>
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-gray-900" />
+                    </div>
+                  </div>
+                ) : (
+                  <Link
+                    href="/dashboard/guide/tours/new"
+                    className="px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-3xl font-bold shadow-xl shadow-blue-500/30 transition-all flex items-center gap-3 group"
+                  >
+                    <PlusCircle className="w-5 h-5" />
+                    Create New Tour
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                )}
               </div>
             </motion.div>
           </div>
 
-          {/* STATS GRID */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -251,8 +324,14 @@ export default function GuideDashboardPage() {
           >
             <StatCard 
               icon={Calendar} 
-              label="Total Trips" 
-              value={profile?.totalTrips || 0} 
+              label="Total Tours" 
+              value={tourStats.total} 
+              color="blue" 
+            />
+            <StatCard 
+              icon={Users} 
+              label="Total Travelers" 
+              value={totalTravelers} 
               color="blue" 
             />
             <StatCard 
@@ -262,16 +341,10 @@ export default function GuideDashboardPage() {
               color="amber" 
             />
             <StatCard 
-              icon={TrendingUp} 
-              label="Response Rate" 
-              value="98%" 
+              icon={Wallet} 
+              label="Total Volume" 
+              value={`$${totalEarnings.toFixed(2)}`} 
               color="emerald" 
-            />
-            <StatCard 
-              icon={DollarSign} 
-              label="Pending Earnings" 
-              value="$0.00" 
-              color="purple" 
             />
           </motion.div>
 
@@ -298,38 +371,77 @@ export default function GuideDashboardPage() {
                     <div className="space-y-6">
                       <div className="space-y-2">
                         <div className="flex justify-between text-xs font-black uppercase tracking-wider text-gray-500">
-                          <span>Completed Tours</span>
-                          <span className="text-blue-600">40% weight</span>
+                          <span>Tour Inventory</span>
+                          <span className="text-blue-600">{tourStats.total} Total</span>
                         </div>
-                        <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                          <motion.div initial={{ width: 0 }} animate={{ width: '85%' }} className="h-full bg-blue-600" />
+                        <div className="flex gap-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                          <div style={{ width: `${(tourStats.published / (tourStats.total || 1)) * 100}%` }} className="h-full bg-emerald-500" />
+                          <div style={{ width: `${(tourStats.pending / (tourStats.total || 1)) * 100}%` }} className="h-full bg-amber-500" />
+                          <div style={{ width: `${(tourStats.drafts / (tourStats.total || 1)) * 100}%` }} className="h-full bg-blue-500" />
+                        </div>
+                        <div className="flex gap-4 mt-2">
+                          <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            {tourStats.published} Published
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-600">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                            {tourStats.pending} Under Review
+                          </div>
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-xs font-black uppercase tracking-wider text-gray-500">
-                          <span>Average Rating</span>
-                          <span className="text-amber-600">30% weight</span>
+
+                      <div className="space-y-4 pt-2">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-800">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-amber-500/10 rounded-xl">
+                              <AlertCircle className="w-4 h-4 text-amber-600" />
+                            </div>
+                            <span className="text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-tight">Pending Requests</span>
+                          </div>
+                          <span className="text-sm font-black text-amber-600">{pendingRequests}</span>
                         </div>
-                        <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                          <motion.div initial={{ width: 0 }} animate={{ width: '92%' }} className="h-full bg-amber-500" />
-                        </div>
+                        {tourStats.rejected > 0 && (
+                          <div className="flex items-center justify-between p-4 bg-red-500/10 rounded-2xl border border-red-500/20">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-red-500/20 rounded-xl">
+                                <AlertCircle className="w-4 h-4 text-red-600" />
+                              </div>
+                              <span className="text-xs font-black text-red-700 dark:text-red-400 uppercase tracking-tight italic">Tours Needing Edits</span>
+                            </div>
+                            <span className="text-sm font-black text-red-600">{tourStats.rejected}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    <div className="bg-blue-500/5 dark:bg-white/5 rounded-3xl p-6 border border-blue-500/10">
+                    <div className="bg-blue-500/5 dark:bg-white/5 rounded-3xl p-6 border border-blue-500/10 h-fit">
                       <div className="flex items-center gap-2 text-blue-600 font-black text-xs uppercase mb-4">
                         <Info className="w-4 h-4" />
-                        Quick Tip
+                        Performance Insights
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
-                        Guide who respond to inquiries within 2 hours are 3x more likely to get the booking.
-                      </p>
+                      <div className="space-y-4">
+                          <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-800">
+                            <span className="text-[10px] font-bold text-gray-500 uppercase">Completed Jobs</span>
+                            <span className="text-xs font-black text-gray-900 dark:text-white">{profile?.totalTrips || 0}</span>
+                          </div>
+                          <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-gray-800">
+                            <span className="text-[10px] font-bold text-gray-500 uppercase">Profile Strength</span>
+                            <span className="text-xs font-black text-emerald-600">{impactScore}%</span>
+                          </div>
+                          <div className="flex justify-between items-center py-2">
+                             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">Member Since</span>
+                             <span className="text-xs font-black text-gray-400">
+                               {profile?.memberSince ? new Date(profile.memberSince).getFullYear() : '2026'}
+                             </span>
+                          </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </GlassCard>
 
-              {/* UPCOMING TRIPS PLACEHOLDER (Guide Version) */}
+              {/* UPCOMING SCHEDULE */}
               <GlassCard className="p-8">
                 <div className="flex items-center justify-between mb-8">
                   <div>
@@ -342,21 +454,61 @@ export default function GuideDashboardPage() {
                   </Link>
                 </div>
 
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-3xl p-12 text-center border-2 border-dashed border-gray-200 dark:border-gray-800">
-                  <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Calendar className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                {upcomingBookings.length > 0 ? (
+                  <div className="space-y-4">
+                    {upcomingBookings.map(b => (
+                      <Link key={b.id} href={`/dashboard/guide/bookings/${b.id}`}>
+                        <div className="p-6 bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800 rounded-[2rem] hover:border-blue-500/50 hover:bg-white dark:hover:bg-gray-800 transition-all group mb-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-600">
+                                <Calendar className="w-6 h-6" />
+                              </div>
+                              <div>
+                                <h4 className="font-black text-gray-900 dark:text-white tracking-tight group-hover:text-blue-600 transition-colors">
+                                  {b.tourTitle}
+                                </h4>
+                                <div className="flex items-center gap-3 mt-1">
+                                  <span className="text-xs font-bold text-gray-400 flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    {new Date(b.startTimeUtc).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                                  </span>
+                                  <span className="text-xs font-bold text-blue-500 flex items-center gap-1">
+                                    <Users className="w-3 h-3" />
+                                    {b.peopleCount} guests
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                              b.status === BookingStatus.Confirmed 
+                                ? 'bg-emerald-500/10 text-emerald-600' 
+                                : 'bg-amber-500/10 text-amber-600'
+                            }`}>
+                              {b.status}
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No booked tours yet</h3>
-                  <p className="text-gray-500 dark:text-gray-400 max-w-xs mx-auto mb-6 font-medium">
-                    You haven't received any bookings for the upcoming week. Promote your tours on social media!
-                  </p>
-                  <Link 
-                    href="/dashboard/guide/tours/new" 
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl text-sm font-black hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    Manage Templates
-                  </Link>
-                </div>
+                ) : (
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-3xl p-12 text-center border-2 border-dashed border-gray-200 dark:border-gray-800">
+                    <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <Calendar className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No booked tours yet</h3>
+                    <p className="text-gray-500 dark:text-gray-400 max-w-xs mx-auto mb-6 font-medium">
+                      You haven't received any bookings for the upcoming week. Promote your tours on social media!
+                    </p>
+                    <Link 
+                      href="/dashboard/guide/tours/new" 
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl text-sm font-black hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    >
+                      Manage Templates
+                    </Link>
+                  </div>
+                )}
               </GlassCard>
             </div>
 
@@ -368,7 +520,9 @@ export default function GuideDashboardPage() {
                 <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-wider text-xs mb-6">Wallet Balance</h3>
                 
                 <div className="mb-6">
-                  <div className="text-4xl font-black text-gray-900 dark:text-white mb-1 tracking-tight">$0.00</div>
+                  <div className="text-4xl font-black text-gray-900 dark:text-white mb-1 tracking-tight">
+                    ${totalEarnings.toFixed(2)}
+                  </div>
                   <p className="text-xs text-emerald-600 font-bold flex items-center gap-1">
                     <CheckCircle className="w-3 h-3" /> Ready for withdrawal
                   </p>
@@ -377,6 +531,33 @@ export default function GuideDashboardPage() {
                 <button disabled className="w-full py-3 bg-gray-100 dark:bg-gray-800 text-gray-400 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-not-allowed">
                   Withdraw Funds
                 </button>
+              </GlassCard>
+
+              {/* RECENT ACTIVITY */}
+              <GlassCard className="p-6">
+                <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-wider text-xs mb-6">Recent Activity</h3>
+                <div className="space-y-6">
+                  {recentActivities.length > 0 ? (
+                    recentActivities.map(activity => (
+                      <div key={activity.id} className="flex gap-4 group">
+                        <div className={`mt-1 w-8 h-8 rounded-xl bg-${activity.color}-500/10 flex items-center justify-center shrink-0`}>
+                          <activity.icon className={`w-4 h-4 text-${activity.color}-600`} />
+                        </div>
+                        <div>
+                          <p className="text-xs font-black text-gray-900 dark:text-white leading-tight mb-1 group-hover:text-blue-600 transition-colors">
+                            {activity.title}
+                          </p>
+                          <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 line-clamp-1">
+                            {activity.description}
+                          </p>
+                          <span className="text-[10px] text-gray-400 block mt-1">{activity.timestamp}</span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-center text-gray-400 py-4 font-bold">No recent activity</p>
+                  )}
+                </div>
               </GlassCard>
 
               {/* ACHIEVEMENTS */}

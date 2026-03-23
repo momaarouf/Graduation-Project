@@ -24,9 +24,13 @@ import {
     Backpack,
     ShieldCheck,
     ChevronDown,
-    Info
+    Info,
+    Globe,
+    Tag,
+    Timer
 } from 'lucide-react'
 import type { TourInfoProps } from '@/src/types/tour-detail.types'
+import { parseList, parseItinerary } from '@/src/lib/utils/tour-parser'
 
 export default function TourInfo({
     description,
@@ -38,10 +42,62 @@ export default function TourInfo({
     meetingPoint,
     safetyMeasures,
     isHalalCertified,
-    halalCertificationDetails
-}: TourInfoProps) {
+    halalCertificationDetails,
+    tags,
+    languages,
+    durationHours,
+    durationMinutes
+}: any) {
+    const inclusionList = parseList(inclusions)
+    const exclusionList = parseList(exclusions)
+    const requirementList = parseList(requirements)
+    const bringList = parseList(whatToBring)
+    const safetyList = parseList(safetyMeasures)
+    const itineraryList = parseItinerary(itinerary)
+
+    const tagList = Array.isArray(tags) ? tags : parseList(tags)
+    const languageList = Array.isArray(languages) ? languages : parseList(languages)
+
     return (
         <div className="space-y-10">
+            {/* Quick Specs / Tags & Languages */}
+            <section className="flex flex-wrap gap-4 pb-6 border-b border-gray-100 dark:border-gray-800">
+                {/* Duration */}
+                {(durationHours > 0 || durationMinutes > 0) && (
+                    <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800/30">
+                        <Timer className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        <span className="text-sm font-bold text-blue-700 dark:text-blue-300">
+                            {durationHours > 0 && `${durationHours}h`} {durationMinutes > 0 && `${durationMinutes}m`}
+                        </span>
+                    </div>
+                )}
+
+                {/* Languages */}
+                {languageList.length > 0 && (
+                    <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <Globe className="w-4 h-4 text-gray-500" />
+                        <div className="flex gap-2">
+                            {languageList.map((lang, i) => (
+                                <span key={i} className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">
+                                    {typeof lang === 'string' ? lang : (lang.language || JSON.stringify(lang))}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Tags */}
+                {tagList.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                        {tagList.map((tag, i) => (
+                            <div key={i} className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-semibold text-gray-500 hover:text-blue-600 transition-colors cursor-default">
+                                <Tag className="w-3 h-3" />
+                                {typeof tag === 'string' ? tag : (tag.name || JSON.stringify(tag))}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </section>
 
             {/* ========================================
           ABOUT THE TOUR
@@ -93,15 +149,15 @@ export default function TourInfo({
                         Visual Itinerary
                     </h2>
                     <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {itinerary.length} stops
+                        {itineraryList.length} stops
                     </span>
                 </div>
 
                 <div className="space-y-0">
-                    {itinerary.map((stop, index) => (
+                    {itineraryList.map((stop, index) => (
                         <div key={stop.id} className="relative flex gap-4 pb-8 last:pb-0">
                             {/* Connector line */}
-                            {index !== itinerary.length - 1 && (
+                            {index !== itineraryList.length - 1 && (
                                 <div className="absolute left-[15px] top-[30px] bottom-0 w-0.5 bg-gray-200 dark:bg-gray-800" />
                             )}
 
@@ -154,7 +210,7 @@ export default function TourInfo({
                         What's included
                     </h3>
                     <ul className="space-y-2.5">
-                        {inclusions.map((item, i) => (
+                        {inclusionList.map((item, i) => (
                             <li key={i} className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-400">
                                 <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
                                 <span>{item}</span>
@@ -170,7 +226,7 @@ export default function TourInfo({
                         What's excluded
                     </h3>
                     <ul className="space-y-2.5">
-                        {exclusions.map((item, i) => (
+                        {exclusionList.map((item, i) => (
                             <li key={i} className="flex items-start gap-2.5 text-sm text-gray-600 dark:text-gray-400">
                                 <X className="w-4 h-4 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
                                 <span>{item}</span>
@@ -192,7 +248,7 @@ export default function TourInfo({
                             Requirements
                         </h3>
                         <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                            {requirements.map((item, i) => (
+                            {requirementList.map((item, i) => (
                                 <li key={i} className="flex items-start gap-2">
                                     <span className="text-gray-400 mt-1">•</span>
                                     <span>{item}</span>
@@ -210,7 +266,7 @@ export default function TourInfo({
                             What to bring
                         </h3>
                         <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                            {whatToBring.map((item, i) => (
+                            {bringList.map((item, i) => (
                                 <li key={i} className="flex items-start gap-2">
                                     <span className="text-gray-400 mt-1">•</span>
                                     <span>{item}</span>
@@ -279,7 +335,7 @@ export default function TourInfo({
                         Safety Measures
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {safetyMeasures.map((measure, i) => (
+                        {safetyList.map((measure, i) => (
                             <div key={i} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-sm text-gray-600 dark:text-gray-400">
                                 <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                                 <span>{measure}</span>

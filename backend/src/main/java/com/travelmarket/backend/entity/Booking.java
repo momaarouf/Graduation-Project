@@ -70,6 +70,15 @@ public class Booking {
     @Column(name = "dynamic_multiplier_snapshot", precision = 3, scale = 2)
     private BigDecimal dynamicMultiplierSnapshot;
 
+    @Column(name = "refund_percent", precision = 5, scale = 2)
+    private BigDecimal refundPercent;
+
+    @Column(name = "cancelled_at_utc")
+    private Instant cancelledAtUtc;
+
+    @Column(name = "cancellation_reason")
+    private String cancellationReason;
+
     @Column(name = "cart_id")
     private UUID cartId;
 

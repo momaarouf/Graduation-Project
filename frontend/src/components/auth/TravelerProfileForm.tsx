@@ -37,6 +37,8 @@ export interface TravelerProfileFormData {
   nationality?: string;
   dateOfBirth?: string; // YYYY-MM-DD
   preferences?: string[];
+  tagline?: string;
+  bio?: string;
 }
 
 // ============================================================================
@@ -114,6 +116,8 @@ export default function TravelerProfileForm({ onSubmit, initialData }: TravelerP
     nationality: initialData?.nationality || '',
     dateOfBirth: initialData?.dateOfBirth || '',
     preferences: initialData?.preferences || [],
+    tagline: initialData?.tagline || '',
+    bio: initialData?.bio || '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -428,6 +432,40 @@ export default function TravelerProfileForm({ onSubmit, initialData }: TravelerP
             {errors.dateOfBirth && touched.dateOfBirth && (
               <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.dateOfBirth}</p>
             )}
+          </div>
+
+          {/* Tagline (optional) */}
+          <div className="space-y-1.5">
+            <label htmlFor="tagline" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Headline / Tagline <span className="text-gray-400">(optional)</span>
+            </label>
+            <input
+              type="text"
+              id="tagline"
+              name="tagline"
+              value={formData.tagline || ''}
+              onChange={handleChange}
+              disabled={isSubmitting}
+              placeholder="e.g. History buff and nature lover"
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-50"
+            />
+          </div>
+
+          {/* Bio (optional) */}
+          <div className="space-y-1.5">
+            <label htmlFor="bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              About Me <span className="text-gray-400">(optional)</span>
+            </label>
+            <textarea
+              id="bio"
+              name="bio"
+              value={formData.bio || ''}
+              onChange={handleChange as any}
+              disabled={isSubmitting}
+              rows={4}
+              placeholder="Tell guides a bit about your travel style..."
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-50 resize-none"
+            />
           </div>
 
           {/* Travel Preferences (optional) */}

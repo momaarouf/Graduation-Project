@@ -4,8 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.travelmarket.backend.dto.GuideCompleteProfileRequest;
 import com.travelmarket.backend.dto.GuideProfileResponse;
+import com.travelmarket.backend.dto.UpdateGuideMetaRequest;
 import com.travelmarket.backend.entity.*;
 import com.travelmarket.backend.repository.*;
+import com.travelmarket.backend.tour.enums.TourTemplateStatus;
+import com.travelmarket.backend.tour.repository.TourTemplateRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +29,8 @@ public class GuideProfileController {
     private final GuideProfileRepository guideProfileRepository;
     private final LanguageRepository languageRepository;
     private final GuideLanguageRepository guideLanguageRepository;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final TourTemplateRepository tourTemplateRepository;
+    private final ObjectMapper objectMapper;
 
     @GetMapping
     public GuideProfileResponse getProfile(@AuthenticationPrincipal UserDetails principal) throws Exception {
@@ -42,11 +45,19 @@ public class GuideProfileController {
                 .orElseThrow(() -> new RuntimeException("Guide profile missing"));
 
         GuideProfileResponse res = new GuideProfileResponse();
+        res.setId(gp.getId());
         res.setFullName(user.getFullName());
         res.setPhoneE164(user.getPhoneE164());
         res.setCountry(gp.getBaseCountry());
         res.setCity(gp.getBaseCity());
         res.setBio(gp.getBio());
+        res.setTagline(gp.getTagline());
+        res.setAvatarUrl(gp.getAvatarUrl());
+        res.setCoverImageUrl(gp.getCoverImageUrl());
+
+        // Count portfolio-eligible tours
+        int tourCount = (int) tourTemplateRepository.countPortfolioByGuideId(gp.getId());
+        res.setTourCount(tourCount);
 
         if (gp.getExpertiseJson() != null && !gp.getExpertiseJson().isBlank()) {
             res.setExpertise(objectMapper.readValue(gp.getExpertiseJson(), new TypeReference<List<String>>() {}));
@@ -70,6 +81,10 @@ public class GuideProfileController {
         res.setTotalTrips(gp.getTotalGuidedTrips() != null ? gp.getTotalGuidedTrips() : 0);
         res.setTotalTravelers(0); // placeholder for now since no entity property
         res.setImpactScore(gp.getImpactScore());
+
+        res.setSocialLinksJson(gp.getSocialLinksJson());
+        res.setResponseRate(gp.getResponseRate());
+        res.setResponseTimeText(gp.getResponseTimeText());
 
         if (Boolean.TRUE.equals(gp.getIdVerified())) {
             res.setVerificationStatus("approved");
@@ -188,6 +203,30 @@ public class GuideProfileController {
 
         user.setProfileCompleted(agreementsOk && requiredOk);
         userRepository.save(user);
+    }
+
+    @PutMapping("/meta")
+    public void updateMeta(@AuthenticationPrincipal UserDetails principal,
+            @Valid @RequestBody UpdateGuideMetaRequest req) {
+
+        User user = userRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getRole() != User.Role.Guide) {
+            throw new AccessDeniedException("Forbidden");
+        }
+
+        GuideProfile gp = guideProfileRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Guide profile missing"));
+
+        gp.setTagline(req.getTagline());
+        gp.setAvatarUrl(req.getAvatarUrl());
+        gp.setCoverImageUrl(req.getCoverImageUrl());
+        gp.setSocialLinksJson(req.getSocialLinksJson());
+        gp.setResponseRate(req.getResponseRate());
+        gp.setResponseTimeText(req.getResponseTimeText());
+
+        guideProfileRepository.save(gp);
     }
 
     /**

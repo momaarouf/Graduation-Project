@@ -29,6 +29,7 @@ import {
   AuditPage,
   AuditEventResponse
 } from '@/src/lib/api/admin'
+import { getAdminPendingTours } from '@/src/lib/api/tours'
 import { toast } from 'react-hot-toast'
 import { getGreeting } from '@/src/lib/greeting'
 
@@ -97,8 +98,8 @@ export default function AdminDashboardPage() {
     totalUsers: 0,
     pendingVerifications: 0,
     auditEventsCount: 0,
-    activeTours: 12, // Mock for now until API ready
-    revenue: 4250 // Mock for now until API ready
+    pendingTours: 0,
+    revenue: 4250 // Still mock until Financials milestone
   })
   const [recentAudits, setRecentAudits] = useState<AuditEventResponse[]>([])
   const [pendingVerifs, setPendingVerifs] = useState<GuideProfileResponse[]>([])
@@ -108,17 +109,19 @@ export default function AdminDashboardPage() {
     const fetchData = async () => {
       try {
         setIsLoading(true)
-        const [usersResponse, verifs, audits] = await Promise.all([
+        const [usersResponse, verifs, audits, tours] = await Promise.all([
           adminGetUsers(),
           adminGetPendingVerifications(),
-          adminGetAuditEvents(0, 5)
+          adminGetAuditEvents(0, 5),
+          getAdminPendingTours()
         ])
 
         setStats(prev => ({
           ...prev,
           totalUsers: usersResponse.users.length,
           pendingVerifications: verifs.length,
-          auditEventsCount: audits.totalElements || 0
+          auditEventsCount: audits.totalElements || 0,
+          pendingTours: tours.data.length
         }))
 
         setRecentAudits(audits.content || [])
@@ -173,11 +176,13 @@ export default function AdminDashboardPage() {
           isLoading={isLoading}
         />
         <StatCard 
-          title="Platform Tours" 
-          value={stats.activeTours} 
+          title="Tour Reviews" 
+          value={stats.pendingTours} 
           icon={TrendingUp} 
           color="purple" 
           isLoading={isLoading}
+          trend={stats.pendingTours > 5 ? "Action Required" : "Stable"}
+          direction={stats.pendingTours > 5 ? "up" : "down"}
         />
         <StatCard 
           title="Gross Revenue" 

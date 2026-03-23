@@ -16,7 +16,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -265,15 +265,18 @@ function StatusBadge({ status }: StatusBadgeProps) {
 // ============================================================================
 
 interface BookingDetailsPageProps {
-  params: {
+  params: Promise<{
     bookingId: string
-  }
+  }>
 }
 
 export default function BookingDetailsPage({ params }: BookingDetailsPageProps) {
+  const unwrappedParams = use(params)
+  const bookingId = unwrappedParams.bookingId
+  
   const router = useRouter()
   const [booking, setBooking] = useState<BookingDetails | null>(
-    MOCK_BOOKING_DETAILS[params.bookingId] || null
+    MOCK_BOOKING_DETAILS[bookingId] || null
   )
   const [showQR, setShowQR] = useState(false)
   const [showNotes, setShowNotes] = useState(false)

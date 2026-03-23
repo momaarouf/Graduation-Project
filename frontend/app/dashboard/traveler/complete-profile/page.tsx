@@ -16,7 +16,7 @@ export default function TravelerCompleteProfilePage() {
   const [isFetchingData, setIsFetchingData] = useState(true)
 
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== 'Traveler')) router.push('/auth/login')
+    if (!isLoading && (!user || user.role !== 'TRAVELER')) router.push('/dashboard')
   }, [user, isLoading, router])
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function TravelerCompleteProfilePage() {
       }
     }
     
-    if (user && user.role === 'Traveler') {
+    if (user && user.role !== 'TRAVELER') {
         fetchProfile()
     } else {
         setIsFetchingData(false)

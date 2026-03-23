@@ -43,7 +43,7 @@ public class TourMedia {
     private TourMediaType mediaType;
 
     // Full URL to the stored file (CDN or object storage path)
-    @Column(nullable = false, length = 512)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String url;
 
     // Ordering within the gallery; lowest value = cover image

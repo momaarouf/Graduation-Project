@@ -6,7 +6,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
   Calendar,
@@ -35,6 +35,7 @@ const NAV_ITEMS = [
   // Primary
   { href: '/dashboard/traveler', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/traveler/bookings', label: 'My Bookings', icon: Calendar },
+  { href: '/dashboard/traveler/wishlist', label: 'Wishlist', icon: Heart },
   { href: '/dashboard/traveler/messages', label: 'Messages', icon: MessageSquare, badge: 3 },
   
   // Divider - visual only
@@ -126,10 +127,18 @@ export default function TravelerDashboardLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
-  const { user, logout } = useAuth()
+  const { user, logout, isLoading } = useAuth()
+  const router = useRouter()
   const [isCollapsed, setIsCollapsed] = useState(true)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+
+  // Role guard
+  useEffect(() => {
+    if (!isLoading && (!user || user.role !== 'TRAVELER')) {
+      router.push('/dashboard')
+    }
+  }, [user, isLoading, router])
 
   // Prevent hydration mismatch
   useEffect(() => {

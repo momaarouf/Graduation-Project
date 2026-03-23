@@ -46,6 +46,8 @@ export default function ForgotPasswordForm() {
     const isValid = validateEmail(email)
     const showError = touched && !isValid && email.length > 0
 
+    const [isRedirecting, setIsRedirecting] = useState(false)
+
     // ========================================
     // HANDLERS
     // ========================================
@@ -62,10 +64,8 @@ export default function ForgotPasswordForm() {
 
         try {
             // Call backend to request password reset
-            // Backend sends email to user with reset code + token
             const response = await requestPasswordReset(email)
 
-            // In dev mode, response includes code and token for testing
             if (response.code || response.token) {
                 console.log('Dev mode - Reset Code:', response.code, 'Token:', response.token)
             }
@@ -75,13 +75,18 @@ export default function ForgotPasswordForm() {
                 icon: '📧'
             })
 
+            // Set redirecting state to keep the loading spinner visible
+            setIsRedirecting(true)
+            
             // Auto-redirect to the reset-password page where they enter the code
             router.push(`/auth/reset-password?email=${encodeURIComponent(email)}`)
+            
+            // Note: We don't set setIsLoading(false) here on success 
+            // to keep the button in "loading" mode during navigation.
         } catch (err: any) {
             const errorMessage = err?.response?.data?.message || 'Failed to send reset code. Please try again.'
             setError(errorMessage)
             toast.error(errorMessage)
-        } finally {
             setIsLoading(false)
         }
     }
@@ -231,10 +236,10 @@ export default function ForgotPasswordForm() {
                         group
                     "
                 >
-                    {isLoading ? (
+                    {isLoading || isRedirecting ? (
                         <>
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            <span>Sending code...</span>
+                            <span>{isRedirecting ? 'Redirecting...' : 'Sending code...'}</span>
                         </>
                     ) : (
                         <>

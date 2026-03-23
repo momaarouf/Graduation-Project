@@ -29,6 +29,9 @@ public class CreateTourTemplateRequest {
     @Size(max = 100, message = "Region must not exceed 100 characters")
     private String region;
 
+    @Size(max = 100, message = "City must not exceed 100 characters")
+    private String city;
+
     // ISO 3166-1 alpha-2; defaults to LB if omitted
     @Size(max = 5, message = "Country code must not exceed 5 characters")
     private String countryCode = "LB";
@@ -43,6 +46,18 @@ public class CreateTourTemplateRequest {
     @DecimalMin(value = "-180.0", message = "Invalid longitude")
     @DecimalMax(value = "180.0",  message = "Invalid longitude")
     private BigDecimal meetingLongitude;
+
+    private String meetingPointAddress;
+    private String meetingPointInstructions;
+
+    private String itinerary;
+    private String inclusions;
+    private String exclusions;
+    private String requirements;
+    private String whatToBring;
+
+    private String tags;
+    private String languages;
 
     @NotNull(message = "Base price is required")
     @DecimalMin(value = "0.01", message = "Base price must be greater than 0")
@@ -60,11 +75,22 @@ public class CreateTourTemplateRequest {
     @Min(value = 1, message = "Max capacity must be at least 1")
     private Integer maxCapacity;
 
+    private Integer durationHours = 2;
+    private Integer durationMinutes = 0;
+
     private Boolean instantBook = false;
+    
+    private java.time.Instant startDate;
 
     private Boolean isRecurring = false;
 
     private RecurrencePattern recurrencePattern = RecurrencePattern.NONE;
+
+    private String recurringDays;
+
+    private java.time.Instant recurringUntil;
+    private String recurringDates;
+    private String excludedDates;
 
     private Boolean halalFriendly = false;
 
@@ -73,6 +99,15 @@ public class CreateTourTemplateRequest {
 
     // Guide can opt out of portfolio visibility on creation
     private Boolean showInPortfolio = true;
+
+    private String dynamicPricing;
+    private String halalDetails;
+
+    private Boolean isPremium;
+    private Boolean isFamilyFriendly;
+    private Boolean hasGroupDiscount;
+    private Integer groupDiscountThreshold;
+    private java.math.BigDecimal groupDiscountPercent;
 
     // Guide creates tours as DRAFT only.
     // Ignored if the client sends PUBLISHED — service enforces DRAFT on create.

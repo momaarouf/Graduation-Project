@@ -13,6 +13,10 @@ public class TravelerProfileResponse {
     private String nationality;
     private String dateOfBirth;     // yyyy-mm-dd
     private List<String> preferences;
+    private String tagline;
+    private String bio;
+    private String avatarUrl;
+    private String coverImageUrl;
 
     private String email;
     private Boolean emailVerified;

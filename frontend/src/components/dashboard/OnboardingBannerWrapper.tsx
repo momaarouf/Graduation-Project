@@ -11,7 +11,7 @@ import OnboardingBanner from './OnboardingBanner'
  * For guide dashboards pass idVerified from the guide profile API.
  * For traveler dashboards omit idVerified.
  */
-export default function OnboardingBannerWrapper({ idVerified }: { idVerified?: boolean }) {
+export default function OnboardingBannerWrapper({ verificationStatus }: { verificationStatus?: 'not_submitted' | 'pending' | 'approved' | 'rejected' }) {
   const { user } = useAuth()
   if (!user) return null
 
@@ -19,8 +19,8 @@ export default function OnboardingBannerWrapper({ idVerified }: { idVerified?: b
     <OnboardingBanner
       profileCompleted={user.profileCompleted}
       emailVerified={user.emailVerified}
-      idVerified={idVerified}
-      role={user.role as 'Traveler' | 'Guide'}
+      verificationStatus={verificationStatus}
+      role={user.role as 'TRAVELER' | 'GUIDE' | 'ADMIN'}
       userEmail={user.email}
     />
   )

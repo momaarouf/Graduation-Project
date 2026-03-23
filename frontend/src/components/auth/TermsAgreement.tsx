@@ -26,19 +26,17 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import {
     CheckCircle,
     AlertCircle,
-    FileText,
     Mail,
     Shield,
-    Users,
     ChevronDown,
     ChevronUp,
-    Loader2,
     Heart,
+    Users,
     Sparkles
 } from 'lucide-react'
 import { useSignup } from '@/src/lib/contexts/SignupContext'
@@ -138,37 +136,53 @@ interface TermsSectionProps {
 
 function TermsSection({ section, isExpanded, onToggle }: TermsSectionProps) {
     return (
-        <div className="border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
+        <div className="bg-white/30 dark:bg-gray-800/30 border border-white/20 dark:border-gray-700/50 rounded-2xl overflow-hidden transition-all duration-300">
             <button
                 type="button"
                 onClick={onToggle}
                 className="
                     w-full
                     flex items-center justify-between
-                    px-4 py-3
-                    bg-gray-50 dark:bg-gray-800/50
-                    hover:bg-gray-100 dark:hover:bg-gray-800
-                    transition-colors
+                    px-5 py-4
+                    hover:bg-white/40 dark:hover:bg-gray-800/40
+                    transition-all duration-300
                     text-left
                 "
             >
-                <span className="font-medium text-gray-900 dark:text-white">
-                    {section.title}
-                </span>
+                <div className="flex items-center gap-3">
+                    <div className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${isExpanded ? 'bg-blue-600 scale-125' : 'bg-gray-300 dark:bg-gray-600'}`} />
+                    <span className="text-sm font-bold text-gray-900 dark:text-white">
+                        {section.title}
+                    </span>
+                </div>
                 {isExpanded ? (
-                    <ChevronUp className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                    <ChevronUp className="w-4 h-4 text-blue-600" />
                 ) : (
-                    <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                    <ChevronDown className="w-4 h-4 text-gray-400" />
                 )}
             </button>
             
-            {isExpanded && (
-                <div className="p-4 bg-white dark:bg-gray-900">
-                    <pre className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap font-sans">
-                        {section.content}
-                    </pre>
-                </div>
-            )}
+            <AnimatePresence>
+                {isExpanded && (
+                    <motion.div 
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    >
+                        <div className="px-5 pb-5 pt-1">
+                            <ul className="space-y-2">
+                                {section.content.trim().split('\n').map((line, i) => (
+                                    <li key={i} className="text-xs font-medium text-gray-500 dark:text-gray-400 flex items-start gap-2">
+                                        <div className="mt-1 flex-shrink-0 w-1 h-1 rounded-full bg-blue-600/30" />
+                                        {line.replace('•', '').trim()}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     )
 }
@@ -237,262 +251,204 @@ export default function TermsAgreement({
 
     return (
         <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
             className="w-full max-w-2xl mx-auto"
         >
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-xl p-6 sm:p-8">
+            <div className="bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl border border-white/20 dark:border-gray-800 rounded-3xl p-8 shadow-xl shadow-blue-600/5 items-center flex flex-col">
                 
-                {/* ========================================
-                    FORM HEADER
-                    ======================================== */}
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-                        <FileText className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                {/* Icon Header */}
+                <div className="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-3xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    <Shield className="w-10 h-10" strokeWidth={1.5} />
+                </div>
+
+                <div className="text-center mb-10">
+                    <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight mb-3">
                         Almost There!
                     </h2>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Just a few legal things before you start your journey
+                    <p className="text-gray-500 dark:text-gray-400 font-medium">
+                        Just a few legal things before you start your adventure.
                     </p>
                 </div>
 
-                {/* ========================================
-                    WELCOME CARD (Role-specific)
-                    ======================================== */}
-                <div className="
-                    mb-6 p-4
-                    bg-gradient-to-br from-blue-50 to-indigo-50
-                    dark:from-blue-950/30 dark:to-indigo-950/30
-                    border border-blue-200 dark:border-blue-800
-                    rounded-xl
-                ">
-                    <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-3">
-                        Welcome, {data.firstName}! 🎉
+                {/* Role-Specific Benefits - Glassmorphism */}
+                <div className="w-full mb-10 p-6 bg-blue-600/5 border border-blue-600/10 rounded-2xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl -mr-16 -mt-16 group-hover:bg-blue-600/20 transition-colors" />
+                    
+                    <h3 className="text-sm font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-4 flex items-center gap-2">
+                        <Sparkles size={14} />
+                        Welcome, {data.firstName}!
                     </h3>
-                    <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
-                        You're about to join our community of {isTraveler ? 'travelers' : 'guides'}. 
-                        Here's what you can expect:
+                    
+                    <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-6">
+                        You're joining our community as a {isTraveler ? 'Traveler' : 'Guide'}. 
+                        Here's what awaits you:
                     </p>
-                    <div className="grid grid-cols-2 gap-2">
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {benefits.map((benefit, index) => {
                             const Icon = benefit.icon
                             return (
-                                <div key={index} className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400">
-                                    <Icon className="w-3 h-3" />
-                                    <span>{benefit.text}</span>
-                                </div>
+                                <motion.div 
+                                    key={index}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.1 }}
+                                    className="flex items-center gap-3 p-3 bg-white/40 dark:bg-gray-800/40 border border-white/20 dark:border-gray-700/50 rounded-xl"
+                                >
+                                    <div className="w-8 h-8 rounded-lg bg-blue-600/10 flex items-center justify-center text-blue-600">
+                                        <Icon size={16} strokeWidth={2} />
+                                    </div>
+                                    <span className="text-xs font-black text-gray-600 dark:text-gray-400 tracking-wide">{benefit.text}</span>
+                                </motion.div>
                             )
                         })}
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    
-                    {/* ========================================
-                        TERMS SECTIONS (Expandable)
-                        ======================================== */}
+                <form onSubmit={handleSubmit} className="w-full space-y-8">
+                    {/* Expandable Terms Summary */}
                     <div className="space-y-3">
-                        {TERMS_SECTIONS.map((section) => (
-                            <TermsSection
-                                key={section.id}
-                                section={section}
-                                isExpanded={expandedSections.includes(section.id)}
-                                onToggle={() => toggleSection(section.id)}
-                            />
-                        ))}
+                        <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 ml-1 mb-2">
+                            Summary of Terms
+                        </label>
+                        <div className="grid gap-3">
+                            {TERMS_SECTIONS.map((section) => (
+                                <TermsSection
+                                    key={section.id}
+                                    section={section}
+                                    isExpanded={expandedSections.includes(section.id)}
+                                    onToggle={() => toggleSection(section.id)}
+                                />
+                            ))}
+                        </div>
                     </div>
 
-                    {/* ========================================
-                        REQUIRED AGREEMENTS
-                        ======================================== */}
-                    <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                        
+                    {/* Checkbox Agreements */}
+                    <div className="space-y-4 pt-6 border-t border-white/10">
                         {/* Terms of Service */}
-                        <label className="flex items-start gap-3 cursor-pointer group">
+                        <label className="flex items-start gap-4 p-4 bg-white/20 dark:bg-gray-800/20 border border-white/10 dark:border-gray-700/30 rounded-2xl cursor-pointer group hover:bg-white/30 dark:hover:bg-gray-800/30 transition-all duration-300">
                             <div className="relative flex items-center justify-center mt-0.5">
                                 <input
                                     type="checkbox"
                                     checked={data.agreedToTerms}
                                     onChange={handleCheckboxChange('agreedToTerms')}
-                                    className="peer absolute opacity-0 w-4 h-4 cursor-pointer"
-                                    aria-label="I agree to the Terms of Service"
+                                    className="peer absolute opacity-0 w-6 h-6 cursor-pointer"
                                 />
                                 <div className={`
-                                    w-4 h-4 border rounded transition-all duration-200 flex items-center justify-center
+                                    w-6 h-6 border-2 rounded-lg transition-all duration-300 flex items-center justify-center
                                     ${data.agreedToTerms
-                                        ? 'bg-blue-600 dark:bg-blue-500 border-blue-600 dark:border-blue-500'
-                                        : 'bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 group-hover:border-gray-400 dark:group-hover:border-gray-600'
+                                        ? 'bg-blue-600 border-blue-600 scale-110 shadow-lg shadow-blue-600/30'
+                                        : 'bg-white/50 dark:bg-gray-900 border-gray-300 dark:border-gray-700'
                                     }
                                     ${errors.agreedToTerms && touched.agreedToTerms ? 'border-red-500' : ''}
                                 `}>
-                                    {data.agreedToTerms && (
-                                        <CheckCircle className="w-3 h-3 text-white" />
-                                    )}
+                                    {data.agreedToTerms && <CheckCircle className="w-4 h-4 text-white" />}
                                 </div>
                             </div>
-                            <span className="flex-1 text-sm text-gray-600 dark:text-gray-400">
-                                I agree to the{' '}
-                                <Link
-                                    href="/terms"
-                                    target="_blank"
-                                    className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
-                                >
-                                    Terms of Service
-                                </Link>{' '}
-                                and confirm that I am at least 18 years old.
-                            </span>
+                            <div className="flex-1">
+                                <p className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">
+                                    I agree to the Terms of Service
+                                </p>
+                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                    Confirming you're 18+ and accept our <Link href="/terms" className="text-blue-600 hover:underline">legal framework</Link>.
+                                </p>
+                            </div>
                         </label>
 
                         {/* Privacy Policy */}
-                        <label className="flex items-start gap-3 cursor-pointer group">
+                        <label className="flex items-start gap-4 p-4 bg-white/20 dark:bg-gray-800/20 border border-white/10 dark:border-gray-700/30 rounded-2xl cursor-pointer group hover:bg-white/30 dark:hover:bg-gray-800/30 transition-all duration-300">
                             <div className="relative flex items-center justify-center mt-0.5">
                                 <input
                                     type="checkbox"
                                     checked={data.agreedToPrivacy}
                                     onChange={handleCheckboxChange('agreedToPrivacy')}
-                                    className="peer absolute opacity-0 w-4 h-4 cursor-pointer"
-                                    aria-label="I agree to the Privacy Policy"
+                                    className="peer absolute opacity-0 w-6 h-6 cursor-pointer"
                                 />
                                 <div className={`
-                                    w-4 h-4 border rounded transition-all duration-200 flex items-center justify-center
+                                    w-6 h-6 border-2 rounded-lg transition-all duration-300 flex items-center justify-center
                                     ${data.agreedToPrivacy
-                                        ? 'bg-blue-600 dark:bg-blue-500 border-blue-600 dark:border-blue-500'
-                                        : 'bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 group-hover:border-gray-400 dark:group-hover:border-gray-600'
+                                        ? 'bg-blue-600 border-blue-600 scale-110 shadow-lg shadow-blue-600/30'
+                                        : 'bg-white/50 dark:bg-gray-900 border-gray-300 dark:border-gray-700'
                                     }
                                     ${errors.agreedToPrivacy && touched.agreedToPrivacy ? 'border-red-500' : ''}
                                 `}>
-                                    {data.agreedToPrivacy && (
-                                        <CheckCircle className="w-3 h-3 text-white" />
-                                    )}
+                                    {data.agreedToPrivacy && <CheckCircle className="w-4 h-4 text-white" />}
                                 </div>
                             </div>
-                            <span className="flex-1 text-sm text-gray-600 dark:text-gray-400">
-                                I agree to the{' '}
-                                <Link
-                                    href="/privacy"
-                                    target="_blank"
-                                    className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
-                                >
-                                    Privacy Policy
-                                </Link>{' '}
-                                and consent to the processing of my data.
-                            </span>
+                            <div className="flex-1">
+                                <p className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">
+                                    I accept the Privacy Policy
+                                </p>
+                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                    Consenting to how we <Link href="/privacy" className="text-blue-600 hover:underline">handle and protect</Link> your data.
+                                </p>
+                            </div>
                         </label>
                     </div>
 
-                    {/* ========================================
-                        OPTIONAL AGREEMENTS
-                        ======================================== */}
-                    <div className="space-y-3 pt-2">
-                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Communication Preferences (Optional)
-                        </p>
-
-                        {/* Newsletter */}
-                        <label className="flex items-start gap-3 cursor-pointer group">
-                            <div className="relative flex items-center justify-center mt-0.5">
+                    {/* Communication Opt-ins */}
+                    <div className="space-y-4 pt-4">
+                        <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 ml-1">
+                            Preferences (Optional)
+                        </label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <label className="flex items-center gap-3 p-3 bg-white/10 dark:bg-gray-800/10 border border-white/5 rounded-xl cursor-pointer hover:bg-white/20 transition-all duration-300">
                                 <input
                                     type="checkbox"
                                     checked={data.newsletterOptIn}
                                     onChange={handleCheckboxChange('newsletterOptIn')}
                                     className="peer absolute opacity-0 w-4 h-4 cursor-pointer"
-                                    aria-label="Subscribe to newsletter"
                                 />
                                 <div className={`
-                                    w-4 h-4 border rounded transition-all duration-200 flex items-center justify-center
-                                    ${data.newsletterOptIn
-                                        ? 'bg-amber-600 dark:bg-amber-500 border-amber-600 dark:border-amber-500'
-                                        : 'bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 group-hover:border-gray-400 dark:group-hover:border-gray-600'
-                                    }
+                                    w-5 h-5 border-2 rounded-md transition-all flex items-center justify-center
+                                    ${data.newsletterOptIn ? 'bg-amber-500 border-amber-500 scale-110' : 'border-gray-300 dark:border-gray-700'}
                                 `}>
-                                    {data.newsletterOptIn && (
-                                        <Mail className="w-3 h-3 text-white" />
-                                    )}
+                                    {data.newsletterOptIn && <Mail className="w-3 h-3 text-white" />}
                                 </div>
-                            </div>
-                            <span className="flex-1 text-sm text-gray-600 dark:text-gray-400">
-                                Send me travel tips, exclusive offers, and updates
-                                <span className="block text-xs text-gray-500 dark:text-gray-500">
-                                    You can unsubscribe anytime
-                                </span>
-                            </span>
-                        </label>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">Newsletter</span>
+                            </label>
 
-                        {/* Marketing Communications */}
-                        <label className="flex items-start gap-3 cursor-pointer group">
-                            <div className="relative flex items-center justify-center mt-0.5">
+                            <label className="flex items-center gap-3 p-3 bg-white/10 dark:bg-gray-800/10 border border-white/5 rounded-xl cursor-pointer hover:bg-white/20 transition-all duration-300">
                                 <input
                                     type="checkbox"
                                     checked={data.marketingOptIn}
                                     onChange={handleCheckboxChange('marketingOptIn')}
                                     className="peer absolute opacity-0 w-4 h-4 cursor-pointer"
-                                    aria-label="Receive marketing communications"
                                 />
                                 <div className={`
-                                    w-4 h-4 border rounded transition-all duration-200 flex items-center justify-center
-                                    ${data.marketingOptIn
-                                        ? 'bg-purple-600 dark:bg-purple-500 border-purple-600 dark:border-purple-500'
-                                        : 'bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 group-hover:border-gray-400 dark:group-hover:border-gray-600'
-                                    }
+                                    w-5 h-5 border-2 rounded-md transition-all flex items-center justify-center
+                                    ${data.marketingOptIn ? 'bg-purple-500 border-purple-500 scale-110' : 'border-gray-300 dark:border-gray-700'}
                                 `}>
-                                    {data.marketingOptIn && (
-                                        <Sparkles className="w-3 h-3 text-white" />
-                                    )}
+                                    {data.marketingOptIn && <Sparkles className="w-3 h-3 text-white" />}
                                 </div>
-                            </div>
-                            <span className="flex-1 text-sm text-gray-600 dark:text-gray-400">
-                                Receive partner offers and promotions
-                                <span className="block text-xs text-gray-500 dark:text-gray-500">
-                                    From selected partners (never spam)
-                                </span>
-                            </span>
-                        </label>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">Marketing</span>
+                            </label>
+                        </div>
                     </div>
 
-                    {/* ========================================
-                        ERROR MESSAGE
-                        ======================================== */}
-                    {(errors.agreedToTerms || errors.agreedToPrivacy) && 
-                     (touched.agreedToTerms || touched.agreedToPrivacy) && (
-                        <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2">
-                            <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-                            <p className="text-xs text-red-700 dark:text-red-300">
-                                Please agree to both the Terms of Service and Privacy Policy to continue.
+                    {/* Server/Validation Errors */}
+                    {(errors.agreedToTerms || errors.agreedToPrivacy || serverErrors?.general) && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="p-4 bg-red-500/5 border border-red-500/20 rounded-2xl flex items-start gap-3"
+                        >
+                            <AlertCircle size={14} className="text-red-500 mt-0.5 flex-shrink-0" />
+                            <p className="text-xs font-bold text-red-600 dark:text-red-400">
+                                {serverErrors?.general || "Please agree to both terms and privacy policy to continue."}
                             </p>
-                        </div>
+                        </motion.div>
                     )}
-                    {/* ========================================
-    SERVER ERRORS
-    ======================================== */}
-{serverErrors?.general && (
-  <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2">
-    <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-    <p className="text-xs text-red-700 dark:text-red-300">{serverErrors.general}</p>
-  </div>
-)}
-                    {/* ========================================
-                        FORM ACTIONS
-                        ======================================== */}
-                    <div className="flex gap-3 pt-6">
+
+                    {/* Actions */}
+                    <div className="flex gap-4 pt-4">
                         <button
                             type="button"
                             onClick={onBack}
                             disabled={isSubmitting}
-                            className="
-                                flex-1
-                                px-4 py-2.5
-                                bg-gray-100 dark:bg-gray-800
-                                text-gray-700 dark:text-gray-300
-                                font-medium
-                                rounded-lg
-                                hover:bg-gray-200 dark:hover:bg-gray-700
-                                transition-colors
-                                disabled:opacity-50 disabled:cursor-not-allowed
-                                focus:outline-none focus:ring-2 focus:ring-gray-500/20
-                            "
+                            className="flex-1 py-4 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-300 disabled:opacity-50"
                         >
                             Back
                         </button>
@@ -500,41 +456,28 @@ export default function TermsAgreement({
                         <button
                             type="submit"
                             disabled={isSubmitting || !data.agreedToTerms || !data.agreedToPrivacy}
-                            className="
-                                flex-1
-                                px-4 py-2.5
-                                bg-gradient-to-r from-emerald-600 to-green-600
-                                dark:from-emerald-700 dark:to-green-700
-                                text-white font-medium
-                                rounded-lg
-                                hover:from-emerald-700 hover:to-green-700
-                                dark:hover:from-emerald-800 dark:hover:to-green-800
-                                transition-all
-                                disabled:opacity-50 disabled:cursor-not-allowed
-                                focus:outline-none focus:ring-2 focus:ring-emerald-500/20
-                                flex items-center justify-center gap-2
-                            "
+                            className={`
+                                flex-[1.5] py-4 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 group
+                                ${data.agreedToTerms && data.agreedToPrivacy
+                                    ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-600/20 hover:bg-emerald-700' 
+                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
+                                }
+                            `}
                         >
                             {isSubmitting ? (
-                                <>
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                    <span>Creating Account...</span>
-                                </>
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                             ) : (
                                 <>
-                                    <CheckCircle className="w-4 h-4" />
-                                    <span>Complete Signup</span>
+                                    Complete Signup
+                                    <CheckCircle size={14} className="group-hover:scale-110 transition-transform" />
                                 </>
                             )}
                         </button>
                     </div>
 
-                    {/* ========================================
-                        GDPR NOTE
-                        ======================================== */}
-                    <p className="text-xs text-center text-gray-500 dark:text-gray-500 pt-4">
-                        <Shield className="inline w-3 h-3 mr-1" />
-                        Your data is protected under GDPR. You can request deletion anytime.
+                    <p className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 flex items-center justify-center gap-2 opacity-50">
+                        <Shield size={12} />
+                        Secured by SafariHub Trust™
                     </p>
                 </form>
             </div>

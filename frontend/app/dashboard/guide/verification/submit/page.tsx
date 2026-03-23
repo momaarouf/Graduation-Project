@@ -151,12 +151,17 @@ export default function GuideVerificationSubmitPage() {
                   <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800/50 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 transition-colors">
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       {formData.idFrontImage ? (
-                        <CheckCircle className="w-8 h-8 text-emerald-500 mb-2" />
+                        <div className="relative w-20 h-14 rounded-lg overflow-hidden border-2 border-emerald-500/30 ring-4 ring-emerald-500/10 mb-2">
+                          <img src={formData.idFrontImage} className="w-full h-full object-cover" alt="Front Preview" />
+                          <div className="absolute inset-0 flex items-center justify-center bg-emerald-500/20">
+                             <CheckCircle className="w-6 h-6 text-emerald-600" />
+                          </div>
+                        </div>
                       ) : (
                         <Upload className="w-8 h-8 text-gray-400 mb-2" />
                       )}
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {formData.idFrontImage ? <span className="text-emerald-600 font-medium">Image uploaded</span> : 'Click to select image file'}
+                        {formData.idFrontImage ? <span className="text-emerald-600 font-bold uppercase tracking-widest text-[10px]">Front uploaded</span> : 'Click to upload front'}
                       </p>
                     </div>
                     <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload('idFrontImage', e)} />
@@ -173,16 +178,21 @@ export default function GuideVerificationSubmitPage() {
                   </label>
                   <div className={`flex items-center justify-center w-full ${errors.idBackImage ? 'ring-2 ring-red-500 rounded-xl' : ''}`}>
                     <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800/50 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 transition-colors">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        {formData.idBackImage ? (
-                          <CheckCircle className="w-8 h-8 text-emerald-500 mb-2" />
-                        ) : (
-                          <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                        )}
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {formData.idBackImage ? <span className="text-emerald-600 font-medium">Image uploaded</span> : 'Click to select image file'}
-                        </p>
-                      </div>
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          {formData.idBackImage ? (
+                            <div className="relative w-20 h-14 rounded-lg overflow-hidden border-2 border-emerald-500/30 ring-4 ring-emerald-500/10 mb-2">
+                              <img src={formData.idBackImage} className="w-full h-full object-cover" alt="Back Preview" />
+                              <div className="absolute inset-0 flex items-center justify-center bg-emerald-500/20">
+                                 <CheckCircle className="w-6 h-6 text-emerald-600" />
+                              </div>
+                            </div>
+                          ) : (
+                            <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                          )}
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {formData.idBackImage ? <span className="text-emerald-600 font-bold uppercase tracking-widest text-[10px]">Back uploaded</span> : 'Click to upload back'}
+                          </p>
+                        </div>
                       <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload('idBackImage', e)} />
                     </label>
                   </div>
@@ -200,12 +210,17 @@ export default function GuideVerificationSubmitPage() {
                   <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800/50 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 transition-colors">
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       {formData.selfieImage ? (
-                        <CheckCircle className="w-8 h-8 text-emerald-500 mb-2" />
+                        <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-emerald-500/30 ring-4 ring-emerald-500/10 mb-2">
+                          <img src={formData.selfieImage} className="w-full h-full object-cover" alt="Selfie Preview" />
+                          <div className="absolute inset-0 flex items-center justify-center bg-emerald-500/20">
+                             <CheckCircle className="w-5 h-5 text-emerald-600" />
+                          </div>
+                        </div>
                       ) : (
                         <Upload className="w-8 h-8 text-gray-400 mb-2" />
                       )}
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {formData.selfieImage ? <span className="text-emerald-600 font-medium">Image uploaded</span> : 'Click to select image file'}
+                        {formData.selfieImage ? <span className="text-emerald-600 font-bold uppercase tracking-widest text-[10px]">Selfie uploaded</span> : 'Click to upload selfie'}
                       </p>
                     </div>
                     <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload('selfieImage', e)} />

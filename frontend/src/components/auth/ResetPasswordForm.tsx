@@ -27,10 +27,10 @@ export default function ResetPasswordForm({ token: propToken }: Props) {
   const searchParams = useSearchParams()
   const { user, resetPassword } = useAuth()
 
-  const backPath = user 
-    ? (user.role === 'Guide' ? '/dashboard/guide/settings' : '/dashboard/traveler/settings')
+  const backPath = user
+    ? (user.role === 'ADMIN' ? '/dashboard/admin/settings' : user.role === 'GUIDE' ? '/dashboard/guide/settings' : '/dashboard/traveler/settings')
     : '/auth/login'
-  
+
   const backLabel = user ? 'Back to Settings' : 'Back to login'
   const emailFromUrl = searchParams.get('email') || ''
 

@@ -13,13 +13,13 @@ const COLORS = {
 interface Props {
   profileCompleted: boolean
   emailVerified: boolean
-  idVerified?: boolean   // guide only
-  role: 'Traveler' | 'Guide'
+  verificationStatus?: 'not_submitted' | 'pending' | 'approved' | 'rejected' // guide only
+  role: 'TRAVELER' | 'GUIDE' | 'ADMIN'
   /** Pass the user's email so the verification page auto-sends the code */
   userEmail?: string
 }
 
-export default function OnboardingBanner({ profileCompleted, emailVerified, idVerified, role, userEmail }: Props) {
+export default function OnboardingBanner({ profileCompleted, emailVerified, verificationStatus, role, userEmail }: Props) {
   const [dismissed, setDismissed] = useState(false)
 
   // Build the email verification href with email pre-filled so the form auto-sends the code
@@ -28,10 +28,35 @@ export default function OnboardingBanner({ profileCompleted, emailVerified, idVe
     : '/auth/email-verification'
 
   type Color = 'blue' | 'amber' | 'purple'
-  const steps: { id: string; label: string; desc: string; href: string; icon: React.ElementType; color: Color; done: boolean }[] = [
-    { id: 'email',    label: 'Verify your email',     desc: 'Confirm your address to secure your account.',                                    href: emailVerifyHref,                                                     icon: Mail,   color: 'blue',   done: emailVerified },
-    { id: 'profile',  label: 'Complete your profile', desc: role === 'Guide' ? 'Add bio, languages and expertise so travelers can find you.' : 'Add your name, location and preferences.', href: role === 'Guide' ? '/dashboard/guide/complete-profile' : '/dashboard/traveler/complete-profile', icon: User, color: 'purple', done: profileCompleted },
-    ...(role === 'Guide' ? [{ id: 'verify', label: 'Submit ID verification', desc: 'Upload ID + selfie. Verified guides get 3× more bookings.', href: '/dashboard/guide/verification', icon: Shield, color: 'amber' as Color, done: idVerified ?? false }] : []),
+  const steps: { id: string; label: string; desc: string; href: string; icon: React.ElementType; color: Color; done: boolean; statusLabel?: string }[] = [
+    { 
+      id: 'email',    
+      label: 'Verify your email',     
+      desc: 'Confirm your address to secure your account.',                                    
+      href: emailVerifyHref,                                                     
+      icon: Mail,   
+      color: 'blue',   
+      done: emailVerified 
+    },
+    { 
+      id: 'profile',  
+      label: 'Complete your profile', 
+      desc: role === 'GUIDE' ? 'Add bio, languages and expertise so travelers can find you.' : 'Add your name, location and preferences.', 
+      href: role === 'GUIDE' ? '/dashboard/guide/complete-profile' : '/dashboard/traveler/complete-profile', 
+      icon: User, 
+      color: 'purple', 
+      done: profileCompleted 
+    },
+    ...(role === 'GUIDE' ? [{ 
+      id: 'verify', 
+      label: verificationStatus === 'pending' ? 'ID Verification Pending' : 'Submit ID verification', 
+      desc: verificationStatus === 'pending' ? 'We are reviewing your documents. This usually takes 24-48h.' : 'Upload ID + selfie. Verified guides get 3× more bookings.', 
+      href: '/dashboard/guide/verification', 
+      icon: Shield, 
+      color: 'amber' as Color, 
+      done: verificationStatus === 'approved' || verificationStatus === 'pending',
+      statusLabel: verificationStatus === 'pending' ? 'Reviewing' : undefined
+    }] : []),
   ]
 
   const pending = steps.filter(s => !s.done)
@@ -64,11 +89,25 @@ export default function OnboardingBanner({ profileCompleted, emailVerified, idVe
                 <Icon className="w-4 h-4" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">{step.label}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{step.label}</p>
+                  {step.statusLabel && (
+                    <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[8px] font-black uppercase tracking-tighter rounded-md border border-amber-500/20">
+                      {step.statusLabel}
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{step.desc}</p>
-                <Link href={step.href} className={`inline-flex items-center gap-1 mt-2 px-3 py-1.5 text-xs font-medium rounded-lg transition ${c.btn}`}>
-                  Get started <ChevronRight className="w-3 h-3" />
-                </Link>
+                {!step.done && (
+                  <Link href={step.href} className={`inline-flex items-center gap-1 mt-2 px-3 py-1.5 text-xs font-medium rounded-lg transition ${c.btn}`}>
+                    Get started <ChevronRight className="w-3 h-3" />
+                  </Link>
+                )}
+                {step.done && step.statusLabel === 'Reviewing' && (
+                  <Link href={step.href} className="inline-flex items-center gap-1 mt-2 px-3 py-1.5 text-xs font-black text-amber-600 hover:text-amber-700 transition uppercase tracking-widest">
+                    View Status <ChevronRight className="w-3 h-3" />
+                  </Link>
+                )}
               </div>
             </div>
           )

@@ -1,430 +1,192 @@
-// ============================================================================
-// TOURS API SERVICE - PHASE 2 PREPARATION
-// ============================================================================
-// LOCATION: /frontend/src/lib/api/tours.ts
-// 
-// PURPOSE: Centralized API calls for all tour-related operations
-// 
-// WHY THIS FILE EXISTS:
-// ---------------------
-// 1. Single source of truth for all tour API endpoints
-// 2. Prepares codebase for Phase 2 backend integration
-// 3. Consistent error handling across all tour operations
-// 4. Type-safe responses with proper TypeScript interfaces
-// 
-// PHASE 1 vs PHASE 2:
-// -------------------
-// PHASE 1: Returns mock data from types files
-// PHASE 2: Replace with actual fetch() calls to Spring Boot backend
-// 
-// MIGRATION PATH:
-// 1. Keep mock data during Phase 1 development
-// 2. Replace mockToursPromise with actual API call in Phase 2
-// 3. Error handling remains the same
-// ============================================================================
+// src/lib/api/tours.ts
 
-import { 
-  TourDetail, 
-  ReviewDetail,
-  MOCK_TOUR_DETAIL,
-  MOCK_REVIEWS,
-  MOCK_SIMILAR_TOURS 
-} from '@/src/types/tour-detail.types'
-import { Country, City } from '@/src/components/search/types/filters.types'
+import apiClient from '@/src/lib/api/client'
+import {
+  TourTemplateResponse,
+  TourMediaResponse,
+  PublicTourCardResponse,
+  PublicTourDetailResponse,
+  TourOccurrenceResponse,
+  GuidePortfolioTourResponse,
+  GuidePortfolioTourDetailResponse,
+  CreateTourTemplateRequest,
+  UpdateTourTemplateRequest,
+  CreateOccurrenceRequest,
+  UpdateOccurrenceRequest,
+  PublicTourFilters,
+  CreateBookingRequest,
+  BookingResponse,
+  GuideBookingResponse,
+} from '@/src/lib/types/tour.types'
+import { GuideProfileResponse } from '@/src/lib/types/guide.types'
 
-// ============================================================================
-// TYPE DEFINITIONS - API Request/Response
-// ============================================================================
+// ── Guide: Tour CRUD ─────────────────────────────────────────────────────────
 
-export interface GetTourParams {
-  /** Tour ID (from URL) */
-  id: string
-}
+/** Create a new tour (always starts as DRAFT) */
+export const createTour = (data: CreateTourTemplateRequest) =>
+  apiClient.post<TourTemplateResponse>('/api/guide/tours', data)
 
-export interface GetTourReviewsParams {
-  /** Tour ID */
-  tourId: string
-  /** Page number for pagination */
-  page?: number
-  /** Items per page */
-  limit?: number
-  /** Sort by (most_relevant, newest, highest_rating) */
-  sortBy?: 'most_relevant' | 'newest' | 'highest_rating'
-  /** Filter by rating (5,4,3,2,1) */
-  rating?: number
-}
+/** List all own tours (all statuses, not deleted) */
+export const getGuideTours = () =>
+  apiClient.get<TourTemplateResponse[]>('/api/guide/tours')
 
-export interface GetSimilarToursParams {
-  /** Current tour ID to exclude from results */
-  currentTourId: string
-  /** City for location-based recommendations */
-  city?: City
-  /** Country for location-based recommendations */
-  country?: Country
-  /** Maximum number of tours to return */
-  limit?: number
-}
+/** Get guide profile stats & info */
+export const getGuideProfile = () =>
+  apiClient.get<GuideProfileResponse>('/api/guide/profile')
 
-export interface SearchToursParams {
-  /** Search query (text) */
-  q?: string
-  /** Filter by country */
-  country?: Country | Country[]
-  /** Filter by city */
-  city?: City | City[]
-  /** Minimum price (USD) */
-  minPrice?: number
-  /** Maximum price (USD) */
-  maxPrice?: number
-  /** Minimum rating */
-  minRating?: number
-  /** Halal certified only */
-  halal?: boolean
-  /** Instant booking only */
-  instantBook?: boolean
-  /** Verified guides only */
-  verifiedGuides?: boolean
-  /** Group discount available */
-  groupDiscount?: boolean
-  /** Available spots only */
-  availableSpots?: boolean
-  /** Page number */
-  page?: number
-  /** Items per page */
-  limit?: number
-  /** Sort field */
-  sortBy?: 'price_asc' | 'price_desc' | 'rating_desc' | 'newest' | 'recommended'
-}
+/** Get one own tour by ID */
+export const getGuideTour = (id: number) =>
+  apiClient.get<TourTemplateResponse>(`/api/guide/tours/${id}`)
 
-// ============================================================================
-// API RESPONSE TYPES
-// ============================================================================
+/** Partial update — only send fields you want to change */
+export const updateTour = (id: number, data: UpdateTourTemplateRequest) =>
+  apiClient.put<TourTemplateResponse>(`/api/guide/tours/${id}`, data)
 
-export interface ApiResponse<T> {
-  /** Success status */
-  success: boolean
-  /** Response data */
-  data: T
-  /** Error message (if success = false) */
-  error?: string
-  /** Status code */
-  statusCode: number
-}
+/** Soft delete a tour */
+export const deleteTour = (id: number) =>
+  apiClient.delete(`/api/guide/tours/${id}`)
 
-export interface PaginatedResponse<T> {
-  /** Array of items */
-  items: T[]
-  /** Total number of items (for pagination) */
-  total: number
-  /** Current page */
-  page: number
-  /** Items per page */
-  limit: number
-  /** Total number of pages */
-  totalPages: number
-  /** Has next page */
-  hasNext: boolean
-  /** Has previous page */
-  hasPrev: boolean
-}
+// ── Guide: Status transitions ────────────────────────────────────────────────
 
-// ============================================================================
-// MOCK PROMISES - Phase 1 only
-// ============================================================================
-// 
-// These simulate async API calls with realistic network delay.
-// Replace with actual fetch() calls in Phase 2.
-// ============================================================================
+/** DRAFT or REJECTED → PENDING_REVIEW */
+export const submitTourForReview = (id: number) =>
+  apiClient.post<TourTemplateResponse>(`/api/guide/tours/${id}/submit`)
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+/** PENDING_REVIEW → DRAFT (guide withdraws to make more edits) */
+export const withdrawTourFromReview = (id: number) =>
+  apiClient.post<TourTemplateResponse>(`/api/guide/tours/${id}/withdraw`)
 
-const mockToursPromise = async <T,>(data: T, shouldFail = false): Promise<T> => {
-  // Simulate network latency (300-800ms)
-  await delay(Math.random() * 500 + 300)
-  
-  // Simulate random failures (10% chance)
-  if (shouldFail && Math.random() < 0.1) {
-    throw new Error('Network error: Failed to fetch tour data')
-  }
-  
-  return data
-}
+/** PUBLISHED → PAUSED */
+export const pauseTour = (id: number) =>
+  apiClient.post<TourTemplateResponse>(`/api/guide/tours/${id}/pause`)
 
-// ============================================================================
-// TOUR API ENDPOINTS
-// ============================================================================
+/** PAUSED → PENDING_REVIEW (resuming requires re-approval) */
+export const resumeTour = (id: number) =>
+  apiClient.post<TourTemplateResponse>(`/api/guide/tours/${id}/resume`)
 
-/**
- * Get detailed tour information by ID
- * 
- * @param params - Tour ID parameters
- * @returns Promise with tour details
- * 
- * @example
- * const tour = await getTourById({ id: '1' })
- * console.log(tour.title) // 'Ottoman Heritage: Topkapi Palace & Hagia Sophia'
- */
-export async function getTourById({ id }: GetTourParams): Promise<TourDetail | null> {
-  try {
-    // ========================================
-    // PHASE 1: Return mock data
-    // ========================================
-    const data = await mockToursPromise(MOCK_TOUR_DETAIL)
-    
-    // Simulate 404 if ID doesn't match (for testing)
-    if (id !== '1' && id !== MOCK_TOUR_DETAIL.id) {
-      return null
-    }
-    
-    return data
-    
-    // ========================================
-    // PHASE 2: Replace with actual API call
-    // ========================================
-    // const response = await fetch(`/api/tours/${id}`, {
-    //   method: 'GET',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   // Next.js 15+ caching strategy
-    //   next: {
-    //     revalidate: 3600, // Revalidate every hour
-    //     tags: [`tour-${id}`] // For on-demand revalidation
-    //   }
-    // })
-    // 
-    // if (!response.ok) {
-    //   if (response.status === 404) return null
-    //   throw new Error(`API error: ${response.status}`)
-    // }
-    // 
-    // const result: ApiResponse<TourDetail> = await response.json()
-    // return result.data
-    
-  } catch (error) {
-    // Log to monitoring service in Phase 2
-    console.error(`[API] Failed to fetch tour ${id}:`, error)
-    throw error
-  }
-}
+/** PUBLISHED or PAUSED → ARCHIVED (permanent) */
+export const archiveTour = (id: number) =>
+  apiClient.post<TourTemplateResponse>(`/api/guide/tours/${id}/archive`)
 
-/**
- * Get reviews for a specific tour
- * 
- * @param params - Tour ID and pagination parameters
- * @returns Promise with paginated reviews
- * 
- * @example
- * const { items, total, hasNext } = await getTourReviews({
- *   tourId: '1',
- *   page: 1,
- *   limit: 10
- * })
- */
-export async function getTourReviews({
-  tourId,
-  page = 1,
-  limit = 10,
-  sortBy = 'most_relevant',
-  rating
-}: GetTourReviewsParams): Promise<PaginatedResponse<ReviewDetail>> {
-  try {
-    // ========================================
-    // PHASE 1: Return mock data with pagination
-    // ========================================
-    let reviews = [...MOCK_REVIEWS]
-    
-    // Filter by rating if specified
-    if (rating) {
-      reviews = reviews.filter(r => r.rating === rating)
-    }
-    
-    // Sort reviews
-    if (sortBy === 'newest') {
-      reviews = reviews.sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )
-    } else if (sortBy === 'highest_rating') {
-      reviews = reviews.sort((a, b) => b.rating - a.rating)
-    }
-    
-    // Paginate
-    const start = (page - 1) * limit
-    const end = start + limit
-    const paginatedReviews = reviews.slice(start, end)
-    
-    await delay(400) // Simulate network
-    
-    return {
-      items: paginatedReviews,
-      total: reviews.length,
-      page,
-      limit,
-      totalPages: Math.ceil(reviews.length / limit),
-      hasNext: end < reviews.length,
-      hasPrev: page > 1
-    }
-    
-  } catch (error) {
-    console.error(`[API] Failed to fetch reviews for tour ${tourId}:`, error)
-    throw error
-  }
-}
+/** DEV-ONLY: Immediately publish a tour bypassing admin review */
+export const publishTourImmediately = (id: number) =>
+  apiClient.post<TourTemplateResponse>(`/api/guide/tours/${id}/publish-immediately`)
 
-/**
- * Get similar tours based on location
- * 
- * @param params - Current tour ID and location filters
- * @returns Promise with array of similar tours
- * 
- * @example
- * const similar = await getSimilarTours({
- *   currentTourId: '1',
- *   city: City.ISTANBUL,
- *   limit: 4
- * })
- */
-export async function getSimilarTours({
-  currentTourId,
-  city,
-  country,
-  limit = 4
-}: GetSimilarToursParams): Promise<TourDetail[]> {
-  try {
-    // ========================================
-    // PHASE 1: Return filtered mock data
-    // ========================================
-    let similar = MOCK_SIMILAR_TOURS
-    
-    // Filter by location
-    if (city) {
-      similar = similar.filter(t => t.location.toLowerCase().includes(city.toLowerCase()))
-    } else if (country) {
-      similar = similar.filter(t => t.country === country)
-    }
-    
-    // Exclude current tour
-    similar = similar.filter(t => t.id !== currentTourId)
-    
-    // Limit results
-    similar = similar.slice(0, limit)
-    
-    await delay(350)
-    
-    return similar as unknown as TourDetail[]
-    
-  } catch (error) {
-    console.error('[API] Failed to fetch similar tours:', error)
-    throw error
-  }
-}
+// ── Guide: Media ─────────────────────────────────────────────────────────────
 
-/**
- * Search tours with filters
- * 
- * @param params - Search query and filters
- * @returns Promise with paginated tour results
- * 
- * @example
- * const results = await searchTours({
- *   q: 'istanbul',
- *   halal: true,
- *   minRating: 4,
- *   page: 1,
- *   limit: 12
- * })
- */
-export async function searchTours(params: SearchToursParams): Promise<PaginatedResponse<TourDetail>> {
-  try {
-    // ========================================
-    // PHASE 2: Actual API call
-    // ========================================
-    // const queryParams = new URLSearchParams()
-    // Object.entries(params).forEach(([key, value]) => {
-    //   if (value !== undefined && value !== null) {
-    //     queryParams.append(key, String(value))
-    //   }
-    // })
-    // 
-    // const response = await fetch(`/api/tours?${queryParams.toString()}`)
-    // const result: ApiResponse<PaginatedResponse<TourDetail>> = await response.json()
-    // return result.data
-    
-    throw new Error('Search API not implemented in Phase 1')
-    
-  } catch (error) {
-    console.error('[API] Failed to search tours:', error)
-    throw error
-  }
-}
+/** Add a media item (base64) to a tour */
+export const addTourMedia = (templateId: number, data: { url: string; mediaType: string; displayOrder: number }) =>
+  apiClient.post<TourMediaResponse>(`/api/guide/tours/${templateId}/media`, data)
 
-// ============================================================================
-// BOOKING OPERATIONS (Phase 2)
-// ============================================================================
+/** Delete a media item by ID */
+export const deleteTourMedia = (mediaId: number) =>
+  apiClient.delete(`/api/guide/media/${mediaId}`)
 
-/**
- * Create a new booking
- * Phase 2 implementation
- */
-export async function createBooking(data: {
-  tourId: string
-  date: string
-  peopleCount: number
-  message?: string
-}) {
-  // Will be implemented in Phase 2
-  throw new Error('Booking API not implemented in Phase 1')
-}
+// ── Guide: Occurrences ───────────────────────────────────────────────────────
 
-/**
- * Join waitlist for a tour
- * Phase 2 implementation
- */
-export async function joinWaitlist(data: {
-  tourId: string
-  date: string
-  peopleCount: number
-}) {
-  // Will be implemented in Phase 2
-  throw new Error('Waitlist API not implemented in Phase 1')
-}
+/** Create occurrence under a PUBLISHED tour */
+export const createOccurrence = (templateId: number, data: CreateOccurrenceRequest) =>
+  apiClient.post<TourOccurrenceResponse>(`/api/guide/tours/${templateId}/occurrences`, data)
 
-// ============================================================================
-// CACHE INVALIDATION (Phase 2)
-// ============================================================================
+/** List all occurrences for one of guide's tours */
+export const getGuideOccurrences = (templateId: number) =>
+  apiClient.get<TourOccurrenceResponse[]>(`/api/guide/tours/${templateId}/occurrences`)
 
-/**
- * Revalidate tour data on-demand
- * Next.js 15+ App Router
- */
-export async function revalidateTour(id: string) {
-  try {
-    await fetch(`/api/revalidate?tag=tour-${id}`, {
-      method: 'POST'
-    })
-  } catch (error) {
-    console.error('Failed to revalidate tour:', error)
-  }
-}
+/** Update an occurrence (reschedule or cancel) */
+export const updateOccurrence = (occurrenceId: number, data: UpdateOccurrenceRequest) =>
+  apiClient.put<TourOccurrenceResponse>(`/api/guide/occurrences/${occurrenceId}`, data)
 
-// ============================================================================
-// USAGE IN COMPONENTS:
-// ============================================================================
-// 
-// ✅ IN PAGE COMPONENT (Server Component):
-// const tour = await getTourById({ id })
-// const reviews = await getTourReviews({ tourId: id, page: 1 })
-// 
-// ✅ IN CLIENT COMPONENT (with useEffect):
-// useEffect(() => {
-//   getTourReviews({ tourId: id })
-//     .then(setReviews)
-//     .catch(handleError)
-// }, [id])
-// 
-// ✅ WITH REACT QUERY (Phase 2):
-// const { data: tour } = useQuery({
-//   queryKey: ['tour', id],
-//   queryFn: () => getTourById({ id })
-// })
-// ============================================================================
+/** Soft delete an occurrence */
+export const deleteOccurrence = (occurrenceId: number) =>
+  apiClient.delete(`/api/guide/occurrences/${occurrenceId}`)
+
+// ── Admin: Review ────────────────────────────────────────────────────────────
+
+/** Get all tours waiting for approval */
+export const getAdminPendingTours = () =>
+  apiClient.get<TourTemplateResponse[]>('/api/admin/tours/pending')
+
+/** Approve a tour → PUBLISHED */
+export const adminApproveTour = (id: number) =>
+  apiClient.post<TourTemplateResponse>(`/api/admin/tours/${id}/approve`)
+
+/** Reject a tour with a reason */
+export const adminRejectTour = (id: number, rejectionReason: string) =>
+  apiClient.post<TourTemplateResponse>(`/api/admin/tours/${id}/reject`, { rejectionReason })
+
+// ── Public: Browsing ─────────────────────────────────────────────────────────
+
+/** Public tour listing with optional filters */
+export const getPublicTours = (filters?: PublicTourFilters) =>
+  apiClient.get<PublicTourCardResponse[]>('/api/public/tours', { params: filters })
+
+/** Public tour detail page */
+export const getPublicTourDetail = (id: number) =>
+  apiClient.get<PublicTourDetailResponse>(`/api/public/tours/${id}`)
+
+/** Future active occurrences for a published tour */
+export const getPublicTourOccurrences = (id: number) =>
+  apiClient.get<TourOccurrenceResponse[]>(`/api/public/tours/${id}/occurrences`)
+
+// ── Public: Portfolio ────────────────────────────────────────────────────────
+
+/** Guide's public portfolio tour list */
+export const getGuidePortfolio = (guideId: number | string) =>
+  apiClient.get<GuidePortfolioTourResponse[]>(`/api/public/guides/${guideId}/tours`)
+
+/** Single portfolio tour — full case-study view */
+export const getPortfolioTourDetail = (guideId: number, tourId: number) =>
+  apiClient.get<GuidePortfolioTourDetailResponse>(`/api/public/guides/${guideId}/tours/${tourId}`)
+
+// ── Bookings: Traveler ───────────────────────────────────────────────────────
+
+/** Create a new booking */
+export const createBooking = (data: CreateBookingRequest) =>
+  apiClient.post<BookingResponse>('/api/traveler/bookings', data)
+
+/** List traveler's bookings */
+export const getTravelerBookings = () =>
+  apiClient.get<BookingResponse[]>('/api/traveler/bookings')
+
+/** Get single traveler booking */
+export const getTravelerBooking = (id: number) =>
+  apiClient.get<BookingResponse>(`/api/traveler/bookings/${id}`)
+
+/** Cancel a booking */
+export const cancelBooking = (id: number) =>
+  apiClient.delete<BookingResponse>(`/api/traveler/bookings/${id}`)
+
+// ── Bookings: Guide ──────────────────────────────────────────────────────────
+
+/** List guide's incoming bookings */
+export const getGuideBookings = () =>
+  apiClient.get<GuideBookingResponse[]>('/api/guide/bookings')
+
+/** Get single guide booking */
+export const getGuideBooking = (id: number) =>
+  apiClient.get<GuideBookingResponse>(`/api/guide/bookings/${id}`)
+
+/** Confirm a pending booking */
+export const confirmBooking = (id: number) =>
+  apiClient.put<GuideBookingResponse>(`/api/guide/bookings/${id}/confirm`)
+
+/** Reject a pending booking */
+export const rejectBooking = (id: number) =>
+  apiClient.put<GuideBookingResponse>(`/api/guide/bookings/${id}/reject`)
+
+// ── Placeholders & Legacy Support ────────────────────────────────────────────
+
+/** Alias for getPublicTourDetail used by legacy components */
+export const getTourById = ({ id }: { id: string | number }) =>
+  getPublicTourDetail(Number(id)).then(r => r.data)
+
+/** Fetch reviews (Placeholder) */
+export const getTourReviews = (params: any) =>
+  Promise.resolve({ data: { data: [], total: 0, page: 1, limit: 10, hasNext: false, hasPrev: false } } as any)
+
+/** Fetch similar tours (Placeholder) */
+export const getSimilarTours = (params: any) =>
+  apiClient.get<PublicTourCardResponse[]>('/api/public/tours', { params }).then(r => r.data).catch(() => [])
+
+/** Export types used by callers */
+export type { GetTourReviewsParams, PaginatedResponse } from '../types/tour.types'

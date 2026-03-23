@@ -29,6 +29,7 @@
 // ============================================================================
 
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import type {ResolvingMetadata } from 'next'
 import PageLayout from '@/src/components/layout/PageLayout'
 import TourHero from '@/src/components/tour-detail/TourHero'
@@ -37,10 +38,13 @@ import TourGuide from '@/src/components/tour-detail/TourGuide'
 import BookingCard from '@/src/components/tour-detail/BookingCard'
 import ReviewList from '@/src/components/tour-detail/ReviewList'
 import SimilarTours from '@/src/components/tour-detail/SimilarTours'
-import { MOCK_TOUR_DETAIL, MOCK_REVIEWS } from '@/src/types/tour-detail.types'
-import { getTourById } from '@/src/lib/api/tours'
+import { MOCK_TOUR_DETAIL, MOCK_REVIEWS, BookingMode, TourStatus } from '@/src/types/tour-detail.types'
+import { getPublicTourDetail } from '@/src/lib/api/tours'
 import { Metadata } from 'next'
+import { ChevronLeft } from 'lucide-react'
 import BookingCardWrapper from '@/src/components/tour-detail/BookingCardWrapper'
+import CinematicBackground from '@/src/components/layout/CinematicBackground'
+import { parseItinerary, parseList } from '@/src/lib/utils/tour-parser'
 // ============================================================================
 // DYNAMIC METADATA - SEO CRITICAL
 // ============================================================================
@@ -64,7 +68,8 @@ export async function generateMetadata(
     // In Phase 2: fetch tour data from API
     // For Phase 1: use mock data
     const { id } = await params
-    const tour = MOCK_TOUR_DETAIL // In Phase 2: await getTourById(id)
+    const res = await getPublicTourDetail(Number(id))
+    const tour = res.data
 
     if (!tour) {
         return {
@@ -75,31 +80,34 @@ export async function generateMetadata(
 
     const previousImages = (await parent).openGraph?.images || []
     const tourUrl = `https://safaribub.com/tours/${id}`
+    const itinerary = parseItinerary(tour.itinerary)
+    const mainImage = tour.media?.[0]?.url || '/images/defaults/tour-hero.jpg'
 
     return {
-        title: `${tour.title} | SafariHub`,
-        description: tour.description.substring(0, 160),
+        title: `${tour.title || 'Tour'} | SafariHub`,
+        description: tour.description?.substring(0, 160) || '',
         keywords: [
-            tour.location,
-            tour.country,
+            tour.locationName || '',
+            tour.region || '',
+            tour.countryCode || '',
             'halal tour',
             'muslim friendly',
             'guided tour',
             'travel',
-            ...tour.itinerary.map(stop => stop.title).slice(0, 5)
+            ...(itinerary || []).map((stop: any) => stop.title).slice(0, 5)
         ].join(', '),
 
         openGraph: {
             title: tour.title,
-            description: tour.description.substring(0, 160),
+            description: tour.description?.substring(0, 160) || '',
             url: tourUrl,
             siteName: 'SafariHub',
             images: [
                 {
-                    url: tour.mainImage,
+                    url: mainImage,
                     width: 1200,
                     height: 630,
-                    alt: tour.title
+                    alt: tour.title || 'Tour Image'
                 },
                 ...previousImages
             ],
@@ -110,8 +118,8 @@ export async function generateMetadata(
         twitter: {
             card: 'summary_large_image',
             title: tour.title,
-            description: tour.description.substring(0, 160),
-            images: [tour.mainImage],
+            description: tour.description?.substring(0, 160) || '',
+            images: [mainImage],
         },
 
         alternates: {
@@ -138,153 +146,126 @@ export async function generateMetadata(
 
 export default async function TourDetailPage({ params}:PageProps ) {
     const {id} =await params
-    const tour = await getTourById({id})// await only once
-
-    // In Phase 2: fetch tour data from API
-    // const tour = await getTourById(id)
-    // const reviews = await getTourReviews(id)
-    // const similarTours = await getSimilarTours(id)
-
-    
-    const reviews = MOCK_REVIEWS
+    const res = await getPublicTourDetail(Number(id))
+    const tour = res.data
 
     if (!tour) {
         notFound()
     }
 
+    // Normalizing media for TourHero
+    const gallery = (tour.media || []).map((m: any) => ({
+        id: m.id.toString(),
+        type: (m.mediaType || 'IMAGE').toLowerCase() as 'image' | 'video',
+        url: m.url,
+        displayOrder: m.displayOrder || 0
+    }))
+
+    const mainImage = gallery[0]?.url || '/images/defaults/tour-hero.jpg'
+    const itinerary = parseItinerary(tour.itinerary)
+    const normalizedBookingMode = tour.instantBook ? BookingMode.INSTANT : BookingMode.REQUEST
+    const normalizedStatus = (tour.status as any) || TourStatus.SCHEDULED
+    const tourTags = parseList(tour.tags)
+    const tourLanguages = parseList(tour.languages)
+
     return (
         <PageLayout>
-            {/* 
-        ========================================
-        PAGE OFFSET - SINGLE SOURCE OF TRUTH
-        ========================================
-        
-        pt-14/sm:pt-16: Offsets fixed navbar
-        This matches the Tours page pattern
-      */}
-            <div className="pt-14 sm:pt-16">
+            <div className="max-w-7xl mx-auto px-4 pt-20 sm:pt-28 pb-8">
+                {/* Navigation Back */}
+                <Link
+                    href="/tours"
+                    className="inline-flex items-center gap-2 mb-8 group text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-blue-600 transition-colors"
+                >
+                    <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                    Back to all tours
+                </Link>
 
-                {/* 
-          ========================================
-          MAIN CONTENT WRAPPER
-          ========================================
-          
-          Container-safe: Responsive padding
-          mx-auto: Center content
-          max-w-7xl: Maximum width for large screens
-        */}
-                <div className="container-safe mx-auto max-w-7xl">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Left Column: Content */}
+                    <div className="lg:col-span-2 space-y-8">
+                        <TourHero
+                            id={tour.id}
+                            title={tour.title}
+                            location={tour.locationName || tour.region || ''}
+                            country={tour.countryCode as any}
+                            mainImage={mainImage}
+                            gallery={gallery}
+                            averageRating={tour.averageRating || 0}
+                            totalReviews={tour.reviewCount || 0}
+                            isHalalCertified={tour.halalFriendly}
+                            bookingMode={normalizedBookingMode}
+                            status={normalizedStatus}
+                            isPremium={tour.isPremium}
+                            isFamilyFriendly={tour.isFamilyFriendly}
+                            hasGroupDiscount={tour.hasGroupDiscount}
+                        />
 
-                    {/* 
-            ========================================
-            LAYOUT: 2-COLUMN GRID
-            ========================================
-            
-            DESKTOP:
-            ┌─────────────────┬─────────────┐
-            │ Hero            │             │
-            ├─────────────────┤  Booking    │
-            │ Info           │    Card     │
-            ├─────────────────┤             │
-            │ Guide Profile  │             │
-            ├─────────────────┴─────────────┤
-            │ Reviews                      │
-            ├───────────────────────────────┤
-            │ Similar Tours               │
-            └───────────────────────────────┘
-            
-            MOBILE:
-            ┌─────────────────┐
-            │ Hero           │
-            ├─────────────────┤
-            │ Booking Card   │ ← Sticky on mobile
-            ├─────────────────┤
-            │ Info           │
-            ├─────────────────┤
-            │ Guide Profile  │
-            ├─────────────────┤
-            │ Reviews        │
-            ├─────────────────┤
-            │ Similar Tours  │
-            └─────────────────┘
-          */}
-                    <div className=" grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 py-6 lg:py-8 ">
+                        <TourInfo
+                            description={tour.description}
+                            itinerary={itinerary}
+                            inclusions={parseList(tour.inclusions)}
+                            exclusions={parseList(tour.exclusions)}
+                            requirements={parseList(tour.requirements)}
+                            whatToBring={parseList(tour.whatToBring)}
+                            meetingPoint={{
+                                name: tour.meetingPointName || '',
+                                address: tour.meetingPointAddress || '',
+                                lat: tour.meetingLatitude || undefined,
+                                lng: tour.meetingLongitude || undefined,
+                                instructions: tour.meetingPointInstructions || ''
+                            }}
+                            safetyMeasures={[]}
+                            isHalalCertified={tour.halalFriendly}
+                            tags={tourTags}
+                            languages={tourLanguages}
+                            durationHours={tour.durationHours}
+                            durationMinutes={tour.durationMinutes}
+                        />
 
-                        {/* ========================================
-               LEFT COLUMN - MAIN CONTENT
-               ========================================
-               lg:col-span-2: Takes 2/3 on desktop
-               Full width on mobile
-            */}
-                        <div className="lg:col-span-2 space-y-6 lg:space-y-8">
+                        <TourGuide
+                            guide={{
+                                id: tour.guideId.toString(),
+                                displayName: tour.guideDisplayName,
+                                verified: tour.guideVerified,
+                                avatar: tour.guideAvatarUrl || '/images/defaults/avatar.jpg',
+                                averageRating: tour.averageRating || 5.0,
+                                totalReviews: tour.reviewCount || 0,
+                                languages: tourLanguages
+                            }}
+                        />
 
-                            {/* Hero Section - Gallery, Title, Quick Info */}
-                            <TourHero
-                                title={tour.title}
-                                location={tour.location}
-                                country={tour.country}
-                                mainImage={tour.mainImage}
-                                gallery={tour.gallery}
-                                averageRating={tour.averageRating}
-                                totalReviews={tour.totalReviews}
-                                isHalalCertified={tour.isHalalCertified}
-                                bookingMode={tour.bookingMode}
-                                status={tour.status}
-                            />
+                        <ReviewList
+                            reviews={[]}
+                            averageRating={tour.averageRating || 0}
+                            totalReviews={tour.reviewCount || 0}
+                        />
+                    </div>
 
-                            {/* Tour Information - Description, Itinerary, Inclusions */}
-                            <TourInfo
-                                description={tour.description}
-                                itinerary={tour.itinerary}
-                                inclusions={tour.inclusions}
-                                exclusions={tour.exclusions}
-                                requirements={tour.requirements}
-                                whatToBring={tour.whatToBring}
-                                meetingPoint={tour.meetingPoint}
-                                safetyMeasures={tour.safetyMeasures}
-                                isHalalCertified={tour.isHalalCertified}
-                                halalCertificationDetails={tour.halalCertificationDetails}
-                            />
-
-                            {/* Guide Profile - Bio, Languages, Stats, Badges */}
-                            <TourGuide guide={tour.guide} />
-
-                            {/* Reviews - List, Summary, Rating Distribution */}
-                            <ReviewList
-                                reviews={reviews}
-                                averageRating={tour.averageRating}
-                                totalReviews={tour.totalReviews}
-                                reviewSummary={tour.reviewSummary}
-                            />
-                        </div>
-
-                        {/* ========================================
-               RIGHT COLUMN - BOOKING WIDGET
-               ========================================
-               lg:col-span-1: Takes 1/3 on desktop
-               Sticky on desktop, hidden on mobile
-            */}
-                        <div className="lg:col-span-1">
-                            <div className="lg:sticky lg:top-24 space-y-6">
-                                <BookingCardWrapper tour={tour} />{/*Client component with handlers */}
-                                
-                            </div>
-                        </div>
-
-                        {/* ========================================
-               SIMILAR TOURS - FULL WIDTH
-               ========================================
-               Spans full width below the 2-column layout
-            */}
-                        <div className="col-span-1 lg:col-span-3 mt-6 lg:mt-8">
-                            <SimilarTours
-                                currentTourId={tour.id}
-                                city={tour.city}
-                                country={tour.country}
-                                limit={4}
+                    {/* Right Column: Booking */}
+                    <div className="lg:col-span-1">
+                        <div className="sticky top-24">
+                            <BookingCardWrapper
+                                tourId={tour.id.toString()}
+                                basePrice={tour.basePrice}
+                                currency={tour.currency}
+                                minCapacity={tour.minCapacity}
+                                maxCapacity={tour.maxCapacity}
+                                bookingMode={normalizedBookingMode}
+                                occurrences={tour.occurrences || []}
+                                waitlistCount={0}
+                                isWaitlistAvailable={false}
                             />
                         </div>
                     </div>
+                </div>
+
+                {/* Similar Tours */}
+                <div className="mt-16 pt-8 border-t border-gray-100 dark:border-gray-900">
+                    <SimilarTours
+                        currentTourId={tour.id.toString()}
+                        city={tour.locationName as any}
+                        country={tour.countryCode as any}
+                    />
                 </div>
             </div>
         </PageLayout>

@@ -57,6 +57,17 @@ public class TravelerProfile {
     @Column(name = "travel_preferences_json")
     private String travelPreferencesJson;
 
+    private String tagline;
+
+    @Column(columnDefinition = "TEXT")
+    private String bio;
+
+    @Column(name = "avatar_url", columnDefinition = "TEXT")
+    private String avatarUrl;
+
+    @Column(name = "cover_image_url", columnDefinition = "TEXT")
+    private String coverImageUrl;
+
     @PrePersist
     protected void onCreate() {
         createdAtUtc = Instant.now();

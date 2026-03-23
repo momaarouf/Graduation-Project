@@ -86,6 +86,27 @@ public class GuideProfile {
     @Column(name = "selfie_image")
     private String selfieImage;
 
+    @Column(name = "tagline")
+    private String tagline;
+
+    @Column(name = "avatar_url", columnDefinition = "TEXT")
+    private String avatarUrl;
+
+    @Column(name = "cover_image_url", columnDefinition = "TEXT")
+    private String coverImageUrl;
+
+    @Column(name = "tour_count")
+    private Integer tourCount = 0;
+
+    @Column(name = "social_links_json", columnDefinition = "TEXT")
+    private String socialLinksJson;
+
+    @Column(name = "response_rate", precision = 5, scale = 2)
+    private BigDecimal responseRate;
+
+    @Column(name = "response_time_text", length = 50)
+    private String responseTimeText;
+
     @PrePersist
     protected void onCreate() {
         createdAtUtc = Instant.now();

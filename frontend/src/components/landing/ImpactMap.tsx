@@ -48,6 +48,8 @@ import {
   Quote
 } from 'lucide-react'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
+
 
 // ============================================================================
 // ANIMATED COUNTER COMPONENT
@@ -463,7 +465,7 @@ export default function ImpactMap() {
   }
 
   return (
-    <section className="py-16 sm:py-20 bg-white dark:bg-gray-950 scroll-mt-16 relative overflow-hidden" aria-label="Live community impact map">
+    <section className="py-24 bg-gray-950 scroll-mt-16 relative overflow-hidden" aria-label="Live community impact map">
       {/* ========================================
            BACKGROUND DECORATION
            ======================================== */}
@@ -474,33 +476,30 @@ export default function ImpactMap() {
         {/* ========================================
              SECTION HEADER
              ======================================== */}
-        <div className="text-center mb-10 sm:mb-14">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16 sm:mb-20"
+        >
           {/* Live badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 text-white rounded-full text-xs sm:text-sm font-medium shadow-lg shadow-blue-600/20">
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-white/5 backdrop-blur-md text-white rounded-full text-xs sm:text-sm font-bold border border-white/10 shadow-xl shadow-blue-500/10">
             <span className="relative flex h-2 w-2">
-              <span className="
-                animate-ping 
-                absolute inline-flex h-full w-full 
-                rounded-full bg-white opacity-75
-              " />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
             </span>
-            LIVE IMPACT
+            LIVE PLATFORM DATA
           </div>
 
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
-            See the{' '}
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
-              Impact
-            </span>{' '}
-            You're Making
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white mb-6 tracking-tight">
+            See the <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Impact</span> We Make
           </h2>
 
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Every booking creates opportunities for local guides and communities.
-            Here's what our community achieved together this week.
+          <p className="text-lg sm:text-xl text-white/40 max-w-2xl mx-auto leading-relaxed">
+            Every booking supports local experts and sustainable tourism.
+            Here is the pulse of our community this week.
           </p>
-        </div>
+        </motion.div>
 
         {/* ========================================
              MAIN GRID - MAP + STATS
@@ -530,123 +529,85 @@ export default function ImpactMap() {
             {/* ========================================
                  STATS GRID
                  ======================================== */}
-            <div className="grid grid-cols-2 gap-4 sm:gap-5">
+            <div className="grid grid-cols-2 gap-4 sm:gap-6">
               {/* Tours Completed */}
-              <div className="p-5 sm:p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-xl border border-blue-200 dark:border-blue-800">
-                <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400 mb-2" />
-                <p className="
-                  text-xs sm:text-sm
-                  text-gray-600 dark:text-gray-400
-                  mb-1
-                ">
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="p-6 sm:p-8 bg-white/5 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 group hover:border-blue-500/30 transition-colors"
+              >
+                <Calendar className="w-6 h-6 text-blue-400 mb-4" />
+                <p className="text-xs sm:text-sm font-black text-white/30 uppercase tracking-widest mb-1">
                   Tours This Week
                 </p>
-                <p className="
-                  text-2xl sm:text-3xl md:text-4xl
-                  font-bold
-                  text-gray-900 dark:text-white
-                ">
-                  <AnimatedCounter
-                    end={stats.toursThisWeek}
-                    duration={2500}
-                  />
-                </p>
-                <span className="inline-flex items-center gap-1 mt-2 text-xs text-emerald-600 dark:text-emerald-400">
+                <div className="text-3xl sm:text-4xl font-black text-white mb-3">
+                  <AnimatedCounter end={stats.toursThisWeek} duration={2500} />
+                </div>
+                <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-emerald-400">
                   <TrendingUp className="w-3 h-3" />
-                  +12% vs last week
+                  +12% Growth
                 </span>
-              </div>
+              </motion.div>
 
               {/* Happy Travelers */}
-              <div className="p-5 sm:p-6 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                <Users className="
-                  w-5 h-5 sm:w-6 sm:h-6
-                  text-emerald-600 dark:text-emerald-400
-                  mb-2
-                " />
-                <p className="
-                  text-xs sm:text-sm
-                  text-gray-600 dark:text-gray-400
-                  mb-1
-                ">
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="p-6 sm:p-8 bg-white/5 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 group hover:border-emerald-500/30 transition-colors"
+              >
+                <Users className="w-6 h-6 text-emerald-400 mb-4" />
+                <p className="text-xs sm:text-sm font-black text-white/30 uppercase tracking-widest mb-1">
                   Happy Travelers
                 </p>
-                <p className="
-                  text-2xl sm:text-3xl md:text-4xl
-                  font-bold
-                  text-gray-900 dark:text-white
-                ">
-                  <AnimatedCounter
-                    end={stats.happyTravelers}
-                    duration={2500}
-                    delay={200}
-                  />
-                </p>
-                <span className="inline-flex items-center gap-1 mt-2 text-xs text-blue-600 dark:text-blue-400">
+                <div className="text-3xl sm:text-4xl font-black text-white mb-3">
+                  <AnimatedCounter end={stats.happyTravelers} duration={2500} delay={200} />
+                </div>
+                <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-blue-400">
                   <Heart className="w-3 h-3 fill-current" />
-                  98% satisfaction
+                  98% Joy
                 </span>
-              </div>
+              </motion.div>
 
               {/* Active Guides */}
-              <div className="p-5 sm:p-6 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 rounded-xl border border-orange-200 dark:border-orange-800">
-                <Award className="
-                  w-5 h-5 sm:w-6 sm:h-6
-                  text-orange-600 dark:text-orange-400
-                  mb-2
-                " />
-                <p className="
-                  text-xs sm:text-sm
-                  text-gray-600 dark:text-gray-400
-                  mb-1
-                ">
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="p-6 sm:p-8 bg-white/5 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 group hover:border-orange-500/30 transition-colors"
+              >
+                <Award className="w-6 h-6 text-orange-400 mb-4" />
+                <p className="text-xs sm:text-sm font-black text-white/30 uppercase tracking-widest mb-1">
                   Active Guides
                 </p>
-                <p className="
-                  text-2xl sm:text-3xl md:text-4xl
-                  font-bold
-                  text-gray-900 dark:text-white
-                ">
-                  <AnimatedCounter
-                    end={stats.activeGuides}
-                    duration={2500}
-                    delay={400}
-                  />
-                </p>
-                <span className="inline-flex items-center gap-1 mt-2 text-xs text-purple-600 dark:text-purple-400">
+                <div className="text-3xl sm:text-4xl font-black text-white mb-3">
+                  <AnimatedCounter end={stats.activeGuides} duration={2500} delay={400} />
+                </div>
+                <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-purple-400">
                   <Star className="w-3 h-3 fill-current" />
-                  {stats.avgRating}/5 rating
+                  {stats.avgRating}/5 Rating
                 </span>
-              </div>
+              </motion.div>
 
               {/* Coverage */}
-              <div className="p-5 sm:p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-xl border border-purple-200 dark:border-purple-800">
-                <MapPin className="
-                  w-5 h-5 sm:w-6 sm:h-6
-                  text-purple-600 dark:text-purple-400
-                  mb-2
-                " />
-                <p className="
-                  text-xs sm:text-sm
-                  text-gray-600 dark:text-gray-400
-                  mb-1
-                ">
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="p-6 sm:p-8 bg-white/5 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 group hover:border-purple-500/30 transition-colors"
+              >
+                <MapPin className="w-6 h-6 text-purple-400 mb-4" />
+                <p className="text-xs sm:text-sm font-black text-white/30 uppercase tracking-widest mb-1">
                   Coverage
                 </p>
-                <p className="
-                  text-2xl sm:text-3xl md:text-4xl
-                  font-bold
-                  text-gray-900 dark:text-white
-                ">
-                  {stats.countries}{' '}
-                  <span className="text-base sm:text-lg font-normal text-gray-500 dark:text-gray-400">
-                    countries
-                  </span>
+                <div className="text-3xl sm:text-4xl font-black text-white mb-1">
+                  {stats.countries} <span className="text-lg font-normal text-white/20">nations</span>
+                </div>
+                <p className="text-[10px] font-black uppercase tracking-wider text-white/40">
+                  {stats.cities} cities & growing
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {stats.cities} cities and growing
-                </p>
-              </div>
+              </motion.div>
             </div>
 
             {/* ========================================
@@ -654,22 +615,24 @@ export default function ImpactMap() {
                  ========================================
                  FIXED: Container height no longer shifts
             */}
-            <div className="p-6 sm:p-8 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
-              <div className="flex items-center gap-2 mb-4">
-                <MessageCircle className="
-                  w-4 h-4 sm:w-5 sm:h-5
-                  text-blue-600 dark:text-blue-400
-                " />
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  Recent Reviews
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="p-8 bg-white/5 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-2xl"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <MessageCircle className="w-5 h-5 text-blue-400" />
+                <h3 className="font-black text-white uppercase tracking-widest text-sm">
+                  Explorer Pulse
                 </h3>
-                <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
-                  Live
+                <span className="text-[10px] px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded-full font-bold">
+                  LIVE
                 </span>
               </div>
 
               <RotatingReviews />
-            </div>
+            </motion.div>
 
             {/* ========================================
                  CTA LINK
@@ -688,44 +651,33 @@ export default function ImpactMap() {
         {/* ========================================
              BOTTOM TRUST BADGES
              ======================================== */}
-        <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 mt-12 sm:mt-16 pt-6 sm:pt-8 border-t border-gray-200 dark:border-gray-800">
-          <div className="flex items-center gap-2">
-            <div className="flex -space-x-2">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="flex flex-wrap justify-center items-center gap-8 mt-24 pt-12 border-t border-white/10"
+        >
+          <div className="flex items-center gap-4">
+            <div className="flex -space-x-3">
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="
-                    w-6 h-6 sm:w-7 sm:h-7
-                    rounded-full
-                    bg-gradient-to-br
-                    from-gray-200 to-gray-300
-                    dark:from-gray-700 dark:to-gray-800
-                    border-2 border-white dark:border-gray-950
-                  "
+                  className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 border-2 border-gray-950"
                 />
               ))}
             </div>
-            <span className="
-              text-xs sm:text-sm
-              text-gray-600 dark:text-gray-400
-            ">
+            <span className="text-sm font-bold text-white/40 uppercase tracking-widest">
               Trusted by 15k+ travelers
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            <Star className="
-              w-4 h-4 sm:w-5 sm:h-5
-              fill-amber-400 text-amber-400
-            " />
-            <span className="
-              text-xs sm:text-sm
-              text-gray-600 dark:text-gray-400
-            ">
-              4.8/5 rating from 5,200+ reviews
+            <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+            <span className="text-sm font-bold text-white/40 uppercase tracking-widest">
+              4.8/5 Platform Rating
             </span>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   )

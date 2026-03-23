@@ -1,807 +1,313 @@
-// ============================================================================
-// GUIDE BOOKING DETAIL - INDIVIDUAL BOOKING VIEW
-// ============================================================================
-// LOCATION: /frontend/src/app/dashboard/guide/bookings/[id]/page.tsx
-// 
-// PURPOSE: Display detailed information about a specific booking
-// 
-// FEATURES:
-// - Complete booking information
-// - Traveler details with contact info
-// - Tour details and meeting point
-// - Special requests and notes
-// - Check-in status and actions
-// - Message traveler
-// - Report no-show
-// - Download invoice
-// ============================================================================
-
 'use client'
 
-import { useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useEffect, useState, use } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import {
   Calendar,
   Clock,
   MapPin,
   Users,
-  DollarSign,
   User,
   Mail,
-  Eye,
   Phone,
   MessageSquare,
   CheckCircle,
   XCircle,
   AlertCircle,
-  FileText,
-  Download,
   ChevronLeft,
-  Edit,
-  Flag,
-  QrCode,
-  Star,
-  MoreVertical
+  CheckCircle2,
+  XCircle as XIcon,
+  RefreshCw,
+  Zap
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { getGuideBooking, confirmBooking, rejectBooking } from '@/src/lib/api/tours'
+import { GuideBookingResponse, BookingStatus } from '@/src/lib/types/tour.types'
 
-// ============================================================================
-// TYPE DEFINITIONS
-// ============================================================================
-
-type BookingStatus = 'confirmed' | 'pending' | 'completed' | 'cancelled' | 'no-show' | 'checked-in'
-
-interface BookingDetail {
-  id: string
-  bookingReference: string
-  tourId: string
-  tourTitle: string
-  tourImage: string
-  tourDate: string
-  tourDuration: string
-  meetingPoint: {
-    name: string
-    address: string
-    instructions?: string
-  }
-  status: BookingStatus
-  traveler: {
-    id: string
-    name: string
-    avatar?: string
-    email: string
-    phone: string
-    nationality?: string
-    languages?: string[]
-    totalTrips?: number
-    joinedAt?: string
-  }
-  bookingDetails: {
-    peopleCount: number
-    totalPrice: number
-    currency: 'USD' | 'TRY' | 'LBP'
-    basePrice: number
-    discounts?: {
-      type: string
-      amount: number
-      description: string
-    }[]
-    platformFee: number
-    bookedAt: string
-    paymentMethod: string
-    specialRequests?: string
-    dietaryRestrictions?: string[]
-  }
-  checkIn?: {
-    status: 'pending' | 'checked-in' | 'no-show'
-    time?: string
-    qrCode?: string
-  }
-  emergencyContact?: {
-    name: string
-    phone: string
-    relationship: string
-  }
-  notes?: {
-    id: string
-    content: string
-    createdAt: string
-  }[]
-}
-
-// ============================================================================
-// MOCK DATA
-// ============================================================================
-
-const MOCK_BOOKING_DETAIL: Record<string, BookingDetail> = {
-  'b1': {
-    id: 'b1',
-    bookingReference: 'SH-1234-5678',
-    tourId: '1',
-    tourTitle: 'Ottoman Heritage: Topkapi Palace & Hagia Sophia',
-    tourImage: '/images/tours/istanbul-ottoman.jpg',
-    tourDate: '2026-04-15T09:00:00Z',
-    tourDuration: '4 hours',
-    meetingPoint: {
-      name: 'Sultanahmet Square Fountain',
-      address: 'Sultanahmet Meydanı, Fatih/İstanbul',
-      instructions: 'Look for the guide holding an orange sign'
-    },
-    status: 'confirmed',
-    traveler: {
-      id: 't1',
-      name: 'Ahmed Khan',
-      avatar: '/images/travelers/ahmed.jpg',
-      email: 'ahmed.khan@example.com',
-      phone: '+90 555 111 2233',
-      nationality: 'United Arab Emirates',
-      languages: ['Arabic', 'English'],
-      totalTrips: 12,
-      joinedAt: '2025-06-15'
-    },
-    bookingDetails: {
-      peopleCount: 2,
-      totalPrice: 178,
-      currency: 'USD',
-      basePrice: 89,
-      discounts: [
-        { type: 'group', amount: 9, description: 'Group discount (5%)' }
-      ],
-      platformFee: 17.8,
-      bookedAt: '2026-03-20T14:30:00Z',
-      paymentMethod: 'Visa •••• 4242',
-      specialRequests: 'Vegetarian food options needed. Also need wheelchair accessibility.',
-      dietaryRestrictions: ['Vegetarian', 'No nuts']
-    },
-    checkIn: {
-      status: 'pending',
-      qrCode: 'QR-AHMED-123'
-    },
-    emergencyContact: {
-      name: 'Fatima Khan',
-      phone: '+90 555 111 2244',
-      relationship: 'Spouse'
-    }
-  },
-  'b2': {
-    id: 'b2',
-    bookingReference: 'SH-2345-6789',
-    tourId: '1',
-    tourTitle: 'Ottoman Heritage: Topkapi Palace & Hagia Sophia',
-    tourImage: '/images/tours/istanbul-ottoman.jpg',
-    tourDate: '2026-04-15T09:00:00Z',
-    tourDuration: '4 hours',
-    meetingPoint: {
-      name: 'Sultanahmet Square Fountain',
-      address: 'Sultanahmet Meydanı, Fatih/İstanbul',
-      instructions: 'Look for the guide holding an orange sign'
-    },
-    status: 'checked-in',
-    traveler: {
-      id: 't2',
-      name: 'Fatima Al-Zahra',
-      avatar: '/images/travelers/fatima.jpg',
-      email: 'fatima.z@example.com',
-      phone: '+90 555 222 3344',
-      nationality: 'United Kingdom',
-      languages: ['English'],
-      totalTrips: 8,
-      joinedAt: '2025-09-20'
-    },
-    bookingDetails: {
-      peopleCount: 1,
-      totalPrice: 89,
-      currency: 'USD',
-      basePrice: 89,
-      platformFee: 8.9,
-      bookedAt: '2026-03-21T10:15:00Z',
-      paymentMethod: 'Mastercard •••• 5678'
-    },
-    checkIn: {
-      status: 'checked-in',
-      time: '08:45',
-      qrCode: 'QR-FATIMA-456'
-    }
-  }
-}
-
-// ============================================================================
-// STATUS BADGE COMPONENT
-// ============================================================================
-
-const StatusBadge = ({ status }: { status: BookingStatus | 'checked-in' }) => {
-  const styles = {
-    confirmed: {
-      bg: 'bg-emerald-50 dark:bg-emerald-500/10',
-      text: 'text-emerald-700 dark:text-emerald-400',
-      border: 'border-emerald-200 dark:border-emerald-800/50',
-      icon: CheckCircle,
-      label: 'Confirmed'
-    },
-    pending: {
-      bg: 'bg-amber-50 dark:bg-amber-500/10',
-      text: 'text-amber-700 dark:text-amber-400',
-      border: 'border-amber-200 dark:border-amber-800/50',
-      icon: Clock,
-      label: 'Pending'
-    },
-    completed: {
-      bg: 'bg-blue-50 dark:bg-blue-500/10',
-      text: 'text-blue-700 dark:text-blue-400',
-      border: 'border-blue-200 dark:border-blue-800/50',
-      icon: CheckCircle,
-      label: 'Completed'
-    },
-    cancelled: {
-      bg: 'bg-gray-50 dark:bg-gray-800',
-      text: 'text-gray-700 dark:text-gray-400',
-      border: 'border-gray-200 dark:border-gray-700',
-      icon: XCircle,
-      label: 'Cancelled'
-    },
-    'no-show': {
-      bg: 'bg-red-50 dark:bg-red-500/10',
-      text: 'text-red-700 dark:text-red-400',
-      border: 'border-red-200 dark:border-red-800/50',
-      icon: AlertCircle,
-      label: 'No Show'
-    },
-    'checked-in': {
-      bg: 'bg-emerald-50 dark:bg-emerald-500/10',
-      text: 'text-emerald-700 dark:text-emerald-400',
-      border: 'border-emerald-200 dark:border-emerald-800/50',
-      icon: CheckCircle,
-      label: 'Checked In'
-    }
-  }
-
-  const { bg, text, border, icon: Icon, label } = styles[status as keyof typeof styles]
-
-  return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full border ${bg} ${text} ${border}`}>
-      <Icon className="w-3.5 h-3.5" />
-      {label}
-    </span>
-  )
-}
-
-// ============================================================================
-// MAIN PAGE
-// ============================================================================
-
-export default function GuideBookingDetailPage() {
-  const params = useParams()
+export default function GuideBookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const router = useRouter()
-  const [booking, setBooking] = useState<BookingDetail | null>(
-    MOCK_BOOKING_DETAIL[params.id as string] || null
-  )
-  const [showQR, setShowQR] = useState(false)
-  const [note, setNote] = useState('')
-  const [notes, setNotes] = useState<{ id: string; content: string; createdAt: string }[]>(
-    booking?.notes || []
-  )
-  const [showHeaderMenu, setShowHeaderMenu] = useState(false)
-  if (!booking) {
+  const [booking, setBooking] = useState<GuideBookingResponse | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  useEffect(() => {
+    fetchBooking()
+  }, [id])
+
+  const fetchBooking = async () => {
+    setIsLoading(true)
+    try {
+      const response = await getGuideBooking(Number(id))
+      setBooking(response.data)
+    } catch (error: any) {
+      toast.error('Failed to load booking details')
+      router.push('/dashboard/guide/bookings')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleConfirm = async () => {
+    if (!booking) return
+    if (!confirm('Approve this booking request?')) return
+
+    setIsProcessing(true)
+    try {
+      await confirmBooking(booking.id)
+      toast.success('Booking confirmed')
+      fetchBooking()
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to confirm booking')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleReject = async () => {
+    if (!booking) return
+    if (!confirm('Reject this booking request? This will refund the traveler.')) return
+
+    setIsProcessing(true)
+    try {
+      await rejectBooking(booking.id)
+      toast.success('Booking rejected')
+      fetchBooking()
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to reject booking')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  if (isLoading) {
     return (
-      <>
-        <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-          <div className="text-center">
-            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              Booking Not Found
-            </h1>
-            <button
-              onClick={() => router.back()}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg"
-            >
-              Go Back
-            </button>
-          </div>
-        </div>
-      </>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
+        <RefreshCw className="w-10 h-10 text-blue-600 animate-spin" />
+        <p className="text-gray-500 font-bold animate-pulse">Loading booking details...</p>
+      </div>
     )
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit'
-    })
-  }
+  if (!booking) return null
 
-  const handleCheckIn = () => {
-    setBooking(prev => {
-      if (!prev) return prev
-      return {
-        ...prev,
-        status: 'checked-in',
-        checkIn: {
-          status: 'checked-in',
-          time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-          qrCode: prev.checkIn?.qrCode
-        }
-      }
-    })
-    toast.success('Traveler checked in successfully!')
-  }
-
-  const handleMarkNoShow = () => {
-    if (confirm('Mark this traveler as no-show?')) {
-      setBooking(prev => {
-        if (!prev) return prev
-        return {
-          ...prev,
-          status: 'no-show',
-          checkIn: {
-            status: 'no-show',
-            qrCode: prev.checkIn?.qrCode
-          }
-        }
-      })
-      toast.success('Marked as no-show')
-    }
-  }
-
-  const handleAddNote = () => {
-    if (!note.trim()) return
-    const newNote = {
-      id: Date.now().toString(),
-      content: note,
-      createdAt: new Date().toISOString()
-    }
-    setNotes(prev => [newNote, ...prev])
-    setNote('')
-    toast.success('Note added')
-  }
-
-  const handleContact = () => {
-    router.push(`/dashboard/guide/messages?traveler=${booking.traveler.id}`)
-  }
-  const handleDownloadInvoice = () => {
-  const invoice = `
-SAFARIHUB - INVOICE
-===================
-Booking Reference: ${booking.bookingReference}
-Date: ${new Date().toLocaleDateString()}
-
-TOUR DETAILS
-------------
-Tour: ${booking.tourTitle}
-Date: ${formatDate(booking.tourDate)}
-Duration: ${booking.tourDuration}
-Meeting Point: ${booking.meetingPoint.name}
-
-TRAVELER DETAILS
-----------------
-Name: ${booking.traveler.name}
-Email: ${booking.traveler.email}
-Phone: ${booking.traveler.phone}
-
-BOOKING DETAILS
----------------
-Number of People: ${booking.bookingDetails.peopleCount}
-Base Price: $${booking.bookingDetails.basePrice} per person
-${booking.bookingDetails.discounts?.map(d => `${d.description}: -$${d.amount}`).join('\n') || ''}
-Platform Fee: $${booking.bookingDetails.platformFee}
-----------------------------------------
-TOTAL: $${booking.bookingDetails.totalPrice}
-
-Payment Method: ${booking.bookingDetails.paymentMethod}
-Booked On: ${new Date(booking.bookingDetails.bookedAt).toLocaleDateString()}
-
-Thank you for choosing SafariHub!
-This invoice is for your records.
-  `
+  const isPending = booking.status === BookingStatus.PendingGuide
   
-  const blob = new Blob([invoice], { type: 'text/plain' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `invoice-${booking.bookingReference}.txt`
-  a.click()
-  URL.revokeObjectURL(url)
-  
-  toast.success('Invoice downloaded!')
-}
+  const statusColors = {
+    [BookingStatus.Confirmed]: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400',
+    [BookingStatus.PendingGuide]: 'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400',
+    [BookingStatus.Cancelled]: 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400',
+    [BookingStatus.Completed]: 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400',
+    [BookingStatus.InProgress]: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400',
+    [BookingStatus.Rejected]: 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400',
+    [BookingStatus.PendingPayment]: 'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400',
+    [BookingStatus.Waitlisted]: 'bg-purple-100 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400',
+    [BookingStatus.Expired]: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
+  }
+
+  const startDate = new Date(booking.startTimeUtc)
+  const formattedDate = startDate.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
+  })
+
   return (
-    <>
-      <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
-        <div className="container-safe mx-auto max-w-6xl py-8 sm:py-10">
-          
-          {/* Back Button */}
-          <button
-            onClick={() => router.back()}
-            className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors mb-6 group"
-          >
-            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-            <span>Back to Bookings</span>
-          </button>
+    <div className="max-w-5xl mx-auto px-4 py-8 pt-20 sm:pt-24">
+      {/* Back Button */}
+      <button
+        onClick={() => router.push('/dashboard/guide/bookings')}
+        className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 mb-8 transition-colors font-bold group"
+      >
+        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        Back to Bookings
+      </button>
 
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                Booking Details
-              </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Reference: {booking.bookingReference}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <StatusBadge status={booking.status} />
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-3 tracking-tight leading-tight">
+            Booking Details
+          </h1>
+          <div className="flex items-center gap-3">
+            <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border border-current shadow-sm ${statusColors[booking.status]}`}>
+              {booking.status.replace(/([A-Z])/g, ' $1').trim()}
+            </span>
+            <span className="text-sm text-gray-400 font-mono font-bold tracking-tight">
+                SH-{booking.id.toString().padStart(6, '0')}
+            </span>
+          </div>
+        </div>
+
+        {isPending && (
+          <div className="flex gap-3 w-full md:w-auto">
+            <button
+              onClick={handleReject}
+              disabled={isProcessing}
+              className="flex-1 md:flex-none px-6 py-3 bg-white dark:bg-gray-950 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 font-bold rounded-2xl hover:bg-red-50 dark:hover:bg-red-950/20 active:scale-95 transition-all disabled:opacity-50"
+            >
+              <XIcon className="w-4 h-4 mr-2 inline" />
+              Reject
+            </button>
+            <button
+              onClick={handleConfirm}
+              disabled={isProcessing}
+              className="flex-1 md:flex-none px-8 py-3 bg-emerald-600 text-white font-black rounded-2xl hover:bg-emerald-700 shadow-xl shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-50"
+            >
+              <CheckCircle2 className="w-4 h-4 mr-2 inline" />
+              Approve
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        {/* Main Info */}
+        <div className="lg:col-span-2 space-y-10">
+          {/* Tour Card */}
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 sm:p-10 shadow-xl border border-gray-100 dark:border-gray-800 relative overflow-hidden">
+             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-600 to-indigo-600" />
             
-<div className="relative">
-  <button
-    onClick={() => setShowHeaderMenu(!showHeaderMenu)}
-    className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-  >
-    <MoreVertical className="w-5 h-5" />
-  </button>
-
-  {showHeaderMenu && (
-    <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl z-10 py-1">
-      <button
-        onClick={() => {
-          setShowHeaderMenu(false)
-          router.push(`/dashboard/guide/tours/${booking.tourId}`)
-        }}
-        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
-      >
-        <Eye className="w-4 h-4" />
-        View Tour
-      </button>
-      
-      <button
-        onClick={() => {
-          setShowHeaderMenu(false)
-          window.open(`mailto:${booking.traveler.email}?subject=Booking%20${booking.bookingReference}`, '_blank')
-        }}
-        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
-      >
-        <Mail className="w-4 h-4" />
-        Email Traveler
-      </button>
-      
-      <button
-        onClick={() => {
-          setShowHeaderMenu(false)
-          // Copy booking reference to clipboard
-          navigator.clipboard.writeText(booking.bookingReference)
-          toast.success('Booking reference copied!')
-        }}
-        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-2"
-      >
-        <FileText className="w-4 h-4" />
-        Copy Reference
-      </button>
-      
-      <div className="border-t border-gray-200 dark:border-gray-800 my-1" />
-      
-      <button
-        onClick={() => {
-          setShowHeaderMenu(false)
-          if (confirm('Report this booking as an issue?')) {
-            toast.success('Reported to support')
-          }
-        }}
-        className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2"
-      >
-        <Flag className="w-4 h-4" />
-        Report Issue
-      </button>
-    </div>
-  )}
-</div>
+            <h3 className="text-sm font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-blue-500" />
+              Tour Information
+            </h3>
+            <div className="space-y-6">
+              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white leading-tight">
+                {booking.tourTitle}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
+                <div className="space-y-1">
+                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Date & Time</p>
+                   <div className="flex items-center gap-2 text-gray-900 dark:text-gray-300 font-bold">
+                      <Clock className="w-4 h-4 text-blue-500" />
+                      <span>{formattedDate}</span>
+                   </div>
+                </div>
+                <div className="space-y-1">
+                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Party Size</p>
+                   <div className="flex items-center gap-2 text-gray-900 dark:text-gray-300 font-bold">
+                      <Users className="w-4 h-4 text-blue-500" />
+                      <span>{booking.peopleCount} Participants</span>
+                   </div>
+                </div>
+                <div className="space-y-1 sm:col-span-2">
+                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Booking Mode</p>
+                   <div className="flex items-center gap-2 text-gray-900 dark:text-gray-300 font-bold">
+                      <Zap className="w-4 h-4 text-amber-500" />
+                      <span className="capitalize">{booking.bookingMode.replace('_', ' ')}</span>
+                   </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Main Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            {/* Left Column - Main Info */}
-            <div className="lg:col-span-2 space-y-6">
-              
-              {/* Tour Info Card */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-20 h-20 rounded-lg bg-gray-200 dark:bg-gray-800 overflow-hidden">
-                    <Image src={booking.tourImage} alt={booking.tourTitle} width={80} height={80} className="object-cover" />
+          {/* Traveler Info */}
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 sm:p-10 shadow-xl border border-gray-100 dark:border-gray-800">
+            <h3 className="text-sm font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
+              <User className="w-5 h-5 text-indigo-500" />
+              Traveler Information
+            </h3>
+
+            {booking.traveler ? (
+              <div className="space-y-8">
+                <div className="flex items-center gap-6 p-6 bg-gray-50 dark:bg-gray-800/30 rounded-3xl border border-gray-100 dark:border-gray-800">
+                  <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                    <User className="w-8 h-8 text-white" />
                   </div>
-                  <div className="flex-1">
-                    <h2 className="font-bold text-gray-900 dark:text-white mb-1">
-                      {booking.tourTitle}
-                    </h2>
-                    <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        <span>{formatDate(booking.tourDate)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4" />
-                        <span>{booking.tourDuration}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Traveler Info Card */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
-                <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  Traveler Information
-                </h3>
-
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden">
-                    {booking.traveler.avatar ? (
-                      <Image src={booking.traveler.avatar} alt={booking.traveler.name} width={64} height={64} className="object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <User className="w-8 h-8 text-gray-400" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-                      {booking.traveler.name}
-                    </h4>
-                    {booking.traveler.nationality && (
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {booking.traveler.nationality}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Mail className="w-4 h-4 text-gray-400" />
-                    <a href={`mailto:${booking.traveler.email}`} className="text-blue-600 dark:text-blue-400 hover:underline">
-                      {booking.traveler.email}
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Phone className="w-4 h-4 text-gray-400" />
-                    <a href={`tel:${booking.traveler.phone}`} className="text-blue-600 dark:text-blue-400 hover:underline">
-                      {booking.traveler.phone}
-                    </a>
-                  </div>
-                  {booking.traveler.languages && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-gray-500 dark:text-gray-400">Languages:</span>
-                      <span className="text-gray-900 dark:text-white">
-                        {booking.traveler.languages.join(', ')}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Special Requests */}
-              {booking.bookingDetails.specialRequests && (
-                <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
-                  <h3 className="font-bold text-amber-800 dark:text-amber-300 mb-3 flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4" />
-                    Special Requests
-                  </h3>
-                  <p className="text-amber-700 dark:text-amber-400 mb-3">
-                    {booking.bookingDetails.specialRequests}
-                  </p>
-                  {booking.bookingDetails.dietaryRestrictions && (
-                    <div className="flex flex-wrap gap-2">
-                      {booking.bookingDetails.dietaryRestrictions.map((item, i) => (
-                        <span key={i} className="px-2 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-xs rounded-full">
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Notes Section */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
-                <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  Notes
-                </h3>
-
-                <div className="space-y-3 mb-4">
-                  {notes.map(note => (
-                    <div key={note.id} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <p className="text-sm text-gray-700 dark:text-gray-300">{note.content}</p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                        {new Date(note.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    placeholder="Add a note..."
-                    className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm"
-                  />
-                  <button
-                    onClick={handleAddNote}
-                    disabled={!note.trim()}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg disabled:opacity-50"
-                  >
-                    Add
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column - Sidebar */}
-            <div className="space-y-6">
-              
-              {/* Check-in Card */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
-                <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  Check-in Status
-                </h3>
-
-                {booking.status === 'confirmed' && (
-                  <>
-                    <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
-                      <p className="text-sm text-blue-800 dark:text-blue-300">
-                        Ready to check in
-                      </p>
-                    </div>
-                    <div className="space-y-2">
-                      <button
-                        onClick={handleCheckIn}
-                        className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg"
-                      >
-                        Check In Traveler
-                      </button>
-                      <button
-                        onClick={handleMarkNoShow}
-                        className="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg"
-                      >
-                        Mark No Show
-                      </button>
-                    </div>
-                  </>
-                )}
-
-                {booking.status === 'checked-in' && booking.checkIn?.time && (
-                  <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-lg">
-                    <p className="text-sm text-emerald-800 dark:text-emerald-300">
-                      Checked in at {booking.checkIn.time}
+                  <div>
+                    <p className="text-xl font-black text-gray-900 dark:text-white mb-1">{booking.traveler.fullName}</p>
+                    <p className="text-xs font-bold text-gray-500 bg-white dark:bg-gray-900 px-2.5 py-1 rounded-full border border-gray-200 dark:border-gray-800 inline-block uppercase tracking-wider">
+                        Joined {new Date(booking.createdAtUtc).toLocaleDateString()}
                     </p>
                   </div>
-                )}
+                </div>
 
-                {booking.status === 'no-show' && (
-                  <div className="p-3 bg-red-50 dark:bg-red-950/30 rounded-lg">
-                    <p className="text-sm text-red-800 dark:text-red-300">
-                      Marked as no-show
-                    </p>
-                  </div>
-                )}
-
-                {booking.checkIn?.qrCode && (
-                  <button
-                    onClick={() => setShowQR(!showQR)}
-                    className="w-full mt-3 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center gap-2"
-                  >
-                    <QrCode className="w-4 h-4" />
-                    {showQR ? 'Hide QR' : 'Show QR'}
-                  </button>
-                )}
-
-                {showQR && booking.checkIn?.qrCode && (
-                  <div className="mt-3 p-4 bg-white border border-gray-200 dark:border-gray-800 rounded-lg text-center">
-                    <div className="inline-block p-3 bg-white rounded-lg shadow-sm mb-2">
-                      <QrCode className="w-24 h-24 text-gray-900" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <a href={`mailto:${booking.traveler.email}`} className="flex items-center gap-4 p-5 rounded-3xl bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 hover:border-blue-500 group transition-all">
+                    <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30">
+                        <Mail className="w-5 h-5 text-gray-400 group-hover:text-blue-500" />
                     </div>
-                    <p className="text-xs font-mono text-gray-500">{booking.checkIn.qrCode}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Emergency Contact */}
-              {booking.emergencyContact && (
-                <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
-                  <h3 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
-                    Emergency Contact
-                  </h3>
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    {booking.emergencyContact.name}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                    {booking.emergencyContact.relationship}
-                  </p>
-                  <a href={`tel:${booking.emergencyContact.phone}`} className="text-blue-600 dark:text-blue-400 text-sm hover:underline">
-                    {booking.emergencyContact.phone}
+                    <div className="flex-1 overflow-hidden">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Email Address</p>
+                        <p className="text-sm font-bold text-gray-900 dark:text-gray-200 truncate">{booking.traveler.email}</p>
+                    </div>
+                  </a>
+                  <a href={`tel:${booking.traveler.phoneE164}`} className="flex items-center gap-4 p-5 rounded-3xl bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 hover:border-emerald-500 group transition-all">
+                    <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center group-hover:bg-emerald-50 dark:group-hover:bg-emerald-900/30">
+                        <Phone className="w-5 h-5 text-gray-400 group-hover:text-emerald-500" />
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Phone Number</p>
+                        <p className="text-sm font-bold text-gray-900 dark:text-gray-200 truncate">{booking.traveler.phoneE164}</p>
+                    </div>
                   </a>
                 </div>
-              )}
 
-              {/* Quick Actions */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
-                <h3 className="font-bold text-gray-900 dark:text-white mb-3">
-                  Quick Actions
-                </h3>
-                <div className="space-y-2">
-                  <button
-                    onClick={handleContact}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
-                  >
-                    <MessageSquare className="w-4 h-4" />
-                    Message Traveler
-                  </button>
-                  <button onClick={handleDownloadInvoice} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <Download className="w-4 h-4" />
-                    Download Invoice
-                  </button>
-                </div>
+                <button 
+                  onClick={() => router.push(`/dashboard/guide/messages?traveler=${booking.id}`)}
+                  className="w-full py-4 bg-blue-600 text-white font-black rounded-2xl flex items-center justify-center gap-3 hover:bg-blue-700 shadow-xl shadow-blue-500/20 active:scale-95 transition-all group"
+                >
+                  <MessageSquare className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                  Message Traveler
+                </button>
               </div>
-
-              {/* Meeting Point */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
-                <h3 className="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  Meeting Point
-                </h3>
-                <p className="font-medium text-gray-900 dark:text-white">
-                  {booking.meetingPoint.name}
+            ) : (
+              <div className="py-12 text-center bg-gray-50 dark:bg-gray-800/30 rounded-[2rem] border border-dashed border-gray-200 dark:border-gray-800">
+                <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-sm text-gray-500 font-bold uppercase tracking-widest">
+                  Identity Protected
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                  {booking.meetingPoint.address}
+                <p className="text-xs text-gray-400 font-medium">
+                    Traveler contact information is hidden for {booking.status.toLowerCase()} bookings.
                 </p>
-                {booking.meetingPoint.instructions && (
-                  <p className="text-xs text-blue-600 dark:text-blue-400">
-                    {booking.meetingPoint.instructions}
-                  </p>
-                )}
               </div>
+            )}
+          </div>
+        </div>
 
-              {/* Booking Summary */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6">
-                <h3 className="font-bold text-gray-900 dark:text-white mb-3">
-                  Booking Summary
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">People</span>
-                    <span className="font-medium text-gray-900 dark:text-white">
-                      {booking.bookingDetails.peopleCount}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500 dark:text-gray-400">Total</span>
-                    <span className="font-bold text-gray-900 dark:text-white">
-                      ${booking.bookingDetails.totalPrice}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500 dark:text-gray-400">Booked</span>
-                    <span className="text-gray-600 dark:text-gray-400">
-                      {new Date(booking.bookingDetails.bookedAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
+        {/* Sidebar */}
+        <div className="space-y-8">
+          {/* Payment Card */}
+          <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-16 -mt-16" />
+            
+            <h3 className="text-lg font-black text-gray-900 dark:text-white mb-8 text-center uppercase tracking-wider">Financial Hub</h3>
+            
+            <div className="space-y-6">
+              <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-800/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider tabular-nums">Total Paid</span>
+                <span className="font-black text-gray-900 dark:text-white">
+                  {booking.currency} {booking.finalPrice.toFixed(2)}
+                </span>
+              </div>
+              
+              <div className="p-6 bg-blue-600 rounded-[2rem] text-white shadow-xl shadow-blue-500/20 relative overflow-hidden group">
+                 <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                 <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-1 opacity-80">Estimated Profit</p>
+                 <p className="text-3xl font-black mb-1">
+                    {booking.currency} {(booking.finalPrice * 0.9).toFixed(2)}
+                 </p>
+                 <p className="text-[9px] font-bold opacity-60">* After 10% platform fee</p>
               </div>
             </div>
+          </div>
+
+          <div className="p-8 bg-amber-50 dark:bg-amber-900/10 rounded-[2.5rem] border border-amber-100/50 dark:border-amber-900/20">
+            <h4 className="flex items-center gap-2 text-xs font-black text-amber-700 dark:text-amber-500 mb-4 uppercase tracking-[0.2em]">
+              <AlertCircle className="w-4 h-4" />
+              Guidelines
+            </h4>
+            <p className="text-xs text-amber-800/80 dark:text-amber-400/80 leading-relaxed font-bold">
+              Confirm your arrival at the meeting point 15 minutes before launch. Ensure travelers sign the digital waiver upon check-in if not already verified.
+            </p>
           </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }

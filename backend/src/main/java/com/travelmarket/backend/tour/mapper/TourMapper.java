@@ -7,25 +7,22 @@ import com.travelmarket.backend.tour.entity.TourMedia;
 import com.travelmarket.backend.tour.entity.TourOccurrence;
 import com.travelmarket.backend.tour.entity.TourTemplate;
 import com.travelmarket.backend.tour.enums.TourTemplateStatus;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Central mapping component for all tour-related entity → DTO conversions.
- *
- * Rules:
- *  - Never expose internal fields (status REJECTED/PENDING_REVIEW on public endpoints,
- *    rejectionReason, lastPublishedAtUtc raw details, guide profile internals).
- *  - All public-facing methods receive pre-loaded data to avoid lazy-load issues.
- *  - Null-safe throughout — missing optional fields produce null, not exceptions.
- */
 @Component
 public class TourMapper {
+    private final ObjectMapper objectMapper;
 
-    // ── Media ──────────────────────────────────────────────────────────────────
+    public TourMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     public TourMediaResponse toMediaResponse(TourMedia media) {
         if (media == null) return null;
@@ -42,17 +39,10 @@ public class TourMapper {
         return mediaList.stream().map(this::toMediaResponse).collect(Collectors.toList());
     }
 
-    /**
-     * Extracts the cover image URL from an ordered media list.
-     * The first item (lowest displayOrder) is the cover.
-     * Returns null if no media exists.
-     */
     public String extractCoverImageUrl(List<TourMedia> mediaList) {
         if (mediaList == null || mediaList.isEmpty()) return null;
         return mediaList.get(0).getUrl();
     }
-
-    // ── Occurrence ─────────────────────────────────────────────────────────────
 
     public TourOccurrenceResponse toOccurrenceResponse(TourOccurrence o) {
         if (o == null) return null;
@@ -65,15 +55,12 @@ public class TourMapper {
         r.setSeatsReserved(o.getSeatsReserved());
         r.setCreatedAtUtc(o.getCreatedAtUtc());
         r.setUpdatedAtUtc(o.getUpdatedAtUtc());
-
-        // Compute available seats from template capacity if template is loaded
         if (o.getTemplate() != null && o.getTemplate().getMaxCapacity() != null) {
             int max = o.getTemplate().getMaxCapacity();
             int reserved = o.getSeatsReserved() != null ? o.getSeatsReserved() : 0;
             r.setMaxCapacity(max);
             r.setAvailableSeats(Math.max(0, max - reserved));
         }
-
         return r;
     }
 
@@ -82,17 +69,9 @@ public class TourMapper {
         return occurrences.stream().map(this::toOccurrenceResponse).collect(Collectors.toList());
     }
 
-    // ── Guide tour (private — for the owning guide) ────────────────────────────
-
-    /**
-     * Full tour response for the guide's own dashboard.
-     * Includes status, rejectionReason, and all admin-review fields.
-     * Never returned by public endpoints.
-     */
     public TourTemplateResponse toTemplateResponse(TourTemplate t, List<TourMedia> media) {
         if (t == null) return null;
         TourTemplateResponse r = new TourTemplateResponse();
-
         r.setId(t.getId());
         r.setTitle(t.getTitle());
         r.setDescription(t.getDescription());
@@ -100,105 +79,128 @@ public class TourMapper {
         r.setCategory(t.getCategory());
         r.setLocationName(t.getLocationName());
         r.setRegion(t.getRegion());
+        r.setCity(t.getCity());
         r.setCountryCode(t.getCountryCode());
         r.setMeetingPointName(t.getMeetingPointName());
         r.setMeetingLatitude(t.getMeetingLatitude());
         r.setMeetingLongitude(t.getMeetingLongitude());
+        r.setMeetingPointAddress(t.getMeetingPointAddress());
+        r.setMeetingPointInstructions(t.getMeetingPointInstructions());
+        r.setItinerary(t.getItinerary());
+        r.setInclusions(t.getInclusions());
+        r.setExclusions(t.getExclusions());
+        r.setRequirements(t.getRequirements());
+        r.setWhatToBring(t.getWhatToBring());
+        r.setTags(t.getTags());
+        r.setLanguages(t.getLanguages());
         r.setBasePrice(t.getBasePrice());
         r.setCurrency(t.getCurrency());
         r.setMinCapacity(t.getMinCapacity());
         r.setMaxCapacity(t.getMaxCapacity());
+        r.setDurationHours(t.getDurationHours());
+        r.setDurationMinutes(t.getDurationMinutes());
         r.setInstantBook(t.getInstantBook());
+        r.setHalalFriendly(t.getHalalFriendly());
+        r.setAverageRating(t.getAverageRating());
+        r.setReviewCount(t.getReviewCount());
+        r.setIsPremium(t.getIsPremium());
+        r.setIsFamilyFriendly(t.getIsFamilyFriendly());
+        r.setHasGroupDiscount(t.getHasGroupDiscount());
+        r.setGroupDiscountThreshold(t.getGroupDiscountThreshold());
+        r.setGroupDiscountPercent(t.getGroupDiscountPercent());
         r.setIsRecurring(t.getIsRecurring());
         r.setRecurrencePattern(t.getRecurrencePattern() != null ? t.getRecurrencePattern().name() : null);
-        r.setHalalFriendly(t.getHalalFriendly());
+        r.setRecurringDays(t.getRecurringDays());
+        r.setRecurringUntil(t.getRecurringUntil());
+        r.setRecurringDates(t.getRecurringDates());
+        r.setExcludedDates(t.getExcludedDates());
+        r.setStartDate(t.getStartDate());
         r.setStatus(t.getStatus() != null ? t.getStatus().name() : null);
         r.setIsActive(t.getIsActive());
-        r.setRejectionReason(t.getRejectionReason());    // guide sees admin feedback
+        r.setRejectionReason(t.getRejectionReason());
         r.setShowInPortfolio(t.getShowInPortfolio());
         r.setAutoCancelIfMinNotMet(t.getAutoCancelIfMinNotMet());
+        r.setDynamicPricing(t.getDynamicPricing());
+        r.setHalalDetails(t.getHalalDetails());
         r.setMedia(toMediaResponseList(media));
         r.setCreatedAtUtc(t.getCreatedAtUtc());
         r.setUpdatedAtUtc(t.getUpdatedAtUtc());
         r.setLastPublishedAtUtc(t.getLastPublishedAtUtc());
-
+        if (Boolean.FALSE.equals(t.getIsRecurring()) && t.getRecurringDates() != null) {
+            try {
+                List<String> dates = objectMapper.readValue(t.getRecurringDates(), new TypeReference<List<String>>() {});
+                if (!dates.isEmpty()) {
+                    r.setStartDate(Instant.parse(dates.get(0)));
+                }
+            } catch (Exception e) {}
+        }
         return r;
     }
 
-    // ── Public listing card ────────────────────────────────────────────────────
+    public TourTemplateResponse toTemplateResponse(TourTemplate t, List<TourMedia> media,
+            List<TourOccurrence> completedOccurrences) {
+        TourTemplateResponse r = toTemplateResponse(t, media);
+        if (completedOccurrences != null) {
+            int totalTravelers = 0;
+            for (TourOccurrence o : completedOccurrences) {
+                totalTravelers += (o.getSeatsReserved() != null ? o.getSeatsReserved() : 0);
+            }
+            r.setCompletedRunCount(completedOccurrences.size());
+            r.setTotalTravelersCount(totalTravelers);
+            r.setAverageRating(java.math.BigDecimal.ZERO);
+            r.setReviewCount(0);
+        }
+        return r;
+    }
 
-    /**
-     * Lightweight card for the public browse listing.
-     * Does NOT include: description, meeting coordinates, capacity, media gallery,
-     * occurrences list, status, rejection reason, or any admin fields.
-     *
-     * @param t          the tour template
-     * @param guide      the GuideProfile (to access guide name and verified flag)
-     * @param guideUser  the User linked to the guide (for display name)
-     * @param media      ordered media list — only first item is used for cover
-     * @param nextOccurrence  earliest future SCHEDULED occurrence, or null
-     */
     public PublicTourCardResponse toPublicCardResponse(
             TourTemplate t,
             GuideProfile guide,
             User guideUser,
             List<TourMedia> media,
-            TourOccurrence nextOccurrence
-    ) {
+            TourOccurrence nextOccurrence) {
         if (t == null) return null;
         PublicTourCardResponse r = new PublicTourCardResponse();
-
         r.setId(t.getId());
         r.setTitle(t.getTitle());
         r.setShortDescription(t.getShortDescription());
         r.setCategory(t.getCategory());
         r.setLocationName(t.getLocationName());
         r.setRegion(t.getRegion());
+        r.setCity(t.getCity());
         r.setCountryCode(t.getCountryCode());
         r.setBasePrice(t.getBasePrice());
         r.setCurrency(t.getCurrency());
         r.setHalalFriendly(t.getHalalFriendly());
         r.setInstantBook(t.getInstantBook());
-
-        // Guide info
         r.setGuideId(guide != null ? guide.getId() : null);
         r.setGuideDisplayName(guideUser != null ? guideUser.getFullName() : null);
+        r.setGuideAvatarUrl(guide != null ? guide.getAvatarUrl() : null);
         r.setGuideVerified(guide != null ? Boolean.TRUE.equals(guide.getIdVerified()) : false);
-
-        // Cover image only
         r.setCoverImageUrl(extractCoverImageUrl(media));
-
-        // Next occurrence start time
         r.setNextOccurrenceStartUtc(nextOccurrence != null ? nextOccurrence.getStartTimeUtc() : null);
-
-        // Reviews — null until implemented
-        r.setAverageRating(null);
-        r.setReviewCount(null);
-
+        r.setAverageRating(t.getAverageRating());
+        r.setReviewCount(t.getReviewCount());
+        r.setIsPremium(t.getIsPremium());
+        r.setIsFamilyFriendly(t.getIsFamilyFriendly());
+        r.setHasGroupDiscount(t.getHasGroupDiscount());
+        r.setGroupDiscountThreshold(t.getGroupDiscountThreshold());
+        r.setGroupDiscountPercent(t.getGroupDiscountPercent());
+        r.setDynamicPricing(t.getDynamicPricing());
+        r.setHalalDetails(t.getHalalDetails());
+        r.setDurationHours(t.getDurationHours());
+        r.setDurationMinutes(t.getDurationMinutes());
         return r;
     }
 
-    // ── Public tour detail ─────────────────────────────────────────────────────
-
-    /**
-     * Full detail for the public tour detail page.
-     *
-     * @param t           the tour template
-     * @param guide       the GuideProfile
-     * @param guideUser   the User linked to the guide
-     * @param media       full ordered media list
-     * @param occurrences future active occurrences (SCHEDULED or FULL, start > now)
-     */
     public PublicTourDetailResponse toPublicDetailResponse(
             TourTemplate t,
             GuideProfile guide,
             User guideUser,
             List<TourMedia> media,
-            List<TourOccurrence> occurrences
-    ) {
+            List<TourOccurrence> occurrences) {
         if (t == null) return null;
         PublicTourDetailResponse r = new PublicTourDetailResponse();
-
         r.setId(t.getId());
         r.setTitle(t.getTitle());
         r.setDescription(t.getDescription());
@@ -206,100 +208,99 @@ public class TourMapper {
         r.setCategory(t.getCategory());
         r.setLocationName(t.getLocationName());
         r.setRegion(t.getRegion());
+        r.setCity(t.getCity());
         r.setCountryCode(t.getCountryCode());
         r.setMeetingPointName(t.getMeetingPointName());
         r.setMeetingLatitude(t.getMeetingLatitude());
         r.setMeetingLongitude(t.getMeetingLongitude());
+        r.setMeetingPointAddress(t.getMeetingPointAddress());
+        r.setMeetingPointInstructions(t.getMeetingPointInstructions());
+        r.setItinerary(t.getItinerary());
+        r.setInclusions(t.getInclusions());
+        r.setExclusions(t.getExclusions());
+        r.setRequirements(t.getRequirements());
+        r.setWhatToBring(t.getWhatToBring());
+        r.setTags(t.getTags());
+        r.setLanguages(t.getLanguages());
         r.setBasePrice(t.getBasePrice());
         r.setCurrency(t.getCurrency());
         r.setMinCapacity(t.getMinCapacity());
         r.setMaxCapacity(t.getMaxCapacity());
+        r.setDurationHours(t.getDurationHours());
+        r.setDurationMinutes(t.getDurationMinutes());
         r.setInstantBook(t.getInstantBook());
         r.setIsRecurring(t.getIsRecurring());
         r.setRecurrencePattern(t.getRecurrencePattern() != null ? t.getRecurrencePattern().name() : null);
+        r.setRecurringDays(t.getRecurringDays());
+        r.setRecurringUntil(t.getRecurringUntil());
+        r.setRecurringDates(t.getRecurringDates());
+        r.setExcludedDates(t.getExcludedDates());
         r.setHalalFriendly(t.getHalalFriendly());
-
-        // Guide info
+        r.setIsFamilyFriendly(t.getIsFamilyFriendly());
+        r.setHasGroupDiscount(t.getHasGroupDiscount());
+        r.setGroupDiscountThreshold(t.getGroupDiscountThreshold());
+        r.setGroupDiscountPercent(t.getGroupDiscountPercent());
+        r.setDynamicPricing(t.getDynamicPricing());
+        r.setHalalDetails(t.getHalalDetails());
         r.setGuideId(guide != null ? guide.getId() : null);
         r.setGuideDisplayName(guideUser != null ? guideUser.getFullName() : null);
+        r.setGuideAvatarUrl(guide != null ? guide.getAvatarUrl() : null);
         r.setGuideVerified(guide != null ? Boolean.TRUE.equals(guide.getIdVerified()) : false);
-
         r.setMedia(toMediaResponseList(media));
         r.setOccurrences(toOccurrenceResponseList(occurrences));
-
-        // Reviews — null until implemented
-        r.setAverageRating(null);
-        r.setReviewCount(null);
-
+        r.setAverageRating(t.getAverageRating());
+        r.setReviewCount(t.getReviewCount());
         return r;
     }
 
-    // ── Portfolio card ─────────────────────────────────────────────────────────
-
-    /**
-     * Portfolio card for one tour in the guide's public portfolio list.
-     *
-     * @param t                  the tour template
-     * @param media              ordered media list — only cover used
-     * @param completedRunCount  count of COMPLETED occurrences
-     * @param totalTravelers     sum of seats_reserved across completed occurrences
-     */
     public GuidePortfolioTourResponse toPortfolioCardResponse(
             TourTemplate t,
             List<TourMedia> media,
             int completedRunCount,
-            int totalTravelers
-    ) {
+            int totalTravelers) {
         if (t == null) return null;
         GuidePortfolioTourResponse r = new GuidePortfolioTourResponse();
-
         r.setId(t.getId());
         r.setTitle(t.getTitle());
         r.setShortDescription(t.getShortDescription());
         r.setCategory(t.getCategory());
         r.setLocationName(t.getLocationName());
         r.setRegion(t.getRegion());
+        r.setCity(t.getCity());
         r.setBasePrice(t.getBasePrice());
         r.setCurrency(t.getCurrency());
         r.setHalalFriendly(t.getHalalFriendly());
         r.setCoverImageUrl(extractCoverImageUrl(media));
         r.setCompletedRunCount(completedRunCount);
         r.setTotalTravelersCount(totalTravelers);
-        r.setAverageRating(null);   // null until reviews implemented
+        r.setAverageRating(null);
         r.setReviewCount(null);
         r.setStatus(t.getStatus() != null ? t.getStatus().name() : null);
         r.setCurrentlyAvailable(t.getStatus() == TourTemplateStatus.PUBLISHED);
         r.setLastPublishedAtUtc(t.getLastPublishedAtUtc());
-
+        r.setIsPremium(t.getIsPremium());
+        r.setIsFamilyFriendly(t.getIsFamilyFriendly());
+        r.setHasGroupDiscount(t.getHasGroupDiscount());
+        r.setGroupDiscountThreshold(t.getGroupDiscountThreshold());
+        r.setGroupDiscountPercent(t.getGroupDiscountPercent());
+        r.setDynamicPricing(t.getDynamicPricing());
+        r.setHalalDetails(t.getHalalDetails());
         return r;
     }
 
-    // ── Portfolio detail ───────────────────────────────────────────────────────
-
-    /**
-     * Full portfolio detail — the professional case-study view.
-     *
-     * @param t                   the tour template
-     * @param guide               the GuideProfile
-     * @param guideUser           the User linked to the guide
-     * @param media               full ordered media list
-     * @param completedOccurrences list of COMPLETED occurrences ordered newest first
-     * @param relatedPublishedId  ID of the current live version of this tour, or null
-     */
     public GuidePortfolioTourDetailResponse toPortfolioDetailResponse(
             TourTemplate t,
             GuideProfile guide,
             User guideUser,
             List<TourMedia> media,
             List<TourOccurrence> completedOccurrences,
-            Long relatedPublishedId
-    ) {
+            Long relatedPublishedId) {
         if (t == null) return null;
         GuidePortfolioTourDetailResponse r = new GuidePortfolioTourDetailResponse();
-
         r.setId(t.getId());
         r.setGuideId(guide != null ? guide.getId() : null);
         r.setGuideDisplayName(guideUser != null ? guideUser.getFullName() : null);
+        r.setGuideAvatarUrl(guide != null ? guide.getAvatarUrl() : null);
         r.setGuideVerified(guide != null ? Boolean.TRUE.equals(guide.getIdVerified()) : false);
         r.setTitle(t.getTitle());
         r.setDescription(t.getDescription());
@@ -307,12 +308,28 @@ public class TourMapper {
         r.setCategory(t.getCategory());
         r.setLocationName(t.getLocationName());
         r.setRegion(t.getRegion());
+        r.setCity(t.getCity());
         r.setCountryCode(t.getCountryCode());
         r.setMeetingPointName(t.getMeetingPointName());
+        r.setMeetingPointAddress(t.getMeetingPointAddress());
+        r.setMeetingPointInstructions(t.getMeetingPointInstructions());
+        r.setItinerary(t.getItinerary());
+        r.setInclusions(t.getInclusions());
+        r.setExclusions(t.getExclusions());
+        r.setRequirements(t.getRequirements());
+        r.setWhatToBring(t.getWhatToBring());
+        r.setTags(t.getTags());
+        r.setLanguages(t.getLanguages());
+        r.setIsRecurring(t.getIsRecurring());
+        r.setRecurrencePattern(t.getRecurrencePattern() != null ? t.getRecurrencePattern().name() : null);
+        r.setRecurringDates(t.getRecurringDates());
+        r.setExcludedDates(t.getExcludedDates());
         r.setBasePrice(t.getBasePrice());
         r.setCurrency(t.getCurrency());
         r.setMinCapacity(t.getMinCapacity());
         r.setMaxCapacity(t.getMaxCapacity());
+        r.setDurationHours(t.getDurationHours());
+        r.setDurationMinutes(t.getDurationMinutes());
         r.setHalalFriendly(t.getHalalFriendly());
         r.setInstantBook(t.getInstantBook());
         r.setMedia(toMediaResponseList(media));
@@ -320,30 +337,133 @@ public class TourMapper {
         r.setCurrentlyAvailable(t.getStatus() == TourTemplateStatus.PUBLISHED);
         r.setRelatedPublishedTourId(relatedPublishedId);
         r.setLastPublishedAtUtc(t.getLastPublishedAtUtc());
-
-        // Build aggregate stats and run history from completed occurrences
+        r.setIsPremium(t.getIsPremium());
+        r.setIsFamilyFriendly(t.getIsFamilyFriendly());
+        r.setHasGroupDiscount(t.getHasGroupDiscount());
+        r.setGroupDiscountThreshold(t.getGroupDiscountThreshold());
+        r.setGroupDiscountPercent(t.getGroupDiscountPercent());
+        r.setDynamicPricing(t.getDynamicPricing());
+        r.setHalalDetails(t.getHalalDetails());
         int totalTravelers = 0;
         List<GuidePortfolioTourDetailResponse.CompletedRunSummary> runs = new java.util.ArrayList<>();
-
         for (TourOccurrence o : completedOccurrences) {
             int attendees = o.getSeatsReserved() != null ? o.getSeatsReserved() : 0;
             totalTravelers += attendees;
-
-            GuidePortfolioTourDetailResponse.CompletedRunSummary run =
-                    new GuidePortfolioTourDetailResponse.CompletedRunSummary();
+            GuidePortfolioTourDetailResponse.CompletedRunSummary run = new GuidePortfolioTourDetailResponse.CompletedRunSummary();
             run.setOccurrenceId(o.getId());
             run.setStartTimeUtc(o.getStartTimeUtc());
             run.setEndTimeUtc(o.getEndTimeUtc());
             run.setAttendeeCount(attendees);
             runs.add(run);
         }
-
         r.setCompletedRunCount(completedOccurrences.size());
         r.setTotalTravelersCount(totalTravelers);
-        r.setAverageRating(null);   // null until reviews implemented
+        r.setAverageRating(null);
         r.setReviewCount(null);
         r.setCompletedRuns(runs);
-
         return r;
     }
 }
+
+// BUFFER ZONE START
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// BUFFER ZONE END

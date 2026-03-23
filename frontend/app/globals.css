@@ -72,7 +72,7 @@
     scroll-behavior: smooth;
 
     /* Prevent horizontal overflow & bounce */
-    overflow-x: hidden;
+    overflow-x: clip;
     overscroll-behavior-x: none;
     min-width: 100%;
 
@@ -96,7 +96,7 @@
   body {
     min-width: 100%;
     position: relative;
-    overflow-x: hidden;
+    overflow-x: clip;
     margin: 0;
     padding: 0;
     /* ============================================

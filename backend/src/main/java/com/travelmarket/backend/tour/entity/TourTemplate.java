@@ -65,6 +65,9 @@ public class TourTemplate {
     @Column(length = 100)
     private String region;
 
+    @Column(length = 100)
+    private String city;
+
     // ISO 3166-1 alpha-2 country code; Lebanon-first default
     @Column(name = "country_code", nullable = false, length = 5)
     private String countryCode = "LB";
@@ -79,6 +82,37 @@ public class TourTemplate {
 
     @Column(name = "meeting_longitude", precision = 11, scale = 8)
     private BigDecimal meetingLongitude;
+
+    @Column(name = "meeting_point_address", length = 500)
+    private String meetingPointAddress;
+
+    @Column(name = "meeting_point_instructions", columnDefinition = "TEXT")
+    private String meetingPointInstructions;
+
+    // ── Content Arrays & Itinerary ─────────────────────────────────────────────
+
+    // JSON string representation of the itinerary array
+    @Column(columnDefinition = "TEXT")
+    private String itinerary;
+
+    // JSON string representation of arrays
+    @Column(columnDefinition = "TEXT")
+    private String inclusions;
+
+    @Column(columnDefinition = "TEXT")
+    private String exclusions;
+
+    @Column(columnDefinition = "TEXT")
+    private String requirements;
+
+    @Column(columnDefinition = "TEXT")
+    private String whatToBring;
+
+    @Column(columnDefinition = "TEXT")
+    private String tags;
+
+    @Column(columnDefinition = "TEXT")
+    private String languages;
 
     // ── Pricing ────────────────────────────────────────────────────────────────
 
@@ -97,11 +131,19 @@ public class TourTemplate {
     @Column(name = "max_capacity", nullable = false)
     private Integer maxCapacity;
 
+    @Column(name = "duration_hours")
+    private Integer durationHours = 2;
+
+    @Column(name = "duration_minutes")
+    private Integer durationMinutes = 0;
+
     // ── Booking behaviour ──────────────────────────────────────────────────────
 
     // TRUE = traveler books instantly without guide confirmation
-    @Column(name = "instant_book")
     private Boolean instantBook = false;
+    
+    @Column(name = "start_date_utc")
+    private Instant startDate;
 
     // ── Recurrence ─────────────────────────────────────────────────────────────
 
@@ -113,11 +155,52 @@ public class TourTemplate {
     @Column(name = "recurrence_pattern", length = 50)
     private RecurrencePattern recurrencePattern = RecurrencePattern.NONE;
 
+    @Column(name = "recurring_days", length = 255)
+    private String recurringDays;
+
+    @Column(name = "recurring_until")
+    private Instant recurringUntil;
+
+    @Column(name = "recurring_dates", columnDefinition = "TEXT")
+    private String recurringDates;
+
+    @Column(name = "excluded_dates", columnDefinition = "TEXT")
+    private String excludedDates;
+
     // ── Trust & filters ────────────────────────────────────────────────────────
 
     // Halal-friendly badge shown on public listings (renamed from halal_badge in V17)
     @Column(name = "halal_friendly")
     private Boolean halalFriendly = false;
+
+    @Column(name = "average_rating", precision = 3, scale = 2)
+    private java.math.BigDecimal averageRating = java.math.BigDecimal.ZERO;
+
+    @Column(name = "review_count")
+    private Integer reviewCount = 0;
+
+    @Column(name = "is_premium")
+    private Boolean isPremium = false;
+
+    @Column(name = "is_family_friendly")
+    private Boolean isFamilyFriendly = true;
+
+    @Column(name = "has_group_discount")
+    private Boolean hasGroupDiscount = false;
+
+    // JSON string representation of dynamic pricing rules
+    @Column(name = "dynamic_pricing", columnDefinition = "TEXT")
+    private String dynamicPricing;
+
+    @Column(name = "group_discount_threshold")
+    private Integer groupDiscountThreshold;
+
+    @Column(name = "group_discount_percent", precision = 5, scale = 2)
+    private java.math.BigDecimal groupDiscountPercent;
+
+    // JSON string representation of expanded halal details (food, prayer, etc.)
+    @Column(name = "halal_details", columnDefinition = "TEXT")
+    private String halalDetails;
 
     // ── Status & visibility ────────────────────────────────────────────────────
 

@@ -76,12 +76,12 @@ export default function GuideCompleteProfilePage() {
 
   // Role guard
   useEffect(() => {
-    if (!isLoading && (!user || user.role !== 'Guide')) router.push('/auth/login')
+    if (!isLoading && (!user || user.role !== 'GUIDE')) router.push('/auth/login')
   }, [user, isLoading, router])
 
   // Pre-fill existing profile data
   useEffect(() => {
-    if (!user || user.role !== 'Guide') return
+    if (!user || user.role !== 'GUIDE') return
     const fetchProfile = async () => {
       try {
         const res = await apiClient.get('/api/guide/profile')

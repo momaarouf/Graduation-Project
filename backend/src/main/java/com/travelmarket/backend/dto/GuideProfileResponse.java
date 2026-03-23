@@ -6,11 +6,16 @@ import java.util.List;
 
 @Data
 public class GuideProfileResponse {
+    private Long id;
     private String fullName;
     private String phoneE164;
     private String country;
     private String city;
     private String bio;
+    private String tagline;
+    private String avatarUrl;
+    private String coverImageUrl;
+    private Integer tourCount;
     private List<String> expertise;
     private List<LanguageItem> languages;
 
@@ -20,6 +25,11 @@ public class GuideProfileResponse {
     private Integer totalTrips;
     private Integer totalTravelers;
     private java.math.BigDecimal impactScore;
+    
+    // New metrics and social
+    private String socialLinksJson;
+    private java.math.BigDecimal responseRate;
+    private String responseTimeText;
     
     // Verification fields
     private String verificationStatus;

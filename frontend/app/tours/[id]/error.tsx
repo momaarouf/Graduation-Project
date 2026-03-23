@@ -53,11 +53,8 @@ export default function TourDetailError({ error, reset }: ErrorProps) {
   // For Phase 1: Console error only
   // ========================================
   useEffect(() => {
-    console.error('[TourDetail Error]:', {
-      message: error.message,
-      digest: error.digest,
-      stack: error.stack
-    })
+    // Log the error for debugging
+    console.error('[TourDetail Error]:', error)
   }, [error])
 
   // ========================================

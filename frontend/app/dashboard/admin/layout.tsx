@@ -88,7 +88,8 @@ const NAV_ITEMS = [
     name: 'Tours',
     href: '/dashboard/admin/tours',
     icon: Globe,
-    color: 'indigo'
+    color: 'indigo',
+    badgeKey: 'tours'
   },
   {
     name: 'Audit',
@@ -189,6 +190,7 @@ const NavItem = ({ item, isActive, isCollapsed, onClick }: NavItemProps) => {
 
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import { adminGetPendingVerifications } from '@/src/lib/api/admin'
+import { getAdminPendingTours } from '@/src/lib/api/tours'
 
 export default function AdminLayout({
   children,
@@ -207,8 +209,14 @@ export default function AdminLayout({
   useEffect(() => {
     const fetchBadges = async () => {
       try {
-        const pending = await adminGetPendingVerifications()
-        setBadges(prev => ({ ...prev, verifications: pending.length }))
+        const [verificationsRes, toursRes] = await Promise.all([
+          adminGetPendingVerifications(),
+          getAdminPendingTours()
+        ])
+        setBadges({
+          verifications: verificationsRes.length,
+          tours: toursRes.data.length
+        })
       } catch (err) {
         console.error('Failed to fetch admin badges:', err)
       }
@@ -253,7 +261,7 @@ export default function AdminLayout({
   }
 
   // Guard: if not admin, redirect
-  if (user && user.role !== 'Admin') {
+  if (user && user.role !== 'ADMIN') {
     router.replace('/dashboard')
     return null
   }

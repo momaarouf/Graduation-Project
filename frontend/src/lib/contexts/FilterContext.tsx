@@ -97,7 +97,7 @@ type FilterAction =
  */
 const initialState: FilterContextState = {
     filters: {},
-    isSidebarCollapsed: false,
+    isSidebarCollapsed: true,
     totalResults: null,
     isLoading: false,
     lastUpdated: 0
@@ -123,7 +123,14 @@ function filterReducer(state: FilterContextState, action: FilterAction): FilterC
                 lastUpdated: Date.now()
             }
 
-        case 'UPDATE_FILTERS':
+        case 'UPDATE_FILTERS': {
+            // Check if anything actually changed to avoid redundant re-renders
+            const hasChanges = Object.entries(action.payload).some(
+                ([key, value]) => JSON.stringify(state.filters[key as keyof FilterState]) !== JSON.stringify(value)
+            )
+
+            if (!hasChanges) return state
+
             return {
                 ...state,
                 filters: {
@@ -132,8 +139,10 @@ function filterReducer(state: FilterContextState, action: FilterAction): FilterC
                 },
                 lastUpdated: Date.now()
             }
+        }
 
         case 'CLEAR_FILTERS':
+            if (Object.keys(state.filters).length === 0) return state
             return {
                 ...state,
                 filters: {},
@@ -221,7 +230,9 @@ export function FilterProvider({ children, initialFilters }: FilterProviderProps
             const saved = localStorage.getItem('safaribub-filters-sidebar')
             if (saved !== null) {
                 const isCollapsed = JSON.parse(saved)
-                if (isCollapsed) {
+                // If user previously chose to have it OPEN (isCollapsed === false), 
+                // toggle it because our default is now CLOSED (true).
+                if (isCollapsed === false) {
                     dispatch({ type: 'TOGGLE_SIDEBAR' })
                 }
             }

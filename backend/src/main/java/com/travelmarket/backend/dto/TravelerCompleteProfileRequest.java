@@ -25,4 +25,8 @@ public class TravelerCompleteProfileRequest {
     @Pattern(regexp = "(^$|^\\d{4}-\\d{2}-\\d{2}$)", message = "dateOfBirth must be in YYYY-MM-DD format")
     private String dateOfBirth;     // optional yyyy-mm-dd
     private List<String> preferences; // optional
+    private String tagline;
+    private String bio;
+    private String avatarUrl;
+    private String coverImageUrl;
 }

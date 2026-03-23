@@ -13,9 +13,9 @@ import java.time.Instant;
  * as long as lastPublishedAtUtc IS NOT NULL and showInPortfolio = true.
  *
  * The status field lets the frontend badge the card:
- *   PUBLISHED → "Available to book" + Book Now button
- *   PAUSED    → "Temporarily unavailable"
- *   ARCHIVED  → "Past tour"
+ * PUBLISHED → "Available to book" + Book Now button
+ * PAUSED → "Temporarily unavailable"
+ * ARCHIVED → "Past tour"
  */
 @Data
 public class GuidePortfolioTourResponse {
@@ -29,6 +29,7 @@ public class GuidePortfolioTourResponse {
     // Location
     private String locationName;
     private String region;
+    private String city;
 
     // Pricing (shown for context; may have changed since last run)
     private BigDecimal basePrice;
@@ -41,17 +42,25 @@ public class GuidePortfolioTourResponse {
     private String coverImageUrl;
 
     // Track record — proves the guide actually ran this tour
-    private Integer completedRunCount;    // count of COMPLETED occurrences
-    private Integer totalTravelersCount;  // sum of seats_reserved across completed runs
+    private Integer completedRunCount; // count of COMPLETED occurrences
+    private Integer totalTravelersCount; // sum of seats_reserved across completed runs
 
     // Reviews — null until review system is implemented
     private Double averageRating;
     private Integer reviewCount;
 
     // Current availability — lets frontend show "Book Now" or "Past Tour"
-    private String status;               // PUBLISHED / PAUSED / ARCHIVED
+    private String status; // PUBLISHED / PAUSED / ARCHIVED
     private Boolean currentlyAvailable; // true only when status = PUBLISHED
 
     // When the guide last ran this tour
     private Instant lastPublishedAtUtc;
+    
+    private Boolean isPremium;
+    private Boolean isFamilyFriendly;
+    private Boolean hasGroupDiscount;
+    private Integer groupDiscountThreshold;
+    private java.math.BigDecimal groupDiscountPercent;
+    private String dynamicPricing;
+    private String halalDetails;
 }

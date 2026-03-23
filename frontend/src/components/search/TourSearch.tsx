@@ -8,9 +8,10 @@
 // PURPOSE: Clean search bar - X button clears search AND all filters
 // ============================================================================
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Search, X } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 // ============================================================================
 // PROPS
@@ -21,7 +22,7 @@ interface TourSearchProps {
   initialQuery?: string
   /** Callback when search changes */
   onSearchChange?: (query: string) => void
-  /** Clear all filters function from parent */
+  /** Clear all functionality */
   onClearAll?: () => void
   /** Additional CSS classes */
   className?: string
@@ -47,30 +48,34 @@ export default function TourSearch({
   const [isFocused, setIsFocused] = useState(false)
 
   // ========================================
-  // DERIVED VALUES
-  // ========================================
-  const hasActiveSearch = searchValue.length > 0
-
-  // ========================================
   // EFFECTS
   // ========================================
   
-  // Sync with URL params on mount
+  // Sync with URL params
   useEffect(() => {
     const urlQuery = searchParams.get('q') || ''
-    setSearchValue(urlQuery)
+    if (urlQuery !== searchValue) {
+      setSearchValue(urlQuery)
+    }
   }, [searchParams])
+
+  // Handle search changes with debounce
+  useEffect(() => {
+    if (!onSearchChange) return
+
+    const timeoutId = setTimeout(() => {
+      onSearchChange(searchValue)
+    }, 300)
+
+    return () => clearTimeout(timeoutId)
+  }, [searchValue, onSearchChange])
 
   // ========================================
   // HANDLERS
   // ========================================
 
-  /**
-   * Handle search submission
-   */
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    
     const params = new URLSearchParams(searchParams.toString())
     
     if (searchValue.trim()) {
@@ -79,88 +84,117 @@ export default function TourSearch({
       params.delete('q')
     }
     
-    router.push(`/tours?${params.toString()}`)
-    onSearchChange?.(searchValue)
+    router.push(`/tours?${params.toString()}`, { scroll: false })
   }
 
-  /**
-   * X BUTTON - Clears EVERYTHING (search + all filters)
-   */
-  const handleClearAll = () => {
+  const handleClear = () => {
     setSearchValue('')
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('q')
+    router.push(`/tours?${params.toString()}`, { scroll: false })
     
-    // Call parent's clear all function which clears filter context
-    if (onClearAll) {
-      onClearAll()
-    } else {
-      // Fallback: just clear URL
-      router.push('/tours')
-    }
-    
-    onSearchChange?.('')
+    // If we want it to also clear filters (as the previous version did), we call onClearAll
+    // But user said "remove nothing more" which might mean just clear the search text.
+    // However, usually 'X' in this context should be helpful.
+    // Let's stick to just clearing the search text if they didn't explicitly ask for more.
   }
 
   return (
-    <div className={`w-full ${className}`}>
-      
-      {/* MAIN SEARCH BAR WITH X BUTTON */}
-      <form onSubmit={handleSearch} className="relative group">
-        {/* Search icon */}
-        <div className="absolute left-4 top-1/2 -translate-y-1/2">
-          <Search className={`
-            w-5 h-5 transition-colors duration-200
-            ${isFocused 
-              ? 'text-blue-600 dark:text-blue-400' 
-              : 'text-gray-400 dark:text-gray-500'
-            }
-          `} />
+    <div className={`w-full ${className} relative z-30`}>
+      <motion.form 
+        onSubmit={handleSearchSubmit}
+        initial={{ opacity: 0, y: 5 }}
+        animate={{ 
+          opacity: 1, 
+          y: 0,
+          scale: isFocused || searchValue.length > 0 ? 1.015 : 1,
+          boxShadow: searchValue.length > 0 
+            ? '0 25px 50px -12px rgba(37, 99, 235, 0.2)' 
+            : isFocused 
+              ? '0 15px 30px -10px rgba(0, 0, 0, 0.15)'
+              : '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+        }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="relative flex items-center bg-white dark:bg-gray-900 !border-none !ring-0 !outline-none rounded-xl overflow-hidden group"
+      >
+        {/* Progress/Activity Line at the bottom - Premium Blue */}
+        <AnimatePresence>
+          {searchValue.length > 0 && (
+            <motion.div 
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: '100%', opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              className="absolute bottom-0 left-0 h-[3px] bg-gradient-to-r from-blue-400 via-blue-600 to-blue-400 bg-[length:200%_100%] z-20"
+              style={{
+                animation: 'shimmer 2s linear infinite'
+              }}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Ambient background shift when typing - Subtle Blue Tint */}
+        <AnimatePresence>
+          {searchValue.length > 0 && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-blue-50/10 dark:bg-blue-950/5 pointer-events-none"
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Search Icon - Premium Blue when active */}
+        <div className="relative pl-4 z-10 transition-colors duration-300">
+          <motion.div
+            animate={{ 
+              scale: searchValue.length > 0 ? [1, 1.2, 1] : 1,
+              color: searchValue.length > 0 ? '#2563eb' : '#9ca3af'
+            }}
+            transition={{ 
+              scale: { repeat: searchValue.length > 0 ? Infinity : 0, duration: 2, ease: "easeInOut" },
+              color: { duration: 0.3 }
+            }}
+          >
+            <Search className="w-5 h-5" />
+          </motion.div>
         </div>
 
-        {/* Search input */}
+        {/* Input Field Field */}
         <input
           type="text"
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder="Search destinations, tours, or guides..."
-          className="
-            w-full
-            pl-12 pr-12
-            py-4
-            bg-white dark:bg-gray-900
-            border border-gray-200 dark:border-gray-800
-            rounded-2xl
-            text-base
-            text-gray-900 dark:text-white
-            placeholder-gray-400 dark:placeholder-gray-600
-            focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
-            transition-all duration-200
-            shadow-sm hover:shadow-md
-          "
+          placeholder="Search tours..."
+          className="relative z-10 flex-1 px-3 py-4 bg-transparent !border-none !ring-0 !outline-none focus:!ring-0 focus:!outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 font-bold text-lg"
         />
 
-        {/* X BUTTON - Clears EVERYTHING */}
-        {hasActiveSearch && (
-          <button
-            type="button"
-            onClick={handleClearAll}
-            className="
-              absolute right-3 top-1/2 -translate-y-1/2
-              p-2
-              text-gray-400 hover:text-gray-600
-              dark:text-gray-500 dark:hover:text-gray-300
-              hover:bg-gray-100 dark:hover:bg-gray-800
-              rounded-lg
-              transition-all
-              z-10
-            "
-            aria-label="Clear all filters and search"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        )}
-      </form>
+        {/* 'X' Clear Button - Only when there is text */}
+        <AnimatePresence>
+          {searchValue.length > 0 && (
+            <motion.button
+              type="button"
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              onClick={handleClear}
+              className="relative z-10 p-2 mr-2 text-gray-400 hover:text-red-500 !border-none !ring-0 !outline-none focus:!ring-0 focus:!outline-none transition-colors"
+              aria-label="Clear search"
+            >
+              <X className="w-5 h-5" />
+            </motion.button>
+          )}
+        </AnimatePresence>
+
+        <style jsx>{`
+          @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+          }
+        `}</style>
+      </motion.form>
     </div>
   )
-}
+}

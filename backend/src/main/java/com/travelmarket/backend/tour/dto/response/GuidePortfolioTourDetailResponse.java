@@ -28,6 +28,7 @@ public class GuidePortfolioTourDetailResponse {
     // Guide info (for breadcrumb and back-link)
     private Long guideId;
     private String guideDisplayName;
+    private String guideAvatarUrl;
     private Boolean guideVerified;
 
     // Content
@@ -39,8 +40,24 @@ public class GuidePortfolioTourDetailResponse {
     // Location
     private String locationName;
     private String region;
+    private String city;
     private String countryCode;
     private String meetingPointName;
+    private String meetingPointAddress;
+    private String meetingPointInstructions;
+
+    // Content
+    private String itinerary;
+    private String inclusions;
+    private String exclusions;
+    private String requirements;
+    private String whatToBring;
+    private String tags;
+    private String languages;
+    private Boolean isRecurring;
+    private String recurrencePattern;
+    private String recurringDates;
+    private String excludedDates;
 
     // Pricing
     private BigDecimal basePrice;
@@ -49,6 +66,8 @@ public class GuidePortfolioTourDetailResponse {
     // Capacity
     private Integer minCapacity;
     private Integer maxCapacity;
+    private Integer durationHours;
+    private Integer durationMinutes;
 
     // Trust signals
     private Boolean halalFriendly;
@@ -75,6 +94,14 @@ public class GuidePortfolioTourDetailResponse {
     private Long relatedPublishedTourId;
 
     private Instant lastPublishedAtUtc;
+
+    private Boolean isPremium;
+    private Boolean isFamilyFriendly;
+    private Boolean hasGroupDiscount;
+    private Integer groupDiscountThreshold;
+    private java.math.BigDecimal groupDiscountPercent;
+    private String dynamicPricing;
+    private String halalDetails;
 
     /**
      * One completed run shown in the run history table.

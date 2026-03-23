@@ -25,6 +25,7 @@ public class PublicTourCardResponse {
     // Location
     private String locationName;
     private String region;
+    private String city;
     private String countryCode;
 
     // Pricing
@@ -38,6 +39,7 @@ public class PublicTourCardResponse {
     // Guide info shown on card (display name + verified badge)
     private Long guideId;
     private String guideDisplayName;
+    private String guideAvatarUrl;
     private Boolean guideVerified;
 
     // Cover image (lowest displayOrder media item); null if no media uploaded
@@ -47,6 +49,17 @@ public class PublicTourCardResponse {
     private Instant nextOccurrenceStartUtc;
 
     // Reviews — null until review system is implemented
-    private Double averageRating;
+    private BigDecimal averageRating;
     private Integer reviewCount;
+
+    private Integer durationHours;
+    private Integer durationMinutes;
+
+    private Boolean isPremium;
+    private Boolean isFamilyFriendly;
+    private Boolean hasGroupDiscount;
+    private Integer groupDiscountThreshold;
+    private java.math.BigDecimal groupDiscountPercent;
+    private String dynamicPricing;
+    private String halalDetails;
 }

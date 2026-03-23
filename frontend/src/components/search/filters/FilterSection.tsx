@@ -28,52 +28,41 @@ export default function FilterSection({
     title,
     icon,
     children,
-    defaultExpanded = true,
-    showSeparator = true,
+    defaultExpanded = false,
+    showSeparator = false,
     className = ''
 }: FilterSectionProps) {
     const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
     return (
-        <div className={`w-full ${showSeparator ? 'border-b border-gray-200 dark:border-gray-800' : ''} ${className}`}>
+        <div className={`w-full py-5 border-b border-gray-200 dark:border-gray-800 last:border-0 ${className}`}>
             {/* ========================================
-          SECTION HEADER - Click to toggle
+          SECTION HEADER - Clean & Sleek
           ======================================== */}
             <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="w-full flex items-center justify-between py-4 px-1 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                className="w-full flex items-center justify-between focus:outline-none group"
                 aria-expanded={isExpanded}
                 aria-label={`${title} filter section, ${isExpanded ? 'expanded' : 'collapsed'}`}
             >
-                <div className="flex items-center gap-2">
-                    {/* Icon with dual theme colors */}
-                    {icon && (
-                        <span className="text-gray-500 dark:text-gray-400">
-                            {icon}
-                        </span>
-                    )}
-
-                    {/* Title with dual theme colors */}
-                    <span className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white">
+                <div className="flex items-center gap-3">
+                    {/* Minimalist Title */}
+                    <span className="text-[15px] font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                         {title}
                     </span>
                 </div>
 
-                {/* Expand/collapse indicator */}
-                <span className="text-gray-500 dark:text-gray-400">
-                    {isExpanded ? (
-                        <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5" />
-                    ) : (
-                        <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
-                    )}
+                {/* Minimalist Chevron */}
+                <span className="text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                    <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
                 </span>
             </button>
 
             {/* ========================================
           SECTION CONTENT - Collapsible
           ======================================== */}
-            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[1000px] opacity-100 mb-4' : 'max-h-0 opacity-0'}`}>
-                <div className="px-1 pb-2">
+            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[2000px] opacity-100 mt-4' : 'max-h-0 opacity-0'}`}>
+                <div>
                     {children}
                 </div>
             </div>

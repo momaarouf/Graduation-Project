@@ -26,41 +26,57 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import {
-  Calendar,
-  Clock,
-  MapPin,
-  Users,
-  DollarSign,
-  Leaf,
-  Globe,
-  Camera,
-  Video,
-  Plus,
-  Trash2,
+import { motion } from 'framer-motion'
+import { 
+  Camera, 
+  MapPin, 
+  Shield, 
+  Users, 
+  Calendar, 
+  Clock, 
+  DollarSign, 
+  Globe, 
+  ChevronRight, 
+  Plus, 
+  Trash2, 
   ChevronDown,
   ChevronUp,
   Save,
-  X,
-  Eye,
-  Copy,
-  AlertCircle,
-  CheckCircle,
-  HelpCircle,
+  Eye, 
   Info,
-  Sun,
-  Moon,
-  Star,
+  CheckCircle,
+  X,
+  Languages,
+  CalendarRange,
   Zap,
-  Award,
   TrendingUp,
+  Leaf,
   Repeat,
-  CalendarRange
+  RefreshCw,
+  PlusCircle,
+  Video,
+  Undo2,
+  AlertCircle,
+  Sparkles,
+  Star
 } from 'lucide-react'
+import { useAuth } from '@/src/lib/contexts/AuthContext'
+import { toast } from 'react-hot-toast'
+import CalendarPicker from '@/src/components/ui/CalendarPicker'
+import { GuideProfileResponse } from '@/src/lib/types/guide.types'
+import { 
+  createTour, 
+  updateTour, 
+  getGuideProfile,
+  getGuideTour,
+  addTourMedia, 
+  submitTourForReview,
+  withdrawTourFromReview 
+} from '@/src/lib/api/tours'
 // ============================================================================
 // PROPS INTERFACE - ADD THIS AFTER IMPORTS
 // ============================================================================
@@ -120,7 +136,8 @@ interface TourFormData {
   startDate?: string
   endDate?: string
   recurrencePattern?: RecurrencePattern
-  recurringDays?: DayOfWeek[]
+  recurringDays: DayOfWeek[]
+  recurringUntil?: string
   recurringDates?: string[]
   excludedDates?: string[]
   
@@ -131,6 +148,7 @@ interface TourFormData {
   // Pricing
   basePrice: number
   currency: 'USD' | 'TRY' | 'LBP'
+  isPremium: boolean
   dynamicPricing: {
     enabled: boolean
     weekendMultiplier?: number
@@ -147,6 +165,7 @@ interface TourFormData {
   
   // Halal Features
   isHalalCertified: boolean
+  isFamilyFriendly: boolean
   halalDetails?: {
     prayerSpace: boolean
     halalFood: boolean
@@ -193,7 +212,7 @@ interface TourFormData {
   }
   
   // Status
-  status: 'draft' | 'published' | 'paused' | 'archived'
+  status: 'draft' | 'published' | 'paused' | 'archived' | 'pending_review' | 'rejected'
 }
 
 // ============================================================================
@@ -224,6 +243,8 @@ const MOCK_TOUR_DATA_FOR_EDIT: TourFormData = {
   instantBookEnabled: true,
   
   tourType: 'one-time',
+  recurringDays: [],
+  recurringUntil: undefined,
   
   durationHours: 2,
   durationMinutes: 0,
@@ -239,6 +260,14 @@ const MOCK_TOUR_DATA_FOR_EDIT: TourFormData = {
   groupDiscountPercent: 5,
   
   isHalalCertified: false,
+  isFamilyFriendly: false,
+  isPremium: false,
+  halalDetails: {
+    prayerSpace: false,
+    halalFood: false,
+    genderSensitiveGuides: false,
+    mosqueVisits: false
+  },
   
   availableLanguages: [],
   
@@ -275,22 +304,10 @@ function FormSection({ title, icon: Icon, children, defaultExpanded = true }: Fo
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
   return (
-    <div className="
-      bg-white dark:bg-gray-900
-      border border-gray-200 dark:border-gray-800
-      rounded-xl
-      overflow-hidden
-    ">
+    <div className=" bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden ">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="
-          w-full
-          flex items-center justify-between
-          p-4
-          bg-gray-50 dark:bg-gray-800/50
-          hover:bg-gray-100 dark:hover:bg-gray-800
-          transition-colors
-        "
+        className=" w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors "
       >
         <div className="flex items-center gap-2">
           <Icon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -336,16 +353,7 @@ function BasicInfoSection({ formData, onChange }: BasicInfoSectionProps) {
             type="text"
             value={formData.title}
             onChange={(e) => onChange('title', e.target.value)}
-            className="
-              w-full
-              px-3 py-2
-              bg-gray-50 dark:bg-gray-800
-              border border-gray-200 dark:border-gray-700
-              rounded-lg
-              text-gray-900 dark:text-white
-              placeholder-gray-500 dark:placeholder-gray-400
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-            "
+            className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 "
             placeholder="e.g., Ottoman Heritage: Topkapi Palace & Hagia Sophia"
           />
         </div>
@@ -359,17 +367,7 @@ function BasicInfoSection({ formData, onChange }: BasicInfoSectionProps) {
             value={formData.description}
             onChange={(e) => onChange('description', e.target.value)}
             rows={5}
-            className="
-              w-full
-              px-3 py-2
-              bg-gray-50 dark:bg-gray-800
-              border border-gray-200 dark:border-gray-700
-              rounded-lg
-              text-gray-900 dark:text-white
-              placeholder-gray-500 dark:placeholder-gray-400
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-              resize-none
-            "
+            className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none "
             placeholder="Describe your tour, what travelers will experience, and what makes it special..."
           />
         </div>
@@ -382,15 +380,7 @@ function BasicInfoSection({ formData, onChange }: BasicInfoSectionProps) {
           <select
             value={formData.category}
             onChange={(e) => onChange('category', e.target.value)}
-            className="
-              w-full
-              px-3 py-2
-              bg-gray-50 dark:bg-gray-800
-              border border-gray-200 dark:border-gray-700
-              rounded-lg
-              text-gray-900 dark:text-white
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-            "
+            className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
           >
             <option value="historical">Historical</option>
             <option value="cultural">Cultural</option>
@@ -411,16 +401,7 @@ function BasicInfoSection({ formData, onChange }: BasicInfoSectionProps) {
             type="text"
             value={formData.tags.join(', ')}
             onChange={(e) => onChange('tags', e.target.value.split(',').map(t => t.trim()))}
-            className="
-              w-full
-              px-3 py-2
-              bg-gray-50 dark:bg-gray-800
-              border border-gray-200 dark:border-gray-700
-              rounded-lg
-              text-gray-900 dark:text-white
-              placeholder-gray-500 dark:placeholder-gray-400
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-            "
+            className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 "
             placeholder="istanbul, ottoman, history, palace"
           />
         </div>
@@ -451,15 +432,7 @@ function LocationSection({ formData, onChange }: LocationSectionProps) {
               type="text"
               value={formData.city}
               onChange={(e) => onChange('city', e.target.value)}
-              className="
-                w-full
-                px-3 py-2
-                bg-gray-50 dark:bg-gray-800
-                border border-gray-200 dark:border-gray-700
-                rounded-lg
-                text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-              "
+              className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
               placeholder="e.g., Istanbul"
             />
           </div>
@@ -470,15 +443,7 @@ function LocationSection({ formData, onChange }: LocationSectionProps) {
             <select
               value={formData.country}
               onChange={(e) => onChange('country', e.target.value)}
-              className="
-                w-full
-                px-3 py-2
-                bg-gray-50 dark:bg-gray-800
-                border border-gray-200 dark:border-gray-700
-                rounded-lg
-                text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-              "
+              className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
             >
               <option value="">Select country</option>
               <option value="turkey">Turkey</option>
@@ -495,15 +460,7 @@ function LocationSection({ formData, onChange }: LocationSectionProps) {
             type="text"
             value={formData.meetingPoint.name}
             onChange={(e) => onChange('meetingPoint', { ...formData.meetingPoint, name: e.target.value })}
-            className="
-              w-full
-              px-3 py-2
-              bg-gray-50 dark:bg-gray-800
-              border border-gray-200 dark:border-gray-700
-              rounded-lg
-              text-gray-900 dark:text-white
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-            "
+            className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
             placeholder="e.g., Sultanahmet Square Fountain"
           />
         </div>
@@ -516,15 +473,7 @@ function LocationSection({ formData, onChange }: LocationSectionProps) {
             type="text"
             value={formData.meetingPoint.address}
             onChange={(e) => onChange('meetingPoint', { ...formData.meetingPoint, address: e.target.value })}
-            className="
-              w-full
-              px-3 py-2
-              bg-gray-50 dark:bg-gray-800
-              border border-gray-200 dark:border-gray-700
-              rounded-lg
-              text-gray-900 dark:text-white
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-            "
+            className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
             placeholder="Full address with street, district, city"
           />
         </div>
@@ -537,15 +486,7 @@ function LocationSection({ formData, onChange }: LocationSectionProps) {
             value={formData.meetingPoint.instructions || ''}
             onChange={(e) => onChange('meetingPoint', { ...formData.meetingPoint, instructions: e.target.value })}
             rows={2}
-            className="
-              w-full
-              px-3 py-2
-              bg-gray-50 dark:bg-gray-800
-              border border-gray-200 dark:border-gray-700
-              rounded-lg
-              text-gray-900 dark:text-white
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-            "
+            className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
             placeholder="e.g., Look for the guide holding an orange sign"
           />
         </div>
@@ -583,17 +524,9 @@ function CapacitySection({ formData, onChange }: CapacitySectionProps) {
             <input
               type="number"
               min="1"
-              value={formData.minCapacity}
-              onChange={(e) => onChange('minCapacity', parseInt(e.target.value))}
-              className="
-                w-full
-                px-3 py-2
-                bg-gray-50 dark:bg-gray-800
-                border border-gray-200 dark:border-gray-700
-                rounded-lg
-                text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-              "
+              value={formData.minCapacity || ''}
+              onChange={(e) => onChange('minCapacity', e.target.value === '' ? 0 : parseInt(e.target.value))}
+              className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
             />
           </div>
           <div>
@@ -602,18 +535,10 @@ function CapacitySection({ formData, onChange }: CapacitySectionProps) {
             </label>
             <input
               type="number"
-              min={formData.minCapacity}
-              value={formData.maxCapacity}
-              onChange={(e) => onChange('maxCapacity', parseInt(e.target.value))}
-              className="
-                w-full
-                px-3 py-2
-                bg-gray-50 dark:bg-gray-800
-                border border-gray-200 dark:border-gray-700
-                rounded-lg
-                text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-              "
+              min={formData.minCapacity || 1}
+              value={formData.maxCapacity || ''}
+              onChange={(e) => onChange('maxCapacity', e.target.value === '' ? 0 : parseInt(e.target.value))}
+              className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
             />
           </div>
         </div>
@@ -638,17 +563,7 @@ function CapacitySection({ formData, onChange }: CapacitySectionProps) {
               }}
               className="sr-only peer"
             />
-            <div className="
-              w-11 h-6
-              bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300
-              dark:peer-focus:ring-blue-800 rounded-full peer
-              dark:bg-gray-700
-              peer-checked:after:translate-x-full peer-checked:after:border-white
-              after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-              after:bg-white after:border-gray-300 after:border after:rounded-full
-              after:h-5 after:w-5 after:transition-all
-              dark:border-gray-600 peer-checked:bg-blue-600
-            "></div>
+            <div className=" w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 "></div>
           </label>
         </div>
       </div>
@@ -668,6 +583,15 @@ interface ScheduleSectionProps {
 function ScheduleSection({ formData, onChange }: ScheduleSectionProps) {
   const daysOfWeek: DayOfWeek[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 
+  const toggleDay = (day: DayOfWeek) => {
+    const current = formData.recurringDays || []
+    if (current.includes(day)) {
+      onChange('recurringDays', current.filter(d => d !== day))
+    } else {
+      onChange('recurringDays', [...current, day])
+    }
+  }
+
   return (
     <FormSection title="Schedule & Duration" icon={Calendar}>
       <div className="space-y-4">
@@ -680,6 +604,7 @@ function ScheduleSection({ formData, onChange }: ScheduleSectionProps) {
             <label className="flex items-center gap-2">
               <input
                 type="radio"
+                name="tourType"
                 checked={formData.tourType === 'one-time'}
                 onChange={() => onChange('tourType', 'one-time')}
                 className="w-4 h-4 text-blue-600"
@@ -689,6 +614,7 @@ function ScheduleSection({ formData, onChange }: ScheduleSectionProps) {
             <label className="flex items-center gap-2">
               <input
                 type="radio"
+                name="tourType"
                 checked={formData.tourType === 'recurring'}
                 onChange={() => onChange('tourType', 'recurring')}
                 className="w-4 h-4 text-blue-600"
@@ -708,17 +634,9 @@ function ScheduleSection({ formData, onChange }: ScheduleSectionProps) {
               type="number"
               min="0"
               max="24"
-              value={formData.durationHours}
-              onChange={(e) => onChange('durationHours', parseInt(e.target.value))}
-              className="
-                w-full
-                px-3 py-2
-                bg-gray-50 dark:bg-gray-800
-                border border-gray-200 dark:border-gray-700
-                rounded-lg
-                text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-              "
+              value={formData.durationHours || ''}
+              onChange={(e) => onChange('durationHours', e.target.value === '' ? 0 : parseInt(e.target.value))}
+              className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
             />
           </div>
           <div>
@@ -726,29 +644,20 @@ function ScheduleSection({ formData, onChange }: ScheduleSectionProps) {
               Minutes
             </label>
             <select
-              value={formData.durationMinutes}
-              onChange={(e) => onChange('durationMinutes', parseInt(e.target.value))}
-              className="
-                w-full
-                px-3 py-2
-                bg-gray-50 dark:bg-gray-800
-                border border-gray-200 dark:border-gray-700
-                rounded-lg
-                text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-              "
+              value={formData.durationMinutes || 0}
+              onChange={(e) => onChange('durationMinutes', parseInt(e.target.value) || 0)}
+              className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
             >
-              <option value="0">0 min</option>
-              <option value="15">15 min</option>
-              <option value="30">30 min</option>
-              <option value="45">45 min</option>
+              <option value={0}>0 min</option>
+              <option value={15}>15 min</option>
+              <option value={30}>30 min</option>
+              <option value={45}>45 min</option>
             </select>
           </div>
         </div>
 
-        {/* Recurring options */}
         {formData.tourType === 'recurring' && (
-          <>
+          <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-700">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Repeats
@@ -756,81 +665,163 @@ function ScheduleSection({ formData, onChange }: ScheduleSectionProps) {
               <select
                 value={formData.recurrencePattern || 'weekly'}
                 onChange={(e) => onChange('recurrencePattern', e.target.value)}
-                className="
-                  w-full
-                  px-3 py-2
-                  bg-gray-50 dark:bg-gray-800
-                  border border-gray-200 dark:border-gray-700
-                  rounded-lg
-                  text-gray-900 dark:text-white
-                  focus:outline-none focus:ring-2 focus:ring-blue-500
-                "
+                className=" w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
               >
                 <option value="daily">Daily</option>
                 <option value="weekly">Weekly</option>
                 <option value="monthly">Monthly</option>
+                <option value="custom">Custom (Select Dates)</option>
               </select>
             </div>
 
-            {/* Days of week for weekly recurrence */}
-            {formData.recurrencePattern === 'weekly' && (
+            {formData.recurrencePattern === 'custom' && (
+              <p className="text-xs text-blue-600 font-medium">
+                Click dates on the calendar below to add/remove them from your schedule.
+              </p>
+            )}
+
+            {(!formData.recurrencePattern || formData.recurrencePattern === 'weekly') && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Repeat on
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {daysOfWeek.map((day) => (
-                    <button
-                      key={day}
-                      onClick={() => {
-                        const current = formData.recurringDays || []
-                        const newDays = current.includes(day)
-                          ? current.filter(d => d !== day)
-                          : [...current, day]
-                        onChange('recurringDays', newDays)
-                      }}
-                      className={`
-                        px-3 py-1.5
-                        rounded-lg
-                        text-sm font-medium
-                        transition-colors
-                        ${formData.recurringDays?.includes(day)
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-                        }
-                      `}
-                    >
-                      {day.slice(0, 3)}
-                    </button>
-                  ))}
+                  {daysOfWeek.map((day) => {
+                    const isSelected = formData.recurringDays?.includes(day)
+                    return (
+                      <button
+                        key={day}
+                        type="button"
+                        onClick={() => toggleDay(day)}
+                        className={` px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                          isSelected 
+                            ? 'bg-blue-600 text-white' 
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' 
+                        }`}
+                      >
+                        {day.slice(0, 3)}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             )}
-          </>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Recurring Until (Optional)
+              </label>
+              <div className="relative">
+                <input
+                  type="date"
+                  value={formData.recurringUntil ? formData.recurringUntil.split('T')[0] : ''}
+                  onChange={(e) => onChange('recurringUntil', e.target.value ? new Date(e.target.value).toISOString() : undefined)}
+                  className=" w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
+                  min={new Date().toISOString().split('T')[0]}
+                />
+                {formData.recurringUntil && (
+                  <button
+                    type="button"
+                    onClick={() => onChange('recurringUntil', undefined)}
+                    className="absolute right-10 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Leave empty to repeat indefinitely
+              </p>
+            </div>
+          </div>
         )}
 
-        {/* Date range for one-time */}
-        {formData.tourType === 'one-time' && (
-          <div>
+        {/* Recurring Date Preview */}
+        {formData.tourType === 'recurring' && (
+          <div className="mt-6 p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/20">
+             <div className="flex items-center gap-2 mb-4">
+                <Calendar className="w-4 h-4 text-blue-600" />
+                <h4 className="text-xs font-black text-blue-900 dark:text-blue-100 uppercase tracking-widest">
+                  Upcoming Departure Preview
+                </h4>
+             </div>
+             <CalendarPicker
+               selectedDates={(() => {
+                 if (formData.recurrencePattern === 'custom') {
+                   return (formData.recurringDates || []).map(d => {
+                     const [year, month, day] = d.split('-').map(Number)
+                     return new Date(year, month - 1, day)
+                   })
+                 }
+                 
+                 const dates: Date[] = []
+                 const dayMap: Record<string, number> = {
+                   'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3, 
+                   'thursday': 4, 'friday': 5, 'saturday': 6
+                 }
+                 const targetDays = (formData.recurringDays || []).map(d => dayMap[d.toLowerCase()])
+                 
+                 if (targetDays.length === 0 && formData.recurrencePattern !== 'daily') return []
+
+                 let current = new Date()
+                 let count = 0
+                 while (count < 90 && dates.length < 24) {
+                   const isPatternDay = formData.recurrencePattern === 'daily' || targetDays.includes(current.getDay())
+                    const dateStr = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`
+                   const isExcluded = formData.excludedDates?.includes(dateStr)
+
+                   if (isPatternDay && !isExcluded) {
+                     if (formData.recurringUntil && current > new Date(formData.recurringUntil)) {
+                       break;
+                     }
+                     dates.push(new Date(current))
+                   }
+                   current.setDate(current.getDate() + 1)
+                   count++
+                 }
+                 return dates
+               })()}
+               highlightedDates={(formData.excludedDates || []).map(d => {
+                  const [year, month, day] = d.split('-').map(Number)
+                  return new Date(year, month - 1, day)
+                })}
+                onToggleDate={(date) => {
+                  const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+                 if (formData.recurrencePattern === 'custom') {
+                   const current = formData.recurringDates || []
+                   if (current.includes(dateStr)) {
+                     onChange('recurringDates', current.filter(d => d !== dateStr))
+                   } else {
+                     onChange('recurringDates', [...current, dateStr])
+                   }
+                 } else {
+                   const current = formData.excludedDates || []
+                   if (current.includes(dateStr)) {
+                     onChange('excludedDates', current.filter(d => d !== dateStr))
+                   } else {
+                     onChange('excludedDates', [...current, dateStr])
+                   }
+                 }
+               }}
+             />
+             <p className="mt-3 text-[10px] font-bold text-blue-600/60 uppercase tracking-widest text-center italic">
+                Check the "Occurrences" page after saving for full schedule management
+             </p>
+          </div>
+        )}
+
+        {/* Start Date Selection (Unified) */}
+        <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Start Date & Time
+              {formData.tourType === 'recurring' ? 'First Occurrence Date & Time' : 'Start Date & Time'}
             </label>
             <input
               type="datetime-local"
               value={formData.startDate || ''}
               onChange={(e) => onChange('startDate', e.target.value)}
-              className="
-                w-full
-                px-3 py-2
-                bg-gray-50 dark:bg-gray-800
-                border border-gray-200 dark:border-gray-700
-                rounded-lg
-                text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-              "
+              className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
             />
           </div>
-        )}
       </div>
     </FormSection>
   )
@@ -862,17 +853,9 @@ function PricingSection({ formData, onChange }: PricingSectionProps) {
               <input
                 type="number"
                 min="0"
-                value={formData.basePrice}
-                onChange={(e) => onChange('basePrice', parseInt(e.target.value))}
-                className="
-                  w-full
-                  pl-7 pr-3 py-2
-                  bg-gray-50 dark:bg-gray-800
-                  border border-gray-200 dark:border-gray-700
-                  rounded-lg
-                  text-gray-900 dark:text-white
-                  focus:outline-none focus:ring-2 focus:ring-blue-500
-                "
+                value={formData.basePrice || ''}
+                onChange={(e) => onChange('basePrice', e.target.value === '' ? 0 : parseInt(e.target.value))}
+                className=" w-full pl-7 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
               />
             </div>
           </div>
@@ -883,21 +866,35 @@ function PricingSection({ formData, onChange }: PricingSectionProps) {
             <select
               value={formData.currency}
               onChange={(e) => onChange('currency', e.target.value)}
-              className="
-                w-full
-                px-3 py-2
-                bg-gray-50 dark:bg-gray-800
-                border border-gray-200 dark:border-gray-700
-                rounded-lg
-                text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-              "
+              className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
             >
               <option value="USD">USD ($)</option>
               <option value="TRY">TRY (₺)</option>
               <option value="LBP">LBP (ل.ل)</option>
             </select>
           </div>
+        </div>
+
+        {/* Premium Toggle */}
+        <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/20 rounded-lg mb-4">
+          <div className="flex items-center gap-2">
+            <Star className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+            <div>
+              <p className="text-sm font-medium text-amber-900 dark:text-amber-100">Premium Experience</p>
+              <p className="text-xs text-amber-700 dark:text-amber-400">
+                Mark this tour as a high-end, premium offering
+              </p>
+            </div>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.isPremium || false}
+              onChange={(e) => onChange('isPremium', e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className=" w-11 h-6 bg-amber-200/50 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-amber-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-amber-500 "></div>
+          </label>
         </div>
 
         {/* Dynamic Pricing Toggle */}
@@ -918,17 +915,7 @@ function PricingSection({ formData, onChange }: PricingSectionProps) {
               onChange={(e) => onChange('dynamicPricing', { ...formData.dynamicPricing, enabled: e.target.checked })}
               className="sr-only peer"
             />
-            <div className="
-              w-11 h-6
-              bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300
-              dark:peer-focus:ring-blue-800 rounded-full peer
-              dark:bg-gray-700
-              peer-checked:after:translate-x-full peer-checked:after:border-white
-              after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-              after:bg-white after:border-gray-300 after:border after:rounded-full
-              after:h-5 after:w-5 after:transition-all
-              dark:border-gray-600 peer-checked:bg-blue-600
-            "></div>
+            <div className=" w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 "></div>
           </label>
         </div>
 
@@ -942,20 +929,12 @@ function PricingSection({ formData, onChange }: PricingSectionProps) {
               <input
                 type="number"
                 min="0"
-                value={formData.dynamicPricing.weekendMultiplier || 120}
+                value={formData.dynamicPricing.weekendMultiplier || ''}
                 onChange={(e) => onChange('dynamicPricing', { 
                   ...formData.dynamicPricing, 
-                  weekendMultiplier: parseInt(e.target.value) 
+                  weekendMultiplier: e.target.value === '' ? 0 : parseInt(e.target.value)
                 })}
-                className="
-                  w-full
-                  px-3 py-2
-                  bg-gray-50 dark:bg-gray-800
-                  border border-gray-200 dark:border-gray-700
-                  rounded-lg
-                  text-gray-900 dark:text-white
-                  focus:outline-none focus:ring-2 focus:ring-blue-500
-                "
+                className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
               />
               <p className="text-xs text-gray-500 mt-1">Example: 120% means 20% extra on weekends</p>
             </div>
@@ -967,20 +946,12 @@ function PricingSection({ formData, onChange }: PricingSectionProps) {
               <input
                 type="number"
                 min="0"
-                value={formData.dynamicPricing.holidayMultiplier || 150}
+                value={formData.dynamicPricing.holidayMultiplier || ''}
                 onChange={(e) => onChange('dynamicPricing', { 
                   ...formData.dynamicPricing, 
-                  holidayMultiplier: parseInt(e.target.value) 
+                  holidayMultiplier: e.target.value === '' ? 0 : parseInt(e.target.value)
                 })}
-                className="
-                  w-full
-                  px-3 py-2
-                  bg-gray-50 dark:bg-gray-800
-                  border border-gray-200 dark:border-gray-700
-                  rounded-lg
-                  text-gray-900 dark:text-white
-                  focus:outline-none focus:ring-2 focus:ring-blue-500
-                "
+                className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
               />
             </div>
           </div>
@@ -1004,17 +975,7 @@ function PricingSection({ formData, onChange }: PricingSectionProps) {
               onChange={(e) => onChange('groupDiscountEnabled', e.target.checked)}
               className="sr-only peer"
             />
-            <div className="
-              w-11 h-6
-              bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300
-              dark:peer-focus:ring-blue-800 rounded-full peer
-              dark:bg-gray-700
-              peer-checked:after:translate-x-full peer-checked:after:border-white
-              after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-              after:bg-white after:border-gray-300 after:border after:rounded-full
-              after:h-5 after:w-5 after:transition-all
-              dark:border-gray-600 peer-checked:bg-blue-600
-            "></div>
+            <div className=" w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 "></div>
           </label>
         </div>
 
@@ -1028,17 +989,9 @@ function PricingSection({ formData, onChange }: PricingSectionProps) {
               <input
                 type="number"
                 min="2"
-                value={formData.groupDiscountThreshold}
-                onChange={(e) => onChange('groupDiscountThreshold', parseInt(e.target.value))}
-                className="
-                  w-full
-                  px-3 py-2
-                  bg-gray-50 dark:bg-gray-800
-                  border border-gray-200 dark:border-gray-700
-                  rounded-lg
-                  text-gray-900 dark:text-white
-                  focus:outline-none focus:ring-2 focus:ring-blue-500
-                "
+                value={formData.groupDiscountThreshold || ''}
+                onChange={(e) => onChange('groupDiscountThreshold', e.target.value === '' ? 0 : parseInt(e.target.value))}
+                className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
               />
             </div>
             <div>
@@ -1049,21 +1002,133 @@ function PricingSection({ formData, onChange }: PricingSectionProps) {
                 type="number"
                 min="0"
                 max="100"
-                value={formData.groupDiscountPercent}
-                onChange={(e) => onChange('groupDiscountPercent', parseInt(e.target.value))}
-                className="
-                  w-full
-                  px-3 py-2
-                  bg-gray-50 dark:bg-gray-800
-                  border border-gray-200 dark:border-gray-700
-                  rounded-lg
-                  text-gray-900 dark:text-white
-                  focus:outline-none focus:ring-2 focus:ring-blue-500
-                "
+                value={formData.groupDiscountPercent || ''}
+                onChange={(e) => onChange('groupDiscountPercent', e.target.value === '' ? 0 : parseInt(e.target.value))}
+                className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
               />
             </div>
           </div>
         )}
+      </div>
+    </FormSection>
+  )
+}
+
+// ============================================================================
+// MEDIA SECTION
+// ============================================================================
+
+interface MediaSectionProps {
+  formData: TourFormData
+  onChange: (field: string, value: any) => void
+}
+
+function MediaSection({ formData, onChange }: MediaSectionProps) {
+  const [uploading, setUploading] = useState(false)
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    setUploading(true)
+    try {
+      const newMedia = []
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        
+        // 50MB limit check
+        if (file.size > 100 * 1024 * 1024) {
+          toast.error(`File ${file.name} is too large. Max 100MB.`)
+          continue
+        }
+
+        const reader = new FileReader()
+        const base64Promise = new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string)
+          reader.onerror = () => reject(new Error('Failed to read file'))
+          reader.readAsDataURL(file)
+        })
+        const base64 = await base64Promise
+        
+        newMedia.push({
+          id: `temp-${Date.now()}-${i}`,
+          type: file.type.startsWith('video') ? 'video' as const : 'image' as const,
+          url: base64,
+          caption: ''
+        })
+      }
+      onChange('gallery', [...formData.gallery, ...newMedia])
+    } catch (err) {
+      toast.error('Failed to process image')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const removeMedia = (index: number) => {
+    onChange('gallery', formData.gallery.filter((_, i) => i !== index))
+  }
+
+  return (
+    <FormSection title="Photos & Videos" icon={Camera}>
+      <div className="space-y-4">
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+          The first image will be used as the cover photo. Max 100MB per file.
+        </p>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {formData.gallery.map((item, index) => (
+            <div key={item.id} className="relative aspect-video rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-800 group">
+              {item.type === 'image' ? (
+                <Image src={item.url} alt={`Media ${index}`} fill className="object-cover" />
+              ) : (
+                <video 
+                  src={item.url} 
+                  className="w-full h-full object-cover" 
+                  muted 
+                  playsInline 
+                  onMouseOver={(e) => e.currentTarget.play()}
+                  onMouseOut={(e) => e.currentTarget.pause()}
+                />
+              )}
+              
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => removeMedia(index)}
+                  className="p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+              
+              {index === 0 && (
+                <div className="absolute top-2 left-2 px-2 py-0.5 bg-blue-600 text-[10px] font-bold text-white rounded-full shadow-lg">
+                  COVER
+                </div>
+              )}
+            </div>
+          ))}
+          
+          <label className="relative aspect-video rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 cursor-pointer flex flex-col items-center justify-center gap-2 transition-all">
+            <input
+              type="file"
+              multiple
+              accept="image/*,video/*"
+              className="hidden"
+              onChange={handleFileChange}
+              disabled={uploading}
+            />
+            {uploading ? (
+              <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <>
+                <Camera className="w-6 h-6 text-gray-400" />
+                <span className="text-xs font-semibold text-gray-500">Add Media</span>
+              </>
+            )}
+          </label>
+        </div>
       </div>
     </FormSection>
   )
@@ -1080,7 +1145,7 @@ interface HalalSectionProps {
 
 function HalalSection({ formData, onChange }: HalalSectionProps) {
   return (
-    <FormSection title="Halal Features" icon={Leaf}>
+    <FormSection title="Halal & Special Features" icon={Leaf}>
       <div className="space-y-4">
         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
           <div className="flex items-center gap-2">
@@ -1095,21 +1160,33 @@ function HalalSection({ formData, onChange }: HalalSectionProps) {
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
-              checked={formData.isHalalCertified}
+              checked={formData.isHalalCertified || false}
               onChange={(e) => onChange('isHalalCertified', e.target.checked)}
               className="sr-only peer"
             />
-            <div className="
-              w-11 h-6
-              bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300
-              dark:peer-focus:ring-blue-800 rounded-full peer
-              dark:bg-gray-700
-              peer-checked:after:translate-x-full peer-checked:after:border-white
-              after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-              after:bg-white after:border-gray-300 after:border after:rounded-full
-              after:h-5 after:w-5 after:transition-all
-              dark:border-gray-600 peer-checked:bg-emerald-600
-            "></div>
+            <div className=" w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600 "></div>
+          </label>
+        </div>
+
+        {/* Family Friendly Toggle */}
+        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-pink-600 dark:text-pink-400" />
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">Family Friendly</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Suitable for children and families
+              </p>
+            </div>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.isFamilyFriendly || false}
+              onChange={(e) => onChange('isFamilyFriendly', e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className=" w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-pink-600 "></div>
           </label>
         </div>
 
@@ -1225,28 +1302,12 @@ function LanguagesSection({ formData, onChange }: LanguagesSectionProps) {
             value={newLanguage}
             onChange={(e) => setNewLanguage(e.target.value)}
             placeholder="e.g., Arabic"
-            className="
-              flex-1
-              px-3 py-2
-              bg-gray-50 dark:bg-gray-800
-              border border-gray-200 dark:border-gray-700
-              rounded-lg
-              text-gray-900 dark:text-white
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-            "
+            className=" flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
           />
           <select
             value={newProficiency}
             onChange={(e) => setNewProficiency(e.target.value as any)}
-            className="
-              w-24
-              px-3 py-2
-              bg-gray-50 dark:bg-gray-800
-              border border-gray-200 dark:border-gray-700
-              rounded-lg
-              text-gray-900 dark:text-white
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-            "
+            className=" w-24 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
           >
             <option value="basic">Basic</option>
             <option value="fluent">Fluent</option>
@@ -1254,13 +1315,7 @@ function LanguagesSection({ formData, onChange }: LanguagesSectionProps) {
           </select>
           <button
             onClick={handleAddLanguage}
-            className="
-              px-4 py-2
-              bg-blue-600 hover:bg-blue-700
-              text-white
-              rounded-lg
-              transition-colors
-            "
+            className=" px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors "
           >
             Add
           </button>
@@ -1337,15 +1392,7 @@ function ItinerarySection({ formData, onChange }: ItinerarySectionProps) {
               value={item.title}
               onChange={(e) => updateItineraryItem(index, 'title', e.target.value)}
               placeholder="Title (e.g., Hagia Sophia)"
-              className="
-                w-full
-                px-3 py-2
-                bg-white dark:bg-gray-900
-                border border-gray-200 dark:border-gray-700
-                rounded-lg
-                text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-              "
+              className=" w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
             />
 
             <textarea
@@ -1353,16 +1400,7 @@ function ItinerarySection({ formData, onChange }: ItinerarySectionProps) {
               onChange={(e) => updateItineraryItem(index, 'description', e.target.value)}
               placeholder="Description of this stop"
               rows={2}
-              className="
-                w-full
-                px-3 py-2
-                bg-white dark:bg-gray-900
-                border border-gray-200 dark:border-gray-700
-                rounded-lg
-                text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-                resize-none
-              "
+              className=" w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none "
             />
 
             <div className="grid grid-cols-2 gap-2">
@@ -1371,28 +1409,14 @@ function ItinerarySection({ formData, onChange }: ItinerarySectionProps) {
                 value={item.duration}
                 onChange={(e) => updateItineraryItem(index, 'duration', e.target.value)}
                 placeholder="Duration (e.g., 1 hour)"
-                className="
-                  px-3 py-2
-                  bg-white dark:bg-gray-900
-                  border border-gray-200 dark:border-gray-700
-                  rounded-lg
-                  text-gray-900 dark:text-white
-                  focus:outline-none focus:ring-2 focus:ring-blue-500
-                "
+                className=" px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
               />
               <input
                 type="text"
                 value={item.location?.name || ''}
                 onChange={(e) => updateItineraryLocation(index, e.target.value)}
                 placeholder="Location (optional)"
-                className="
-                  px-3 py-2
-                  bg-white dark:bg-gray-900
-                  border border-gray-200 dark:border-gray-700
-                  rounded-lg
-                  text-gray-900 dark:text-white
-                  focus:outline-none focus:ring-2 focus:ring-blue-500
-                "
+                className=" px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
               />
             </div>
           </div>
@@ -1400,16 +1424,7 @@ function ItinerarySection({ formData, onChange }: ItinerarySectionProps) {
 
         <button
           onClick={addItineraryItem}
-          className="
-            w-full
-            py-3
-            border-2 border-dashed border-gray-300 dark:border-gray-700
-            rounded-lg
-            text-gray-500 dark:text-gray-400
-            hover:border-blue-500 hover:text-blue-500
-            transition-colors
-            flex items-center justify-center gap-2
-          "
+          className=" w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg text-gray-500 dark:text-gray-400 hover:border-blue-500 hover:text-blue-500 transition-colors flex items-center justify-center gap-2 "
         >
           <Plus className="w-4 h-4" />
           Add Itinerary Stop
@@ -1423,12 +1438,12 @@ function ItinerarySection({ formData, onChange }: ItinerarySectionProps) {
 // INCLUSIONS SECTION
 // ============================================================================
 
-interface InclusionsSectionProps {
+interface InclusionsExclusionsSectionProps {
   formData: TourFormData
   onChange: (field: string, value: any) => void
 }
 
-function InclusionsSection({ formData, onChange }: InclusionsSectionProps) {
+function InclusionsExclusionsSection({ formData, onChange }: InclusionsExclusionsSectionProps) {
   const [newInclusion, setNewInclusion] = useState('')
   const [newExclusion, setNewExclusion] = useState('')
 
@@ -1479,25 +1494,11 @@ function InclusionsSection({ formData, onChange }: InclusionsSectionProps) {
               value={newInclusion}
               onChange={(e) => setNewInclusion(e.target.value)}
               placeholder="e.g., Professional guide"
-              className="
-                flex-1
-                px-3 py-2
-                bg-gray-50 dark:bg-gray-800
-                border border-gray-200 dark:border-gray-700
-                rounded-lg
-                text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-              "
+              className=" flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
             />
             <button
               onClick={addInclusion}
-              className="
-                px-4 py-2
-                bg-emerald-600 hover:bg-emerald-700
-                text-white
-                rounded-lg
-                transition-colors
-              "
+              className=" px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors "
             >
               Add
             </button>
@@ -1528,25 +1529,121 @@ function InclusionsSection({ formData, onChange }: InclusionsSectionProps) {
               value={newExclusion}
               onChange={(e) => setNewExclusion(e.target.value)}
               placeholder="e.g., Hotel pickup"
-              className="
-                flex-1
-                px-3 py-2
-                bg-gray-50 dark:bg-gray-800
-                border border-gray-200 dark:border-gray-700
-                rounded-lg
-                text-gray-900 dark:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-500
-              "
+              className=" flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
             />
             <button
               onClick={addExclusion}
-              className="
-                px-4 py-2
-                bg-red-600 hover:bg-red-700
-                text-white
-                rounded-lg
-                transition-colors
-              "
+              className=" px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors "
+            >
+              Add
+            </button>
+          </div>
+        </div>
+      </div>
+    </FormSection>
+  )
+}
+
+// ============================================================================
+// REQUIREMENTS & WHAT TO BRING SECTION
+// ============================================================================
+
+interface RequirementsSectionProps {
+  formData: TourFormData
+  onChange: (field: string, value: any) => void
+}
+
+function RequirementsSection({ formData, onChange }: RequirementsSectionProps) {
+  const [newRequirement, setNewRequirement] = useState('')
+  const [newThing, setNewThing] = useState('')
+
+  const addRequirement = () => {
+    if (!newRequirement.trim()) return
+    onChange('requirements', [...formData.requirements, newRequirement.trim()])
+    setNewRequirement('')
+  }
+
+  const addThing = () => {
+    if (!newThing.trim()) return
+    onChange('whatToBring', [...formData.whatToBring, newThing.trim()])
+    setNewThing('')
+  }
+
+  const removeRequirement = (index: number) => {
+    onChange('requirements', formData.requirements.filter((_, i) => i !== index))
+  }
+
+  const removeThing = (index: number) => {
+    onChange('whatToBring', formData.whatToBring.filter((_, i) => i !== index))
+  }
+
+  return (
+    <FormSection title="Requirements & What to Bring" icon={Info}>
+      <div className="space-y-6">
+        {/* Requirements */}
+        <div>
+          <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+            Tour Requirements
+          </h4>
+          <div className="space-y-2 mb-3">
+            {formData.requirements.map((item, index) => (
+              <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span className="text-sm text-gray-700 dark:text-gray-300">{item}</span>
+                <button
+                  onClick={() => removeRequirement(index)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newRequirement}
+              onChange={(e) => setNewRequirement(e.target.value)}
+              placeholder="e.g., Moderate fitness level"
+              className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              onClick={addRequirement}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+
+        {/* What To Bring */}
+        <div>
+          <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+            What to Bring
+          </h4>
+          <div className="space-y-2 mb-3">
+            {formData.whatToBring.map((item, index) => (
+              <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span className="text-sm text-gray-700 dark:text-gray-300">{item}</span>
+                <button
+                  onClick={() => removeThing(index)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newThing}
+              onChange={(e) => setNewThing(e.target.value)}
+              placeholder="e.g., Comfortable walking shoes"
+              className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              onClick={addThing}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
               Add
             </button>
@@ -1562,27 +1659,349 @@ function InclusionsSection({ formData, onChange }: InclusionsSectionProps) {
 // ============================================================================
 
 export default function TourForm({ initialData, isEditing, tourId }: TourFormProps) {
+  const { user } = useAuth()
   const router = useRouter()
-  const [formData, setFormData] = useState<TourFormData>(INITIAL_FORM_DATA)
+  const [profile, setProfile] = useState<GuideProfileResponse | null>(null)
+  const [formData, setFormData] = useState<TourFormData>(() => {
+    const base = {
+      ...INITIAL_FORM_DATA,
+      ...initialData
+    };
+    
+    // Parse recurringDays from string to array if it comes from backend
+    if (initialData && typeof initialData.recurringDays === 'string' && initialData.recurringDays) {
+      base.recurringDays = (initialData.recurringDays as string)
+        .split(',')
+        .map(d => d.toLowerCase() as DayOfWeek);
+    }
+
+    // Normalize casing for recurrencePattern and status
+    if (base.recurrencePattern) {
+      base.recurrencePattern = base.recurrencePattern.toLowerCase() as any;
+    }
+    if (base.status) {
+      base.status = base.status.toLowerCase() as any;
+    }
+    
+    return base as TourFormData;
+  })
   const [isSaving, setIsSaving] = useState(false)
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true)
   const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit')
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const res = await getGuideProfile()
+        setProfile(res.data)
+      } catch (err) {
+        console.error('Failed to fetch guide profile in TourForm:', err)
+      } finally {
+        setIsLoadingProfile(false)
+      }
+    }
+    fetchProfileData()
+  }, [])
+
+  // Guard: Check if the guide is allowed to manage tours
+  const isVerified = user?.emailVerified && user?.profileCompleted && profile?.verificationStatus === 'approved'
+
+  // If loading profile, show a subtle loading state
+  if (isLoadingProfile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm font-medium text-gray-500 animate-pulse">Verifying access...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // If not verified, block tour creation (unless editing an already existing tour? 
+  // No, the user wants it blocked from creating. If it's editing a draft, maybe allow? 
+  // But submission should definitely be blocked.)
+  if (!isEditing && !isVerified) {
+    return (
+      <div className="min-h-screen pt-24 pb-12 px-4 bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-8 text-center shadow-xl"
+        >
+          <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <Shield className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Verification Required</h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
+            To create and manage tours, you need to complete a few verification steps first. 
+            This helps us maintain a high-trust marketplace.
+          </p>
+
+          <div className="space-y-3 mb-8">
+            <div className={`flex items-center justify-between p-3 rounded-xl border ${user?.emailVerified ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/30' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-800'}`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-2 h-2 rounded-full ${user?.emailVerified ? 'bg-emerald-500' : 'bg-gray-300'}`} />
+                <span className="text-sm font-medium">Email Verification</span>
+              </div>
+              {!user?.emailVerified && <Link href="/auth/email-verification" className="text-xs font-bold text-blue-600">Complete</Link>}
+            </div>
+            
+            <div className={`flex items-center justify-between p-3 rounded-xl border ${user?.profileCompleted ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/30' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-800'}`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-2 h-2 rounded-full ${user?.profileCompleted ? 'bg-emerald-500' : 'bg-gray-300'}`} />
+                <span className="text-sm font-medium">Profile Completion</span>
+              </div>
+              {!user?.profileCompleted && <Link href="/dashboard/guide/complete-profile" className="text-xs font-bold text-blue-600">Complete</Link>}
+            </div>
+
+            <div className={`flex items-center justify-between p-3 rounded-xl border ${profile?.verificationStatus === 'approved' ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/30' : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-800'}`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-2 h-2 rounded-full ${profile?.verificationStatus === 'approved' ? 'bg-emerald-500' : 'bg-gray-300'}`} />
+                <span className="text-sm font-medium text-left">
+                  ID Verification
+                  {profile?.verificationStatus === 'pending' && <span className="block text-[10px] text-amber-600 font-bold uppercase tracking-widest mt-0.5">Under Review</span>}
+                </span>
+              </div>
+              {profile?.verificationStatus === 'not_submitted' && <Link href="/dashboard/guide/verification" className="text-xs font-bold text-blue-600">Start</Link>}
+            </div>
+          </div>
+
+          <button
+            onClick={() => router.push('/dashboard/guide')}
+            className="w-full py-4 bg-gray-900 dark:bg-white dark:text-gray-900 text-white rounded-2xl font-bold hover:opacity-90 transition"
+          >
+            Back to Dashboard
+          </button>
+        </motion.div>
+      </div>
+    )
+  }
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  const validateForm = () => {
+    if (!formData.title.trim()) {
+      toast.error('Tour title is required')
+      return false
+    }
+    if (!formData.description.trim() || formData.description.length < 20) {
+      toast.error('Please provide a description (at least 20 characters)')
+      return false
+    }
+    if (!formData.city || !formData.country) {
+      toast.error('City and Country are required')
+      return false
+    }
+    if (formData.basePrice <= 0) {
+      toast.error('Price must be greater than 0')
+      return false
+    }
+    if (formData.minCapacity <= 0) {
+      toast.error('Minimum capacity must be at least 1')
+      return false
+    }
+    if (formData.maxCapacity < formData.minCapacity) {
+      toast.error('Maximum capacity cannot be less than minimum')
+      return false
+    }
+    if (!formData.startDate) {
+      toast.error('Please select a start date for your tour')
+      return false
+    }
+    if (formData.startDate) {
+      const start = new Date(formData.startDate)
+      if (start < new Date()) {
+        toast.error('Start date must be in the future')
+        return false
+      }
+    }
+    if (formData.itinerary.length === 0) {
+      toast.error('Please add at least one stop to your itinerary')
+      return false
+    }
+    return true
+  }
+
   const handleSave = async () => {
+    if (!validateForm()) return
+
     setIsSaving(true)
-    // In Phase 4: API call to save tour
-    console.log('Saving tour:', formData)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setIsSaving(false)
-    router.push('/dashboard/guide/tours')
+    try {
+      // 1. Align field names for backend
+      const payload: any = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        locationName: formData.city, // Backend calls it locationName
+        city: formData.city,
+        countryCode: formData.country === 'lebanon' ? 'LB' : 'TR',
+        basePrice: formData.basePrice,
+        currency: formData.currency,
+        isPremium: formData.isPremium || false,
+        minCapacity: formData.minCapacity,
+        maxCapacity: formData.maxCapacity,
+        instantBook: formData.bookingMode === 'instant',
+        startDate: formData.startDate ? new Date(formData.startDate).toISOString() : null,
+        isRecurring: formData.tourType === 'recurring',
+        recurrencePattern: formData.recurrencePattern?.toUpperCase(),
+        recurringDays: formData.recurringDays.length > 0 ? formData.recurringDays.map(d => d.toUpperCase()).join(',') : null,
+        recurringUntil: formData.recurringUntil ? new Date(formData.recurringUntil).toISOString() : null,
+        recurringDates: formData.recurringDates && formData.recurringDates.length > 0 ? JSON.stringify(formData.recurringDates.map(d => new Date(d).toISOString())) : null,
+        excludedDates: formData.excludedDates && formData.excludedDates.length > 0 ? JSON.stringify(formData.excludedDates.map(d => new Date(d).toISOString())) : null,
+        halalFriendly: formData.isHalalCertified,
+        halalDetails: JSON.stringify(formData.halalDetails),
+        isFamilyFriendly: formData.isFamilyFriendly !== undefined ? formData.isFamilyFriendly : true,
+        dynamicPricing: JSON.stringify(formData.dynamicPricing),
+        hasGroupDiscount: formData.groupDiscountEnabled,
+        groupDiscountThreshold: formData.groupDiscountThreshold,
+        groupDiscountPercent: formData.groupDiscountPercent,
+        meetingPointName: formData.meetingPoint.name,
+        meetingPointAddress: formData.meetingPoint.address,
+        meetingPointInstructions: formData.meetingPoint.instructions,
+        meetingLatitude: formData.meetingPoint.lat,
+        meetingLongitude: formData.meetingPoint.lng,
+        itinerary: JSON.stringify(formData.itinerary),
+        inclusions: JSON.stringify(formData.inclusions),
+        exclusions: JSON.stringify(formData.exclusions),
+        requirements: JSON.stringify(formData.requirements),
+        whatToBring: JSON.stringify(formData.whatToBring),
+        durationHours: formData.durationHours,
+        durationMinutes: formData.durationMinutes,
+        tags: JSON.stringify(formData.tags),
+        languages: JSON.stringify(formData.availableLanguages)
+      }
+
+      let tourResponse
+      if (isEditing && tourId) {
+        tourResponse = await updateTour(parseInt(tourId), payload)
+        toast.success('Tour updated successfully')
+      } else {
+        tourResponse = await createTour(payload)
+        toast.success('Tour created successfully')
+      }
+
+      const tour = tourResponse.data
+
+      // 2. Upload media
+      if (formData.gallery.length > 0) {
+        toast.loading('Uploading media...', { id: 'media-upload' })
+        for (let i = 0; i < formData.gallery.length; i++) {
+          const m = formData.gallery[i]
+          // ONLY upload if it's a new media item (temp ID)
+          if (m.id.startsWith('temp-')) {
+            await addTourMedia(tour.id, {
+              url: m.url,
+              mediaType: m.type.toUpperCase(),
+              displayOrder: i
+            })
+          }
+        }
+        toast.success('Media uploaded', { id: 'media-upload' })
+      }
+
+      router.push('/dashboard/guide/tours')
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to save tour')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleSendForReview = async () => {
+    if (!validateForm()) return
+    
+    if (!isVerified) {
+      toast.error('You must be fully verified to submit a tour for review.')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      // 1. Save the tour first
+      const payload: any = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        locationName: formData.city,
+        city: formData.city,
+        countryCode: formData.country === 'lebanon' ? 'LB' : 'TR',
+        basePrice: formData.basePrice,
+        currency: formData.currency,
+        isPremium: formData.isPremium || false,
+        minCapacity: formData.minCapacity,
+        maxCapacity: formData.maxCapacity,
+        instantBook: formData.bookingMode === 'instant',
+        startDate: formData.startDate ? new Date(formData.startDate).toISOString() : null,
+        isRecurring: formData.tourType === 'recurring',
+        recurrencePattern: formData.recurrencePattern?.toUpperCase(),
+        recurringDays: formData.recurringDays.length > 0 ? formData.recurringDays.map(d => d.toUpperCase()).join(',') : null,
+        recurringUntil: formData.recurringUntil ? new Date(formData.recurringUntil).toISOString() : null,
+        recurringDates: formData.recurringDates && formData.recurringDates.length > 0 ? JSON.stringify(formData.recurringDates.map(d => new Date(d).toISOString())) : null,
+        excludedDates: formData.excludedDates && formData.excludedDates.length > 0 ? JSON.stringify(formData.excludedDates.map(d => new Date(d).toISOString())) : null,
+        halalFriendly: formData.isHalalCertified,
+        halalDetails: JSON.stringify(formData.halalDetails),
+        isFamilyFriendly: formData.isFamilyFriendly !== undefined ? formData.isFamilyFriendly : true,
+        dynamicPricing: JSON.stringify(formData.dynamicPricing),
+        hasGroupDiscount: formData.groupDiscountEnabled,
+        groupDiscountThreshold: formData.groupDiscountThreshold,
+        groupDiscountPercent: formData.groupDiscountPercent,
+        meetingPointName: formData.meetingPoint.name,
+        meetingPointAddress: formData.meetingPoint.address,
+        meetingPointInstructions: formData.meetingPoint.instructions,
+        meetingLatitude: formData.meetingPoint.lat,
+        meetingLongitude: formData.meetingPoint.lng,
+        itinerary: JSON.stringify(formData.itinerary),
+        inclusions: JSON.stringify(formData.inclusions),
+        exclusions: JSON.stringify(formData.exclusions),
+        requirements: JSON.stringify(formData.requirements),
+        whatToBring: JSON.stringify(formData.whatToBring),
+        durationHours: formData.durationHours,
+        durationMinutes: formData.durationMinutes,
+        tags: JSON.stringify(formData.tags),
+        languages: JSON.stringify(formData.availableLanguages)
+      }
+
+      let tourResponse
+      if (isEditing && tourId) {
+        tourResponse = await updateTour(parseInt(tourId), payload)
+      } else {
+        tourResponse = await createTour(payload)
+      }
+
+      const tour = tourResponse.data
+
+      // 2. Upload media
+      if (formData.gallery.length > 0) {
+        for (let i = 0; i < formData.gallery.length; i++) {
+          const m = formData.gallery[i]
+          if (m.id.startsWith('temp-')) {
+            await addTourMedia(tour.id, {
+              url: m.url,
+              mediaType: m.type.toUpperCase(),
+              displayOrder: i
+            })
+          }
+        }
+      }
+
+      // 3. Submit for review
+      toast.loading('Submitting for review...', { id: 'submit-review' })
+      await submitTourForReview(tour.id)
+      toast.success('Tour sent for review', { id: 'submit-review' })
+      router.push('/dashboard/guide/tours')
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to submit tour')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleSaveAsDraft = () => {
-    console.log('Saving as draft:', formData)
-    router.push('/dashboard/guide/tours')
+    // Current save status is DRAFT by default on creation
+    handleSave()
   }
 
   return (
@@ -1592,87 +2011,101 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
         
         <div className="container-safe mx-auto max-w-4xl py-8 sm:py-10">
           
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1">
-                Create New Tour
-              </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Fill in the details below to create your tour listing
-              </p>
+          {/* Status Banner for Pending Review */}
+          {isEditing && formData.status === 'pending_review' && (
+            <div className="mb-8 p-4 bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-900/20 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-bold text-orange-900 dark:text-orange-200">
+                    Tour is Under Review
+                  </p>
+                  <p className="text-xs text-orange-700 dark:text-orange-400 mt-1">
+                    This tour is currently locked for editing while our team reviews it. 
+                    If you need to make changes, you can withdraw it back to draft mode.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={async () => {
+                  try {
+                    if (tourId) {
+                      await withdrawTourFromReview(parseInt(tourId));
+                      toast.success('Tour withdrawn to draft');
+                      router.push('/dashboard/guide/tours');
+                    }
+                  } catch (err: any) {
+                    toast.error(err.response?.data?.message || 'Failed to withdraw tour');
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg text-sm font-semibold transition-colors shrink-0"
+              >
+                <Undo2 className="w-4 h-4" />
+                Withdraw to Edit
+              </button>
             </div>
+          )}
+
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => router.back()}
+                className=" p-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-600 dark:text-gray-400 "
+                title="Go Back"
+              >
+                <Undo2 className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                  {isEditing ? 'Edit Tour' : 'Create New Tour'}
+                </h1>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {isEditing ? 'Update your tour details' : 'Fill in the details below to create your tour listing'}
+                </p>
+              </div>
+            </div>
+
             <div className="flex items-center gap-2">
               <button
-                onClick={handleSaveAsDraft}
-                className="
-                  px-4 py-2
-                  bg-gray-100 dark:bg-gray-800
-                  text-gray-700 dark:text-gray-300
-                  rounded-lg
-                  hover:bg-gray-200 dark:hover:bg-gray-700
-                  transition-colors
-                "
+                onClick={handleSave}
+                disabled={isSaving}
+                className=" px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 "
               >
                 Save Draft
               </button>
               <button
-                onClick={handleSave}
+                onClick={handleSendForReview}
                 disabled={isSaving}
-                className="
-                  flex items-center gap-2
-                  px-4 py-2
-                  bg-blue-600 hover:bg-blue-700
-                  text-white
-                  rounded-lg
-                  transition-colors
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                "
+                className=" flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed "
               >
                 {isSaving ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Saving...
+                    Sending...
                   </>
                 ) : (
                   <>
-                    <Save className="w-4 h-4" />
-                    Publish Tour
+                    <CheckCircle className="w-4 h-4" />
+                    Send for Review
                   </>
                 )}
               </button>
             </div>
           </div>
 
+
           {/* Edit/Preview Tabs */}
           <div className="flex gap-2 mb-6">
             <button
               onClick={() => setActiveTab('edit')}
-              className={`
-                px-4 py-2
-                rounded-lg
-                font-medium
-                transition-colors
-                ${activeTab === 'edit'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-                }
-              `}
+              className={` px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'edit' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' } `}
             >
               Edit
             </button>
             <button
               onClick={() => setActiveTab('preview')}
-              className={`
-                px-4 py-2
-                rounded-lg
-                font-medium
-                transition-colors
-                ${activeTab === 'preview'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-                }
-              `}
+              className={` px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'preview' ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' } `}
             >
               Preview
             </button>
@@ -1683,13 +2116,22 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
             <div className="space-y-4">
               <BasicInfoSection formData={formData} onChange={handleChange} />
               <LocationSection formData={formData} onChange={handleChange} />
+              <MediaSection formData={formData} onChange={handleChange} />
               <CapacitySection formData={formData} onChange={handleChange} />
               <ScheduleSection formData={formData} onChange={handleChange} />
               <PricingSection formData={formData} onChange={handleChange} />
               <HalalSection formData={formData} onChange={handleChange} />
               <LanguagesSection formData={formData} onChange={handleChange} />
               <ItinerarySection formData={formData} onChange={handleChange} />
-              <InclusionsSection formData={formData} onChange={handleChange} />
+              <InclusionsExclusionsSection 
+              formData={formData} 
+              onChange={handleChange} 
+            />
+
+            <RequirementsSection 
+              formData={formData} 
+              onChange={handleChange} 
+            />
             </div>
           )}
 
@@ -1752,6 +2194,10 @@ export const INITIAL_FORM_DATA: TourFormData = {
   instantBookEnabled: true,
   
   tourType: 'one-time',
+  recurringDays: [],
+  recurringUntil: undefined,
+  recurringDates: [],
+  excludedDates: [],
   
   durationHours: 2,
   durationMinutes: 0,
@@ -1767,6 +2213,15 @@ export const INITIAL_FORM_DATA: TourFormData = {
   groupDiscountPercent: 5,
   
   isHalalCertified: false,
+  halalDetails: {
+    prayerSpace: false,
+    halalFood: false,
+    genderSensitiveGuides: false,
+    mosqueVisits: false
+  },
+  
+  isPremium: false,
+  isFamilyFriendly: true,
   
   availableLanguages: [],
   

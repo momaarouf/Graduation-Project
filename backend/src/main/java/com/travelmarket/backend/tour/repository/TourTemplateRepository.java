@@ -12,11 +12,21 @@ import java.util.Optional;
 public interface TourTemplateRepository extends JpaRepository<TourTemplate, Long> {
 
     // ── Guide-scoped queries ────────────────────────────────────────────────────
+    
+    long countByGuideIdAndStatus(Long guideId, TourTemplateStatus status);
 
-    /**
-     * All non-deleted templates owned by a specific guide.
-     * Used by the guide dashboard tour list.
-     */
+    long countByStatusAndDeletedAtUtcIsNull(TourTemplateStatus status);
+
+    @Query("SELECT COUNT(t) FROM TourTemplate t WHERE t.status = 'PUBLISHED' AND t.deletedAtUtc IS NULL AND t.category = :category")
+    long countPublishedByCategory(@Param("category") String category);
+
+    @Query("SELECT t.category as category, COUNT(t) as count FROM TourTemplate t WHERE t.status = 'PUBLISHED' AND t.deletedAtUtc IS NULL AND t.category IS NOT NULL GROUP BY t.category")
+    List<Object[]> countByCategories();
+
+    @Query("SELECT t.city as city, COUNT(t) as count FROM TourTemplate t WHERE t.status = 'PUBLISHED' AND t.deletedAtUtc IS NULL AND t.city IS NOT NULL GROUP BY t.city")
+    List<Object[]> countByCities();
+
+
     @Query("""
         SELECT t FROM TourTemplate t
         WHERE t.guide.id = :guideId
@@ -25,10 +35,6 @@ public interface TourTemplateRepository extends JpaRepository<TourTemplate, Long
     """)
     List<TourTemplate> findAllByGuideId(@Param("guideId") Long guideId);
 
-    /**
-     * One non-deleted template owned by a specific guide.
-     * Used for ownership-checked single-record operations (get, update, delete).
-     */
     @Query("""
         SELECT t FROM TourTemplate t
         WHERE t.id = :id
@@ -42,73 +48,174 @@ public interface TourTemplateRepository extends JpaRepository<TourTemplate, Long
 
     // ── Admin queries ───────────────────────────────────────────────────────────
 
-    /**
-     * All templates currently awaiting admin approval.
-     * Ordered oldest-first so the admin works through the queue in order.
-     */
     @Query("""
         SELECT t FROM TourTemplate t
-        WHERE t.status = 'PENDING_REVIEW'
+        WHERE t.status = :status
           AND t.deletedAtUtc IS NULL
         ORDER BY t.updatedAtUtc ASC
     """)
-    List<TourTemplate> findPendingReview();
+    List<TourTemplate> findByStatusOrderByUpdatedAtAsc(@Param("status") TourTemplateStatus status);
 
     // ── Public listing queries ──────────────────────────────────────────────────
 
-    /**
-     * Public tour listing with optional filters.
-     * Only PUBLISHED, non-deleted templates are returned.
-     *
-     * All filter params are nullable — pass null to skip that filter.
-     * Uses LOWER() for case-insensitive region and category matching.
-     */
     @Query("""
         SELECT t FROM TourTemplate t
-        WHERE t.status = 'PUBLISHED'
+        WHERE t.status = :status
           AND t.deletedAtUtc IS NULL
-          AND (:region IS NULL OR LOWER(t.region) = :region)
+          AND (:regions IS NULL OR LOWER(t.region) IN :regions)
+          AND (:countryCodes IS NULL OR UPPER(t.countryCode) IN :countryCodes)
           AND (:category IS NULL OR LOWER(t.category) = :category)
-          AND (:halalFriendly IS NULL OR t.halalFriendly = :halalFriendly)
-          AND (:instantBook IS NULL OR t.instantBook = :instantBook)
+          AND (:cities IS NULL OR LOWER(t.city) IN :cities)
+          AND (:query IS NULL OR (LOWER(t.title) LIKE :query OR LOWER(t.description) LIKE :query OR LOWER(t.guide.user.fullName) LIKE :query))
+          AND (:halalFriendly IS NULL OR COALESCE(t.halalFriendly, false) = :halalFriendly)
+          AND (:instantBook IS NULL OR COALESCE(t.instantBook, false) = :instantBook)
           AND (:minPrice IS NULL OR t.basePrice >= :minPrice)
           AND (:maxPrice IS NULL OR t.basePrice <= :maxPrice)
+          AND (COALESCE(:minDuration, 0) = 0 OR (COALESCE(t.durationHours, 0) * 60 + COALESCE(t.durationMinutes, 0)) >= :minDuration)
+          AND (COALESCE(:maxDuration, 0) = 0 OR (COALESCE(t.durationHours, 0) * 60 + COALESCE(t.durationMinutes, 0)) <= :maxDuration)
+          AND (:minCap IS NULL OR COALESCE(t.maxCapacity, 0) >= :minCap)
+          AND (:maxCap IS NULL OR COALESCE(t.maxCapacity, 999) <= :maxCap)
+          AND (:minRating IS NULL OR COALESCE(t.averageRating, 0) >= :minRating)
+          AND (:isPremium IS NULL OR COALESCE(t.isPremium, false) = :isPremium)
+          AND (:isFamilyFriendly IS NULL OR COALESCE(t.isFamilyFriendly, true) = :isFamilyFriendly)
+          AND (:hasGroupDiscount IS NULL OR COALESCE(t.hasGroupDiscount, false) = :hasGroupDiscount)
+          AND (:language IS NULL OR LOWER(COALESCE(t.languages, '')) LIKE :language)
         ORDER BY t.createdAtUtc DESC
     """)
-    List<TourTemplate> findPublishedWithFilters(
-            @Param("region") String region,
+    List<TourTemplate> findWithFilters(
+            @Param("status") TourTemplateStatus status,
+            @Param("regions") List<String> regions,
+            @Param("countryCodes") List<String> countryCodes,
             @Param("category") String category,
+            @Param("cities") List<String> cities,
+            @Param("query") String query,
             @Param("halalFriendly") Boolean halalFriendly,
             @Param("instantBook") Boolean instantBook,
             @Param("minPrice") java.math.BigDecimal minPrice,
-            @Param("maxPrice") java.math.BigDecimal maxPrice
+            @Param("maxPrice") java.math.BigDecimal maxPrice,
+            @Param("minDuration") Integer minDuration,
+            @Param("maxDuration") Integer maxDuration,
+            @Param("minCap") Integer minCap,
+            @Param("maxCap") Integer maxCap,
+            @Param("minRating") java.math.BigDecimal minRating,
+            @Param("isPremium") Boolean isPremium,
+            @Param("isFamilyFriendly") Boolean isFamilyFriendly,
+            @Param("hasGroupDiscount") Boolean hasGroupDiscount,
+            @Param("language") String language
     );
 
-    /**
-     * Single published, non-deleted template for the public tour detail page.
-     */
+    @Query("""
+        SELECT t FROM TourTemplate t
+        WHERE t.status = :status
+          AND t.deletedAtUtc IS NULL
+          AND (:regions IS NULL OR LOWER(t.region) IN :regions)
+          AND (:countryCodes IS NULL OR UPPER(t.countryCode) IN :countryCodes)
+          AND (:category IS NULL OR LOWER(t.category) = :category)
+          AND (:cities IS NULL OR LOWER(t.city) IN :cities)
+          AND (:query IS NULL OR (LOWER(t.title) LIKE :query OR LOWER(t.description) LIKE :query OR LOWER(t.guide.user.fullName) LIKE :query))
+          AND (:halalFriendly IS NULL OR COALESCE(t.halalFriendly, false) = :halalFriendly)
+          AND (:instantBook IS NULL OR COALESCE(t.instantBook, false) = :instantBook)
+          AND (:minPrice IS NULL OR t.basePrice >= :minPrice)
+          AND (:maxPrice IS NULL OR t.basePrice <= :maxPrice)
+          AND (COALESCE(:minDuration, 0) = 0 OR (COALESCE(t.durationHours, 0) * 60 + COALESCE(t.durationMinutes, 0)) >= :minDuration)
+          AND (COALESCE(:maxDuration, 0) = 0 OR (COALESCE(t.durationHours, 0) * 60 + COALESCE(t.durationMinutes, 0)) <= :maxDuration)
+          AND (:minCap IS NULL OR COALESCE(t.maxCapacity, 0) >= :minCap)
+          AND (:maxCap IS NULL OR COALESCE(t.maxCapacity, 999) <= :maxCap)
+          AND (:minRating IS NULL OR COALESCE(t.averageRating, 0) >= :minRating)
+          AND (:isPremium IS NULL OR COALESCE(t.isPremium, false) = :isPremium)
+          AND (:isFamilyFriendly IS NULL OR COALESCE(t.isFamilyFriendly, true) = :isFamilyFriendly)
+          AND (:hasGroupDiscount IS NULL OR COALESCE(t.hasGroupDiscount, false) = :hasGroupDiscount)
+          AND (:language IS NULL OR LOWER(COALESCE(t.languages, '')) LIKE :language)
+        ORDER BY t.basePrice ASC
+    """)
+    List<TourTemplate> findWithFiltersPriceAsc(
+            @Param("status") TourTemplateStatus status,
+            @Param("regions") List<String> regions,
+            @Param("countryCodes") List<String> countryCodes,
+            @Param("category") String category,
+            @Param("cities") List<String> cities,
+            @Param("query") String query,
+            @Param("halalFriendly") Boolean halalFriendly,
+            @Param("instantBook") Boolean instantBook,
+            @Param("minPrice") java.math.BigDecimal minPrice,
+            @Param("maxPrice") java.math.BigDecimal maxPrice,
+            @Param("minDuration") Integer minDuration,
+            @Param("maxDuration") Integer maxDuration,
+            @Param("minCap") Integer minCap,
+            @Param("maxCap") Integer maxCap,
+            @Param("minRating") java.math.BigDecimal minRating,
+            @Param("isPremium") Boolean isPremium,
+            @Param("isFamilyFriendly") Boolean isFamilyFriendly,
+            @Param("hasGroupDiscount") Boolean hasGroupDiscount,
+            @Param("language") String language
+    );
+
+    @Query("""
+        SELECT t FROM TourTemplate t
+        WHERE t.status = :status
+          AND t.deletedAtUtc IS NULL
+          AND (:regions IS NULL OR LOWER(t.region) IN :regions)
+          AND (:countryCodes IS NULL OR UPPER(t.countryCode) IN :countryCodes)
+          AND (:category IS NULL OR LOWER(t.category) = :category)
+          AND (:cities IS NULL OR LOWER(t.city) IN :cities)
+          AND (:query IS NULL OR (LOWER(t.title) LIKE :query OR LOWER(t.description) LIKE :query OR LOWER(t.guide.user.fullName) LIKE :query))
+          AND (:halalFriendly IS NULL OR COALESCE(t.halalFriendly, false) = :halalFriendly)
+          AND (:instantBook IS NULL OR COALESCE(t.instantBook, false) = :instantBook)
+          AND (:minPrice IS NULL OR t.basePrice >= :minPrice)
+          AND (:maxPrice IS NULL OR t.basePrice <= :maxPrice)
+          AND (COALESCE(:minDuration, 0) = 0 OR (COALESCE(t.durationHours, 0) * 60 + COALESCE(t.durationMinutes, 0)) >= :minDuration)
+          AND (COALESCE(:maxDuration, 0) = 0 OR (COALESCE(t.durationHours, 0) * 60 + COALESCE(t.durationMinutes, 0)) <= :maxDuration)
+          AND (:minCap IS NULL OR COALESCE(t.maxCapacity, 0) >= :minCap)
+          AND (:maxCap IS NULL OR COALESCE(t.maxCapacity, 999) <= :maxCap)
+          AND (:minRating IS NULL OR COALESCE(t.averageRating, 0) >= :minRating)
+          AND (:isPremium IS NULL OR COALESCE(t.isPremium, false) = :isPremium)
+          AND (:isFamilyFriendly IS NULL OR COALESCE(t.isFamilyFriendly, true) = :isFamilyFriendly)
+          AND (:hasGroupDiscount IS NULL OR COALESCE(t.hasGroupDiscount, false) = :hasGroupDiscount)
+          AND (:language IS NULL OR LOWER(COALESCE(t.languages, '')) LIKE :language)
+        ORDER BY t.basePrice DESC
+    """)
+    List<TourTemplate> findWithFiltersPriceDesc(
+            @Param("status") TourTemplateStatus status,
+            @Param("regions") List<String> regions,
+            @Param("countryCodes") List<String> countryCodes,
+            @Param("category") String category,
+            @Param("cities") List<String> cities,
+            @Param("query") String query,
+            @Param("halalFriendly") Boolean halalFriendly,
+            @Param("instantBook") Boolean instantBook,
+            @Param("minPrice") java.math.BigDecimal minPrice,
+            @Param("maxPrice") java.math.BigDecimal maxPrice,
+            @Param("minDuration") Integer minDuration,
+            @Param("maxDuration") Integer maxDuration,
+            @Param("minCap") Integer minCap,
+            @Param("maxCap") Integer maxCap,
+            @Param("minRating") java.math.BigDecimal minRating,
+            @Param("isPremium") Boolean isPremium,
+            @Param("isFamilyFriendly") Boolean isFamilyFriendly,
+            @Param("hasGroupDiscount") Boolean hasGroupDiscount,
+            @Param("language") String language
+    );
+
     @Query("""
         SELECT t FROM TourTemplate t
         WHERE t.id = :id
-          AND t.status = 'PUBLISHED'
+          AND t.status = :status
           AND t.deletedAtUtc IS NULL
     """)
-    Optional<TourTemplate> findPublishedById(@Param("id") Long id);
+    Optional<TourTemplate> findByIdAndStatus(
+            @Param("id") Long id,
+            @Param("status") TourTemplateStatus status
+    );
 
-    // ── Portfolio queries ───────────────────────────────────────────────────────
+    @Query("""
+        SELECT COUNT(t) FROM TourTemplate t
+        WHERE t.guide.id = :guideId
+          AND t.lastPublishedAtUtc IS NOT NULL
+          AND t.showInPortfolio = true
+          AND t.deletedAtUtc IS NULL
+    """)
+    long countPortfolioByGuideId(@Param("guideId") Long guideId);
 
-    /**
-     * Guide portfolio — all tours that were ever approved and the guide
-     * has opted into showing publicly, regardless of current status.
-     *
-     * Eligibility rule:
-     *   last_published_at_utc IS NOT NULL  → was approved at least once
-     *   show_in_portfolio = true           → guide has not opted out
-     *   deleted_at_utc IS NULL             → not soft-deleted
-     *
-     * This correctly includes PUBLISHED, PAUSED, and ARCHIVED tours.
-     * DRAFT and REJECTED tours are excluded because lastPublishedAtUtc is null.
-     */
     @Query("""
         SELECT t FROM TourTemplate t
         WHERE t.guide.id = :guideId
@@ -119,10 +226,6 @@ public interface TourTemplateRepository extends JpaRepository<TourTemplate, Long
     """)
     List<TourTemplate> findPortfolioByGuideId(@Param("guideId") Long guideId);
 
-    /**
-     * Single portfolio tour — applies the same eligibility rules as the list,
-     * scoped to one tour and one guide (ownership check for the detail page).
-     */
     @Query("""
         SELECT t FROM TourTemplate t
         WHERE t.id = :id
@@ -136,14 +239,6 @@ public interface TourTemplateRepository extends JpaRepository<TourTemplate, Long
             @Param("guideId") Long guideId
     );
 
-    // ── Existence checks ────────────────────────────────────────────────────────
-
-    /**
-     * Used before soft-deleting a PUBLISHED template to enforce the rule:
-     * a guide cannot delete a published tour that still has future occurrences.
-     * The check itself is done in TourTemplateService using TourOccurrenceRepository.
-     * This query is a lightweight ownership + status check.
-     */
     @Query("""
         SELECT t FROM TourTemplate t
         WHERE t.id = :id
@@ -151,3 +246,106 @@ public interface TourTemplateRepository extends JpaRepository<TourTemplate, Long
     """)
     Optional<TourTemplate> findByIdNotDeleted(@Param("id") Long id);
 }
+
+// BUFFER ZONE START
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// ................................................................................
+// BUFFER ZONE END

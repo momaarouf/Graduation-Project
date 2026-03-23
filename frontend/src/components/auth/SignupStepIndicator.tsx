@@ -99,7 +99,7 @@ export default function SignupStepIndicator({
             <div className="hidden sm:block">
                 <div className="relative">
                     {/* Progress Line */}
-                    <div className="absolute top-5 left-0 w-full h-0.5 bg-gray-200 dark:bg-gray-800">
+                    <div className="absolute top-4 left-0 w-full h-[1px] bg-gray-200 dark:bg-gray-800">
                         <div
                             className="absolute h-full bg-blue-600 dark:bg-blue-500 transition-all duration-500"
                             style={{
@@ -125,36 +125,37 @@ export default function SignupStepIndicator({
                                     onClick={() => isClickable && onStepClick(step.step)}
                                     className={`
                                         flex flex-col items-center
-                                        ${isClickable ? 'cursor-pointer' : 'cursor-default'}
+                                        ${isClickable ? 'cursor-pointer hover:opacity-80' : 'cursor-default'}
+                                        transition-opacity
                                     `}
                                     disabled={!isClickable}
                                 >
                                     {/* Step Circle */}
                                     <div
                                         className={`
-                                            w-10 h-10 rounded-full flex items-center justify-center
-                                            border-2 transition-all duration-300
+                                            w-8 h-8 rounded-full flex items-center justify-center
+                                            border transition-all duration-300
                                             ${isCompleted || isCurrent
-                                                ? 'border-blue-600 dark:border-blue-500'
-                                                : 'border-gray-300 dark:border-gray-700'
+                                                ? 'border-blue-600 dark:border-blue-500 shadow-sm'
+                                                : 'border-gray-200 dark:border-gray-800'
                                             }
                                             ${isCompleted
                                                 ? 'bg-blue-600 dark:bg-blue-500'
                                                 : isCurrent
-                                                    ? 'bg-blue-50 dark:bg-blue-900/20'
+                                                    ? 'bg-blue-50 dark:bg-blue-900/30'
                                                     : 'bg-white dark:bg-gray-900'
                                             }
                                         `}
                                     >
                                         {isCompleted ? (
-                                            <Check className="w-5 h-5 text-white" />
+                                            <Check className="w-4 h-4 text-white" />
                                         ) : (
                                             <span
                                                 className={`
-                                                    text-sm font-semibold
+                                                    text-[10px] font-black
                                                     ${isCurrent
                                                         ? 'text-blue-600 dark:text-blue-400'
-                                                        : 'text-gray-500 dark:text-gray-400'
+                                                        : 'text-gray-400 dark:text-gray-600'
                                                     }
                                                 `}
                                             >
@@ -164,22 +165,19 @@ export default function SignupStepIndicator({
                                     </div>
 
                                     {/* Step Label */}
-                                    <div className="mt-2 text-center">
+                                    <div className="mt-3 text-center">
                                         <p
                                             className={`
-                                                text-xs font-semibold
+                                                text-[10px] font-black uppercase tracking-widest
                                                 ${isCurrent
                                                     ? 'text-blue-600 dark:text-blue-400'
                                                     : isCompleted
                                                         ? 'text-gray-900 dark:text-white'
-                                                        : 'text-gray-500 dark:text-gray-400'
+                                                        : 'text-gray-400 dark:text-gray-600'
                                                 }
                                             `}
                                         >
                                             {step.label}
-                                        </p>
-                                        <p className="text-xs text-gray-400 dark:text-gray-500 hidden md:block">
-                                            {step.description}
                                         </p>
                                     </div>
                                 </button>

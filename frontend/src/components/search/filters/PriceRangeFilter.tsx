@@ -74,7 +74,11 @@ export default function PriceRangeFilter({
         const min = localMin === '' ? undefined : Number(localMin)
         const max = localMax === '' ? undefined : Number(localMax)
 
-        // Only update if values are valid
+        // Only update if values are valid AND different from initial props
+        // This prevents the "refresh to all" bug on mount
+        const isInitialValue = min === minPrice && max === maxPrice
+        if (isInitialValue) return
+
         if (
             (min === undefined || !isNaN(min)) &&
             (max === undefined || !isNaN(max))
@@ -157,10 +161,10 @@ export default function PriceRangeFilter({
             {/* ========================================
           PRICE INPUTS - Dual field
           ======================================== */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
                 {/* Min input */}
                 <div className="flex-1 relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-[15px] font-medium">
                         {currencySymbol}
                     </span>
                     <input
@@ -170,16 +174,16 @@ export default function PriceRangeFilter({
                         placeholder="Min"
                         min={absoluteMin}
                         max={maxPrice || absoluteMax}
-                        className="w-full pl-7 pr-3 py-2 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full pl-8 pr-3 py-2.5 text-[15px] font-medium bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 dark:focus:ring-white dark:focus:border-white transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         aria-label="Minimum price"
                     />
                 </div>
 
-                <span className="text-gray-500 dark:text-gray-400">—</span>
+                <span className="text-gray-400 dark:text-gray-500 font-medium">—</span>
 
                 {/* Max input */}
                 <div className="flex-1 relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-[15px] font-medium">
                         {currencySymbol}
                     </span>
                     <input
@@ -189,7 +193,7 @@ export default function PriceRangeFilter({
                         placeholder="Max"
                         min={minPrice || absoluteMin}
                         max={absoluteMax}
-                        className="w-full pl-7 pr-3 py-2 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full pl-8 pr-3 py-2.5 text-[15px] font-medium bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 dark:focus:ring-white dark:focus:border-white transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         aria-label="Maximum price"
                     />
                 </div>

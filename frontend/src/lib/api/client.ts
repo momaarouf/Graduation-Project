@@ -3,6 +3,9 @@ import axios from 'axios';
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true, // required for refresh cookie
+  paramsSerializer: {
+    indexes: null // serialize arrays as ?key=val1&key=val2
+  }
 });
 
 let isRefreshing = false;
@@ -45,8 +48,12 @@ apiClient.interceptors.response.use(
   async error => {
     const originalRequest = error.config;
 
-    // Special case: never retry or redirect on 401 from /api/auth/me
-    if (originalRequest.url?.includes('/api/auth/me') && error.response?.status === 401) {
+    // Special cases: never retry or refresh for login, register, or /me
+    const isAuthEndpoint = originalRequest.url?.includes('/api/auth/login') || 
+                           originalRequest.url?.includes('/api/auth/register') ||
+                           originalRequest.url?.includes('/api/auth/me');
+
+    if (isAuthEndpoint && error.response?.status === 401) {
       return Promise.reject(error);
     }
 

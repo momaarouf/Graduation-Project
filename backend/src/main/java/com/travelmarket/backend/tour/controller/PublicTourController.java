@@ -1,5 +1,6 @@
 package com.travelmarket.backend.tour.controller;
 
+import com.travelmarket.backend.dto.PublicGuideProfileResponse;
 import com.travelmarket.backend.tour.dto.response.*;
 import com.travelmarket.backend.tour.service.PublicTourService;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import java.util.List;
  * Public tour browsing and guide portfolio endpoints.
  * No authentication required (permitAll in SecurityConfig).
  *
+ *   GET /api/public/guides/{guideId}                public guide profile
  *   GET /api/public/tours                            browse listing with filters
  *   GET /api/public/tours/{id}                       tour detail
  *   GET /api/public/tours/{id}/occurrences           future active occurrences
@@ -41,15 +43,29 @@ public class PublicTourController {
      */
     @GetMapping("/tours")
     public List<PublicTourCardResponse> listTours(
-            @RequestParam(required = false) String region,
+            @RequestParam(required = false) List<String> regions,
             @RequestParam(required = false) String category,
+            @RequestParam(required = false) List<String> cities,
+            @RequestParam(required = false) String query,
             @RequestParam(required = false) Boolean halalFriendly,
             @RequestParam(required = false) Boolean instantBook,
             @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice) {
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) Integer minDuration,
+            @RequestParam(required = false) Integer maxDuration,
+            @RequestParam(required = false) Integer minCap,
+            @RequestParam(required = false) Integer maxCap,
+            @RequestParam(required = false) BigDecimal minRating,
+            @RequestParam(required = false) Boolean isPremium,
+            @RequestParam(required = false) Boolean isFamilyFriendly,
+            @RequestParam(required = false) Boolean hasGroupDiscount,
+            @RequestParam(required = false) String language,
+            @RequestParam(required = false) String sortBy) {
 
         return publicTourService.listTours(
-                region, category, halalFriendly, instantBook, minPrice, maxPrice);
+                regions, category, cities, query, halalFriendly, instantBook, 
+                minPrice, maxPrice, minDuration, maxDuration, minCap, maxCap, 
+                minRating, isPremium, isFamilyFriendly, hasGroupDiscount, language, sortBy);
     }
 
     /** Full detail for one published tour. */
@@ -90,5 +106,19 @@ public class PublicTourController {
             @PathVariable Long guideId,
             @PathVariable Long tourId) {
         return publicTourService.getPortfolioTourDetail(guideId, tourId);
+    }
+
+    /** Public profile lookup for the guide portfolio page. */
+    @GetMapping("/guides/{guideId}")
+    public PublicGuideProfileResponse getGuideProfile(@PathVariable Long guideId) {
+        return publicTourService.getPublicGuideProfile(guideId);
+    }
+
+    /**
+     * Search for verified guides by name.
+     */
+    @GetMapping("/guides/search")
+    public List<PublicGuideProfileResponse> searchGuides(@RequestParam("q") String q) {
+        return publicTourService.searchGuides(q);
     }
 }

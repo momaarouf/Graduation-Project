@@ -162,10 +162,10 @@ export default function CheckboxFilter<T = string>({
                     return (
                         <label
                             key={String(option.id)}
-                            className={`flex items-center gap-2 cursor-pointer group ${option.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`flex items-center gap-3 cursor-pointer group py-1.5 ${option.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             {/* ========================================
-                  Custom Checkbox - Better than native
+                  Custom Checkbox - Premium styling
                   ======================================== */}
                             <div className="relative flex items-center justify-center">
                                 <input
@@ -173,20 +173,20 @@ export default function CheckboxFilter<T = string>({
                                     checked={isSelected}
                                     onChange={() => handleToggle(option.id)}
                                     disabled={option.disabled}
-                                    className="peer absolute opacity-0 w-4 h-4 cursor-pointer"
+                                    className="peer absolute opacity-0 w-5 h-5 cursor-pointer"
                                     aria-label={option.label}
                                 />
 
                                 {/* Checkbox visual */}
-                                <div className={`w-4 h-4 border rounded transition-all duration-200 flex items-center justify-center ${isSelected ? 'bg-blue-600 dark:bg-blue-500 border-blue-600 dark:border-blue-500' : 'bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 group-hover:border-gray-400 dark:group-hover:border-gray-600'} ${option.disabled ? 'bg-gray-100 dark:bg-gray-800' : ''}`}>
+                                <div className={`w-5 h-5 border-[1.5px] rounded-md transition-all duration-200 flex items-center justify-center ${isSelected ? 'bg-gray-900 dark:bg-white border-gray-900 dark:border-white' : 'bg-white dark:bg-gray-950 border-gray-300 dark:border-gray-700 group-hover:border-gray-500 dark:group-hover:border-gray-400'}`}>
                                     {isSelected && (
-                                        <Check className="w-3 h-3 text-white" />
+                                        <Check className="w-3.5 h-3.5 text-white dark:text-gray-900 stroke-[3]" />
                                     )}
                                 </div>
                             </div>
 
                             {/* Label with count badge */}
-                            <span className={`flex-1 text-xs sm:text-sm ${isSelected ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-700 dark:text-gray-300'}`}>
+                            <span className={`flex-1 text-[15px] leading-snug ${isSelected ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-300'}`}>
                                 {option.label}
                             </span>
 

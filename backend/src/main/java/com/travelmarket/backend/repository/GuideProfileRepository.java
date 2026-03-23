@@ -9,36 +9,52 @@ import java.util.Optional;
 
 public interface GuideProfileRepository extends JpaRepository<GuideProfile, Long> {
 
-    Optional<GuideProfile> findByUserId(Long userId);
+  Optional<GuideProfile> findByUserId(Long userId);
+  long countByIdVerifiedTrueAndDeletedAtUtcIsNull();
 
-    /**
-     * Pending = submitted, not verified, not deleted, and NOT rejected.
-     */
-    @Query("""
-        SELECT gp FROM GuideProfile gp
-        WHERE gp.deletedAtUtc IS NULL
-          AND gp.idVerified = false
-          AND gp.verificationSubmittedAtUtc IS NOT NULL
-          AND gp.verificationRejectedReason IS NULL
-    """)
-    List<GuideProfile> findPendingVerifications();
 
-    /**
-     * Rejected = submitted, not verified, not deleted, and rejected reason exists.
-     */
-    @Query("""
-        SELECT gp FROM GuideProfile gp
-        WHERE gp.deletedAtUtc IS NULL
-          AND gp.idVerified = false
-          AND gp.verificationSubmittedAtUtc IS NOT NULL
-          AND gp.verificationRejectedReason IS NOT NULL
-    """)
-    List<GuideProfile> findRejectedVerifications();
-    @Query("""
-    SELECT gp FROM GuideProfile gp
-    WHERE gp.deletedAtUtc IS NULL
-      AND gp.idVerified = true
-    ORDER BY gp.idVerifiedAtUtc DESC
-""")
-    List<GuideProfile> findVerifiedGuides();
+  @Query("SELECT gp FROM GuideProfile gp JOIN gp.user u WHERE u.email = :email")
+  Optional<GuideProfile> findByUserEmail(String email);
+
+  /**
+   * Pending = submitted, not verified, not deleted, and NOT rejected.
+   */
+  @Query("""
+          SELECT gp FROM GuideProfile gp
+          WHERE gp.deletedAtUtc IS NULL
+            AND gp.idVerified = false
+            AND gp.verificationSubmittedAtUtc IS NOT NULL
+            AND gp.verificationRejectedReason IS NULL
+      """)
+  List<GuideProfile> findPendingVerifications();
+
+  /**
+   * Rejected = submitted, not verified, not deleted, and rejected reason exists.
+   */
+  @Query("""
+          SELECT gp FROM GuideProfile gp
+          WHERE gp.deletedAtUtc IS NULL
+            AND gp.idVerified = false
+            AND gp.verificationSubmittedAtUtc IS NOT NULL
+            AND gp.verificationRejectedReason IS NOT NULL
+      """)
+  List<GuideProfile> findRejectedVerifications();
+
+  @Query("""
+          SELECT gp FROM GuideProfile gp
+          WHERE gp.deletedAtUtc IS NULL
+            AND gp.idVerified = true
+          ORDER BY gp.idVerifiedAtUtc DESC
+      """)
+  List<GuideProfile> findVerifiedGuides();
+
+  @Query("""
+          SELECT gp FROM GuideProfile gp
+          JOIN gp.user u
+          WHERE gp.deletedAtUtc IS NULL
+            AND gp.idVerified = true
+            AND LOWER(u.fullName) LIKE :query
+          ORDER BY u.fullName ASC
+      """)
+  List<GuideProfile> findByPartialName(@org.springframework.data.repository.query.Param("query") String query);
 }

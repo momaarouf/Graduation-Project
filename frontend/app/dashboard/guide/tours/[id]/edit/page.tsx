@@ -1,119 +1,125 @@
-// ============================================================================
-// EDIT TOUR PAGE
-// ============================================================================
+'use client'
 
+import { useState, useEffect, use } from 'react'
 import TourForm from '../../components/TourForm'
+import { getGuideTour } from '@/src/lib/api/tours'
+import { TourTemplateResponse } from '@/src/lib/types/tour.types'
+import { RefreshCw, AlertCircle } from 'lucide-react'
+import toast from 'react-hot-toast'
 
-// Mock data for different tour IDs (Phase 1)
-const MOCK_TOUR_DATA: Record<string, any> = {
-  '1': {
-    title: 'Ottoman Heritage Tour',
-    description: 'Explore Istanbul\'s rich history with a licensed guide...',
-    category: 'historical',
-    tags: ['istanbul', 'ottoman', 'history'],
-    city: 'Istanbul',
-    country: 'turkey',
-    meetingPoint: {
-      name: 'Sultanahmet Square Fountain',
-      address: 'Sultanahmet Meydanı, Istanbul',
-      instructions: 'Look for the orange umbrella'
-    },
-    minCapacity: 2,
-    maxCapacity: 8,
-    bookingMode: 'instant',
-    instantBookEnabled: true,
-    tourType: 'recurring',
-    recurrencePattern: 'weekly',
-    recurringDays: ['monday', 'wednesday', 'friday'],
-    durationHours: 4,
-    durationMinutes: 0,
-    basePrice: 89,
-    currency: 'USD',
-    dynamicPricing: { enabled: true, weekendMultiplier: 120, holidayMultiplier: 150 },
-    groupDiscountEnabled: true,
-    groupDiscountThreshold: 4,
-    groupDiscountPercent: 5,
-    isHalalCertified: true,
-    halalDetails: { prayerSpace: true, halalFood: true, genderSensitiveGuides: true },
-    availableLanguages: [
-      { language: 'English', proficiency: 'native' },
-      { language: 'Arabic', proficiency: 'fluent' }
-    ],
-    itinerary: [
-      { id: '1', order: 1, title: 'Hagia Sophia', description: 'Visit the iconic mosque', duration: '1.5 hours' },
-      { id: '2', order: 2, title: 'Topkapi Palace', description: 'Explore the Ottoman palace', duration: '2 hours' }
-    ],
-    inclusions: ['Professional guide', 'Entry tickets', 'Lunch'],
-    exclusions: ['Hotel pickup', 'Personal expenses'],
-    requirements: ['Modest dress code'],
-    whatToBring: ['Camera', 'Water'],
-    cancellationPolicy: { fullRefund: 48, partialRefund: 24, partialRefundPercent: 50, noRefund: 24 },
-    status: 'published'
-  },
-  '2': {
-    title: 'Bosphorus Sunset Cruise',
-    description: 'Enjoy a beautiful sunset cruise on the Bosphorus...',
-    category: 'nature',
-    tags: ['bosphorus', 'cruise', 'sunset'],
-    city: 'Istanbul',
-    country: 'turkey',
-    meetingPoint: {
-      name: 'Kabataş Ferry Terminal',
-      address: 'Kabataş, Istanbul',
-      instructions: 'Meet at the main entrance'
-    },
-    minCapacity: 4,
-    maxCapacity: 20,
-    bookingMode: 'request',
-    instantBookEnabled: false,
-    tourType: 'one-time',
-    startDate: '2026-06-15T18:00',
-    durationHours: 3,
-    durationMinutes: 0,
-    basePrice: 129,
-    currency: 'USD',
-    dynamicPricing: { enabled: false },
-    groupDiscountEnabled: true,
-    groupDiscountThreshold: 6,
-    groupDiscountPercent: 10,
-    isHalalCertified: true,
-    halalDetails: { halalFood: true },
-    availableLanguages: [
-      { language: 'English', proficiency: 'fluent' },
-      { language: 'Turkish', proficiency: 'native' }
-    ],
-    itinerary: [
-      { id: '1', order: 1, title: 'Departure', description: 'Board the boat at Kabataş', duration: '30 min' },
-      { id: '2', order: 2, title: 'Sunset Viewing', description: 'Enjoy the sunset', duration: '1.5 hours' }
-    ],
-    inclusions: ['Boat cruise', 'Dinner', 'Soft drinks'],
-    exclusions: ['Alcoholic drinks'],
-    requirements: [],
-    whatToBring: ['Camera', 'Jacket'],
-    cancellationPolicy: { fullRefund: 48, partialRefund: 24, partialRefundPercent: 50, noRefund: 24 },
-    status: 'published'
-  }
-}
-
-export default function EditTourPage({ params }: { params: { id: string } }) {
-  const tourData = MOCK_TOUR_DATA[params.id]
+export default function EditTourPage({ params }: { params: Promise<{ id: string }> }) {
+  const unwrappedParams = use(params)
+  const id = unwrappedParams.id
   
-  if (!tourData) {
+  const [tour, setTour] = useState<TourTemplateResponse | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchTour = async () => {
+      try {
+        setLoading(true)
+        const res = await getGuideTour(parseInt(id))
+        setTour(res.data)
+      } catch (err: any) {
+        const msg = err.response?.data?.message || 'Failed to fetch tour'
+        setError(msg)
+        toast.error(msg)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchTour()
+  }, [id])
+
+  if (loading) {
+    return (
+      <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center gap-4">
+        <RefreshCw className="w-8 h-8 text-blue-500 animate-spin" />
+        <p className="text-sm font-medium text-gray-500">Loading tour data...</p>
+      </div>
+    )
+  }
+
+  if (error || !tour) {
     return (
       <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center px-6">
+          <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
+          </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Tour Not Found</h1>
-          <p className="text-gray-600 dark:text-gray-400">The tour you're trying to edit doesn't exist.</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">{error || "The tour you're trying to edit doesn't exist or you don't have permission."}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors"
+          >
+            Retry
+          </button>
         </div>
       </div>
     )
   }
-  
+
+  // Map backend TourTemplateResponse to TourFormData for the form
+  const initialData: any = {
+    ...tour,
+    city: tour.city || tour.locationName || '', // Alignment
+    country: tour.countryCode === 'LB' ? 'lebanon' : 'turkey', // Alignment
+    isHalalCertified: tour.halalFriendly, // Alignment
+    instantBookEnabled: tour.instantBook, // Alignment
+    meetingPoint: {
+      name: tour.meetingPointName || '',
+      address: tour.meetingPointAddress || '',
+      instructions: tour.meetingPointInstructions || '',
+      lat: tour.meetingLatitude,
+      lng: tour.meetingLongitude
+    },
+    gallery: tour.media?.map(m => ({
+      id: m.id.toString(),
+      type: m.mediaType.toLowerCase(),
+      url: m.url,
+      caption: ''
+    })) || [],
+    itinerary: tour.itinerary ? JSON.parse(tour.itinerary) : [],
+    inclusions: tour.inclusions ? JSON.parse(tour.inclusions) : [],
+    exclusions: tour.exclusions ? JSON.parse(tour.exclusions) : [],
+    requirements: tour.requirements ? JSON.parse(tour.requirements) : [],
+    whatToBring: tour.whatToBring ? JSON.parse(tour.whatToBring) : [],
+    tags: tour.tags ? JSON.parse(tour.tags) : [],
+    availableLanguages: tour.languages ? JSON.parse(tour.languages) : [],
+    minCapacity: tour.minCapacity ?? 1,
+    maxCapacity: tour.maxCapacity ?? 10,
+    durationHours: tour.durationHours ?? 2,
+    durationMinutes: tour.durationMinutes ?? 0,
+    tourType: tour.isRecurring ? 'recurring' : 'one-time',
+    recurrencePattern: tour.recurrencePattern?.toLowerCase() || 'weekly',
+    recurringDays: tour.recurringDays ? tour.recurringDays.split(',').map(d => d.trim().toLowerCase()) : [],
+    recurringUntil: tour.recurringUntil || undefined,
+    recurringDates: tour.recurringDates ? JSON.parse(tour.recurringDates) : [],
+    excludedDates: tour.excludedDates ? JSON.parse(tour.excludedDates) : [],
+    
+    // New fields
+    dynamicPricing: tour.dynamicPricing ? JSON.parse(tour.dynamicPricing) : { enabled: false },
+    halalDetails: tour.halalDetails ? JSON.parse(tour.halalDetails) : {
+      prayerSpace: false,
+      halalFood: false,
+      genderSensitiveGuides: false,
+      mosqueVisits: false
+    },
+    isPremium: tour.isPremium || false,
+    isFamilyFriendly: tour.isFamilyFriendly !== undefined ? tour.isFamilyFriendly : true,
+    groupDiscountEnabled: tour.hasGroupDiscount || false,
+    groupDiscountThreshold: tour.groupDiscountThreshold || 4,
+    groupDiscountPercent: tour.groupDiscountPercent || 5,
+    status: tour.status?.toLowerCase() || 'draft'
+  }
+
   return (
     <TourForm 
-      initialData={tourData}
+      initialData={initialData}
       isEditing={true}
-      tourId={params.id}
+      tourId={id}
     />
   )
-}
+}

@@ -27,12 +27,24 @@ public class PublicTourDetailResponse {
     // Location
     private String locationName;
     private String region;
+    private String city;
     private String countryCode;
 
     // Meeting point (shown after booking in full; shown here for awareness)
     private String meetingPointName;
+    private String meetingPointAddress;
+    private String meetingPointInstructions;
     private BigDecimal meetingLatitude;
     private BigDecimal meetingLongitude;
+
+    // Content specifics
+    private String itinerary;
+    private String inclusions;
+    private String exclusions;
+    private String requirements;
+    private String whatToBring;
+    private String tags;
+    private String languages;
 
     // Pricing
     private BigDecimal basePrice;
@@ -41,11 +53,17 @@ public class PublicTourDetailResponse {
     // Capacity
     private Integer minCapacity;
     private Integer maxCapacity;
+    private Integer durationHours;
+    private Integer durationMinutes;
 
     // Booking behaviour
     private Boolean instantBook;
     private Boolean isRecurring;
     private String recurrencePattern;
+    private String recurringDays;
+    private Instant recurringUntil;
+    private String recurringDates;
+    private String excludedDates;
 
     // Trust signals
     private Boolean halalFriendly;
@@ -53,6 +71,7 @@ public class PublicTourDetailResponse {
     // Guide info
     private Long guideId;
     private String guideDisplayName;
+    private String guideAvatarUrl;
     private Boolean guideVerified;
 
     // Full ordered media gallery (cover first by displayOrder)
@@ -62,6 +81,14 @@ public class PublicTourDetailResponse {
     private List<TourOccurrenceResponse> occurrences;
 
     // Reviews — null until review system is implemented
-    private Double averageRating;
+    private BigDecimal averageRating;
     private Integer reviewCount;
+
+    private Boolean isPremium;
+    private Boolean isFamilyFriendly;
+    private Boolean hasGroupDiscount;
+    private Integer groupDiscountThreshold;
+    private java.math.BigDecimal groupDiscountPercent;
+    private String dynamicPricing;
+    private String halalDetails;
 }

@@ -34,7 +34,7 @@ import {
   TourStatus 
 } from '@/src/types/tour-detail.types'
 import { 
-  getTourById, 
+  getPublicTourDetail, 
   getTourReviews, 
   getSimilarTours,
   GetTourReviewsParams,
@@ -215,7 +215,7 @@ export function useTourDetail({
         return
       }
       
-      setTour(data)
+      setTour(data as any)
     } catch (error) {
       console.error('[useTourDetail] Failed to fetch tour:', error)
       setTourError(error instanceof Error ? error : new Error('Failed to fetch tour'))
