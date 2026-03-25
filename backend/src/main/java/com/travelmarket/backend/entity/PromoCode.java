@@ -1,5 +1,6 @@
 package com.travelmarket.backend.entity;
 
+import com.travelmarket.backend.booking.entity.Booking;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +10,19 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A promotional discount code that can be applied to bookings.
+ *
+ * Scope:
+ *   guide IS NULL  → platform-wide promo (issued by admin)
+ *   guide NOT NULL → guide-specific promo (issued by a guide for their own tours)
+ *
+ * guideFunded = true means the discount is taken from the guide's payout,
+ * not the platform's margin. Logic lives in the payment card.
+ *
+ * maxUses / usedCount: basic usage cap. Incremented atomically in BookingService
+ * when a promo is applied. Full idempotency enforcement lives in the payment card.
+ */
 @Entity
 @Table(name = "promo_codes")
 @Getter
@@ -19,9 +33,10 @@ public class PromoCode {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    // null = platform-wide promo; non-null = guide-specific promo
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "guide_id")
-    private GuideProfile guide;          // nullable – if null, it's a platform-wide promo
+    private GuideProfile guide;
 
     @Column(unique = true, nullable = false, length = 50)
     private String code;
@@ -29,17 +44,21 @@ public class PromoCode {
     @Column(name = "discount_percent", nullable = false, precision = 5, scale = 2)
     private BigDecimal discountPercent;
 
+    // true = discount comes from guide's payout, not platform margin
     @Column(name = "guide_funded")
-    private Boolean guideFunded = false; // true = discount taken from guide's payout
+    private Boolean guideFunded = false;
 
+    // Maximum number of times this code can be used across all travelers
     @Column(name = "max_uses")
-    private Integer maxUses;              // maximum number of times this code can be used
+    private Integer maxUses;
 
+    // Incremented each time the code is successfully applied to a booking
     @Column(name = "used_count")
-    private Integer usedCount = 0;        // how many times used so far
+    private Integer usedCount = 0;
 
+    // null = never expires
     @Column(name = "expires_at_utc")
-    private Instant expiresAtUtc;          // when the code becomes invalid (null = never)
+    private Instant expiresAtUtc;
 
     @Column(name = "created_at_utc", updatable = false)
     private Instant createdAtUtc;
@@ -47,7 +66,7 @@ public class PromoCode {
     @Column(name = "deleted_at_utc")
     private Instant deletedAtUtc;
 
-    // Bidirectional mapping to bookings (optional, but helpful for queries)
+    // Bidirectional reference — useful for admin queries on promo usage
     @OneToMany(mappedBy = "promoCode")
     private List<Booking> bookings = new ArrayList<>();
 
