@@ -35,6 +35,7 @@
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V3__agreements_and_profile_completion.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V40__add_tour_media_caption.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V41__add_tour_enhancement_fields.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V42__create_reviews_table.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V4__user_account_status.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V5__profile_fields.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V6__guide_verification_front_back.sql" dialect="PostgreSQL" />
