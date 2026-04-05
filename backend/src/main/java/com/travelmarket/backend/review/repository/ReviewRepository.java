@@ -35,17 +35,53 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
      * All visible reviews for a guide, newest first.
      * Partial index on (guide_id) WHERE is_hidden = FALSE keeps this fast.
      */
+    @Query("""
+            SELECT r FROM Review r
+            JOIN FETCH r.traveler t
+            JOIN FETCH t.user u
+            JOIN FETCH r.occurrence o
+            WHERE r.guideId = :guideId
+              AND r.hidden = false
+            ORDER BY r.createdAt DESC
+            """)
     Page<Review> findByGuideIdAndHiddenFalseOrderByCreatedAtDesc(
-            Long guideId,
+            @Param("guideId") Long guideId,
             Pageable pageable
     );
 
     /**
-     * All visible reviews for a tour template, newest first.
-     * Partial index on (tour_template_id) WHERE is_hidden = FALSE keeps this fast.
+     * All visible reviews for a tour template with optional rating filter.
      */
-    Page<Review> findByTourTemplateIdAndHiddenFalseOrderByCreatedAtDesc(
-            Long tourTemplateId,
+    @Query("""
+            SELECT r FROM Review r
+            JOIN FETCH r.traveler t
+            JOIN FETCH t.user u
+            JOIN FETCH r.occurrence o
+            WHERE r.tourTemplateId = :tourTemplateId
+              AND r.hidden = false
+              AND (:rating IS NULL OR r.ratingOverall = :rating)
+            """)
+    Page<Review> findByTourTemplateIdWithFilters(
+            @Param("tourTemplateId") Long tourTemplateId,
+            @Param("rating")         Integer rating,
+            Pageable pageable
+    );
+
+    /**
+     * All visible reviews for a guide with optional rating filter.
+     */
+    @Query("""
+            SELECT r FROM Review r
+            JOIN FETCH r.traveler t
+            JOIN FETCH t.user u
+            JOIN FETCH r.occurrence o
+            WHERE r.guideId = :guideId
+              AND r.hidden = false
+              AND (:rating IS NULL OR r.ratingOverall = :rating)
+            """)
+    Page<Review> findByGuideIdWithFilters(
+            @Param("guideId") Long guideId,
+            @Param("rating")  Integer rating,
             Pageable pageable
     );
 
@@ -56,8 +92,16 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
      * Used for the "My Reviews" section in the traveler dashboard.
      * Includes hidden reviews — the traveler should see their own.
      */
+    @Query("""
+            SELECT r FROM Review r
+            JOIN FETCH r.traveler t
+            JOIN FETCH t.user u
+            JOIN FETCH r.occurrence o
+            WHERE r.travelerId = :travelerId
+            ORDER BY r.createdAt DESC
+            """)
     Page<Review> findByTravelerIdOrderByCreatedAtDesc(
-            Long travelerId,
+            @Param("travelerId") Long travelerId,
             Pageable pageable
     );
 

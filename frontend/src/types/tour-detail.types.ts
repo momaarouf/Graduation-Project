@@ -159,26 +159,34 @@ export interface PriceBreakdown {
  */
 export interface ReviewDetail {
     id: string
+    bookingId: number
+    tourTemplateId: number
+    occurrenceId: number
     travelerId: string
     travelerName: string
-    travelerAvatar?: string
-    travelerTier?: 'bronze' | 'silver' | 'gold' | 'platinum'
-    rating: number
-    comment: string
-    createdAt: string // ISO date
-    tourDate: string // ISO date
+    travelerAvatarUrl?: string | null
+    travelerTier?: string | null
+    ratingOverall: number      // Headline rating (1-5)
+    ratingGuide?: number       // Performance sub-rating
+    ratingTour?: number        // Experience sub-rating
+    ratingValue?: number       // Value sub-rating
+    comment: string | null
+    createdAt: string          // ISO 8601 UTC
+    tourDate: string           // ISO 8601 UTC
+    tourTitle?: string
 
     // Guide reply
-    guideReply?: {
+    guideReply?: string | null | {
         comment: string
         createdAt: string
     }
+    guideRepliedAt?: string | null
 
     // Helpful votes
     helpfulCount: number
-    travelerHasVoted?: boolean
+    isHelpful: boolean         // Whether the current traveler marked it helpful
 
-    // Images attached to review
+    // Images attached to review (future)
     images?: string[]
 }
 
@@ -370,6 +378,9 @@ export interface ReviewListProps {
     averageRating: number
     totalReviews: number
     reviewSummary?: TourDetail['reviewSummary']
+    tourGuideId: string | number // Added to restrict reply visibility
+    tourId: string | number      // Added for navigation to full reviews page
+    isFullPage?: boolean        // To hide "Read all" button when already on full page
     onLoadMore?: () => void
     hasMore?: boolean
 }
@@ -636,11 +647,14 @@ export const MOCK_TOUR_DETAIL: TourDetail = {
 export const MOCK_REVIEWS: ReviewDetail[] = [
     {
         id: 'r1',
+        bookingId: 101,
+        tourTemplateId: 1,
+        occurrenceId: 101,
         travelerId: 't1',
         travelerName: 'Ahmed Khan',
-        travelerAvatar: '/images/travelers/ahmed.jpg',
+        travelerAvatarUrl: '/images/travelers/ahmed.jpg',
         travelerTier: 'gold',
-        rating: 5,
+        ratingOverall: 5,
         comment: 'Mehmet was an exceptional guide! His knowledge of Ottoman history is deep, and he answered all our questions with patience. The halal lunch was delicious and he made sure we had time for prayers. Truly a 5-star experience.',
         createdAt: '2026-02-01T14:30:00Z',
         tourDate: '2026-01-30T09:00:00Z',
@@ -649,7 +663,7 @@ export const MOCK_REVIEWS: ReviewDetail[] = [
             createdAt: '2026-02-02T09:15:00Z'
         },
         helpfulCount: 12,
-        travelerHasVoted: false,
+        isHelpful: false,
         images: [
             '/images/reviews/ahmed-1.jpg',
             '/images/reviews/ahmed-2.jpg'
@@ -657,23 +671,29 @@ export const MOCK_REVIEWS: ReviewDetail[] = [
     },
     {
         id: 'r2',
+        bookingId: 102,
+        tourTemplateId: 1,
+        occurrenceId: 102,
         travelerId: 't2',
         travelerName: 'Fatima Al-Zahra',
-        travelerAvatar: '/images/travelers/fatima.jpg',
+        travelerAvatarUrl: '/images/travelers/fatima.jpg',
         travelerTier: 'silver',
-        rating: 5,
+        ratingOverall: 5,
         comment: 'As a solo female traveler, I appreciated Mehmet\'s professionalism and respect for boundaries. The Sacred Relics section at Topkapi was moving. Highly recommended for Muslim travelers!',
         createdAt: '2026-01-25T11:20:00Z',
         tourDate: '2026-01-23T09:00:00Z',
         helpfulCount: 8,
-        travelerHasVoted: true
+        isHelpful: true
     },
     {
         id: 'r3',
+        bookingId: 103,
+        tourTemplateId: 1,
+        occurrenceId: 103,
         travelerId: 't3',
         travelerName: 'Omar Farooq',
-        travelerAvatar: '/images/travelers/omar.jpg',
-        rating: 4,
+        travelerAvatarUrl: '/images/travelers/omar.jpg',
+        ratingOverall: 4,
         comment: 'Great tour overall. The only reason for 4 stars is that the lunch spot was a bit crowded. However, the food was excellent and Mehmet\'s stories about the Ottoman court were fascinating.',
         createdAt: '2026-01-18T16:45:00Z',
         tourDate: '2026-01-16T09:00:00Z',
@@ -682,7 +702,7 @@ export const MOCK_REVIEWS: ReviewDetail[] = [
             createdAt: '2026-01-19T10:30:00Z'
         },
         helpfulCount: 3,
-        travelerHasVoted: false
+        isHelpful: false
     }
 ]
 

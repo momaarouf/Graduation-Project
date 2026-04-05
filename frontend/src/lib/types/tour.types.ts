@@ -527,3 +527,92 @@ export interface UpdateBookingRequest {
   peopleCount: number
   confirmWaitlistTransition?: boolean
 }
+// ── Review types ─────────────────────────────────────────────────────────────
+// These match the backend ReviewCreateRequest and ReviewResponse DTOs exactly.
+
+/**
+ * Request body for POST /api/traveler/reviews.
+ * All four sub-ratings are required (1–5 each).
+ * comment is optional — null means the traveler left no written feedback.
+ */
+export interface ReviewCreateRequest {
+  bookingId:     number   // The completed booking being reviewed
+  ratingOverall: number   // Overall impression — headline rating (1–5)
+  ratingGuide:   number   // Guide Performance — knowledge, communication (1–5)
+  ratingTour:    number   // Tour Experience — itinerary, pacing, locations (1–5)
+  ratingValue:   number   // Value for Money — price vs experience (1–5)
+  comment?:      string   // Optional free-text, max 1000 characters
+}
+
+/**
+ * Single review as returned by the backend.
+ * guideReply is null until the guide responds (future feature).
+ * tourDate is when the tour happened (occurrence startTimeUtc), not createdAt.
+ */
+export interface ReviewResponse {
+  id:               number
+  bookingId:        number
+  tourTemplateId:   number
+  occurrenceId:     number
+  ratingOverall:    number
+  ratingGuide:      number
+  ratingTour:       number
+  ratingValue:      number
+  comment:          string | null
+  travelerId:       number
+  travelerName:     string
+  travelerAvatarUrl: string | null
+  travelerTier:     string | null
+  tourTitle:        string
+  tourDate:         string   // ISO 8601 UTC — when the tour happened
+  guideReply:       string | null
+  guideRepliedAt:   string | null
+  helpfulCount:     number
+  isHelpful:        boolean
+  createdAt:        string   // ISO 8601 UTC — when review was written
+}
+
+/**
+ * Star distribution histogram — counts of reviews per rating level.
+ * Maps to the frontend reviewSummary shape used by ReviewList component.
+ */
+export interface ReviewDistribution {
+  fiveStar:   number
+  fourStar:   number
+  threeStar:  number
+  twoStar:    number
+  oneStar:    number
+}
+
+/**
+ * Spring Page wrapper around ReviewResponse.
+ * 'content' holds the current page items; pagination metadata is at the root.
+ */
+export interface ReviewPage {
+  content:          ReviewResponse[]
+  totalElements:    number
+  totalPages:       number
+  number:           number   // current page index (0-based)
+  size:             number
+  first:            boolean
+  last:             boolean
+}
+
+/**
+ * Aggregated response from GET /api/reviews/tour/{id} and GET /api/reviews/guide/{id}.
+ * averageOverall is null if the guide/tour has no reviews yet.
+ */
+export interface ReviewSummaryResponse {
+  averageOverall:  number | null
+  averageGuide:    number | null
+  averageTour:     number | null
+  averageValue:    number | null
+  totalReviews:    number
+  distribution:    ReviewDistribution
+  reviews:         ReviewPage
+}
+
+export interface ToggleHelpfulResponse {
+  helpfulCount: number
+  isHelpful:    boolean
+}

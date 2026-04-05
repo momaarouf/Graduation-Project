@@ -1,5 +1,7 @@
 package com.travelmarket.backend.review.entity;
 
+import com.travelmarket.backend.entity.TravelerProfile;
+import com.travelmarket.backend.tour.entity.TourOccurrence;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -69,6 +71,16 @@ public class Review {
     @Column(name = "occurrence_id", nullable = false)
     private Long occurrenceId;
 
+    // ── Relationships (Read-only) ────────────────────────────────────────
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "traveler_id", insertable = false, updatable = false)
+    private TravelerProfile traveler;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "occurrence_id", insertable = false, updatable = false)
+    private TourOccurrence occurrence;
+
     // ── Four sub-ratings (1–5 each) ───────────────────────────────────────
     // Stored as SMALLINT in Postgres (original schema) → must use Short in Java.
     // Using Integer here would cause Hibernate schema validation to fail:
@@ -132,6 +144,11 @@ public class Review {
     @Column(name = "report_count", nullable = false)
     @Builder.Default
     private int reportCount = 0;
+
+    /** Number of travelers who found this review helpful. Denormalized for performance. */
+    @Column(name = "helpful_count", nullable = false)
+    @Builder.Default
+    private long helpfulCount = 0L;
 
     // ── Lifecycle hooks ──────────────────────────────────────────────────
 

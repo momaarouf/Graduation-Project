@@ -28,7 +28,7 @@ import {
   RefreshCw
 } from 'lucide-react'
 
-import { getTravelerBooking, cancelBooking } from '@/src/lib/api/tours'
+import { getTravelerBooking, cancelBooking, getTravelerReviews } from '@/src/lib/api/tours'
 import { BookingResponse, BookingStatus } from '@/src/lib/types/tour.types'
 
 // ============================================================================
@@ -103,13 +103,23 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
   const [cancelReason, setCancelReason] = useState('')
+  const [isReviewed, setIsReviewed] = useState(false)
 
   useEffect(() => {
-    const fetchBooking = async () => {
+    const fetchData = async () => {
       setIsLoading(true)
       try {
-        const res = await getTravelerBooking(Number(bookingId))
-        setBooking(res.data)
+        const [bookingRes, reviewsRes] = await Promise.all([
+          getTravelerBooking(Number(bookingId)),
+          getTravelerReviews().catch(() => ({ data: { content: [] } }))
+        ])
+        setBooking(bookingRes.data)
+        
+        // Check if this booking ID exists in the traveler's reviews
+        const reviewed = (reviewsRes.data?.content || []).some(
+          (r: any) => r.bookingId === Number(bookingId)
+        )
+        setIsReviewed(reviewed)
       } catch {
         toast.error('Booking not found')
         router.push('/dashboard/traveler/bookings')
@@ -117,7 +127,7 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
         setIsLoading(false)
       }
     }
-    fetchBooking()
+    fetchData()
   }, [bookingId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCancelBooking = async () => {
@@ -380,9 +390,28 @@ Thank you for choosing TravelMarket!
                     </button>
                   )}
 
+                  {/* Write Review button — shown only for Completed and non-reviewed bookings */}
+                  {booking.status === BookingStatus.Completed && !isReviewed && (
+                    <Link
+                      href={`/bookings/${booking.id}/review`}
+                      className="w-full mt-4 py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all text-sm shadow-lg shadow-amber-500/20"
+                    >
+                      <Star className="w-4 h-4" />
+                      Write Review
+                    </Link>
+                  )}
+
+                  {booking.status === BookingStatus.Completed && isReviewed && (
+                    <div className="w-full mt-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-400 font-bold rounded-xl flex items-center justify-center gap-2 transition-all text-sm border border-gray-200 dark:border-gray-700 cursor-default">
+                      <CheckCircle className="w-4 h-4" />
+                      Reviewed
+                    </div>
+                  )}
+
                   {booking.status !== BookingStatus.Completed && 
                    booking.status !== BookingStatus.Cancelled && 
-                   booking.status !== BookingStatus.Expired && (
+                   booking.status !== BookingStatus.Expired && 
+                   new Date(booking.startTimeUtc).getTime() > Date.now() && (
                     <Link
                       href={`/tours/${booking.tourId}`}
                       className="w-full mt-2 py-3 bg-indigo-600 dark:bg-indigo-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all text-sm shadow-lg shadow-indigo-500/20"

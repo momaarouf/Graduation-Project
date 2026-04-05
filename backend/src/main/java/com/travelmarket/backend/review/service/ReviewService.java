@@ -6,7 +6,11 @@ import com.travelmarket.backend.booking.repository.BookingRepository;
 import com.travelmarket.backend.review.dto.ReviewCreateRequest;
 import com.travelmarket.backend.review.dto.ReviewResponse;
 import com.travelmarket.backend.review.dto.ReviewSummaryResponse;
+import com.travelmarket.backend.review.dto.ToggleHelpfulResponse;
 import com.travelmarket.backend.review.entity.Review;
+import com.travelmarket.backend.repository.GuideProfileRepository;
+import com.travelmarket.backend.review.entity.ReviewHelpfulVote;
+import com.travelmarket.backend.review.repository.ReviewHelpfulVoteRepository;
 import com.travelmarket.backend.review.repository.ReviewRepository;
 import com.travelmarket.backend.tour.entity.TourOccurrence;
 
@@ -29,6 +33,9 @@ public class ReviewService {
 
     private final ReviewRepository  reviewRepository;
     private final BookingRepository bookingRepository;
+    private final ReviewHelpfulVoteRepository helpfulVoteRepository;
+    private final com.travelmarket.backend.repository.UserRepository userRepository;
+    private final GuideProfileRepository guideProfileRepository;
 
     // =========================================================================
     // CREATE REVIEW
@@ -144,7 +151,7 @@ public class ReviewService {
     public Page<ReviewResponse> getMyReviews(Long travelerProfileId, Pageable pageable) {
         return reviewRepository
                 .findByTravelerIdOrderByCreatedAtDesc(travelerProfileId, pageable)
-                .map(this::toResponseMinimal);
+                .map(r -> toResponseMinimal(r, null));
     }
 
     // =========================================================================
@@ -157,10 +164,10 @@ public class ReviewService {
      * Hidden reviews are excluded automatically by the repository query.
      */
     @Transactional(readOnly = true)
-    public ReviewSummaryResponse getReviewsForGuide(Long guideId, Pageable pageable) {
+    public ReviewSummaryResponse getReviewsForGuide(Long guideId, Long currentUserId, Integer rating, Pageable pageable) {
         Page<ReviewResponse> reviews = reviewRepository
-                .findByGuideIdAndHiddenFalseOrderByCreatedAtDesc(guideId, pageable)
-                .map(this::toResponseMinimal);
+                .findByGuideIdWithFilters(guideId, rating, pageable)
+                .map(r -> toResponseMinimal(r, currentUserId));
 
         Double avgOverall   = reviewRepository.findAverageOverallRatingByGuideId(guideId);
         Long   total        = reviewRepository.countVisibleReviewsByGuideId(guideId);
@@ -179,16 +186,86 @@ public class ReviewService {
      * Hidden reviews are excluded automatically by the repository query.
      */
     @Transactional(readOnly = true)
-    public ReviewSummaryResponse getReviewsForTour(Long tourTemplateId, Pageable pageable) {
+    public ReviewSummaryResponse getReviewsForTour(Long tourTemplateId, Long currentUserId, Integer rating, Pageable pageable) {
         Page<ReviewResponse> reviews = reviewRepository
-                .findByTourTemplateIdAndHiddenFalseOrderByCreatedAtDesc(tourTemplateId, pageable)
-                .map(this::toResponseMinimal);
+                .findByTourTemplateIdWithFilters(tourTemplateId, rating, pageable)
+                .map(r -> toResponseMinimal(r, currentUserId));
 
         Double avgOverall   = reviewRepository.findAverageOverallRatingByTourTemplateId(tourTemplateId);
         Long   total        = reviewRepository.countVisibleReviewsByTourTemplateId(tourTemplateId);
         List<Object[]> dist = reviewRepository.findRatingDistributionByTourTemplateId(tourTemplateId);
 
         return buildSummary(avgOverall, total, dist, reviews);
+    }
+
+    // =========================================================================
+    // ENGAGEMENT: HELPFUL VOTES & REPLIES
+    // =========================================================================
+
+    /**
+     * Toggles a "Helpful" vote for a review.
+     * If already voted -> removes it. Otherwise -> adds it.
+     * Returns the updated helpful count and new state.
+     */
+    @Transactional
+    public ToggleHelpfulResponse toggleHelpfulVote(Long reviewId, Long userId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        var existingVote = helpfulVoteRepository.findByReviewIdAndUserId(reviewId, userId);
+        boolean isNowHelpful;
+
+        if (existingVote.isPresent()) {
+            helpfulVoteRepository.delete(existingVote.get());
+            review.setHelpfulCount(Math.max(0, review.getHelpfulCount() - 1));
+            isNowHelpful = false;
+        } else {
+            ReviewHelpfulVote vote = ReviewHelpfulVote.builder()
+                    .review(review)
+                    .user(user)
+                    .build();
+            helpfulVoteRepository.save(vote);
+            review.setHelpfulCount(review.getHelpfulCount() + 1);
+            isNowHelpful = true;
+        }
+
+        long helpfulCount = reviewRepository.save(review).getHelpfulCount();
+        return new ToggleHelpfulResponse(helpfulCount, isNowHelpful);
+    }
+
+    /**
+     * Allows a guide to reply to a review for their tour.
+     */
+    @Transactional
+    public ReviewResponse replyToReview(Long reviewId, Long guideUserId, String replyBody) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+
+        // Resolver check: The authenticated user must be the guide recorded in the review.
+        // We compare user IDs (Review entity only stores guideProfileId, so we need to bridge it or bridge the auth user).
+        // For simplicity at this layer, we check guideUserId against the guide's User object.
+        // Assuming guideId in Review is GuideProfile.id.
+        // Let's verify guide profile owner.
+        
+        // This is a simpler path:
+        if (!review.getGuideId().equals(resolveGuideProfileId(guideUserId))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only reply to reviews for your own tours");
+        }
+
+        review.setGuideReply(replyBody);
+        review.setGuideRepliedAt(Instant.now());
+        
+        Review updated = reviewRepository.save(review);
+        return toResponseMinimal(updated, guideUserId);
+    }
+
+    private Long resolveGuideProfileId(Long userId) {
+        return guideProfileRepository.findByUserId(userId)
+                .map(com.travelmarket.backend.entity.GuideProfile::getId)
+                .orElse(0L);
     }
 
     // =========================================================================
@@ -208,10 +285,11 @@ public class ReviewService {
     private ReviewResponse toResponse(Review review, Booking booking) {
         String  travelerName      = booking.getTraveler().getUser().getFullName();
         String  travelerAvatarUrl = booking.getTraveler().getAvatarUrl();
+        String  travelerTier      = booking.getTraveler().getLoyaltyTier();
         String  tourTitle         = booking.getOccurrence().getTemplate().getTitle();
         Instant tourDate          = booking.getOccurrence().getStartTimeUtc();
 
-        return buildReviewResponse(review, travelerName, travelerAvatarUrl, tourTitle, tourDate);
+        return buildReviewResponse(review, travelerName, travelerAvatarUrl, travelerTier, tourTitle, tourDate, false);
     }
 
     /**
@@ -225,13 +303,24 @@ public class ReviewService {
      * in ReviewRepository that loads the related Booking + TravelerProfile +
      * TourOccurrence + TourTemplate in one query.
      */
-    private ReviewResponse toResponseMinimal(Review review) {
+    private ReviewResponse toResponseMinimal(Review review, Long currentUserId) {
+        // Enriched via JOIN FETCH in ReviewRepository
+        String  travelerName      = review.getTraveler().getUser().getFullName();
+        String  travelerAvatarUrl = review.getTraveler().getAvatarUrl();
+        String  travelerTier      = review.getTraveler().getLoyaltyTier();
+        String  tourTitle         = review.getOccurrence().getTemplate().getTitle();
+        Instant tourDate          = review.getOccurrence().getStartTimeUtc();
+
+        boolean isHelpful = currentUserId != null && helpfulVoteRepository.existsByReviewIdAndUserId(review.getId(), currentUserId);
+
         return buildReviewResponse(
                 review,
-                "Traveler",   // enriched in future JOIN FETCH iteration
-                null,
-                "Tour",       // enriched in future JOIN FETCH iteration
-                review.getCreatedAt()
+                travelerName,
+                travelerAvatarUrl,
+                travelerTier,
+                tourTitle,
+                tourDate,
+                isHelpful
         );
     }
 
@@ -242,30 +331,30 @@ public class ReviewService {
     private ReviewResponse buildReviewResponse(Review review,
                                                String travelerName,
                                                String travelerAvatarUrl,
+                                               String travelerTier,
                                                String tourTitle,
-                                               Instant tourDate) {
+                                               Instant tourDate,
+                                               boolean isHelpful) {
         return new ReviewResponse(
                 review.getId(),
                 review.getBookingId(),
                 review.getTourTemplateId(),
                 review.getOccurrenceId(),
-
-                (int) review.getRatingOverall(),   // Short → Integer widening
+                (int) review.getRatingOverall(),
                 (int) review.getRatingGuide(),
                 (int) review.getRatingTour(),
                 (int) review.getRatingValue(),
-
                 review.getComment(),
-
                 review.getTravelerId(),
                 travelerName,
                 travelerAvatarUrl,
-
+                travelerTier,
                 tourTitle,
                 tourDate,
-
                 review.getGuideReply(),
                 review.getGuideRepliedAt(),
+                review.getHelpfulCount(),
+                isHelpful,
                 review.getCreatedAt()
         );
     }

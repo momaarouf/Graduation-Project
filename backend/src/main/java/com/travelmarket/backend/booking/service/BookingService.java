@@ -17,6 +17,7 @@ import com.travelmarket.backend.tour.entity.TourOccurrence;
 import com.travelmarket.backend.tour.enums.TourOccurrenceStatus;
 import com.travelmarket.backend.tour.repository.TourOccurrenceRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BookingService {
 
     private final BookingRepository bookingRepository;
@@ -122,16 +124,19 @@ public class BookingService {
     // lazy associations like occurrence.template.title and traveler.user.fullName,
     // causing LazyInitializationException at runtime.
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<BookingResponse> getTravelerBookings(String email) {
         TravelerProfile traveler = resolveTraveler(email);
-        return bookingRepository.findByTravelerOrderByCreatedAtUtcDesc(traveler)
-                .stream().map(this::mapToResponse).collect(Collectors.toList());
+        List<Booking> bookings = bookingRepository.findByTravelerOrderByCreatedAtUtcDesc(traveler);
+        syncBookingStatuses(bookings);
+        return bookings.stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public BookingResponse getTravelerBooking(String email, Long id) {
-        return mapToResponse(resolveTravelerBooking(id, email));
+        Booking booking = resolveTravelerBooking(id, email);
+        syncBookingStatuses(List.of(booking));
+        return mapToResponse(booking);
     }
 
     // ── Traveler: Cancel ──────────────────────────────────────────────────────
@@ -363,16 +368,19 @@ public class BookingService {
 
     // ── Guide: Read ───────────────────────────────────────────────────────────
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<GuideBookingResponse> getGuideBookings(String email) {
         GuideProfile guide = resolveGuide(email);
-        return bookingRepository.findByOccurrenceTemplateGuideOrderByCreatedAtUtcDesc(guide)
-                .stream().map(this::mapToGuideResponse).collect(Collectors.toList());
+        List<Booking> bookings = bookingRepository.findByOccurrenceTemplateGuideOrderByCreatedAtUtcDesc(guide);
+        syncBookingStatuses(bookings);
+        return bookings.stream().map(this::mapToGuideResponse).collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public GuideBookingResponse getGuideBooking(String email, Long id) {
-        return mapToGuideResponse(resolveGuideBooking(id, email));
+        Booking booking = resolveGuideBooking(id, email);
+        syncBookingStatuses(List.of(booking));
+        return mapToGuideResponse(booking);
     }
 
     // ── Guide: Accept / Reject Request Bookings ───────────────────────────────
@@ -850,6 +858,62 @@ public class BookingService {
         return false;
     }
 
+    /**
+     * Lazy-synchronizes booking statuses based on current time.
+     * Transition rules:
+     *   - IN_PROGRESS -> COMPLETED: if now > endTimeUtc + 1 hour.
+     *   - CONFIRMED -> CANCELLED (No-Show): if now > startTimeUtc + 2 hours and not checked in.
+     *
+     * This ensures travelers see 'Completed' as soon as their tour ends,
+     * unlocking review eligibility even if the guide forgets to mark it.
+     */
+    private void syncBookingStatuses(List<Booking> bookings) {
+        if (bookings == null || bookings.isEmpty()) return;
+        Instant now = Instant.now();
+
+        for (Booking b : bookings) {
+            if (b.getOccurrence() == null || b.getOccurrence().getDeletedAtUtc() != null) continue;
+
+            // 1. IN_PROGRESS -> COMPLETED (Stale active tours)
+            if (b.getStatus() == BookingStatus.InProgress) {
+                Instant autoCompleteBuffer = b.getOccurrence().getEndTimeUtc().plus(java.time.Duration.ofHours(1));
+                if (now.isAfter(autoCompleteBuffer)) {
+                    log.info("[Automation] Auto-completing stale InProgress booking ID: {} (Tour ended at: {})", 
+                            b.getId(), b.getOccurrence().getEndTimeUtc());
+                    b.setStatus(BookingStatus.Completed);
+                    b.setCompletedAtUtc(b.getOccurrence().getEndTimeUtc());
+                    
+                    // Increment traveler's total completed trips
+                    TravelerProfile traveler = b.getTraveler();
+                    if (traveler != null) {
+                        traveler.setTotalCompletedTrips((traveler.getTotalCompletedTrips() != null ? traveler.getTotalCompletedTrips() : 0) + 1);
+                        travelerRepository.save(traveler);
+                    }
+                    
+                    bookingRepository.save(b);
+                }
+            }
+            
+            // 2. CONFIRMED -> CANCELLED (No-Show)
+            else if (b.getStatus() == BookingStatus.Confirmed) {
+                Instant noShowBuffer = b.getOccurrence().getStartTimeUtc().plus(java.time.Duration.ofHours(2));
+                if (now.isAfter(noShowBuffer)) {
+                    log.info("[Automation] Auto-cancelling stale Confirmed booking (No-Show) ID: {} (Tour started at: {})", 
+                            b.getId(), b.getOccurrence().getStartTimeUtc());
+                    b.setStatus(BookingStatus.Cancelled);
+                    b.setCancelledAtUtc(now);
+                    b.setCancellationReason("Traveler No-Show (Auto-processed)");
+                    b.setRefundPercent(java.math.BigDecimal.ZERO);
+                    
+                    releaseSeats(b.getOccurrence(), b.getPeopleCount());
+                    promoteFromWaitlist(b.getOccurrence());
+                    
+                    bookingRepository.save(b);
+                }
+            }
+        }
+    }
+
     // ── DTO Mapping ───────────────────────────────────────────────────────────
 
     private BookingResponse mapToResponse(Booking b) {
@@ -928,5 +992,42 @@ public class BookingService {
                 .promotedAtUtc(w.getPromotedAtUtc())
                 .createdAtUtc(w.getCreatedAtUtc())
                 .build();
+    }
+
+    /**
+     * Periodically called to clean up stale bookings that guides forgot to process.
+     */
+    @Transactional
+    public void processStaleBookings() {
+        java.time.Instant now = java.time.Instant.now();
+        
+        // 1. InProgress -> Completed (1 hour buffer after scheduled end)
+        List<com.travelmarket.backend.booking.entity.Booking> staleInProgress = bookingRepository.findStaleInProgressBookings(now.minus(java.time.Duration.ofHours(1)));
+        for (com.travelmarket.backend.booking.entity.Booking b : staleInProgress) {
+            b.setStatus(com.travelmarket.backend.booking.enums.BookingStatus.Completed);
+            b.setCompletedAtUtc(b.getOccurrence().getEndTimeUtc());
+            com.travelmarket.backend.entity.TravelerProfile traveler = b.getTraveler();
+            if (traveler != null) {
+                traveler.setTotalCompletedTrips((traveler.getTotalCompletedTrips() != null ? traveler.getTotalCompletedTrips() : 0) + 1);
+                travelerRepository.save(traveler);
+            }
+            bookingRepository.save(b);
+            log.info("Auto-completed stale booking ID: {}", b.getId());
+        }
+
+        // 2. Confirmed -> Cancelled (No-Show) (2 hour buffer after scheduled start)
+        List<com.travelmarket.backend.booking.entity.Booking> staleConfirmed = bookingRepository.findStaleConfirmedBookings(now.minus(java.time.Duration.ofHours(2)));
+        for (com.travelmarket.backend.booking.entity.Booking b : staleConfirmed) {
+            b.setStatus(com.travelmarket.backend.booking.enums.BookingStatus.Cancelled);
+            b.setCancelledAtUtc(now);
+            b.setCancellationReason("Traveler No-Show (Auto-processed)");
+            b.setRefundPercent(java.math.BigDecimal.ZERO);
+            
+            releaseSeats(b.getOccurrence(), b.getPeopleCount());
+            promoteFromWaitlist(b.getOccurrence());
+            
+            bookingRepository.save(b);
+            log.info("Auto-cancelled stale confirmed booking (No-Show) ID: {}", b.getId());
+        }
     }
 }

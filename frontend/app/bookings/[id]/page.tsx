@@ -426,16 +426,18 @@ Thank you for choosing TravelMarket!
                       Cancel Booking
                     </button>
                   )}
-                  {/* Review — future card, disabled */}
+                  {/* Write Review button — shown only for Completed bookings.
+                      Previously disabled with "Reviews coming soon".
+                      Now active: navigates to the review form at /bookings/{id}/review.
+                      The review form page handles eligibility (backend enforces it too). */}
                   {booking.status === BookingStatus.Completed && (
-                    <button
-                      disabled
-                      title="Reviews coming soon"
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-amber-600/50 text-white/50 text-sm font-medium rounded-lg cursor-not-allowed"
+                    <Link
+                      href={`/bookings/${bookingId}/review`}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors"
                     >
                       <Star className="w-4 h-4" />
                       Write Review
-                    </button>
+                    </Link>
                   )}
                   <button
                     onClick={handleDownloadInvoice}

@@ -5,7 +5,7 @@ import { useBadgeReset } from '@/src/lib/hooks/useBadgeReset'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
-import { getTravelerBookings, cancelBooking, getMyWaitlist, leaveWaitlist } from '@/src/lib/api/tours'
+import { getTravelerBookings, cancelBooking, getMyWaitlist, leaveWaitlist, getTravelerReviews } from '@/src/lib/api/tours'
 import { BookingResponse, BookingStatus, WaitlistResponse } from '@/src/lib/types/tour.types'
 import {
     Calendar,
@@ -288,9 +288,10 @@ function CancellationModal({ booking, isOpen, onClose, onConfirm, isLoading = fa
 interface BookingCardProps {
     booking: BookingResponse
     onCancel: (booking: BookingResponse) => void
+    isReviewed: boolean
 }
 
-function BookingCard({ booking, onCancel }: BookingCardProps) {
+function BookingCard({ booking, onCancel, isReviewed }: BookingCardProps) {
     const router = useRouter()
     const date = new Date(booking.startTimeUtc)
     const formattedDate = date.toLocaleDateString('en-US', {
@@ -408,14 +409,22 @@ function BookingCard({ booking, onCancel }: BookingCardProps) {
                             </Link>
                         )}
 
-                        {booking.status === BookingStatus.Completed && (
+                        {booking.status === BookingStatus.Completed && !isReviewed && (
                             <Link
-                                href={`/dashboard/traveler/bookings/${booking.id}/review`}
+                                // The review form is located at /app/bookings/[id]/review/page.tsx
+                                href={`/bookings/${booking.id}/review`}
                                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-600 dark:bg-amber-700 text-white text-xs font-bold rounded-lg hover:bg-amber-700 dark:hover:bg-amber-800 transition-all shadow-md shadow-amber-500/10 hover:shadow-amber-500/20 active:scale-95"
                             >
                                 <Star className="w-3.5 h-3.5" />
                                 Review
                             </Link>
+                        )}
+
+                        {booking.status === BookingStatus.Completed && isReviewed && (
+                            <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-400 text-xs font-bold rounded-lg cursor-default">
+                                <CheckCircle className="w-3.5 h-3.5" />
+                                Reviewed
+                            </span>
                         )}
 
                         {canCancel && (
@@ -458,6 +467,7 @@ function BookingCard({ booking, onCancel }: BookingCardProps) {
 export default function TravelerBookingsPage() {
     const [bookings, setBookings] = React.useState<BookingResponse[]>([])
     const [waitlistEntries, setWaitlistEntries] = React.useState<WaitlistResponse[]>([])
+    const [reviewedBookingIds, setReviewedBookingIds] = React.useState<Set<number>>(new Set())
     const [isLoading, setIsLoading] = React.useState(true)
     const [isCancelling, setIsCancelling] = React.useState(false)
     const [isLeavingWaitlist, setIsLeavingWaitlist] = React.useState<number | null>(null)
@@ -475,13 +485,20 @@ export default function TravelerBookingsPage() {
     const fetchBookings = async () => {
         setIsLoading(true)
         try {
-            // Fetch bookings and waitlist entries in parallel
-            const [bookingsRes, waitlistRes] = await Promise.all([
+            // Fetch bookings, waitlist entries, and reviews in parallel
+            const [bookingsRes, waitlistRes, reviewsRes] = await Promise.all([
                 getTravelerBookings(),
-                getMyWaitlist().catch(() => ({ data: [] as WaitlistResponse[] }))
+                getMyWaitlist().catch(() => ({ data: [] as WaitlistResponse[] })),
+                getTravelerReviews().catch(() => ({ data: { content: [] } }))
             ])
             setBookings(bookingsRes.data || [])
             setWaitlistEntries(waitlistRes.data || [])
+            
+            // Extract the set of booking IDs that already have reviews
+            const reviewedIds = new Set<number>(
+                (reviewsRes.data?.content || []).map((r: any) => r.bookingId)
+            )
+            setReviewedBookingIds(reviewedIds)
         } catch (err: any) {
             console.error('Failed to fetch bookings:', err)
             toast.error('Failed to load your bookings')
@@ -673,6 +690,7 @@ export default function TravelerBookingsPage() {
                                     key={booking.id}
                                     booking={booking}
                                     onCancel={handleCancelClick}
+                                    isReviewed={reviewedBookingIds.has(booking.id)}
                                 />
                             ))}
                         </div>

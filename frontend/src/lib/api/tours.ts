@@ -18,6 +18,10 @@ import {
   BookingResponse,
   GuideBookingResponse,
   WaitlistResponse,
+  ReviewCreateRequest,
+  ReviewResponse,
+  ReviewSummaryResponse,
+  ToggleHelpfulResponse,
 } from '@/src/lib/types/tour.types'
 import { GuideProfileResponse } from '@/src/lib/types/guide.types'
 
@@ -144,99 +148,112 @@ export const getPortfolioTourDetail = (guideId: number, tourId: number) =>
 export const createBooking = (data: CreateBookingRequest) =>
   apiClient.post<BookingResponse>('/api/traveler/bookings', data)
 
-/** Update an existing booking */
-export const updateBooking = (id: number, data: { occurrenceId: number; peopleCount: number; confirmWaitlistTransition?: boolean }) =>
-  apiClient.patch<BookingResponse>(`/api/traveler/bookings/${id}`, data)
-
-/** List traveler's bookings */
+/** List authenticated traveler bookings */
 export const getTravelerBookings = () =>
   apiClient.get<BookingResponse[]>('/api/traveler/bookings')
 
 /** Get single traveler booking */
-export const getTravelerBooking = (id: number) =>
+export const getTravelerBooking = (id: number | string) =>
   apiClient.get<BookingResponse>(`/api/traveler/bookings/${id}`)
 
-// Cancel a traveler's own booking.
-// reason is optional — backend defaults to 'Cancelled by Traveler' if omitted.
-// The backend calculates refundPercent based on hours until tour start.
-// IMPORTANT: axios DELETE with a body requires the { data } wrapper.
-export const cancelBooking = (id: number, reason?: string) =>
-  apiClient.delete<BookingResponse>(`/api/traveler/bookings/${id}`, {
-    data: reason ? { reason } : undefined,
-  })
+/** Update an existing booking */
+export const updateBooking = (bookingId: number, data: any) =>
+  apiClient.patch<BookingResponse>(`/api/traveler/bookings/${bookingId}`, data)
 
-// ── Bookings: Guide ──────────────────────────────────────────────────────────
+/** Cancel a booking pre-departure */
+export const cancelBooking = (bookingId: number, data?: { reason: string }) =>
+  apiClient.delete<BookingResponse>(`/api/traveler/bookings/${bookingId}`, { data })
 
-/** List guide's incoming bookings */
-export const getGuideBookings = () =>
-  apiClient.get<GuideBookingResponse[]>('/api/guide/bookings')
+// ── Waitlist: Traveler ───────────────────────────────────────────────────────
 
-/** Get single guide booking */
-export const getGuideBooking = (id: number) =>
-  apiClient.get<GuideBookingResponse>(`/api/guide/bookings/${id}`)
+/** Join waitlist for a full occurrence */
+export const joinWaitlist = (data: { occurrenceId: number; peopleCount: number; message?: string }) =>
+  apiClient.post<WaitlistResponse>('/api/traveler/waitlist', data)
 
-/** Confirm a pending booking */
-export const confirmBooking = (id: number) =>
-  apiClient.put<GuideBookingResponse>(`/api/guide/bookings/${id}/confirm`)
-
-// Guide rejects a PENDING_GUIDE booking.
-// reason is optional — backend defaults to 'Rejected by Guide' if omitted.
-export const rejectBooking = (id: number, reason?: string) =>
-  apiClient.put<GuideBookingResponse>(`/api/guide/bookings/${id}/reject`, {
-    reason,
-  })
-
-export const noShowBooking = (id: number, reason?: string) =>
-  apiClient.post<GuideBookingResponse>(`/api/guide/bookings/${id}/no-show`, {
-    reason,
-  })
-
-// ── Bookings: Guide — Check-in & Completion ─────────────────────────────────
-
-// Guide checks in a traveler by tapping from their dashboard list.
-// Transitions booking: CONFIRMED → IN_PROGRESS.
-// Guide checks in a traveler by scanning the UUID embedded in their QR code.
-// This is the primary in-field scanner flow.
-// Backend validates the token belongs to one of this guide’s own occurrences.
-// Transitions booking: CONFIRMED → IN_PROGRESS.
-export const checkInByQrToken = (qrToken: string) =>
-  apiClient.post<GuideBookingResponse>(`/api/guide/bookings/checkin-by-qr/${qrToken}`)
-
-// Guide marks a booking as fully completed after the tour ends.
-// Transitions booking: IN_PROGRESS → COMPLETED.
-// Sets completedAtUtc — starts the 48h payout freeze window (future payout card).
-// Also unlocks review eligibility for the traveler (future review card).
-export const completeBooking = (id: number) =>
-  apiClient.post<GuideBookingResponse>(`/api/guide/bookings/${id}/complete`)
-
-// ── Waitlist: Traveler ─────────────────────────────────────────────────
-
-// Join the waitlist for a full occurrence.
-// Returns 400 if occurrence is not actually full — traveler should book directly.
-// Returns 409 if traveler already has an active waitlist entry or booking.
-// peopleCount specifies how many seats the traveler wants to wait for.
-export const joinWaitlist = (occurrenceId: number, peopleCount: number = 1) =>
-  apiClient.post<WaitlistResponse>('/api/traveler/waitlist', { occurrenceId, peopleCount })
-
-// Get all active waitlist entries for the authenticated traveler.
-// Promoted or self-removed entries are excluded by the backend.
+/** Get my active waitlist entries */
 export const getMyWaitlist = () =>
   apiClient.get<WaitlistResponse[]>('/api/traveler/waitlist')
 
-// Remove the traveler from a waitlist entry they own.
-// Soft-deletes the entry and decrements the occurrence waitlist counter.
-export const leaveWaitlist = (waitlistId: number) =>
-  apiClient.delete<void>(`/api/traveler/waitlist/${waitlistId}`)
+/** Leave waitlist */
+export const leaveWaitlist = (id: number) =>
+  apiClient.delete(`/api/traveler/waitlist/${id}`)
 
-// ── Placeholders & Legacy Support ────────────────────────────────────────────
+// ── Bookings: Guide ──────────────────────────────────────────────────────────
 
-/** Alias for getPublicTourDetail used by legacy components */
-export const getTourById = ({ id }: { id: string | number }) =>
-  getPublicTourDetail(Number(id)).then(r => r.data)
+/** List all bookings for my tour occurrences */
+export const getGuideBookings = () =>
+  apiClient.get<GuideBookingResponse[]>('/api/guide/bookings')
 
-/** Fetch reviews (Placeholder) */
-export const getTourReviews = (params: any) =>
-  Promise.resolve({ data: { data: [], total: 0, page: 1, limit: 10, hasNext: false, hasPrev: false } } as any)
+/** Get single booking on my tour */
+export const getGuideBooking = (id: number) =>
+  apiClient.get<GuideBookingResponse>(`/api/guide/bookings/${id}`)
+
+/** Accept a request booking */
+export const confirmBooking = (id: number) =>
+  apiClient.put<GuideBookingResponse>(`/api/guide/bookings/${id}/confirm`)
+
+/** Reject a request booking */
+export const rejectBooking = (id: number, data?: { reason: string }) =>
+  apiClient.put<GuideBookingResponse>(`/api/guide/bookings/${id}/reject`, data)
+
+/** Mark as no-show */
+export const noShowBooking = (id: number, data?: { reason: string }) =>
+  apiClient.post<GuideBookingResponse>(`/api/guide/bookings/${id}/no-show`, data)
+
+/** Scanner flow: check-in via QR token */
+export const checkInByQrToken = (qrToken: string) =>
+  apiClient.post<GuideBookingResponse>(`/api/guide/bookings/checkin-by-qr/${qrToken}`)
+
+/** Mark tour completed */
+export const completeBooking = (id: number) =>
+  apiClient.post<GuideBookingResponse>(`/api/guide/bookings/${id}/complete`)
+
+// ── Reviews API ──────────────────────────────────────────────────────────────
+
+/**
+ * Fetch paginated reviews + aggregated stats for a tour template.
+ * Calls: GET /api/reviews/tour/{tourId}?page=0&size=10
+ */
+export const getTourReviews = (tourId: number | string, page = 0, size = 10, rating?: number | null, sort = 'newest') =>
+  apiClient.get<ReviewSummaryResponse>(`/api/reviews/tour/${tourId}`, {
+    params: { page, size, rating, sort }
+  })
+
+/** 
+ * Get reviews for a guide.
+ */
+export const getGuideReviews = (guideId: number | string, page = 0, size = 10, rating?: number | null, sort = 'newest') =>
+  apiClient.get<ReviewSummaryResponse>(`/api/reviews/guide/${guideId}`, {
+    params: { page, size, rating, sort }
+  })
+
+/**
+ * Submit a review for a completed booking.
+ */
+export const submitReview = (data: ReviewCreateRequest) =>
+  apiClient.post<ReviewResponse>('/api/traveler/reviews', data)
+
+/**
+ * Get all reviews written by the authenticated traveler.
+ */
+export const getTravelerReviews = (page = 0, size = 100) =>
+  apiClient.get<any>(`/api/traveler/reviews/my`, {
+    params: { page, size }
+  })
+
+/**
+ * Toggle "Helpful" vote on a review.
+ */
+export const toggleReviewHelpful = (reviewId: number | string) =>
+  apiClient.post<ToggleHelpfulResponse>(`/api/reviews/${reviewId}/helpful`)
+
+/**
+ * Guide reply to a traveler review.
+ */
+export const replyToReview = (reviewId: number | string, reply: string) =>
+  apiClient.post<ReviewResponse>(`/api/reviews/${reviewId}/reply`, reply, {
+    headers: { 'Content-Type': 'text/plain' }
+  })
 
 /** Fetch similar tours (Placeholder) */
 export const getSimilarTours = (params: any) =>

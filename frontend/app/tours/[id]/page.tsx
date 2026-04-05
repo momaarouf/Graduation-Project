@@ -39,7 +39,7 @@ import BookingCard from '@/src/components/tour-detail/BookingCard'
 import ReviewList from '@/src/components/tour-detail/ReviewList'
 import SimilarTours from '@/src/components/tour-detail/SimilarTours'
 import { MOCK_TOUR_DETAIL, MOCK_REVIEWS, BookingMode, TourStatus } from '@/src/types/tour-detail.types'
-import { getPublicTourDetail } from '@/src/lib/api/tours'
+import { getPublicTourDetail, getTourReviews } from '@/src/lib/api/tours'
 import { Metadata } from 'next'
 import { ChevronLeft } from 'lucide-react'
 import BookingCardWrapper from '@/src/components/tour-detail/BookingCardWrapper'
@@ -147,8 +147,27 @@ export async function generateMetadata(
 
 export default async function TourDetailPage({ params}:PageProps ) {
     const {id} =await params
-    const res = await getPublicTourDetail(Number(id))
-    const tour = res.data
+    // Parallel fetch for tour data and reviews for maximum throughput
+    let tour: any = null
+    let reviewSummary: any = null
+
+    try {
+        const [tourRes, reviewsRes] = await Promise.allSettled([
+            getPublicTourDetail(Number(id)),
+            // Reusing getTourReviews instead of raw axios for consistency
+            getTourReviews(id, 0, 10).catch(() => ({ data: null }))
+        ])
+
+        if (tourRes.status === 'fulfilled') {
+            tour = tourRes.value.data
+        }
+
+        if (reviewsRes.status === 'fulfilled') {
+            reviewSummary = (reviewsRes.value as any).data
+        }
+    } catch (err) {
+        console.error(`[Server] Error loading tour detail for ${id}:`, err)
+    }
 
     if (!tour) {
         notFound()
@@ -239,9 +258,22 @@ export default async function TourDetailPage({ params}:PageProps ) {
                         />
 
                         <ReviewList
-                            reviews={[]}
-                            averageRating={tour.averageRating || 0}
-                            totalReviews={tour.reviewCount || 0}
+                            reviews={reviewSummary?.reviews.content.map((r: any) => ({
+                              // Map backend ReviewResponse to standardized ReviewDetail
+                              ...r,
+                              id: String(r.id),
+                              travelerId: String(r.travelerId),
+                              // Ensure guideReply is handled consistently if it's a string from backend
+                              guideReply: r.guideReply ? { 
+                                comment: r.guideReply, 
+                                createdAt: r.guideRepliedAt ?? r.createdAt 
+                              } : undefined,
+                            })) ?? []}
+                            averageRating={reviewSummary?.averageOverall ?? tour.averageRating ?? 0}
+                            totalReviews={reviewSummary?.totalReviews ?? tour.reviewCount ?? 0}
+                            reviewSummary={reviewSummary?.distribution}
+                            tourGuideId={tour.guideId}
+                            tourId={id}
                         />
                     </div>
 
@@ -261,9 +293,9 @@ export default async function TourDetailPage({ params}:PageProps ) {
                                 hasGroupDiscount={tour.hasGroupDiscount}
                                 groupDiscountThreshold={tour.groupDiscountThreshold}
                                 groupDiscountPercent={tour.groupDiscountPercent}
-                                activeBookingId={tour.activeBookingId}
-                                activeBookingOccurrenceId={tour.activeBookingOccurrenceId}
-                                activeBookingPeopleCount={tour.activeBookingPeopleCount}
+                                activeBookingId={tour.activeBookings?.[0]?.id}
+                                activeBookingOccurrenceId={tour.activeBookings?.[0]?.occurrenceId}
+                                activeBookingPeopleCount={tour.activeBookings?.[0]?.peopleCount}
                             />
                         </div>
                     </div>
