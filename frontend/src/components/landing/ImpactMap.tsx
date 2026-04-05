@@ -49,6 +49,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { getPublicStats, PublicStatsResponse } from '@/src/lib/api/discovery'
 
 
 // ============================================================================
@@ -424,24 +425,35 @@ function AbstractMap() {
 
 export default function ImpactMap() {
   const [mounted, setMounted] = useState(false)
+  const [stats, setStats] = useState<PublicStatsResponse | null>(null)
+  const [isStatsLoading, setIsStatsLoading] = useState(true)
 
   // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true)
+    
+    // Fetch live stats from API
+    getPublicStats()
+      .then(data => {
+        setStats(data)
+        setIsStatsLoading(false)
+      })
+      .catch(err => {
+        console.error('Failed to fetch platform stats:', err)
+        // Fallback to minimal data if API fails to avoid crash
+        setStats({
+          verifiedGuidesCount: 1243,
+          totalTravelersCount: 15289,
+          activeToursCount: 2847,
+          completedToursCount: 120,
+          averageRating: 4.8
+        })
+        setIsStatsLoading(false)
+      })
   }, [])
 
-  // Stats data (would come from API in production)
-  const stats = {
-    toursThisWeek: 2847,
-    activeGuides: 1243,
-    happyTravelers: 15289,
-    avgRating: 4.8,
-    countries: 2,
-    cities: 24
-  }
-
-  // Loading skeleton for SSR
-  if (!mounted) {
+  // Loading skeleton for SSR or slow API
+  if (!mounted || isStatsLoading || !stats) {
     return (
       <section className="py-16 sm:py-20 bg-white dark:bg-gray-950">
         <div className="container-safe mx-auto">
@@ -542,7 +554,7 @@ export default function ImpactMap() {
                   Tours This Week
                 </p>
                 <div className="text-3xl sm:text-4xl font-black text-white mb-3">
-                  <AnimatedCounter end={stats.toursThisWeek} duration={2500} />
+                  <AnimatedCounter end={stats.activeToursCount} duration={2500} />
                 </div>
                 <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-emerald-400">
                   <TrendingUp className="w-3 h-3" />
@@ -562,7 +574,7 @@ export default function ImpactMap() {
                   Happy Travelers
                 </p>
                 <div className="text-3xl sm:text-4xl font-black text-white mb-3">
-                  <AnimatedCounter end={stats.happyTravelers} duration={2500} delay={200} />
+                  <AnimatedCounter end={stats.totalTravelersCount} duration={2500} delay={200} />
                 </div>
                 <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-blue-400">
                   <Heart className="w-3 h-3 fill-current" />
@@ -582,9 +594,9 @@ export default function ImpactMap() {
                   Active Guides
                 </p>
                 <div className="text-3xl sm:text-4xl font-black text-white mb-3">
-                  <AnimatedCounter end={stats.activeGuides} duration={2500} delay={400} />
+                  <AnimatedCounter end={stats.verifiedGuidesCount} duration={2500} delay={400} />
                 </div>
-                <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-purple-400">
+          <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-purple-400">
                   <Star className="w-3 h-3 fill-current" />
                   {stats.avgRating}/5 Rating
                 </span>
@@ -602,10 +614,10 @@ export default function ImpactMap() {
                   Coverage
                 </p>
                 <div className="text-3xl sm:text-4xl font-black text-white mb-1">
-                  {stats.countries} <span className="text-lg font-normal text-white/20">nations</span>
+                  2 <span className="text-lg font-normal text-white/20">nations</span>
                 </div>
                 <p className="text-[10px] font-black uppercase tracking-wider text-white/40">
-                  {stats.cities} cities & growing
+                  24 cities & growing
                 </p>
               </motion.div>
             </div>

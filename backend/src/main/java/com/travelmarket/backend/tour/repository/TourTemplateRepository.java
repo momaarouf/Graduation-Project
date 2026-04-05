@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.math.BigDecimal;
+
 
 public interface TourTemplateRepository extends JpaRepository<TourTemplate, Long> {
 
@@ -245,6 +247,89 @@ public interface TourTemplateRepository extends JpaRepository<TourTemplate, Long
           AND t.deletedAtUtc IS NULL
     """)
     Optional<TourTemplate> findByIdNotDeleted(@Param("id") Long id);
+
+    // ── 1. Bounding Box Search ────────────────────────────────────────────────
+    //
+    // Returns all PUBLISHED tours whose meeting point falls within the
+    // supplied lat/lng rectangle (bounding box).
+    //
+    // Used when the user pans/zooms the map — the frontend sends the current
+    // map viewport bounds and receives only the tours visible in that area.
+    //
+    // Parameters:
+    //   minLat, maxLat — latitude range  (south edge, north edge)
+    //   minLng, maxLng — longitude range (west edge,  east edge)
+    //
+    // The partial index idx_tour_templates_meeting_coords (added in V44)
+    // makes this a near-instant range scan rather than a full table scan.
+    @Query("""
+        SELECT t FROM TourTemplate t
+        WHERE t.status            = 'PUBLISHED'
+          AND t.deletedAtUtc      IS NULL
+          AND t.meetingLatitude   IS NOT NULL
+          AND t.meetingLongitude  IS NOT NULL
+          AND t.meetingLatitude   >= :minLat
+          AND t.meetingLatitude   <= :maxLat
+          AND t.meetingLongitude  >= :minLng
+          AND t.meetingLongitude  <= :maxLng
+        ORDER BY t.createdAtUtc DESC
+    """)
+    List<TourTemplate> findWithinBoundingBox(
+            @Param("minLat") BigDecimal minLat,
+            @Param("maxLat") BigDecimal maxLat,
+            @Param("minLng") BigDecimal minLng,
+            @Param("maxLng") BigDecimal maxLng
+    );
+
+    // ── 2. Radius / Proximity Search (Haversine) ──────────────────────────────
+    //
+    // Returns all PUBLISHED tours whose meeting point is within radiusKm
+    // kilometres of the supplied centre point (lat, lng).
+    //
+    // Uses the haversine formula — the standard spherical distance formula
+    // for Earth coordinates. Accurate to within ~0.5% for distances under
+    // 1000 km, which is more than sufficient for Lebanon-scale searches.
+    //
+    // Formula breakdown:
+    //   6371 = Earth radius in kilometres
+    //   The acos(cos*cos*cos + sin*sin) term = central angle between two points
+    //   Multiplied by radius = arc length = distance in km
+    //
+    // Performance note: haversine requires a full scan of coordinate-indexed rows.
+    // The bounding box index in V44 helps narrow the candidate set, but Postgres
+    // cannot use it directly for the acos computation. For Lebanon's tour count
+    // this is fast enough. For large-scale use: add PostGIS.
+    //
+    // Parameters:
+    //   lat       — centre latitude  (traveler's location or map centre)
+    //   lng       — centre longitude
+    //   radiusKm  — search radius in kilometres (validated 0.1–500 in controller)
+    @Query("""
+        SELECT t FROM TourTemplate t
+        WHERE t.status           = 'PUBLISHED'
+          AND t.deletedAtUtc     IS NULL
+          AND t.meetingLatitude  IS NOT NULL
+          AND t.meetingLongitude IS NOT NULL
+          AND (6371.0 * acos(
+                  LEAST(1.0,
+                      cos(radians(:lat)) * cos(radians(t.meetingLatitude))
+                      * cos(radians(t.meetingLongitude) - radians(:lng))
+                      + sin(radians(:lat)) * sin(radians(t.meetingLatitude))
+                  )
+              )) <= :radiusKm
+        ORDER BY (6371.0 * acos(
+                  LEAST(1.0,
+                      cos(radians(:lat)) * cos(radians(t.meetingLatitude))
+                      * cos(radians(t.meetingLongitude) - radians(:lng))
+                      + sin(radians(:lat)) * sin(radians(t.meetingLatitude))
+                  )
+              )) ASC
+    """)
+    List<TourTemplate> findWithinRadius(
+            @Param("lat")      double lat,
+            @Param("lng")      double lng,
+            @Param("radiusKm") double radiusKm
+    );
 }
 
 // BUFFER ZONE START

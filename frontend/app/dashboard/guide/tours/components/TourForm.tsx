@@ -1,29 +1,3 @@
-// ============================================================================
-// GUIDE TOUR EDITOR - CARD 17
-// ============================================================================
-// LOCATION: /frontend/src/app/dashboard/guide/tours/new/page.tsx
-// 
-// PURPOSE: Allow guides to create and edit tours
-// 
-// BUSINESS REQUIREMENTS (from project spec):
-// ✓ One-time or recurring tours (e.g., every weekend)
-// ✓ Min/max capacity settings
-// ✓ Dynamic pricing (rush days, weekends, holidays)
-// ✓ Halal badge toggle
-// ✓ Language selection (Arabic, French, etc.)
-// ✓ Visual itinerary builder
-// ✓ Meeting point with map
-// ✓ Media upload (images/videos)
-// 
-// COLOR PSYCHOLOGY:
-// - Blue: Primary actions, form fields
-// - Green: Success, availability
-// - Orange: Pricing, premium features
-// - Gold: Halal certification
-// 
-// DUAL THEME: Full light/dark mode support
-// ============================================================================
-
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
@@ -31,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import dynamic from 'next/dynamic'
 import {
   Camera,
   MapPin,
@@ -57,6 +32,7 @@ import {
   Leaf,
   Repeat,
   RefreshCw,
+  Navigation,
   PlusCircle,
   Video,
   Undo2,
@@ -79,8 +55,20 @@ import {
   submitTourForReview,
   withdrawTourFromReview
 } from '@/src/lib/api/tours'
+
+// Dynamically import Map components with SSR disabled for Leaflet support
+const MapPicker = dynamic(() => import('@/src/components/ui/MapPicker'), { 
+  ssr: false,
+  loading: () => <div className="h-[300px] bg-gray-100 dark:bg-gray-900 rounded-xl animate-pulse flex items-center justify-center font-black text-gray-400">LOADING MAP PICKER...</div>
+})
+
+const RouteBuilderMap = dynamic(() => import('@/src/components/ui/RouteBuilderMap'), { 
+  ssr: false,
+  loading: () => <div className="h-[400px] bg-gray-100 dark:bg-gray-900 rounded-3xl animate-pulse flex items-center justify-center font-black text-gray-400">PREPARING ROUTE BUILDER...</div>
+})
+
 // ============================================================================
-// PROPS INTERFACE - ADD THIS AFTER IMPORTS
+// PROPS INTERFACE
 // ============================================================================
 
 interface TourFormProps {
@@ -196,6 +184,7 @@ interface TourFormData {
       lng?: number
     }
     image?: string
+    showMap?: boolean
   }[]
 
   // Inclusions/Exclusions
@@ -365,6 +354,7 @@ const MOCK_TOUR_DATA_FOR_EDIT: TourFormData = {
   title: '',
   description: '',
   category: 'historical',
+  categories: [],
   tags: [],
 
   location: '',
@@ -579,13 +569,7 @@ function BasicInfoSection({ formData, onChange }: BasicInfoSectionProps) {
 // LOCATION SECTION
 // ============================================================================
 
-interface LocationSectionProps {
-  formData: TourFormData
-  onChange: (field: string, value: any) => void
-}
-
-function LocationSection({ formData, onChange }: LocationSectionProps) {
-  // Memoize options to prevent unnecessary re-renders
+function TourLocationSection({ formData, onChange, mapId }: { formData: TourFormData; onChange: any; mapId?: string }) {
   const countryOptions = useMemo(() => 
     Country.getAllCountries().map(c => ({ label: c.name, value: c.name })),
   [])
@@ -635,7 +619,7 @@ function LocationSection({ formData, onChange }: LocationSectionProps) {
             value={formData.meetingPoint.name}
             onChange={(e) => onChange('meetingPoint', { ...formData.meetingPoint, name: e.target.value })}
             className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
-            placeholder=""
+            placeholder="e.g. Beirut Souks, Martyrs Square"
           />
         </div>
 
@@ -648,29 +632,32 @@ function LocationSection({ formData, onChange }: LocationSectionProps) {
             value={formData.meetingPoint.address}
             onChange={(e) => onChange('meetingPoint', { ...formData.meetingPoint, address: e.target.value })}
             className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
-            placeholder=""
+            placeholder="Street name, building, floor"
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Meeting Instructions (optional)
+        {/* Interactive Map Picker - Meeting Point */}
+        <div className="mt-6">
+          <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <Navigation className="w-3 h-3" />
+            Pick on Map (Automatically fills name & address)
           </label>
-          <textarea
-            value={formData.meetingPoint.instructions || ''}
-            onChange={(e) => onChange('meetingPoint', { ...formData.meetingPoint, instructions: e.target.value })}
-            rows={2}
-            className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
-            placeholder=""
+          <MapPicker 
+            lat={formData.meetingPoint.lat}
+            lng={formData.meetingPoint.lng}
+            onChange={(lat, lng, address, name) => {
+              onChange('meetingPoint', { 
+                ...formData.meetingPoint, 
+                lat, 
+                lng,
+                address: address || formData.meetingPoint.address,
+                name: name || formData.meetingPoint.name
+              })
+              toast.success('Location & Address updated', { id: 'map-pick' })
+            }}
+            mapId={mapId || "meeting-point-map"}
+            height="350px"
           />
-        </div>
-
-        {/* Map placeholder */}
-        <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-center">
-          <MapPin className="w-6 h-6 mx-auto mb-2 text-gray-400" />
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Map integration will be available in Phase 2
-          </p>
         </div>
       </div>
     </FormSection>
@@ -1173,10 +1160,10 @@ function PricingSection({ formData, onChange }: PricingSectionProps) {
               <input
                 type="number"
                 min="0"
-                value={formData.dynamicPricing.weekendMultiplier || ''}
+                value={formData?.dynamicPricing?.weekendMultiplier ?? ''}
                 onChange={(e) => onChange('dynamicPricing', {
-                  ...formData.dynamicPricing,
-                  weekendMultiplier: e.target.value === '' ? 0 : parseInt(e.target.value)
+                  ...(formData.dynamicPricing || {}),
+                  weekendMultiplier: e.target.value === '' ? 100 : parseFloat(e.target.value)
                 })}
                 className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
               />
@@ -1190,10 +1177,11 @@ function PricingSection({ formData, onChange }: PricingSectionProps) {
               <input
                 type="number"
                 min="0"
-                value={formData.dynamicPricing.holidayMultiplier || ''}
+                step="0.01"
+                value={formData?.dynamicPricing?.holidayMultiplier ?? ''}
                 onChange={(e) => onChange('dynamicPricing', {
-                  ...formData.dynamicPricing,
-                  holidayMultiplier: e.target.value === '' ? 0 : parseInt(e.target.value)
+                  ...(formData.dynamicPricing || {}),
+                  holidayMultiplier: e.target.value === '' ? 100 : parseFloat(e.target.value)
                 })}
                 className=" w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 "
               />
@@ -1602,7 +1590,7 @@ interface ItinerarySectionProps {
   onChange: (field: string, value: any) => void
 }
 
-function ItinerarySection({ formData, onChange }: ItinerarySectionProps) {
+function ItinerarySection({ formData, onChange, mapId }: ItinerarySectionProps & { mapId?: string }) {
   const addItineraryItem = () => {
     const newItem = {
       id: Date.now().toString(),
@@ -1621,11 +1609,28 @@ function ItinerarySection({ formData, onChange }: ItinerarySectionProps) {
     onChange('itinerary', updated)
   }
 
-  const updateItineraryLocation = (index: number, locationName: string) => {
+  const updateItineraryLocation = (index: number, locationName: string, lat?: number, lng?: number, address?: string) => {
     const updated = [...formData.itinerary]
+    const currentLoc = updated[index].location || { name: '' }
+    
+    // Set title to full address as requested
+    if (address) {
+      updated[index].title = address;
+    } else if (locationName) {
+      updated[index].title = locationName;
+    }
+    
+    // Leave description empty for the guide to specify
+    updated[index].description = '';
+
     updated[index] = {
       ...updated[index],
-      location: locationName ? { name: locationName } : undefined
+      location: { 
+        ...currentLoc,
+        name: locationName ?? currentLoc.name,
+        lat: lat ?? currentLoc.lat,
+        lng: lng ?? currentLoc.lng
+      }
     }
     onChange('itinerary', updated)
   }
@@ -1636,7 +1641,39 @@ function ItinerarySection({ formData, onChange }: ItinerarySectionProps) {
 
   return (
     <FormSection title="Itinerary" icon={CalendarRange}>
-      <div className="space-y-4">
+      <div className="space-y-6">
+        {/* UNIFIED ROUTE BUILDER MAP */}
+        <div className="mb-8">
+          <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+            <Sparkles className="w-3 h-3 text-blue-500" />
+            Visual Route Builder (A → B → C)
+          </label>
+          <RouteBuilderMap 
+            stops={formData.itinerary}
+            onAddStop={(lat, lng, address, name) => {
+              const newItem = {
+                id: Date.now().toString(),
+                order: formData.itinerary.length + 1,
+                title: address || name || `Stop ${formData.itinerary.length + 1}`,
+                description: '', // Leave empty for guide to specify
+                duration: '0h 30m',
+                location: { name: name || 'Custom Point', lat, lng }
+              }
+              onChange('itinerary', [...formData.itinerary, newItem])
+              toast.success(`Stop ${newItem.order} added to trail`, { id: 'route-add' })
+            }}
+            onUpdateStop={(idx, lat, lng, address, name) => {
+              updateItineraryLocation(idx, name || '', lat, lng, address)
+            }}
+            onRemoveStop={removeItineraryItem}
+            height="450px"
+          />
+          <p className="mt-3 text-[10px] text-gray-400 italic text-center leading-relaxed">
+            PRO TIP: Just click anywhere on the map to add stops in sequence. The trail will form automatically.
+          </p>
+        </div>
+
+        <div className="space-y-4">
         {formData.itinerary.map((item, index) => (
           <div key={item.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-3">
             <div className="flex items-center justify-between">
@@ -1709,14 +1746,51 @@ function ItinerarySection({ formData, onChange }: ItinerarySectionProps) {
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold pointer-events-none uppercase">Min</span>
                 </div>
               </div>
-              <input
-                type="text"
-                value={item.location?.name || ''}
-                onChange={(e) => updateItineraryLocation(index, e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addItineraryItem())}
-                placeholder="Location"
-                className=" w-full px-3 py-2 bg-white dark:bg-gray-900 border-2 border-gray-200/80 dark:border-gray-700/80 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all text-xs "
-              />
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={item.location?.name || ''}
+                  onChange={(e) => updateItineraryLocation(index, e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addItineraryItem())}
+                  placeholder="Location Name"
+                  className=" w-full px-3 py-2 bg-white dark:bg-gray-900 border-2 border-gray-200/80 dark:border-gray-700/80 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all text-xs "
+                />
+              </div>
+            </div>
+
+            {/* Map Picker for Itinerary Stop */}
+            <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-3">
+              <button
+                type="button"
+                onClick={() => {
+                  const items = [...formData.itinerary]
+                  items[index] = { ...items[index], showMap: !(items as any)[index].showMap }
+                  onChange('itinerary', items)
+                }}
+                className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-colors ${(item as any).showMap ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+              >
+                <MapPin className="w-3.5 h-3.5" />
+                {(item as any).showMap ? 'Hide Map' : 'Pick stop on Map'}
+              </button>
+              
+              {(item as any).showMap && (
+                <div className="mt-3">
+                  <MapPicker 
+                    lat={item.location?.lat}
+                    lng={item.location?.lng}
+                    trail={formData.itinerary.slice(0, index).map(it => ({
+                      lat: it.location?.lat || 0,
+                      lng: it.location?.lng || 0,
+                      label: String(it.order)
+                    }))}
+                    onChange={(lat, lng, address, name) => {
+                      updateItineraryLocation(index, name || item.location?.name || '', lat, lng)
+                    }}
+                    mapId={`${mapId || 'itinerary-map'}-stop-${index}`}
+                    height="200px"
+                  />
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -1729,8 +1803,9 @@ function ItinerarySection({ formData, onChange }: ItinerarySectionProps) {
           Add Itinerary Stop
         </button>
       </div>
-    </FormSection>
-  )
+    </div>
+  </FormSection>
+)
 }
 
 // ============================================================================
@@ -2027,36 +2102,45 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
       if (typeof val === 'string' && val.trim()) {
         try {
           base[field] = JSON.parse(val);
-          
-          // Normalize dynamic pricing: scale decimals to percentages for UI
-          if (field === 'dynamicPricing' && base[field]) {
-            if (base[field].weekendMultiplier) base[field].weekendMultiplier = Math.round(base[field].weekendMultiplier * 100);
-            if (base[field].holidayMultiplier) base[field].holidayMultiplier = Math.round(base[field].holidayMultiplier * 100);
-          }
-
-          // Normalize itinerary durations to Xh Ym format
-          if (field === 'itinerary' && Array.isArray(base[field])) {
-            base[field] = base[field].map((item: any) => {
-              let d = item.duration || '0h 0m';
-              if (item.duration && (!item.duration.includes('h') || !item.duration.includes('m'))) {
-                const numeric = parseInt(item.duration) || 0;
-                if (item.duration.toLowerCase().includes('hour') || item.duration.toLowerCase().includes('hr')) {
-                   d = `${numeric}h 0m`;
-                } else {
-                   const h = Math.floor(numeric / 60);
-                   const m = numeric % 60;
-                   d = `${h}h ${m}m`;
-                }
-              }
-              return { ...item, duration: d };
-            });
-          }
-          if (field === 'languages') {
-            base.availableLanguages = base[field];
-          }
         } catch (e) {
           console.error(`Failed to parse ${field} from backend:`, e);
         }
+      } else if (val && typeof val === 'object') {
+        base[field] = val;
+      }
+
+      // Normalize dynamic pricing: scale decimals to percentages for UI
+      if (field === 'dynamicPricing' && base[field]) {
+        // Clone to prevent double-normalization if React re-runs this initializer
+        const dp = { ...base[field] };
+        if (dp.weekendMultiplier !== undefined && dp.weekendMultiplier <= 10) {
+          dp.weekendMultiplier = Math.round(dp.weekendMultiplier * 100);
+        }
+        if (dp.holidayMultiplier !== undefined && dp.holidayMultiplier <= 10) {
+          dp.holidayMultiplier = Math.round(dp.holidayMultiplier * 100);
+        }
+        base[field] = dp;
+      }
+
+      // Normalize itinerary durations to Xh Ym format
+      if (field === 'itinerary' && Array.isArray(base[field])) {
+        base[field] = base[field].map((item: any) => {
+          let d = item.duration || '0h 0m';
+          if (item.duration && (!item.duration.includes('h') || !item.duration.includes('m'))) {
+            const numeric = parseInt(item.duration) || 0;
+            if (item.duration.toLowerCase().includes('hour') || item.duration.toLowerCase().includes('hr')) {
+               d = `${numeric}h 0m`;
+            } else {
+               const h = Math.floor(numeric / 60);
+               const m = numeric % 60;
+               d = `${h}h ${m}m`;
+            }
+          }
+          return { ...item, duration: d };
+        });
+      }
+      if (field === 'languages' && base[field]) {
+        base.availableLanguages = base[field];
       }
     });
 
@@ -2369,7 +2453,11 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
         halalFriendly: formData.isHalalCertified,
         halalDetails: JSON.stringify(formData.halalDetails),
         isFamilyFriendly: formData.isFamilyFriendly !== undefined ? formData.isFamilyFriendly : false,
-        dynamicPricing: JSON.stringify(formData.dynamicPricing),
+        dynamicPricing: JSON.stringify({
+          ...formData.dynamicPricing,
+          weekendMultiplier: (formData.dynamicPricing.weekendMultiplier || 100) / 100,
+          holidayMultiplier: (formData.dynamicPricing.holidayMultiplier || 100) / 100
+        }),
         hasGroupDiscount: formData.groupDiscountEnabled,
         groupDiscountThreshold: formData.groupDiscountThreshold,
         groupDiscountPercent: formData.groupDiscountPercent,
@@ -2541,19 +2629,18 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
           {activeTab === 'edit' && (
             <div className="space-y-4">
               <BasicInfoSection formData={formData} onChange={handleChange} />
-              <LocationSection formData={formData} onChange={handleChange} />
+              <TourLocationSection formData={formData} onChange={handleChange} />
+              <ItinerarySection formData={formData} onChange={handleChange} />
               <MediaSection formData={formData} onChange={handleChange} />
               <CapacitySection formData={formData} onChange={handleChange} />
               <ScheduleSection formData={formData} onChange={handleChange} />
               <PricingSection formData={formData} onChange={handleChange} />
               <HalalSection formData={formData} onChange={handleChange} />
               <LanguagesSection formData={formData} onChange={handleChange} />
-              <ItinerarySection formData={formData} onChange={handleChange} />
               <InclusionsExclusionsSection
                 formData={formData}
                 onChange={handleChange}
               />
-
               <RequirementsSection
                 formData={formData}
                 onChange={handleChange}

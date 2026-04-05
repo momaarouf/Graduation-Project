@@ -62,6 +62,7 @@ export default function ReviewList({
         const fetchFiltered = async () => {
             if (activeDropdown === 'filter' || activeDropdown === 'sort' || initialReviews.length === 0) return 
             
+            console.log(`[ReviewList] Filtering reviews for rating ${filterRating}, sort ${sortBy}`)
             setIsFiltering(true)
             try {
                 const res = await getTourReviews(tourId, 0, isFullPage ? 50 : 10, filterRating, sortBy)
@@ -71,6 +72,8 @@ export default function ReviewList({
                         id: String(r.id),
                         travelerId: String(r.travelerId)
                     })))
+                } else {
+                    setReviews([])
                 }
             } catch (err) {
                 console.error('Failed to filter reviews:', err)
@@ -80,7 +83,7 @@ export default function ReviewList({
             }
         }
 
-        // Don't re-fetch on mount if we already have initialReviews AND filters are default
+        // Don't re-fetch on mount if filters are default
         if (filterRating === null && sortBy === 'newest') return 
         
         fetchFiltered()

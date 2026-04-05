@@ -11,7 +11,11 @@ import java.time.Instant;
  * Full detail is fetched separately via PublicTourDetailResponse.
  *
  * Never exposes: internal IDs of guide profile, status, rejection reason,
- * admin fields, meeting coordinates, or raw entity structure.
+ * admin fields, or raw entity structure.
+ *
+ * meetingLatitude / meetingLongitude added to support map pin placement
+ * on the bounding box and nearby search results. Both are nullable —
+ * tours without coordinates are still returned by text-based search.
  */
 @Data
 public class PublicTourCardResponse {
@@ -27,6 +31,11 @@ public class PublicTourCardResponse {
     private String region;
     private String city;
     private String countryCode;
+
+    // Meeting point coordinates — used to place map pins on the listing view.
+    // Null if the guide has not set coordinates for this tour.
+    private BigDecimal meetingLatitude;
+    private BigDecimal meetingLongitude;
 
     // Pricing
     private BigDecimal basePrice;
@@ -48,7 +57,7 @@ public class PublicTourCardResponse {
     // Next upcoming occurrence — null if no future scheduled occurrences
     private Instant nextOccurrenceStartUtc;
 
-    // Reviews — null until review system is implemented
+    // Reviews
     private BigDecimal averageRating;
     private Integer reviewCount;
 

@@ -155,7 +155,27 @@ export interface PublicTourCardResponse {
   isPremium?: boolean
   isFamilyFriendly?: boolean
   hasGroupDiscount?: boolean
+  // Geo-search results
+  latitude?: number | null
+  longitude?: number | null
+  distanceKm?: number | null
 }
+
+export interface TourMapPointResponse {
+  id: number
+  latitude: number
+  longitude: number
+  orderIndex: number
+  pointName: string | null
+}
+
+export interface TourRouteResponse {
+  tourTemplateId: number
+  occurrenceId: number | null
+  occurrenceStartUtc: string | null
+  waypoints: TourMapPointResponse[]
+}
+
 
 export interface PublicActiveBookingResponse {
   id: number
@@ -505,7 +525,17 @@ export interface PublicTourFilters {
   hasGroupDiscount?: boolean
   language?: string
   sortBy?: 'newest' | 'price_asc' | 'price_desc'
+  // Bounding box (all 4 required)
+  minLat?: number
+  maxLat?: number
+  minLng?: number
+  maxLng?: number
+  // Radius search
+  lat?: number
+  lng?: number
+  radiusKm?: number
 }
+
 
 export interface PaginatedResponse<T> {
   data: T[]

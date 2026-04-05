@@ -32,6 +32,13 @@ import {
 } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
+import dynamic from 'next/dynamic'
+
+// Dynamically import Map component with SSR disabled for Leaflet support
+const TourMap = dynamic(() => import('./TourMap'), { 
+  ssr: false,
+  loading: () => <div className="h-[300px] bg-gray-100 dark:bg-gray-900 rounded-xl animate-pulse flex items-center justify-center font-black text-gray-400">LOADING MAP...</div>
+})
 import type { TourInfoProps } from '@/src/types/tour-detail.types'
 import { parseList, parseItinerary } from '@/src/lib/utils/tour-parser'
 
@@ -43,6 +50,7 @@ export default function TourInfo({
     requirements,
     whatToBring,
     meetingPoint,
+    route,
     safetyMeasures,
     isHalalCertified,
     halalCertificationDetails,
@@ -151,33 +159,84 @@ export default function TourInfo({
           HALAL CERTIFICATION DETAILS
           ======================================== */}
             {isHalalCertified && halalCertificationDetails && (
-                <>
-                    <section className="p-5 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 rounded-2xl">
-                        <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center flex-shrink-0">
-                                <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-emerald-900 dark:text-emerald-100 mb-1">
-                                    Halal Travel Commitment
-                                </h3>
-                                <p className="text-sm text-emerald-700 dark:text-emerald-400 leading-relaxed">
-                                    {halalCertificationDetails}
-                                </p>
-                            </div>
+                <section className="p-5 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 rounded-2xl">
+                    <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+                            <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                         </div>
-                    </section>
-                    <hr className="border-gray-100 dark:border-gray-800" />
-                </>
+                        <div>
+                            <h3 className="font-bold text-emerald-900 dark:text-emerald-100 mb-1">
+                                Halal Travel Commitment
+                            </h3>
+                            <p className="text-sm text-emerald-700 dark:text-emerald-400 leading-relaxed">
+                                {halalCertificationDetails}
+                            </p>
+                        </div>
+                    </div>
+                </section>
             )}
 
+            <hr className="border-gray-100 dark:border-gray-800" />
+
             {/* ========================================
-          ITINERARY
+          ROUTE & MEETING POINT (MAP)
+          ======================================== */}
+            <section id="location" className="py-2 scroll-mt-24">
+                <div className="flex items-center gap-2 mb-6">
+                    <MapPin className="w-5 h-5 text-gray-500" />
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">Visual Route & Meeting Point</h2>
+                </div>
+
+                <div className="space-y-6">
+                    <div className="flex items-start gap-3">
+                        <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                        <div className="space-y-1">
+                            <p className="font-bold text-gray-900 dark:text-white">
+                                {meetingPoint.name}
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                {meetingPoint.address}
+                            </p>
+                        </div>
+                    </div>
+
+                    {meetingPoint.instructions && (
+                        <div className="flex items-start gap-3 p-3 bg-blue-50/50 dark:bg-blue-900/10 rounded-lg">
+                            <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                            <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+                                {meetingPoint.instructions}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Real Leaflet Map */}
+                    <TourMap 
+                        meetingPoint={{
+                            lat: meetingPoint.lat,
+                            lng: meetingPoint.lng,
+                            name: meetingPoint.name,
+                            address: meetingPoint.address
+                        }}
+                        route={route && route.length > 0 ? route : itineraryList.filter(it => it.location?.lat).map(it => ({
+                            id: it.id,
+                            latitude: it.location.lat,
+                            longitude: it.location.lng,
+                            pointName: it.title
+                        }))}
+                        height="400px"
+                    />
+                </div>
+            </section>
+
+            <hr className="border-gray-100 dark:border-gray-800" />
+
+            {/* ========================================
+          ITINERARY DETAILS (LIST)
           ======================================== */}
             <section>
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-8">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                        Visual Itinerary
+                        Discovery Timeline
                     </h2>
                     <span className="text-sm text-gray-500 dark:text-gray-400">
                         {itineraryList.length} stops
@@ -186,30 +245,30 @@ export default function TourInfo({
 
                 <div className="space-y-0">
                     {itineraryList.map((stop, index) => (
-                        <div key={stop.id} className="relative flex gap-4 pb-8 last:pb-0">
+                        <div key={stop.id} className="relative flex gap-6 pb-10 last:pb-0">
                             {/* Connector line */}
                             {index !== itineraryList.length - 1 && (
-                                <div className="absolute left-[15px] top-[30px] bottom-0 w-0.5 bg-gray-200 dark:bg-gray-800" />
+                                <div className="absolute left-[19px] top-[40px] bottom-0 w-0.5 bg-gray-200 dark:bg-gray-800" />
                             )}
 
                             {/* Order number */}
-                            <div className="relative z-10 w-8 h-8 rounded-full bg-blue-600 dark:bg-blue-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                            <div className="relative z-10 w-10 h-10 rounded-2xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-black flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/20 rotate-3">
                                 {index + 1}
                             </div>
 
-                            <div className="space-y-1.5 pt-1">
-                                <h3 className="font-bold text-gray-900 dark:text-white">
+                            <div className="space-y-2 pt-1.5 flex-1">
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                                     {stop.title}
                                 </h3>
-                                <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-                                    <div className="flex items-center gap-1">
-                                        <Clock className="w-3.5 h-3.5" />
-                                        <span>{stop.duration}</span>
+                                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                                    <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800/50 px-2 py-1 rounded-md">
+                                        <Clock className="w-3.5 h-3.5 text-blue-500" />
+                                        <span className="font-medium">{stop.duration}</span>
                                     </div>
                                     {stop.location && (
-                                        <div className="flex items-center gap-1">
-                                            <MapPin className="w-3.5 h-3.5" />
-                                            <span>{stop.location.name}</span>
+                                        <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800/50 px-2 py-1 rounded-md">
+                                            <MapPin className="w-3.5 h-3.5 text-orange-500" />
+                                            <span className="font-medium">{stop.location.name}</span>
                                         </div>
                                     )}
                                 </div>
@@ -304,58 +363,7 @@ export default function TourInfo({
                 )}
             </section>
 
-            <hr className="border-gray-100 dark:border-gray-800" />
-
-            {/* ========================================
-          MEETING POINT
-          ======================================== */}
-            <section id="meeting-point" className="space-y-4">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                    Meeting Point
-                </h2>
-                <div className="
-          p-5
-          border border-gray-200 dark:border-gray-800
-          rounded-2xl
-          space-y-4
-        ">
-                    <div className="flex items-start gap-3">
-                        <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                        <div className="space-y-1">
-                            <p className="font-bold text-gray-900 dark:text-white">
-                                {meetingPoint.name}
-                            </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                {meetingPoint.address}
-                            </p>
-                        </div>
-                    </div>
-
-                    {meetingPoint.instructions && (
-                        <div className="flex items-start gap-3 p-3 bg-blue-50/50 dark:bg-blue-900/10 rounded-lg">
-                            <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                            <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
-                                {meetingPoint.instructions}
-                            </p>
-                        </div>
-                    )}
-
-                    {/* Map placeholder */}
-                    <div className="
-            aspect-[21/9]
-            bg-gray-100 dark:bg-gray-900
-            rounded-xl
-            flex items-center justify-center
-            border border-gray-200 dark:border-gray-800
-          ">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Map integration in Phase 2
-                        </p>
-                    </div>
-                </div>
-            </section>
-
-            <hr className="border-gray-100 dark:border-gray-800" />
+            <hr className="border-gray-100 dark:border-gray-800 opacity-60" />
 
             {/* ========================================
           SAFETY MEASURES

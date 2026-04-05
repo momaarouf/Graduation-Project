@@ -1,6 +1,7 @@
 // src/lib/api/tours.ts
 
 import apiClient from '@/src/lib/api/client'
+import { cache } from 'react'
 import {
   TourTemplateResponse,
   TourMediaResponse,
@@ -22,6 +23,7 @@ import {
   ReviewResponse,
   ReviewSummaryResponse,
   ToggleHelpfulResponse,
+  TourRouteResponse,
 } from '@/src/lib/types/tour.types'
 import { GuideProfileResponse } from '@/src/lib/types/guide.types'
 
@@ -125,13 +127,24 @@ export const adminRejectTour = (id: number, rejectionReason: string) =>
 export const getPublicTours = (filters?: PublicTourFilters) =>
   apiClient.get<PublicTourCardResponse[]>('/api/public/tours', { params: filters })
 
-/** Public tour detail page */
-export const getPublicTourDetail = (id: number) =>
+/** Public tour detail page - Cached for RSC performance */
+export const getPublicTourDetail = cache((id: number) =>
   apiClient.get<PublicTourDetailResponse>(`/api/public/tours/${id}`)
+)
 
 /** Future active occurrences for a published tour */
 export const getPublicTourOccurrences = (id: number) =>
   apiClient.get<TourOccurrenceResponse[]>(`/api/public/tours/${id}/occurrences`)
+
+/** Get ordered waypoints (trail) for a tour's route */
+export const getTourRoute = (id: number) =>
+  apiClient.get<TourRouteResponse>(`/api/public/tours/${id}/route`)
+
+/** Radius search (near me) */
+export const getNearbyTours = (lat: number, lng: number, radiusKm: number) =>
+  apiClient.get<PublicTourCardResponse[]>('/api/public/tours/nearby', {
+    params: { lat, lng, radiusKm }
+  })
 
 // ── Public: Portfolio ────────────────────────────────────────────────────────
 
@@ -210,14 +223,11 @@ export const completeBooking = (id: number) =>
 
 // ── Reviews API ──────────────────────────────────────────────────────────────
 
-/**
- * Fetch paginated reviews + aggregated stats for a tour template.
- * Calls: GET /api/reviews/tour/{tourId}?page=0&size=10
- */
-export const getTourReviews = (tourId: number | string, page = 0, size = 10, rating?: number | null, sort = 'newest') =>
+export const getTourReviews = cache((tourId: number | string, page = 0, size = 10, rating?: number | null, sort = 'newest') =>
   apiClient.get<ReviewSummaryResponse>(`/api/reviews/tour/${tourId}`, {
     params: { page, size, rating, sort }
   })
+)
 
 /** 
  * Get reviews for a guide.

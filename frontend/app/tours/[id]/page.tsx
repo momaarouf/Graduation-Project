@@ -39,7 +39,7 @@ import BookingCard from '@/src/components/tour-detail/BookingCard'
 import ReviewList from '@/src/components/tour-detail/ReviewList'
 import SimilarTours from '@/src/components/tour-detail/SimilarTours'
 import { MOCK_TOUR_DETAIL, MOCK_REVIEWS, BookingMode, TourStatus } from '@/src/types/tour-detail.types'
-import { getPublicTourDetail, getTourReviews } from '@/src/lib/api/tours'
+import { getPublicTourDetail, getTourReviews, getTourRoute } from '@/src/lib/api/tours'
 import { Metadata } from 'next'
 import { ChevronLeft } from 'lucide-react'
 import BookingCardWrapper from '@/src/components/tour-detail/BookingCardWrapper'
@@ -152,10 +152,11 @@ export default async function TourDetailPage({ params}:PageProps ) {
     let reviewSummary: any = null
 
     try {
-        const [tourRes, reviewsRes] = await Promise.allSettled([
+        const [tourRes, reviewsRes, routeRes] = await Promise.allSettled([
             getPublicTourDetail(Number(id)),
             // Reusing getTourReviews instead of raw axios for consistency
-            getTourReviews(id, 0, 10).catch(() => ({ data: null }))
+            getTourReviews(id, 0, 10).catch(() => ({ data: null })),
+            getTourRoute(Number(id)).catch(() => ({ data: null }))
         ])
 
         if (tourRes.status === 'fulfilled') {
@@ -164,6 +165,10 @@ export default async function TourDetailPage({ params}:PageProps ) {
 
         if (reviewsRes.status === 'fulfilled') {
             reviewSummary = (reviewsRes.value as any).data
+        }
+
+        if (routeRes.status === 'fulfilled') {
+            tour.route = (routeRes.value as any).data?.waypoints || []
         }
     } catch (err) {
         console.error(`[Server] Error loading tour detail for ${id}:`, err)
@@ -243,6 +248,7 @@ export default async function TourDetailPage({ params}:PageProps ) {
                             durationHours={tour.durationHours}
                             durationMinutes={tour.durationMinutes}
                             occurrences={tour.occurrences}
+                            route={tour.route}
                         />
 
                         <TourGuide
