@@ -144,7 +144,7 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
     if (!booking) return
     setIsCancelling(true)
     try {
-      const res = await cancelBooking(booking.id, cancelReason || undefined)
+      const res = await cancelBooking(booking.id, cancelReason ? { reason: cancelReason } : undefined)
       toast.success(
         `Booking cancelled! ${res.data.refundPercent ? `${res.data.refundPercent}% refund` : 'No refund (within 24h window)'}`
       )

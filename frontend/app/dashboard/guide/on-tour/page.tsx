@@ -864,7 +864,7 @@ export default function GuideOnTourPage() {
 
         setIsProcessing(true)
         try {
-            await noShowBooking(bookingId, 'No-Show')
+            await noShowBooking(bookingId, { reason: 'No-Show' })
             toast.success('Traveler marked as No-Show')
             fetchActiveBookings()
         } catch (err: any) {

@@ -598,7 +598,7 @@ export default function ImpactMap() {
                 </div>
           <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-purple-400">
                   <Star className="w-3 h-3 fill-current" />
-                  {stats.avgRating}/5 Rating
+                  {stats.averageRating}/5 Rating
                 </span>
               </motion.div>
 
