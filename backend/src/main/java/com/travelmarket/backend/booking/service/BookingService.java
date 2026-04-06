@@ -11,6 +11,7 @@ import com.travelmarket.backend.booking.repository.WaitlistRepository;
 import com.travelmarket.backend.entity.GuideProfile;
 import com.travelmarket.backend.entity.TravelerProfile;
 import com.travelmarket.backend.entity.User;
+import com.travelmarket.backend.payment.service.StripePaymentService;
 import com.travelmarket.backend.repository.GuideProfileRepository;
 import com.travelmarket.backend.repository.TravelerProfileRepository;
 import com.travelmarket.backend.tour.entity.TourOccurrence;
@@ -18,6 +19,7 @@ import com.travelmarket.backend.tour.enums.TourOccurrenceStatus;
 import com.travelmarket.backend.tour.repository.TourOccurrenceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +45,8 @@ public class BookingService {
     private final TravelerProfileRepository travelerRepository;
     private final GuideProfileRepository guideRepository;
     private final ObjectMapper objectMapper;
+    @Lazy
+    private final StripePaymentService stripePaymentService;
 
     // ── Traveler: Create Booking ──────────────────────────────────────────────
 
@@ -96,14 +100,17 @@ public class BookingService {
         booking.setBookingMode(isInstant ? BookingMode.Instant : BookingMode.Request);
 
         if (isInstant) {
-            // Instant Book: seat is reserved immediately upon booking creation.
-            // TODO (payment card): intercept here — status should become PENDING_PAYMENT
-            // and only advance to CONFIRMED once Whish captures the payment.
-            booking.setStatus(BookingStatus.Confirmed);
+            // Instant Book: seats tentatively reserved for 30 minutes while traveler pays.
+            // Booking stays in PendingPayment until StripePaymentService confirms payment.
+            // On success (webhook/mock-confirm): → Confirmed
+            // On expiry (no payment in 30 min): → Expired, seats released by cleanup job
+            booking.setStatus(BookingStatus.PendingPayment);
             reserveSeats(occurrence, newTotalSeats - occurrence.getSeatsReserved());
         } else {
             // Request to Book: seat is ALSO reserved immediately to prevent overbooking
             // while the guide reviews. Guide has 24 h to respond.
+            // Phase 2: after guide accepts → PendingPayment → payment → Confirmed
+            // Phase 1: guide accepts → Confirmed directly (payment skipped for Request mode)
             booking.setStatus(BookingStatus.PendingGuide);
             reserveSeats(occurrence, newTotalSeats - occurrence.getSeatsReserved());
         }
@@ -172,11 +179,16 @@ public class BookingService {
             booking.setRefundPercent(BigDecimal.ZERO);
         }
 
-        // CONFIRMED, PENDING_GUIDE, and IN_PROGRESS bookings hold reserved seats — release them
-        if (booking.getStatus() == BookingStatus.Confirmed
+        // Release reserved seats for all states that hold them:
+        // PendingPayment = tentatively reserved (30-min cart lock)
+        // PendingGuide   = held while guide reviews
+        // Confirmed      = confirmed seat
+        // InProgress     = tour underway
+        if (booking.getStatus() == BookingStatus.PendingPayment
+                || booking.getStatus() == BookingStatus.Confirmed
                 || booking.getStatus() == BookingStatus.PendingGuide
                 || booking.getStatus() == BookingStatus.InProgress) {
-            
+
             releaseSeats(booking.getOccurrence(), booking.getPeopleCount());
             promoteFromWaitlist(booking.getOccurrence());
         }
@@ -478,8 +490,8 @@ public class BookingService {
         }
 
         // IN_PROGRESS → COMPLETED.
-        // completedAtUtc starts the 48 h payout freeze window (future payout card).
-        // COMPLETED status also unlocks review eligibility (future review card).
+        // completedAtUtc anchors the payout freeze window.
+        // COMPLETED status also unlocks review eligibility.
         booking.setStatus(BookingStatus.Completed);
         booking.setCompletedAtUtc(Instant.now());
 
@@ -488,7 +500,12 @@ public class BookingService {
         traveler.setTotalCompletedTrips((traveler.getTotalCompletedTrips() != null ? traveler.getTotalCompletedTrips() : 0) + 1);
         travelerRepository.save(traveler);
 
-        return mapToGuideResponse(bookingRepository.save(booking));
+        Booking completedBooking = bookingRepository.save(booking);
+
+        // Schedule guide payout: funds released after freeze window (0h demo / 48h production)
+        stripePaymentService.scheduleGuidePayoutFor(completedBooking);
+
+        return mapToGuideResponse(completedBooking);
     }
 
     /**
@@ -878,19 +895,21 @@ public class BookingService {
             if (b.getStatus() == BookingStatus.InProgress) {
                 Instant autoCompleteBuffer = b.getOccurrence().getEndTimeUtc().plus(java.time.Duration.ofHours(1));
                 if (now.isAfter(autoCompleteBuffer)) {
-                    log.info("[Automation] Auto-completing stale InProgress booking ID: {} (Tour ended at: {})", 
+                    log.info("[Automation] Auto-completing stale InProgress booking ID: {} (Tour ended at: {})",
                             b.getId(), b.getOccurrence().getEndTimeUtc());
                     b.setStatus(BookingStatus.Completed);
                     b.setCompletedAtUtc(b.getOccurrence().getEndTimeUtc());
-                    
+
                     // Increment traveler's total completed trips
                     TravelerProfile traveler = b.getTraveler();
                     if (traveler != null) {
                         traveler.setTotalCompletedTrips((traveler.getTotalCompletedTrips() != null ? traveler.getTotalCompletedTrips() : 0) + 1);
                         travelerRepository.save(traveler);
                     }
-                    
+
                     bookingRepository.save(b);
+                    // Schedule guide payout after freeze window
+                    stripePaymentService.scheduleGuidePayoutFor(b);
                 }
             }
             
@@ -1012,6 +1031,7 @@ public class BookingService {
                 travelerRepository.save(traveler);
             }
             bookingRepository.save(b);
+            stripePaymentService.scheduleGuidePayoutFor(b);
             log.info("Auto-completed stale booking ID: {}", b.getId());
         }
 

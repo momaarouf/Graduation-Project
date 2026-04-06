@@ -30,6 +30,20 @@ public class GuideProfile {
     @Column(name = "whish_account")
     private String whishAccount;
 
+    /**
+     * Stripe Connect account ID for this guide (e.g. "acct_1ABC...").
+     * Set when the guide completes Stripe Express onboarding (future milestone).
+     * Used by PayoutReleaseJob to transfer earnings after the 48h freeze window.
+     *
+     * In test mode: create a test connected account in Stripe Dashboard →
+     * Connected accounts, and paste the "acct_test_..." ID here via the
+     * guide profile update endpoint or directly in the DB for demo purposes.
+     *
+     * NULL means guide has not set up payouts → PayoutStatus transitions to Failed.
+     */
+    @Column(name = "stripe_account_id")
+    private String stripeAccountId;
+
     @Column(name = "impact_score", precision = 5, scale = 2)
     private BigDecimal impactScore = BigDecimal.ZERO;
 

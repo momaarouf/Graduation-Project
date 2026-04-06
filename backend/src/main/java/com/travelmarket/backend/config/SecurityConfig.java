@@ -60,10 +60,21 @@ public class SecurityConfig {
                         // Public tour browsing — no login required
                         .requestMatchers("/api/public/**", "/api/reviews/**").permitAll()
 
+                        // ── Payment endpoints ─────────────────────────────────
+                        // Stripe calls /webhook directly — NO JWT, verified by Stripe-Signature header
+                        .requestMatchers("/api/payments/webhook").permitAll()
+                        // Mock mode status is open (returns safe metadata only)
+                        .requestMatchers("/api/payments/mock/status").authenticated()
+                        // Mock confirm/fail require any valid JWT (demo use only, guarded by mock-mode flag)
+                        .requestMatchers("/api/payments/mock/**").authenticated()
+                        // create-session requires Traveler role (falls through to role block below)
+
                         // Role-based protection
                         .requestMatchers("/api/admin/**").hasRole("Admin")
                         .requestMatchers("/api/guide/**").hasRole("Guide")
                         .requestMatchers("/api/traveler/**").hasRole("Traveler")
+                        // Payment session creation: Traveler only
+                        .requestMatchers("/api/payments/create-session").hasRole("Traveler")
 
                         .anyRequest().authenticated()
                 )

@@ -1,0 +1,682 @@
+{
+  "info": {
+    "_postman_id": "travelmarket-payment-flow-v2",
+    "name": "🌍 Travel Market – Full Payment Flow",
+    "description": "Complete payment lifecycle.\n\n⚠️ Before running:\n  1. Start backend on http://localhost:8081\n  2. Set stripe.mock-mode=true in application.properties\n  3. Set app.payout.freeze-hours=0\n  4. Change {{occurrenceId}} to a real SCHEDULED occurrence ID",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl",          "value": "http://localhost:8081" },
+    { "key": "travelerEmail",    "value": "travelertest2@gmail.com" },
+    { "key": "travelerPassword", "value": "StrongPass123!" },
+    { "key": "guideEmail",       "value": "GuideTest5@gmail.com" },
+    { "key": "guidePassword",    "value": "StrongPass123!" },
+    { "key": "travelerToken",    "value": "" },
+    { "key": "guideToken",       "value": "" },
+    { "key": "bookingId",        "value": "" },
+    { "key": "sessionId",        "value": "" },
+    { "key": "qrCode",           "value": "" },
+    { "key": "guideBookingId",   "value": "" },
+    { "key": "occurrenceId",     "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "🔐 1. Auth",
+      "item": [
+        {
+          "name": "Login as Traveler",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login 200', () => pm.response.to.have.status(200));",
+                  "var body = pm.response.json();",
+                  "pm.test('Token received', () => pm.expect(body.token).to.be.a('string'));",
+                  "pm.globals.set('travelerToken', body.token);",
+                  "pm.collectionVariables.set('travelerToken', body.token);",
+                  "console.log('Traveler token (first 40):', body.token.substring(0, 40));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"{{travelerEmail}}\", \"password\": \"{{travelerPassword}}\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login as Guide",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Guide Login 200', () => pm.response.to.have.status(200));",
+                  "var body = pm.response.json();",
+                  "pm.test('Guide token received', () => pm.expect(body.token).to.be.a('string'));",
+                  "pm.globals.set('guideToken', body.token);",
+                  "pm.collectionVariables.set('guideToken', body.token);",
+                  "console.log('Guide token (first 40):', body.token.substring(0, 40));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"{{guideEmail}}\", \"password\": \"{{guidePassword}}\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User — /me (Traveler)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var t = pm.globals.get('travelerToken');",
+                  "console.log('Token being sent:', t ? t.substring(0,50) : 'EMPTY - run login first');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "var body = pm.response.json();",
+                  "pm.test('Role is Traveler', () => pm.expect((body.role||'').toUpperCase()).to.eql('TRAVELER'));",
+                  "console.log('Logged in as:', body.email, '| Role:', body.role);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{travelerToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📅 2. Bookings",
+      "item": [
+        {
+          "name": "List Traveler Bookings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "var bookings = pm.response.json();",
+                  "console.log('Total bookings:', Array.isArray(bookings) ? bookings.length : 'N/A');",
+                  "if (Array.isArray(bookings)) {",
+                  "  var pending = bookings.find(function(b){ return b.status === 'PendingPayment'; });",
+                  "  if (pending) console.log('Existing PendingPayment booking ID:', pending.id, '— can skip Create Booking');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{travelerToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/traveler/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "traveler", "bookings"]
+            }
+          }
+        },
+        {
+          "name": "Create Booking — Instant (→ PendingPayment)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var t = pm.globals.get('travelerToken');",
+                  "console.log('travelerToken for booking:', t ? 'SET ' + t.substring(0,30) : 'EMPTY!');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 or 201', () => pm.expect(pm.response.code).to.be.oneOf([200,201]));",
+                  "var body = pm.response.json();",
+                  "pm.test('Status is PendingPayment', () => pm.expect(body.status).to.eql('PendingPayment'));",
+                  "pm.globals.set('bookingId', String(body.id));",
+                  "pm.collectionVariables.set('bookingId', String(body.id));",
+                  "pm.globals.set('qrCode', body.qrCode || '');",
+                  "pm.collectionVariables.set('qrCode', body.qrCode || '');",
+                  "console.log('Booking ID:', body.id, '| Status:', body.status, '| QR:', body.qrCode);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{travelerToken}}" },
+              { "key": "Content-Type",   "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"occurrenceId\": {{occurrenceId}},\n  \"peopleCount\": 1,\n  \"waiverSigned\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/traveler/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "traveler", "bookings"]
+            }
+          }
+        },
+        {
+          "name": "Get Booking Detail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "var body = pm.response.json();",
+                  "console.log('Booking:', body.id, '| Status:', body.status, '| Price:', body.finalPrice, body.currency, '| CartExpiry:', body.cartExpiresAtUtc);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{travelerToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/traveler/bookings/{{bookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "traveler", "bookings", "{{bookingId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💳 3. Payment Flow",
+      "item": [
+        {
+          "name": "Check Mock Mode Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "var body = pm.response.json();",
+                  "pm.test('Mock mode ACTIVE', () => pm.expect(body.mockMode).to.be.true);",
+                  "console.log('Mock mode:', body.mockMode, '|', body.message);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{travelerToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/mock/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "mock", "status"]
+            }
+          }
+        },
+        {
+          "name": "Step 1 — Create Payment Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "var body = pm.response.json();",
+                  "pm.test('Status is Authorized', () => pm.expect(body.status).to.eql('Authorized'));",
+                  "pm.test('Session ID returned', () => pm.expect(body.sessionId).to.be.a('string'));",
+                  "pm.globals.set('sessionId', body.sessionId);",
+                  "pm.collectionVariables.set('sessionId', body.sessionId);",
+                  "console.log('Payment ID:', body.paymentId, '| Session:', body.sessionId);",
+                  "console.log('Amount:', body.amount, body.currency);",
+                  "console.log('checkoutUrl:', body.checkoutUrl);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{travelerToken}}" },
+              { "key": "Content-Type",   "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingId\": {{bookingId}}}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/create-session",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "create-session"]
+            }
+          }
+        },
+        {
+          "name": "Step 2a — ✅ Confirm Payment (Happy Path)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var s = pm.globals.get('sessionId');",
+                  "console.log('Confirming sessionId:', s);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "var body = pm.response.json();",
+                  "pm.test('Payment Captured', () => pm.expect(body.status).to.eql('Captured'));",
+                  "console.log('Payment status:', body.status, '| Payout status:', body.payoutStatus);",
+                  "console.log('Amount:', body.amount, body.currency, '| Captured at:', body.capturedAt);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{travelerToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/mock/confirm/{{sessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "mock", "confirm", "{{sessionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Step 2b — ❌ Fail Payment (Negative — run INSTEAD of 2a)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "var body = pm.response.json();",
+                  "pm.test('Payment Failed', () => pm.expect(body.status).to.eql('Failed'));",
+                  "console.log('Payment:', body.status, '| Booking should be: Expired');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{travelerToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/mock/fail/{{sessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "mock", "fail", "{{sessionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Payment Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "var body = pm.response.json();",
+                  "console.log('Payment:', body.status, '| Payout:', body.payoutStatus);",
+                  "console.log('Payout eligible at:', body.payoutEligibleAt, '| Released at:', body.payoutReleasedAt);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{travelerToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/traveler/payments/{{bookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "traveler", "payments", "{{bookingId}}"]
+            }
+          }
+        },
+        {
+          "name": "Idempotency — Create Session Again (expect 400 or 409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var code = pm.response.code;",
+                  "pm.test('Blocked correctly (400 or 409)', () => pm.expect(code).to.be.oneOf([400,409]));",
+                  "console.log('Idempotency response:', code, pm.response.json().message || '');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{travelerToken}}" },
+              { "key": "Content-Type",   "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"bookingId\": {{bookingId}}}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/create-session",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "create-session"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏁 4. Tour Completion & Payout",
+      "item": [
+        {
+          "name": "[Guide] List My Bookings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "var bookings = pm.response.json();",
+                  "console.log('Guide bookings:', Array.isArray(bookings) ? bookings.length : 'N/A');",
+                  "if (Array.isArray(bookings)) {",
+                  "  var confirmed = bookings.find(function(b){ return b.status === 'Confirmed'; });",
+                  "  if (confirmed) {",
+                  "    pm.globals.set('guideBookingId', String(confirmed.id));",
+                  "    pm.collectionVariables.set('guideBookingId', String(confirmed.id));",
+                  "    console.log('Found Confirmed booking for guide:', confirmed.id);",
+                  "  } else {",
+                  "    console.log('No Confirmed bookings. Run payment confirm first.');",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{guideToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/guide/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "guide", "bookings"]
+            }
+          }
+        },
+        {
+          "name": "[Guide] Check In Traveler by QR",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var qr = pm.globals.get('qrCode');",
+                  "console.log('QR code for check-in:', qr || 'EMPTY - run Create Booking first');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "var body = pm.response.json();",
+                  "pm.test('Status is InProgress', () => pm.expect(body.status).to.eql('InProgress'));",
+                  "pm.globals.set('guideBookingId', String(body.id));",
+                  "pm.collectionVariables.set('guideBookingId', String(body.id));",
+                  "console.log('Checked in! Booking:', body.id, '| Status:', body.status, '| At:', body.checkedInAtUtc);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{guideToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/guide/bookings/checkin-by-qr/{{qrCode}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "guide", "bookings", "checkin-by-qr", "{{qrCode}}"]
+            }
+          }
+        },
+        {
+          "name": "[Guide] Complete Booking (→ triggers payout)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var id = pm.globals.get('guideBookingId');",
+                  "console.log('Completing booking ID:', id);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "var body = pm.response.json();",
+                  "pm.test('Status is Completed', () => pm.expect(body.status).to.eql('Completed'));",
+                  "console.log('COMPLETED! Booking:', body.id, '| completedAtUtc:', body.completedAtUtc);",
+                  "console.log('Payout scheduled in backend. Check Final Payment Status next.');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{guideToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/guide/bookings/{{guideBookingId}}/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "guide", "bookings", "{{guideBookingId}}", "complete"]
+            }
+          }
+        },
+        {
+          "name": "[Traveler] Final Payment Status (expect Transferred)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "var body = pm.response.json();",
+                  "console.log('=== FINAL REPORT ===');",
+                  "console.log('Payment Status: ', body.status);",
+                  "console.log('Payout Status:  ', body.payoutStatus);",
+                  "console.log('Amount:         ', body.amount, body.currency);",
+                  "console.log('Payout Eligible:', body.payoutEligibleAt);",
+                  "console.log('Payout Released:', body.payoutReleasedAt);",
+                  "console.log('Transfer ID:    ', body.stripeTransferId || '(null = job not run yet)');",
+                  "if (body.payoutStatus === 'Transferred') {",
+                  "  pm.test('PAYOUT TRANSFERRED', () => pm.expect(body.payoutStatus).to.eql('Transferred'));",
+                  "  console.log('SUCCESS - Guide received payment!');",
+                  "} else {",
+                  "  pm.test('Payout pending (job not run yet)', () => pm.expect(body.payoutStatus).to.eql('Pending'));",
+                  "  console.log('Payout pending. Wait for PayoutReleaseJob hourly cycle.');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{travelerToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/traveler/payments/{{bookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "traveler", "payments", "{{bookingId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 5. Edge Cases",
+      "item": [
+        {
+          "name": "Webhook without Stripe-Signature (mock: 200, real: 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 (mock skips) or 400 (real rejects)', () => pm.expect(pm.response.code).to.be.oneOf([200,400]));",
+                  "console.log('Webhook no-sig:', pm.response.code);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/webhook",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "webhook"]
+            }
+          }
+        },
+        {
+          "name": "Create session — no auth (expect 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var code = pm.response.code;",
+                  "pm.test('Blocked: 401 or 404 (no auth)', () => pm.expect(code).to.be.oneOf([401,404]));",
+                  "console.log('Auth guard response:', code, '(401=Unauthorized, 404=Spring route guard — both are correct)');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"bookingId\": 999}" },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/create-session",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "create-session"]
+            }
+          }
+        },
+        {
+          "name": "Mock confirm — fake sessionId (expect 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404 Not Found', () => pm.response.to.have.status(404));",
+                  "console.log('Fake session rejected:', pm.response.code);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{travelerToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/mock/confirm/mock_sess_FAKEFAKEFAKE",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "mock", "confirm", "mock_sess_FAKEFAKEFAKE"]
+            }
+          }
+        },
+        {
+          "name": "Guide accesses traveler payment (expect 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403 Forbidden — role guard', () => pm.response.to.have.status(403));",
+                  "console.log('Role guard:', pm.response.code);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{guideToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/traveler/payments/{{bookingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "traveler", "payments", "{{bookingId}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

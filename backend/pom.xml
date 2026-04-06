@@ -146,6 +146,15 @@
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
+
+		<!-- Stripe Java SDK — used by StripePaymentService and PayoutReleaseJob -->
+		<!-- com.stripe.Stripe, Session, Transfer, Webhook, etc. -->
+		<dependency>
+			<groupId>com.stripe</groupId>
+			<artifactId>stripe-java</artifactId>
+			<version>26.3.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

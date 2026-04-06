@@ -92,4 +92,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
               AND b.deletedAtUtc IS NULL
             """)
     List<Booking> findStaleConfirmedBookings(@Param("cutoff") Instant cutoff);
+
+    /**
+     * Finds PendingPayment bookings whose 30-minute cart window has expired.
+     * Safety net alongside Stripe's checkout.session.expired webhook.
+     * cartExpiresAtUtc is set by StripePaymentService.createCheckoutSession().
+     */
+    @Query("""
+            SELECT b FROM Booking b
+            WHERE b.status = com.travelmarket.backend.booking.enums.BookingStatus.PendingPayment
+              AND b.cartExpiresAtUtc IS NOT NULL
+              AND b.cartExpiresAtUtc < :now
+              AND b.deletedAtUtc IS NULL
+            """)
+    List<Booking> findStalePendingPaymentBookings(@Param("now") Instant now);
 }
