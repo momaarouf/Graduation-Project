@@ -64,6 +64,28 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
+    // ── Pay with Saved Card (One-Click) ──────────────────────────────────────
+    /**
+     * Executes a payment using a previously saved payment method.
+     * In this demo, it simulates an immediate successful capture.
+     */
+    @PostMapping("/api/payments/pay-with-saved-card")
+    public ResponseEntity<PaymentResponse> payWithSavedCard(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody java.util.Map<String, Long> request) {
+
+        Long bookingId = request.get("bookingId");
+        Long paymentMethodId = request.get("paymentMethodId");
+
+        log.info("[PaymentController] pay-with-saved-card requested by {} for bookingId: {} using card: {}",
+                userDetails.getUsername(), bookingId, paymentMethodId);
+
+        PaymentResponse response = stripePaymentService.payWithSavedCard(
+                userDetails.getUsername(), bookingId, paymentMethodId);
+
+        return ResponseEntity.ok(response);
+    }
+
     // ── Stripe Webhook ────────────────────────────────────────────────────────
 
     /**

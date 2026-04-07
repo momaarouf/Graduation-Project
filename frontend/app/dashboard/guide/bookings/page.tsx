@@ -23,7 +23,8 @@ import {
   Star,
   Download,
   Check,
-  X
+  X,
+  CreditCard
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { getGuideBookings, confirmBooking, rejectBooking } from '@/src/lib/api/tours'
@@ -72,11 +73,11 @@ const StatusBadge = ({ status }: { status: BookingStatus }) => {
     },
     // Fallbacks for other statuses
     [BookingStatus.PendingPayment]: {
-      bg: 'bg-amber-50 dark:bg-amber-500/10',
-      text: 'text-amber-700 dark:text-amber-400',
-      border: 'border-amber-200 dark:border-amber-800/50',
-      icon: Clock,
-      label: 'Pending Payment'
+      bg: 'bg-indigo-50 dark:bg-indigo-500/10',
+      text: 'text-indigo-700 dark:text-indigo-400',
+      border: 'border-indigo-200 dark:border-indigo-800/50',
+      icon: CreditCard,
+      label: 'Awaiting Payment'
     },
     [BookingStatus.InProgress]: {
       bg: 'bg-indigo-50 dark:bg-indigo-500/10',
@@ -260,8 +261,12 @@ const BookingCard = ({ booking, onConfirm, onReject, isActionLoading }: BookingC
               <div className="text-xl font-black text-gray-900 dark:text-white">
                 {booking.currency} {booking.finalPrice.toFixed(2)}
               </div>
-              <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                Total Paid
+              <div className={`text-[10px] font-black uppercase tracking-widest ${
+                booking.status === BookingStatus.PendingPayment 
+                  ? 'text-indigo-600 dark:text-indigo-400 animate-pulse' 
+                  : 'text-gray-400 dark:text-gray-500'
+              }`}>
+                {booking.status === BookingStatus.PendingPayment ? 'Awaiting Payment' : 'Total Paid'}
               </div>
             </div>
 

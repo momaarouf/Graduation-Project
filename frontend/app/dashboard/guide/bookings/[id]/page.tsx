@@ -19,7 +19,8 @@ import {
   CheckCircle2,
   XCircle as XIcon,
   RefreshCw,
-  Zap
+  Zap,
+  CreditCard
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { getGuideBooking, confirmBooking, rejectBooking } from '@/src/lib/api/tours'
@@ -101,7 +102,7 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
     [BookingStatus.Completed]: 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400',
     [BookingStatus.InProgress]: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400',
     [BookingStatus.Rejected]: 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400',
-    [BookingStatus.PendingPayment]: 'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400',
+    [BookingStatus.PendingPayment]: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400',
     [BookingStatus.Waitlisted]: 'bg-purple-100 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400',
     [BookingStatus.Expired]: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
   }
@@ -118,6 +119,23 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 pt-20 sm:pt-24">
+      {/* Payment Warning Banner */}
+      {booking.status === BookingStatus.PendingPayment && (
+        <div className="mb-8 p-4 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 rounded-2xl flex items-center gap-4 animate-pulse">
+          <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center flex-shrink-0">
+            <CreditCard className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-black text-indigo-900 dark:text-indigo-100 uppercase tracking-widest leading-none mb-1">
+              Awaiting Traveler Payment
+            </p>
+            <p className="text-xs text-indigo-700 dark:text-indigo-300 font-medium">
+              The traveler has reserved this spot but has not completed payment yet. Do not provide service until the status changes to &quot;Confirmed&quot;.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Back Button */}
       <button
         onClick={() => router.push('/dashboard/guide/bookings')}
@@ -289,8 +307,14 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
             
             <div className="space-y-6">
               <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-800/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider tabular-nums">Total Paid</span>
-                <span className="font-black text-gray-900 dark:text-white">
+                <span className={`text-xs font-black uppercase tracking-wider tabular-nums ${
+                  booking.status === BookingStatus.PendingPayment ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500'
+                }`}>
+                  {booking.status === BookingStatus.PendingPayment ? 'Awaiting Payment' : 'Total Paid'}
+                </span>
+                <span className={`font-black ${
+                  booking.status === BookingStatus.PendingPayment ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-900 dark:text-white'
+                }`}>
                   {booking.currency} {booking.finalPrice.toFixed(2)}
                 </span>
               </div>

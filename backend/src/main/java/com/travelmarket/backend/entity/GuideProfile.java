@@ -44,6 +44,15 @@ public class GuideProfile {
     @Column(name = "stripe_account_id")
     private String stripeAccountId;
 
+    @Column(name = "payout_method_last4", length = 4)
+    private String payoutMethodLast4;
+
+    @Column(name = "payout_method_brand", length = 20)
+    private String payoutMethodBrand;
+
+    @Column(name = "payout_method_type", length = 20)
+    private String payoutMethodType; // "card" or "bank"
+
     @Column(name = "impact_score", precision = 5, scale = 2)
     private BigDecimal impactScore = BigDecimal.ZERO;
 

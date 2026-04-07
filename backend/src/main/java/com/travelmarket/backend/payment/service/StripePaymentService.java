@@ -16,12 +16,15 @@ import com.travelmarket.backend.payment.entity.Payment;
 import com.travelmarket.backend.payment.enums.PaymentStatus;
 import com.travelmarket.backend.payment.enums.PayoutStatus;
 import com.travelmarket.backend.payment.repository.PaymentRepository;
+import com.travelmarket.backend.entity.TravelerPaymentMethod;
+import com.travelmarket.backend.repository.TravelerPaymentMethodRepository;
 import com.travelmarket.backend.repository.TravelerProfileRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -71,6 +74,7 @@ public class StripePaymentService {
     private final PaymentRepository paymentRepository;
     private final BookingRepository bookingRepository;
     private final TravelerProfileRepository travelerRepository;
+    private final TravelerPaymentMethodRepository paymentMethodRepository;
 
     @Value("${stripe.secret-key}")
     private String stripeSecretKey;
@@ -541,6 +545,31 @@ public class StripePaymentService {
 
         log.info("[Stripe MOCK] ❌ Payment failed. BookingID: {} → EXPIRED", booking.getId());
         return mapToResponse(payment);
+    }
+
+    /**
+     * One-click payment using a saved traveler card.
+     * For this demo, we simulate a successful transaction after verifying ownership.
+     */
+    @Transactional
+    public PaymentResponse payWithSavedCard(String email, Long bookingId, Long paymentMethodId) {
+        // 1. Verify card ownership
+        TravelerPaymentMethod method = paymentMethodRepository.findById(paymentMethodId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Payment method not found"));
+
+        if (!method.getTravelerProfile().getUser().getEmail().equals(email)) {
+            throw new AccessDeniedException("You do not own this payment method");
+        }
+
+        // 2. Reuse standard creation logic but skip Stripe checkout
+        PaymentCreateRequest createRequest = new PaymentCreateRequest();
+        createRequest.setBookingId(bookingId);
+
+        // createCheckoutSession ensures booking belongs to traveler and is PendingPayment
+        PaymentResponse sessionResponse = createCheckoutSession(email, createRequest);
+
+        // 3. Immediately confirm it (simulated capture)
+        return mockConfirmPayment(sessionResponse.getSessionId());
     }
 
     /** Whether mock mode is active — used by MockPaymentController to guard endpoints. */

@@ -38,6 +38,14 @@ export enum BookingStatus {
   Rejected       = 'Rejected',
 }
 
+export enum PaymentStatus {
+  Authorized = 'Authorized',   // Session created, awaiting user payment
+  Captured   = 'Captured',     // Webhook confirmed successful payment
+  Failed     = 'Failed',       // Session expired or payment declined
+  RefundedPartial = 'RefundedPartial',
+  RefundedFull    = 'RefundedFull',
+}
+
 // ── Response types (match backend DTO fields exactly) ───────────────────────
 
 export interface TourMediaResponse {
@@ -346,6 +354,22 @@ export interface BookingResponse {
   message: string | null             // traveler's note during booking
   tourId: number                     // template ID for navigation
   createdAtUtc: string
+}
+
+export interface PaymentResponse {
+  paymentId: number
+  bookingId: number
+  status: string
+  payoutStatus: string
+  amount: number
+  currency: string
+  checkoutUrl: string | null
+  sessionId: string
+  payoutEligibleAt: string | null
+  payoutReleasedAt: string | null
+  authorizedAt: string
+  capturedAt: string | null
+  createdAt: string
 }
 
 export interface GuideBookingResponse {

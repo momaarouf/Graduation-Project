@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { getTravelerBookings, cancelBooking, getMyWaitlist, leaveWaitlist, getTravelerReviews } from '@/src/lib/api/tours'
+import { createPaymentSession } from '@/src/lib/api/payment'
+import MockPaymentSimulator from '@/src/components/payment/MockPaymentSimulator'
 import { BookingResponse, BookingStatus, WaitlistResponse } from '@/src/lib/types/tour.types'
 import {
     Calendar,
@@ -24,7 +26,9 @@ import {
     Star,
     User,
     Smartphone,
-    RefreshCw
+    RefreshCw,
+    CreditCard,
+    Loader2
 } from 'lucide-react'
 
 // TYPES - We use BookingResponse from tour.types.ts
@@ -80,8 +84,8 @@ function StatusBadge({ status }: StatusBadgeProps) {
             bg: 'bg-indigo-100 dark:bg-indigo-950/30',
             text: 'text-indigo-700 dark:text-indigo-300',
             border: 'border-indigo-200 dark:border-indigo-800',
-            icon: Clock,
-            label: 'Pending Payment'
+            icon: CreditCard,
+            label: 'Awaiting Payment'
         },
         [BookingStatus.Expired]: {
             bg: 'bg-gray-100 dark:bg-gray-800',
@@ -289,10 +293,12 @@ interface BookingCardProps {
     booking: BookingResponse
     onCancel: (booking: BookingResponse) => void
     isReviewed: boolean
+    onMockPayment: (booking: BookingResponse, sessionId: string) => void
 }
 
-function BookingCard({ booking, onCancel, isReviewed }: BookingCardProps) {
+function BookingCard({ booking, onCancel, isReviewed, onMockPayment }: BookingCardProps) {
     const router = useRouter()
+    const [isPaying, setIsPaying] = useState(false)
     const date = new Date(booking.startTimeUtc)
     const formattedDate = date.toLocaleDateString('en-US', {
         weekday: 'short',
@@ -303,10 +309,40 @@ function BookingCard({ booking, onCancel, isReviewed }: BookingCardProps) {
         minute: '2-digit'
     })
 
-    const isUpcoming = booking.status === BookingStatus.Confirmed || booking.status === BookingStatus.PendingGuide
+    const isUpcoming = booking.status === BookingStatus.Confirmed || 
+                       booking.status === BookingStatus.PendingGuide || 
+                       booking.status === BookingStatus.PendingPayment
     // In real app, we check if date is in future
     const isFuture = date.getTime() > Date.now()
     const canCancel = isUpcoming && isFuture
+
+    const handlePayNow = async (e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setIsPaying(true)
+        try {
+            const response = await createPaymentSession(booking.id)
+            if (response.checkoutUrl) {
+                if (response.checkoutUrl.startsWith('MOCK')) {
+                    const match = response.checkoutUrl.match(/mock_sess_[a-f0-9]+/i)
+                    const sessionId = match ? match[0] : null
+                    if (sessionId) {
+                        onMockPayment(booking, sessionId)
+                    } else {
+                        toast.error('Could not parse mock session ID')
+                    }
+                } else {
+                    window.location.href = response.checkoutUrl
+                }
+            } else {
+                toast.error('Could not initiate payment session')
+            }
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || 'Payment failed to start')
+        } finally {
+            setIsPaying(false)
+        }
+    }
 
     return (
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 shadow-sm">
@@ -437,6 +473,21 @@ function BookingCard({ booking, onCancel, isReviewed }: BookingCardProps) {
                             </button>
                         )}
 
+                        {booking.status === BookingStatus.PendingPayment && (
+                            <button
+                                onClick={handlePayNow}
+                                disabled={isPaying}
+                                className="inline-flex items-center gap-1.5 px-6 py-2 bg-indigo-600 dark:bg-indigo-700 text-white text-xs font-black rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-800 transition-all shadow-md shadow-indigo-500/20 active:scale-95 disabled:opacity-50"
+                            >
+                                {isPaying ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                    <CreditCard className="w-3.5 h-3.5" />
+                                )}
+                                Pay Now
+                            </button>
+                        )}
+
                         {booking.status !== BookingStatus.Completed && 
                          booking.status !== BookingStatus.Cancelled && 
                          booking.status !== BookingStatus.Expired && (
@@ -471,6 +522,11 @@ export default function TravelerBookingsPage() {
     const [isLoading, setIsLoading] = React.useState(true)
     const [isCancelling, setIsCancelling] = React.useState(false)
     const [isLeavingWaitlist, setIsLeavingWaitlist] = React.useState<number | null>(null)
+    const [isProcessingMock, setIsProcessingMock] = React.useState(false)
+
+    // Mock Payment Simulator state
+    const [showMockDialog, setShowMockDialog] = React.useState(false)
+    const [mockSessionId, setMockSessionId] = React.useState<string | null>(null)
 
     useBadgeReset('traveler-bookings')
     const [activeFilter, setActiveFilter] = React.useState('all')
@@ -571,6 +627,14 @@ export default function TravelerBookingsPage() {
             setIsLeavingWaitlist(null)
         }
     }
+
+    const handleMockPayment = (booking: BookingResponse, sessionId: string) => {
+        setSelectedBooking(booking)
+        setMockSessionId(sessionId)
+        setShowMockDialog(true)
+    }
+
+    // handleSimulateMockAction removed - logic moved to MockPaymentSimulator component
 
     if (isLoading && bookings.length === 0) {
         return (
@@ -690,6 +754,7 @@ export default function TravelerBookingsPage() {
                                     key={booking.id}
                                     booking={booking}
                                     onCancel={handleCancelClick}
+                                    onMockPayment={handleMockPayment}
                                     isReviewed={reviewedBookingIds.has(booking.id)}
                                 />
                             ))}
@@ -765,7 +830,22 @@ export default function TravelerBookingsPage() {
                 </div>
             </div>
 
-            {/* Cancellation Modal */}
+            {/* --- MOCK PAYMENT SIMULATOR MODAL --- */}
+            {showMockDialog && mockSessionId && selectedBooking && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <MockPaymentSimulator 
+                        sessionId={mockSessionId}
+                        amount={selectedBooking.finalPrice}
+                        currency={selectedBooking.currency}
+                        onSuccess={() => {
+                            fetchBookings()
+                            setShowMockDialog(false)
+                        }}
+                        onCancel={() => setShowMockDialog(false)}
+                    />
+                </div>
+            )}
+
             <CancellationModal
                 booking={selectedBooking}
                 isOpen={showCancelModal}

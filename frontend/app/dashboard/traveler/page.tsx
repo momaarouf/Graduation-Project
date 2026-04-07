@@ -17,7 +17,9 @@ import {
     Sparkles,
     Shield,
     ArrowRight,
-    Search
+    Search,
+    CreditCard,
+    Loader2
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
@@ -25,7 +27,8 @@ import { travelerGetProfile, TravelerProfileResponse } from '@/src/lib/api/trave
 import { getGreeting } from '@/src/lib/greeting'
 import OnboardingBannerWrapper from '@/src/components/dashboard/OnboardingBannerWrapper'
 import { toast } from 'react-hot-toast'
-import { getTravelerBookings, BookingResponse } from '@/src/lib/api/tours'
+import { getTravelerBookings } from '@/src/lib/api/tours'
+import { BookingResponse, BookingStatus } from '@/src/lib/types/tour.types'
 
 // ============================================================================
 // PREMIUM COMPONENTS
@@ -198,6 +201,34 @@ export default function TravelerDashboardPage() {
                         {/* MAIN CONTENT AREA */}
                         <div className="lg:col-span-2 space-y-8">
                             
+                            {/* PAYMENT ALERT BANNER */}
+                            {bookings.some(b => b.status === 'PendingPayment') && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    className="mb-8 p-6 bg-indigo-600 rounded-[2rem] text-white shadow-xl shadow-indigo-500/30 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group"
+                                >
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-110" />
+                                    
+                                    <div className="flex items-center gap-6 relative z-10">
+                                        <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center flex-shrink-0 border border-white/30">
+                                            <CreditCard className="w-7 h-7 text-white" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black tracking-tight mb-1">Action Required: Payment Pending</h3>
+                                            <p className="text-indigo-100 text-sm font-medium">You have an unpaid booking. Complete payment now to secure your spot.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <Link 
+                                        href="/dashboard/traveler/bookings"
+                                        className="px-8 py-3 bg-white text-indigo-600 rounded-2xl font-black text-sm hover:bg-indigo-50 transition-all shadow-lg active:scale-95 relative z-10"
+                                    >
+                                        Pay Now
+                                    </Link>
+                                </motion.div>
+                            )}
+
                             {/* UPCOMING TRIPS PLACEHOLDER */}
                             <GlassCard className="p-8">
                                 <div className="flex items-center justify-between mb-8">
@@ -212,11 +243,11 @@ export default function TravelerDashboardPage() {
                                 </div>
 
                                 {bookings.filter(b => 
-                                    ['Confirmed', 'PendingGuide', 'InProgress'].includes(b.status)
+                                    ['Confirmed', 'PendingGuide', 'InProgress', 'PendingPayment'].includes(b.status)
                                 ).length > 0 ? (
                                     <div className="space-y-4">
                                         {bookings
-                                            .filter(b => ['Confirmed', 'PendingGuide', 'InProgress'].includes(b.status))
+                                            .filter(b => ['Confirmed', 'PendingGuide', 'InProgress', 'PendingPayment'].includes(b.status))
                                             .slice(0, 1)
                                             .map(booking => (
                                                 <div key={booking.id} className="p-6 bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -236,9 +267,10 @@ export default function TravelerDashboardPage() {
                                                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
                                                             booking.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' :
                                                             booking.status === 'InProgress' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                                                            booking.status === 'PendingPayment' ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' :
                                                             'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
                                                         }`}>
-                                                            {booking.status}
+                                                            {booking.status === 'PendingPayment' ? 'Unpaid' : booking.status}
                                                         </span>
                                                         <Link href={`/dashboard/traveler/bookings`} className="p-2 bg-gray-100 dark:bg-gray-800 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                                                             <ChevronRight className="w-4 h-4" />

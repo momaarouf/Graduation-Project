@@ -72,4 +72,11 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
             @Param("paymentStatus") PaymentStatus paymentStatus,
             @Param("now")           Instant       now
     );
+
+    /**
+     * Fetch all payments related to a specific guide's tours.
+     * Used for the Wallet/Earnings dashboard.
+     */
+    @Query("SELECT p FROM Payment p WHERE p.booking.occurrence.template.guide.id = :guideId")
+    List<Payment> findAllByGuideId(@Param("guideId") Long guideId);
 }

@@ -39,6 +39,9 @@
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V43__Add_Review_Engagement_Fields.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V44__add_map_point_name_and_coords_index.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V45__add_payment_stripe_and_payout_fields.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V46__add_guide_payout_method_metadata.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V47__add_traveler_payment_methods.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V48__add_traveler_payment_method_name.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V4__user_account_status.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V5__profile_fields.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V6__guide_verification_front_back.sql" dialect="PostgreSQL" />

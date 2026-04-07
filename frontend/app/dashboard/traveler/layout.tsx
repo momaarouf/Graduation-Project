@@ -22,7 +22,8 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  LogOut as LogOutIcon
+  LogOut as LogOutIcon,
+  CreditCard
 } from 'lucide-react'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import Navigation from '@/src/components/layout/Navigation'
@@ -37,6 +38,7 @@ const NAV_ITEMS = [
   // Primary
   { href: '/dashboard/traveler', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/traveler/bookings', label: 'My Bookings', icon: Calendar, badgeKey: 'traveler-bookings' as const },
+  { href: '/dashboard/traveler/payments', label: 'Payments', icon: CreditCard },
   { href: '/dashboard/traveler/wishlist', label: 'Wishlist', icon: Heart },
   { href: '/dashboard/traveler/messages', label: 'Messages', icon: MessageSquare, badgeKey: 'traveler-messages' as const },
   

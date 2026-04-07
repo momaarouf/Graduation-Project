@@ -36,20 +36,75 @@ import {
 } from 'lucide-react'
 import PageLayout from '@/src/components/layout/PageLayout'
 
-import { getTravelerBooking } from '@/src/lib/api/tours'
+import { 
+  getTravelerPaymentMethods, 
+  saveTravelerPaymentMethod, 
+  payWithSavedCard,
+  TravelerPaymentMethod 
+} from '@/src/lib/api/traveler-payments'
+import { createPaymentSession } from '@/src/lib/api/payment'
+import MockPaymentSimulator from '@/src/components/payment/MockPaymentSimulator'
 import { BookingResponse, BookingStatus } from '@/src/lib/types/tour.types'
+import { useRouter } from 'next/navigation'
+import { getTravelerBooking } from '@/src/lib/api/tours'
 
 export default function BookingConfirmationPage() {
+
+  const router = useRouter()
   const searchParams = useSearchParams()
   const bookingId = searchParams.get('id')
 
   const [booking, setBooking] = useState<BookingResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showQR, setShowQR] = useState(false)
+  const [isPaying, setIsPaying] = useState(false)
+  const [timeLeft, setTimeLeft] = useState<string>('')
+
+  // Payment Methods State
+  const [savedMethods, setSavedMethods] = useState<TravelerPaymentMethod[]>([])
+  const [selectedMethodId, setSelectedMethodId] = useState<number | null>(null)
+  const [showSavedCards, setShowSavedCards] = useState(false)
+  const [isAddingNewCard, setIsAddingNewCard] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  // New Card Form State (if needed)
+  const [newCardName, setNewCardName] = useState('')
+  const [newCardNumber, setNewCardNumber] = useState('')
+  const [newCardExM, setNewCardExM] = useState('01')
+  const [newCardExY, setNewCardExY] = useState(new Date().getFullYear().toString())
+  const [newCardCvv, setNewCardCvv] = useState('')
+  const [saveForFuture, setSaveForFuture] = useState(true)
+
+  // Mock Payment Simulator state (retained for Stripe fallback)
+  const [showMockDialog, setShowMockDialog] = useState(false)
+  const [mockSessionId, setMockSessionId] = useState<string | null>(null)
 
   // ── Fetch the booking created by the booking flow ──────────────────────
   // ?id= is set by the "Book Now" handler after createBooking() succeeds.
   // If the ID is missing or fetch fails, we show a placeholder message.
+
+  const fetchPaymentMethods = async (silent = false) => {
+    if (!silent) setIsRefreshing(true)
+    try {
+      const methods = await getTravelerPaymentMethods()
+      setSavedMethods(methods)
+      if (methods.length > 0) {
+        const exists = methods.find(m => m.id === selectedMethodId)
+        if (!exists || !selectedMethodId) {
+          const def = methods.find(m => m.isDefault) || methods[0]
+          setSelectedMethodId(def.id)
+        }
+        setShowSavedCards(false)
+        setIsAddingNewCard(false)
+      } else {
+        setIsAddingNewCard(true)
+      }
+    } catch (err) {
+      console.error('Failed to fetch methods:', err)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
 
   useEffect(() => {
     const fetchBooking = async () => {
@@ -60,6 +115,10 @@ export default function BookingConfirmationPage() {
       try {
         const res = await getTravelerBooking(Number(bookingId))
         setBooking(res.data)
+
+        if (res.data.status === BookingStatus.PendingPayment) {
+          await fetchPaymentMethods(true)
+        }
       } catch {
         toast.error('Could not load booking details')
       } finally {
@@ -68,6 +127,135 @@ export default function BookingConfirmationPage() {
     }
     fetchBooking()
   }, [bookingId])
+
+  // Sync when user returns to tab
+  useEffect(() => {
+    const onFocus = () => {
+      if (booking?.status === BookingStatus.PendingPayment) {
+        fetchPaymentMethods(true)
+      }
+    }
+    window.addEventListener('focus', onFocus)
+    return () => window.removeEventListener('focus', onFocus)
+  }, [booking?.status, selectedMethodId])
+
+  // ── Countdown Timer logic ──────────────────────────────────────────────
+  useEffect(() => {
+    if (!booking || booking.status !== BookingStatus.PendingPayment) return
+
+    const timer = setInterval(() => {
+      const createdAt = new Date(booking.createdAtUtc).getTime()
+      const expiryTime = createdAt + 30 * 60 * 1000 // 30 minutes
+      const now = new Date().getTime()
+      const diff = expiryTime - now
+
+      if (diff <= 0) {
+        setTimeLeft('Expired')
+        clearInterval(timer)
+      } else {
+        const mins = Math.floor(diff / (1000 * 60))
+        const secs = Math.floor((diff % (1000 * 60)) / 1000)
+        setTimeLeft(`${mins}:${secs < 10 ? '0' : ''}${secs}`)
+      }
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [booking])
+
+  const handlePayNow = async () => {
+    if (!booking) return
+    setIsPaying(true)
+    try {
+      const response = await createPaymentSession(booking.id)
+      if (response.checkoutUrl) {
+        if (response.checkoutUrl.startsWith('MOCK')) {
+          const match = response.checkoutUrl.match(/mock_sess_[a-f0-9]+/i)
+          const sessionId = match ? match[0] : null
+          if (sessionId) {
+            setMockSessionId(sessionId)
+            setShowMockDialog(true)
+          } else {
+            toast.error('Could not parse mock session ID from backend')
+          }
+        } else {
+          window.location.href = response.checkoutUrl
+        }
+      } else {
+        toast.error('Could not initiate payment session')
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Payment failed to start')
+    } finally {
+      setIsPaying(false)
+    }
+  }
+
+  const handlePayWithSavedCard = async () => {
+    if (!booking || !selectedMethodId) return
+    const method = savedMethods.find(m => m.id === selectedMethodId)
+    if (!method) return
+
+    if (!confirm(`Confirm payment of ${booking.currency} ${booking.finalPrice.toFixed(2)} using ${method.brand} •••• ${method.last4}?`)) return
+
+    setIsPaying(true)
+    try {
+      await payWithSavedCard(booking.id, selectedMethodId)
+      toast.success('Payment successful!')
+      // Refresh booking data
+      const res = await getTravelerBooking(Number(bookingId))
+      setBooking(res.data)
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Payment failed')
+    } finally {
+      setIsPaying(false)
+    }
+  }
+
+  const handlePayWithNewCard = async () => {
+    if (!booking) return
+    
+    if (!newCardName.trim() || newCardNumber.replace(/\s/g, '').length < 13 || newCardCvv.length < 3) {
+      toast.error('Please fill in all card details correctly')
+      return
+    }
+
+    setIsPaying(true)
+    try {
+      if (saveForFuture) {
+        const saved = await saveTravelerPaymentMethod({
+          brand: newCardNumber.startsWith('4') ? 'Visa' : 'Mastercard',
+          last4: newCardNumber.replace(/\s/g, '').slice(-4),
+          cardholderName: newCardName,
+          expiryMonth: parseInt(newCardExM),
+          expiryYear: parseInt(newCardExY),
+          isDefault: true
+        })
+        await payWithSavedCard(booking.id, saved.id)
+        toast.success('Card saved and payment processed!')
+      } else {
+        const response = await createPaymentSession(booking.id)
+        if (response.checkoutUrl) {
+          if (response.checkoutUrl.startsWith('MOCK')) {
+            const match = response.checkoutUrl.match(/mock_sess_[a-f0-9]+/i)
+            setMockSessionId(match ? match[0] : null)
+            setShowMockDialog(true)
+          } else {
+            window.location.href = response.checkoutUrl
+          }
+          return
+        }
+      }
+      // Refresh booking data on success
+      const res = await getTravelerBooking(Number(bookingId))
+      setBooking(res.data)
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to process payment')
+    } finally {
+      setIsPaying(false)
+    }
+  }
+
+  // handleSimulateMockAction removed - logic moved to MockPaymentSimulator component
 
   // ── Calendar download (.ics file) ──────────────────────────────────────
   // Generates a standard iCalendar file from the booking date/time.
@@ -206,23 +394,249 @@ Thank you for choosing TravelMarket!
       <div className="pt-14 sm:pt-16 min-h-screen bg-gray-50 dark:bg-gray-950">
         <div className="container-safe mx-auto max-w-3xl py-8 sm:py-12">
 
-          {/* Success Header */}
+          {/* Success/Payment Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 mb-4 bg-emerald-100 dark:bg-emerald-900/30 rounded-full">
-              <CheckCircle className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
+            <div className={`inline-flex items-center justify-center w-20 h-20 mb-4 rounded-full ${
+              booking.status === BookingStatus.PendingPayment 
+                ? 'bg-indigo-100 dark:bg-indigo-900/30 ring-8 ring-indigo-50 dark:ring-indigo-950/20' 
+                : 'bg-emerald-100 dark:bg-emerald-900/30'
+            }`}>
+              {booking.status === BookingStatus.PendingPayment ? (
+                <Clock className="w-10 h-10 text-indigo-600 dark:text-indigo-400 animate-pulse" />
+              ) : (
+                <CheckCircle className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
+              )}
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              {isPending ? 'Booking Request Sent!' : 'Booking Confirmed!'}
+            
+            <h1 className="text-2xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
+              {booking.status === BookingStatus.PendingPayment 
+                ? 'Action Required: Complete Payment' 
+                : isPending 
+                  ? 'Booking Request Sent!' 
+                  : 'Booking Confirmed!'}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Your booking reference: <span className="font-mono font-bold">#{booking.id}</span>
+            
+            <p className="text-gray-600 dark:text-gray-400 font-medium">
+              Reference: <span className="font-mono font-bold text-gray-900 dark:text-white">SH-{booking.id.toString().padStart(4, '0')}</span>
             </p>
-            {isPending && (
-              <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
+
+            {booking.status === BookingStatus.PendingPayment && (
+              <div className="mt-8 max-w-xl mx-auto text-left">
+                <div className="bg-white dark:bg-gray-900 border border-indigo-100 dark:border-indigo-900 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl shadow-indigo-500/10">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight">Checkout</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="px-3 py-1 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900 rounded-full text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
+                          Reserved for {timeLeft}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Amount Due</p>
+                      <p className="text-xl font-black text-indigo-600 dark:text-indigo-400">{booking.currency} {booking.finalPrice.toFixed(2)}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {isAddingNewCard ? (
+                      /* Case 1: Add New Card UI */
+                      <div className="space-y-4 p-5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800">
+                        {savedMethods.length > 0 && (
+                          <button 
+                            onClick={() => setIsAddingNewCard(false)}
+                            className="flex items-center gap-1 text-[10px] font-black text-blue-600 uppercase mb-2 hover:translate-x-1 transition-transform"
+                          >
+                            <CheckCircle className="w-3 h-3 rotate-180" /> Back to Saved
+                          </button>
+                        )}
+                        <h4 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-tight mb-2">New Payment Method</h4>
+                        <div className="space-y-3">
+                          <input
+                            type="text"
+                            value={newCardName}
+                            onChange={(e) => setNewCardName(e.target.value)}
+                            placeholder="CARDHOLDER NAME"
+                            className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold uppercase outline-none focus:border-blue-600 transition-all shadow-sm"
+                          />
+                          <input
+                            type="text"
+                            value={newCardNumber}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, '').replace(/(\d{4})(?=\d)/g, '$1 ').trim().slice(0, 19)
+                              setNewCardNumber(val)
+                            }}
+                            placeholder="0000 0000 0000 0000"
+                            className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold outline-none focus:border-blue-600 transition-all shadow-sm"
+                          />
+                          <div className="grid grid-cols-3 gap-2">
+                            <select value={newCardExM} onChange={(e) => setNewCardExM(e.target.value)} className="px-2 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold outline-none appearance-none cursor-pointer text-center">
+                              {Array.from({length: 12}, (_, i) => String(i+1).padStart(2, '0')).map(m => (<option key={m} value={m}>{m}</option>))}
+                            </select>
+                            <select value={newCardExY} onChange={(e) => setNewCardExY(e.target.value)} className="px-2 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold outline-none appearance-none cursor-pointer text-center">
+                              {Array.from({length: 10}, (_, i) => (new Date().getFullYear() + i).toString()).map(y => (<option key={y} value={y}>{y}</option>))}
+                            </select>
+                            <input
+                              type="password"
+                              value={newCardCvv}
+                              onChange={(e) => setNewCardCvv(e.target.value.replace(/\D/g, '').slice(0, 3))}
+                              placeholder="CVV"
+                              className="px-2 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold outline-none text-center"
+                            />
+                          </div>
+                          
+                          <label className="flex items-center gap-2 cursor-pointer group px-1">
+                            <div 
+                              onClick={() => setSaveForFuture(!saveForFuture)}
+                              className={`w-4 h-4 rounded border transition-all flex items-center justify-center ${saveForFuture ? 'bg-blue-600 border-blue-600 shadow-sm shadow-blue-600/20' : 'border-gray-300 dark:border-gray-600'}`}
+                            >
+                              {saveForFuture && <CheckCircle className="w-3 h-3 text-white" />}
+                            </div>
+                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest group-hover:text-gray-900 dark:group-hover:text-gray-300 transition-colors">Save for future use</span>
+                          </label>
+                        </div>
+
+                        <button
+                          onClick={handlePayWithNewCard}
+                          disabled={isPaying}
+                          className="w-full py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-2xl text-xs font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 shadow-xl shadow-black/10 dark:shadow-white/10"
+                        >
+                          {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm & Pay'}
+                        </button>
+                      </div>
+                    ) : showSavedCards ? (
+                      /* Case 2: Saved Card Selection UI */
+                      <div className="space-y-4">
+                        <button 
+                          onClick={() => setShowSavedCards(false)}
+                          className="flex items-center gap-1 text-[10px] font-black text-blue-600 uppercase mb-2 hover:translate-x-1 transition-transform"
+                        >
+                          <CheckCircle className="w-3 h-3 rotate-180" /> Back
+                        </button>
+                        <div className="space-y-2">
+                          {savedMethods.map((m) => (
+                            <button
+                              key={m.id}
+                              onClick={() => setSelectedMethodId(m.id)}
+                              className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${
+                                selectedMethodId === m.id 
+                                  ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10' 
+                                  : 'border-gray-50 dark:border-gray-800 hover:border-blue-100 hover:scale-[1.01]'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <Users className={`w-5 h-5 ${selectedMethodId === m.id ? 'text-blue-600' : 'text-gray-400'}`} />
+                                <div className="text-left leading-tight">
+                                  <p className={`text-[11px] font-black uppercase tracking-tight ${selectedMethodId === m.id ? 'text-blue-900 dark:text-blue-100' : 'text-gray-600'}`}>
+                                    {m.brand} •••• {m.last4}
+                                  </p>
+                                  <p className="text-[9px] text-gray-400 font-bold uppercase">{m.cardholderName || 'Cardholder'}</p>
+                                </div>
+                              </div>
+                              {selectedMethodId === m.id && <CheckCircle className="w-4 h-4 text-blue-600" />}
+                            </button>
+                          ))}
+                        </div>
+                        
+                        <button 
+                          onClick={() => setIsAddingNewCard(true)}
+                          className="w-full text-center text-[10px] font-black text-gray-400 hover:text-blue-600 uppercase tracking-widest transition-colors py-2"
+                        >
+                          + Use a different card
+                        </button>
+
+                        <button
+                          onClick={handlePayWithSavedCard}
+                          disabled={isPaying || !selectedMethodId}
+                          className="w-full py-4 bg-blue-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-blue-600/20 disabled:opacity-50"
+                        >
+                          {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm & Pay Now'}
+                        </button>
+                      </div>
+                    ) : (
+                      /* Case 3: Simplified One-Click Focus UI */
+                      <div className="space-y-4">
+                        {selectedMethodId && (
+                          <div className="p-5 bg-gradient-to-br from-indigo-50 to-blue-50/50 dark:from-indigo-950/20 dark:to-blue-900/10 rounded-[2rem] border border-indigo-200/50 dark:border-indigo-800/30">
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-2">
+                                <label className="text-[10px] font-black text-indigo-600/60 uppercase tracking-widest">Paying With</label>
+                                <button 
+                                  onClick={() => fetchPaymentMethods()}
+                                  disabled={isRefreshing}
+                                  className={`p-1 hover:bg-white rounded-full transition-all ${isRefreshing ? 'animate-spin text-indigo-600' : 'text-indigo-400'}`}
+                                >
+                                  <Clock className="w-2.5 h-2.5" />
+                                </button>
+                              </div>
+                              {savedMethods.length > 1 && (
+                                <button 
+                                  onClick={() => setShowSavedCards(true)}
+                                  className="text-[10px] font-black text-indigo-600 hover:text-indigo-700 uppercase tracking-widest underline decoration-2 underline-offset-2 transition-all"
+                                >
+                                  Change
+                                </button>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 bg-white dark:bg-gray-900 rounded-2xl flex items-center justify-center shadow-sm">
+                                <Users className="w-6 h-6 text-indigo-600" />
+                              </div>
+                              <div className="min-w-0">
+                                <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">
+                                  {savedMethods.find(m => m.id === selectedMethodId)?.brand} •••• {savedMethods.find(m => m.id === selectedMethodId)?.last4}
+                                </h4>
+                                <p className="text-[10px] text-gray-500 font-bold uppercase truncate">{savedMethods.find(m => m.id === selectedMethodId)?.cardholderName}</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        <button
+                          onClick={handlePayWithSavedCard}
+                          disabled={isPaying || !selectedMethodId}
+                          className="w-full py-5 bg-indigo-600 text-white rounded-[2rem] text-sm font-black uppercase tracking-widest hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-indigo-600/30 disabled:opacity-50 relative overflow-hidden group"
+                        >
+                          <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                          {isPaying ? (
+                            <div className="flex items-center justify-center gap-3">
+                              <Loader2 className="w-5 h-5 animate-spin" />
+                              <span>Processing...</span>
+                            </div>
+                          ) : (
+                            <span>Confirm & Pay Now</span>
+                          )}
+                        </button>
+                        
+                        <p className="text-center text-[9px] font-black text-gray-400 uppercase tracking-widest mt-2 px-4 opacity-70">
+                          Secure 256-bit SSL encrypted checkout
+                        </p>
+                      </div>
+                    )}
+
+                    {(isAddingNewCard || showSavedCards) && (
+                      <div className="pt-2">
+                        <button
+                          onClick={handlePayNow}
+                          disabled={isPaying}
+                          className="w-full py-3 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-100 transition-all border border-gray-200 dark:border-gray-700 active:scale-95"
+                        >
+                          Use External Stripe Checkout
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {isPending && booking.status !== BookingStatus.PendingPayment && (
+              <p className="text-sm text-amber-600 dark:text-amber-400 mt-2 font-medium">
                 Your guide will review and confirm this booking within 24 hours.
               </p>
             )}
-            {!isPending && (
+            
+            {!isPending && booking.status !== BookingStatus.PendingPayment && (
               <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
                 A confirmation has been sent to your email
               </p>
@@ -251,12 +665,14 @@ Thank you for choosing TravelMarket!
                     {booking.bookingMode === 'Instant' ? 'Instant Book' : 'Request to Book'}
                   </p>
                 </div>
-                <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                  isPending
-                    ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
-                    : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                <span className={`px-3 py-1 text-xs font-black uppercase tracking-widest rounded-full border ${
+                  booking.status === BookingStatus.PendingPayment
+                    ? 'bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 border-indigo-100 dark:border-indigo-900'
+                    : isPending
+                      ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                      : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                 }`}>
-                  {isPending ? 'Pending' : 'Confirmed'}
+                  {booking.status === BookingStatus.PendingPayment ? 'Unpaid' : isPending ? 'Pending' : 'Confirmed'}
                 </span>
               </div>
             </div>
@@ -294,10 +710,10 @@ Thank you for choosing TravelMarket!
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <DollarSign className="w-5 h-5 text-gray-400 mt-0.5" />
+                  <DollarSign className="w-5 h-5 text-indigo-500 mt-0.5" />
                   <div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Total Paid</p>
-                    <p className="font-medium text-gray-900 dark:text-white">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{booking.status === BookingStatus.PendingPayment ? 'Amount Due' : 'Total Paid'}</p>
+                    <p className="font-bold text-gray-900 dark:text-white">
                       {booking.currency} {booking.finalPrice.toFixed(2)}
                     </p>
                   </div>
@@ -415,6 +831,24 @@ Thank you for choosing TravelMarket!
           </div>
         </div>
       </div>
+
+      {/* --- MOCK PAYMENT SIMULATOR MODAL --- */}
+      {showMockDialog && mockSessionId && booking && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <MockPaymentSimulator 
+            sessionId={mockSessionId}
+            amount={booking.finalPrice}
+            currency={booking.currency}
+            onSuccess={async () => {
+              // Refresh booking data on success
+              const res = await getTravelerBooking(Number(bookingId))
+              setBooking(res.data)
+              setShowMockDialog(false)
+            }}
+            onCancel={() => setShowMockDialog(false)}
+          />
+        </div>
+      )}
     </PageLayout>
   )
 }
