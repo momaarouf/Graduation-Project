@@ -29,6 +29,7 @@ import {
 } from 'lucide-react'
 
 import { getTravelerBooking, cancelBooking, getTravelerReviews } from '@/src/lib/api/tours'
+import { notificationsApi } from '@/src/lib/api/notifications'
 import { BookingResponse, BookingStatus } from '@/src/lib/types/tour.types'
 
 // ============================================================================
@@ -105,30 +106,41 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
   const [cancelReason, setCancelReason] = useState('')
   const [isReviewed, setIsReviewed] = useState(false)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true)
-      try {
-        const [bookingRes, reviewsRes] = await Promise.all([
-          getTravelerBooking(Number(bookingId)),
-          getTravelerReviews().catch(() => ({ data: { content: [] } }))
-        ])
-        setBooking(bookingRes.data)
-        
-        // Check if this booking ID exists in the traveler's reviews
-        const reviewed = (reviewsRes.data?.content || []).some(
-          (r: any) => r.bookingId === Number(bookingId)
-        )
-        setIsReviewed(reviewed)
-      } catch {
-        toast.error('Booking not found')
-        router.push('/dashboard/traveler/bookings')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    fetchData()
-  }, [bookingId]) // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true)
+            try {
+                const [bookingRes, reviewsRes] = await Promise.all([
+                    getTravelerBooking(Number(bookingId)),
+                    getTravelerReviews().catch(() => ({ data: { content: [] } }))
+                ])
+                setBooking(bookingRes.data)
+                
+                // PERSISTENT SYNC: Mark all notifications for this specific booking as read
+                try {
+                    await notificationsApi.markByReference('BOOKING_', bookingId);
+                    // LOCAL SYNC: Update the bell and sidebar immediately
+                    window.dispatchEvent(new CustomEvent('notification-mark-read', { 
+                        detail: { type: 'BOOKING_', referenceId: bookingId } 
+                    }));
+                } catch (err) {
+                    console.error('Failed to mark booking notifications as read:', err);
+                }
+
+                // Check if this booking ID exists in the traveler's reviews
+                const reviewed = (reviewsRes.data?.content || []).some(
+                    (r: any) => r.bookingId === Number(bookingId)
+                )
+                setIsReviewed(reviewed)
+            } catch {
+                toast.error('Booking not found')
+                router.push('/dashboard/traveler/bookings')
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        fetchData()
+    }, [bookingId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCancelBooking = async () => {
     if (!booking) return

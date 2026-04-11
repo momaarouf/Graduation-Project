@@ -18,6 +18,7 @@ import { useBadgeReset } from '@/src/lib/hooks/useBadgeReset'
 import Image from 'next/image'
 import Link from 'next/link'
 import { chatApi, ConversationResponse, MessageResponse } from '@/src/lib/api/chat'
+import { notificationsApi } from '@/src/lib/api/notifications'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import { useChatSocket } from '@/src/lib/hooks/useChatSocket'
 import {
@@ -754,6 +755,7 @@ export default function TravelerMessagingPage() {
     const [newMessage, setNewMessage] = useState('')
     const [realConvs, setRealConvs] = useState<ConversationResponse[]>([])
     const [realMsgs, setRealMsgs] = useState<MessageResponse[]>([])
+    const [isSending, setIsSending] = useState(false)
 
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -788,10 +790,32 @@ export default function TravelerMessagingPage() {
     useEffect(() => {
         if (selectedConversation) {
             setIsLoadingMsgs(true)
+            
+            // PERSISTENT SYNC: Mark notifications for this conversation as read
+            const syncMessages = async () => {
+                try {
+                    await notificationsApi.markByReference('NEW_MESSAGE', selectedConversation);
+                    // LOCAL SYNC: Update the bell and sidebar immediately
+                    window.dispatchEvent(new CustomEvent('notification-mark-read', { 
+                        detail: { type: 'NEW_MESSAGE', referenceId: selectedConversation } 
+                    }));
+                } catch (err) {
+                    console.error('Failed to mark messages as read:', err);
+                }
+            };
+            
+            syncMessages();
+
             chatApi.getMessages(parseInt(selectedConversation))
-                .then(msgs => setRealMsgs(Array.from(new Map(msgs.map(m => [String(m.id), m])).values())))
+                .then(msgs => {
+                    const unique = Array.from(new Map(msgs.map(m => [String(m.id), m])).values())
+                    setRealMsgs(unique)
+                })
+                .catch(console.error)
                 .finally(() => setIsLoadingMsgs(false))
-        } else setRealMsgs([])
+        } else {
+            setRealMsgs([])
+        }
     }, [selectedConversation])
 
     useChatSocket(
@@ -861,11 +885,27 @@ export default function TravelerMessagingPage() {
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!newMessage.trim() || !selectedConversation) return
+        if (!newMessage.trim() || !selectedConversation || isSending) return
+        
+        if (isNaN(parseInt(selectedConversation))) {
+            console.error('Invalid conversation ID:', selectedConversation)
+            return
+        }
+
+        setIsSending(true)
         try {
-            await chatApi.sendMessage({ conversationId: parseInt(selectedConversation), content: newMessage })
+            await chatApi.sendMessage({ 
+                conversationId: parseInt(selectedConversation), 
+                content: newMessage 
+            })
             setNewMessage('')
-        } catch (e) { console.error(e) }
+        } catch (error: any) { 
+            console.error('Failed to send:', error)
+            const errorMsg = error.response?.data?.message || error.message || 'Unknown error'
+            alert(`Failed to send message: ${errorMsg}. Please try refreshing or check your internet connection.`)
+        } finally {
+            setIsSending(false)
+        }
     }
 
     return (

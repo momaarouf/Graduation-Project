@@ -1,6 +1,7 @@
 package com.travelmarket.backend.booking.service;
 
-import com.travelmarket.backend.booking.dto.request.*;
+import com.travelmarket.backend.notification.enums.NotificationType;
+import com.travelmarket.backend.notification.service.NotificationService;import com.travelmarket.backend.booking.dto.request.*;
 import com.travelmarket.backend.booking.dto.response.*;
 import com.travelmarket.backend.booking.entity.Booking;
 import com.travelmarket.backend.booking.entity.WaitlistEntry;
@@ -45,6 +46,7 @@ public class BookingService {
     private final TravelerProfileRepository travelerRepository;
     private final GuideProfileRepository guideRepository;
     private final ObjectMapper objectMapper;
+    private final NotificationService notificationService;
     @Lazy
     private final StripePaymentService stripePaymentService;
 
@@ -121,6 +123,16 @@ public class BookingService {
         booking.setQrCode(UUID.randomUUID().toString());
 
         Booking saved = bookingRepository.save(booking);
+        
+        notificationService.createNotification(
+                occurrence.getTemplate().getGuide().getUser().getId(),
+                NotificationType.BOOKING_CREATED,
+                "New Booking " + (isInstant ? "Confirmed" : "Request"),
+                "You have a new booking " + (isInstant ? "confirmed" : "request") + " from " + traveler.getUser().getFullName(),
+                saved.getId().toString(),
+                "BOOKING"
+        );
+        
         return mapToResponse(saved);
     }
 
@@ -200,7 +212,18 @@ public class BookingService {
                         ? request.getReason()
                         : "Cancelled by Traveler");
 
-        return mapToResponse(bookingRepository.save(booking));
+        Booking saved = bookingRepository.save(booking);
+        
+        notificationService.createNotification(
+                booking.getOccurrence().getTemplate().getGuide().getUser().getId(),
+                NotificationType.BOOKING_CANCELLED,
+                "Booking Cancelled",
+                booking.getTraveler().getUser().getFullName() + " has cancelled their booking for " + booking.getOccurrence().getTemplate().getTitle() + ".",
+                saved.getId().toString(),
+                "BOOKING"
+        );
+        
+        return mapToResponse(saved);
     }
 
     // ── Traveler: Update Booking ──────────────────────────────────────────────
@@ -417,7 +440,18 @@ public class BookingService {
         booking.setStatus(BookingStatus.Confirmed);
         occurrenceRepository.save(occurrence);
 
-        return mapToGuideResponse(bookingRepository.save(booking));
+        Booking saved = bookingRepository.save(booking);
+        
+        notificationService.createNotification(
+                saved.getTraveler().getUser().getId(),
+                NotificationType.BOOKING_CONFIRMED,
+                "Booking Confirmed",
+                "Your booking for " + occurrence.getTemplate().getTitle() + " has been confirmed by the guide.",
+                saved.getId().toString(),
+                "BOOKING"
+        );
+
+        return mapToGuideResponse(saved);
     }
 
     @Transactional
@@ -439,7 +473,18 @@ public class BookingService {
                         ? request.getReason()
                         : "Rejected by Guide");
 
-        return mapToGuideResponse(bookingRepository.save(booking));
+        Booking saved = bookingRepository.save(booking);
+        
+        notificationService.createNotification(
+                saved.getTraveler().getUser().getId(),
+                NotificationType.BOOKING_CANCELLED,
+                "Booking Rejected",
+                "Your booking request for " + booking.getOccurrence().getTemplate().getTitle() + " was not accepted by the guide.",
+                saved.getId().toString(),
+                "BOOKING"
+        );
+
+        return mapToGuideResponse(saved);
     }
 
     // ── Guide: QR Check-in & Completion ──────────────────────────────────────

@@ -154,47 +154,40 @@ export default function GuideDashboardLayout({
   const [mounted, setMounted] = useState(false)
   const [badges, setBadges] = useState<Record<string, number>>({
     'guide-bookings': 0,
-    'guide-messages': 2 // Keep mock 2 for now as messages aren't wired
+    'guide-messages': 0
   })
 
-  // Fetch real counts
+  // Fetch initial notification counts on mount
   const fetchCounts = async () => {
-    try {
-      const res = await getGuideBookings()
-      const lastViewed = localStorage.getItem('safaribub-last-viewed-guide-bookings')
-      const lastViewedTime = lastViewed ? new Date(lastViewed).getTime() : 0
-
-      // Count all PENDING_GUIDE bookings
-      const unreadCount = res.data.filter(b => 
-        (b.status === BookingStatus.PendingGuide || b.status === 'PendingGuide' || b.status === 'PENDING_GUIDE')
-      ).length
-
-      setBadges(prev => ({ ...prev, 'guide-bookings': unreadCount }))
-    } catch (err) {
-      console.error('Failed to fetch guide badges:', err)
-    }
+    // Note: NotificationBell already fetches unread count and broadcasts 'notification-sync'.
+    // We only need to fetch domain-specific counts if necessary.
+    // For now, let's keep it empty or minimal to let Notifications drive the UI.
   }
 
   useEffect(() => {
     if (mounted) fetchCounts()
     
-    // Listen for reset events from pages
-    const handleReset = (e: any) => {
-      const { category } = e.detail
-      if (category === 'guide-bookings' || category === 'guide-messages') {
-        setBadges(prev => ({ ...prev, [category]: 0 }))
-      }
-    }
+
 
     // Listen for refresh events (re-fetch from server)
     const handleRefresh = () => fetchCounts()
 
-    window.addEventListener('badge-reset', handleReset)
+    // Listen for notification sync events (from NotificationBell)
+    const handleNotificationSync = (e: any) => {
+      const { categories } = e.detail
+      setBadges(prev => ({
+        ...prev,
+        'guide-messages': categories.messages,
+        'guide-bookings': categories.bookings
+      }))
+    }
+
     window.addEventListener('badge-refresh', handleRefresh)
+    window.addEventListener('notification-sync', handleNotificationSync)
     
     return () => {
-      window.removeEventListener('badge-reset', handleReset)
       window.removeEventListener('badge-refresh', handleRefresh)
+      window.removeEventListener('notification-sync', handleNotificationSync)
     }
   }, [mounted])
 

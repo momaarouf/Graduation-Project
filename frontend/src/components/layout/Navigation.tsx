@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
+import { NotificationBell } from '@/src/components/NotificationBell'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
@@ -62,19 +63,36 @@ export default function Navigation() {
     { href: '/how-it-works', label: 'How It Works' },
   ]
 
-  // Traveler dashboard links (for dropdown)
-  const travelerLinks = [
-    { href: '/dashboard/traveler', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/dashboard/traveler/bookings', label: 'My Bookings', icon: Calendar },
-    { href: '/wishlist', label: 'Wishlist', icon: Heart },
-    { href: '/dashboard/traveler/messages', label: 'Messages', icon: MessageSquare, badge: 3 },
-    { href: '/dashboard/traveler/profile', label: 'Profile', icon: User },
-  ]
-
-  // Get current role (backend returns uppercase roles)
+  // User role checking
   const isGuide = user?.role === 'GUIDE'
   const isAdmin = user?.role === 'ADMIN'
   const isTraveler = user?.role === 'TRAVELER'
+
+  // Notification states
+  const [unreadCounts, setUnreadCounts] = useState({ messages: 0, bookings: 0, total: 0 })
+
+  useEffect(() => {
+    const handleSync = (e: any) => {
+      const { unreadCount, categories } = e.detail
+      setUnreadCounts({
+        messages: categories?.messages || 0,
+        bookings: categories?.bookings || 0,
+        total: unreadCount || 0
+      })
+    }
+
+    window.addEventListener('notification-sync', handleSync)
+    return () => window.removeEventListener('notification-sync', handleSync)
+  }, [])
+
+  // Traveler dashboard links (dynamic with badges)
+  const travelerLinks = [
+    { href: '/dashboard/traveler', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/dashboard/traveler/bookings', label: 'My Bookings', icon: Calendar, badge: unreadCounts.bookings > 0 ? unreadCounts.bookings : undefined },
+    { href: '/wishlist', label: 'Wishlist', icon: Heart },
+    { href: '/dashboard/traveler/messages', label: 'Messages', icon: MessageSquare, badge: unreadCounts.messages > 0 ? unreadCounts.messages : undefined },
+    { href: '/dashboard/traveler/profile', label: 'Profile', icon: User },
+  ]
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
@@ -126,6 +144,9 @@ export default function Navigation() {
               )}
             </button>
 
+            {/* Notification Bell */}
+            {user && <NotificationBell />}
+
             {/* User Menu - Same for everyone */}
             {user ? (
               <div className="relative">
@@ -133,8 +154,11 @@ export default function Navigation() {
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0 relative">
                     {(user.email || '?').charAt(0).toUpperCase()}
+                    {unreadCounts.total > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full" />
+                    )}
                   </div>
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden lg:block">
                     {user.email}
@@ -267,9 +291,16 @@ export default function Navigation() {
               {/* User Info if logged in */}
               {user && (
                 <>
-                  <div className="px-3 py-2 border-t border-gray-200 dark:border-gray-800 mt-2 pt-2">
-                    <p className="font-medium text-gray-900 dark:text-white">{user.email}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user.role}</p>
+                  <div className="px-3 py-2 border-t border-gray-200 dark:border-gray-800 mt-2 pt-2 flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">{user.email}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user.role}</p>
+                    </div>
+                    {unreadCounts.total > 0 && (
+                      <span className="px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full">
+                        {unreadCounts.total} New
+                      </span>
+                    )}
                   </div>
 
                   {/* Dashboard Link */}

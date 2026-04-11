@@ -19,6 +19,8 @@ import com.travelmarket.backend.payment.repository.PaymentRepository;
 import com.travelmarket.backend.entity.TravelerPaymentMethod;
 import com.travelmarket.backend.repository.TravelerPaymentMethodRepository;
 import com.travelmarket.backend.repository.TravelerProfileRepository;
+import com.travelmarket.backend.notification.enums.NotificationType;
+import com.travelmarket.backend.notification.service.NotificationService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -75,6 +77,7 @@ public class StripePaymentService {
     private final BookingRepository bookingRepository;
     private final TravelerProfileRepository travelerRepository;
     private final TravelerPaymentMethodRepository paymentMethodRepository;
+    private final NotificationService notificationService;
 
     @Value("${stripe.secret-key}")
     private String stripeSecretKey;
@@ -348,6 +351,15 @@ public class StripePaymentService {
         booking.setStatus(BookingStatus.Confirmed);
         booking.setCartExpiresAtUtc(null);   // cart lock no longer needed
         bookingRepository.save(booking);
+        
+        notificationService.createNotification(
+                booking.getTraveler().getUser().getId(),
+                NotificationType.PAYMENT_SUCCESS,
+                "Payment Successful",
+                "Your payment of " + payment.getAmountCaptured() + " " + payment.getCurrency() + " was successful. Your booking is confirmed.",
+                booking.getId().toString(),
+                "BOOKING"
+        );
 
         log.info("[Stripe Webhook] ✅ Payment captured. BookingID: {} → CONFIRMED. Amount: {} {}",
                 booking.getId(), payment.getAmountCaptured(), payment.getCurrency());
@@ -387,6 +399,15 @@ public class StripePaymentService {
             booking.setCancelledAtUtc(Instant.now());
             booking.setCancellationReason("Payment not completed within 30-minute window");
             bookingRepository.save(booking);
+            
+            notificationService.createNotification(
+                    booking.getTraveler().getUser().getId(),
+                    NotificationType.PAYMENT_FAILED,
+                    "Payment Failed or Expired",
+                    "Your payment window expired or failed for " + booking.getOccurrence().getTemplate().getTitle() + ". The booking has been cancelled.",
+                    booking.getId().toString(),
+                    "BOOKING"
+            );
 
             log.info("[Stripe Webhook] ⏰ Session expired. BookingID: {} → EXPIRED. Seats released.",
                     booking.getId());
@@ -507,6 +528,15 @@ public class StripePaymentService {
         booking.setStatus(BookingStatus.Confirmed);
         booking.setCartExpiresAtUtc(null);
         bookingRepository.save(booking);
+        
+        notificationService.createNotification(
+                booking.getTraveler().getUser().getId(),
+                NotificationType.PAYMENT_SUCCESS,
+                "Payment Successful",
+                "Your payment of " + payment.getAmountCaptured() + " " + payment.getCurrency() + " was successful. Your booking is confirmed.",
+                booking.getId().toString(),
+                "BOOKING"
+        );
 
         log.info("[Stripe MOCK] ✅ Payment confirmed. BookingID: {} → CONFIRMED. Amount: {} {}",
                 booking.getId(), payment.getAmountCaptured(), payment.getCurrency());
@@ -541,6 +571,15 @@ public class StripePaymentService {
             booking.setCancelledAtUtc(Instant.now());
             booking.setCancellationReason("[MOCK] Payment declined or session expired");
             bookingRepository.save(booking);
+            
+            notificationService.createNotification(
+                    booking.getTraveler().getUser().getId(),
+                    NotificationType.PAYMENT_FAILED,
+                    "Payment Failed or Expired",
+                    "Your payment window expired or failed for " + booking.getOccurrence().getTemplate().getTitle() + ". The booking has been cancelled.",
+                    booking.getId().toString(),
+                    "BOOKING"
+            );
         }
 
         log.info("[Stripe MOCK] ❌ Payment failed. BookingID: {} → EXPIRED", booking.getId());

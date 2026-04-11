@@ -18,6 +18,8 @@ import com.travelmarket.backend.entity.TravelerProfile;
 import com.travelmarket.backend.entity.GuideProfile;
 import com.travelmarket.backend.tour.entity.TourTemplate;
 import com.travelmarket.backend.tour.repository.TourTemplateRepository;
+import com.travelmarket.backend.notification.enums.NotificationType;
+import com.travelmarket.backend.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -41,6 +43,7 @@ public class ChatService {
     private final TravelerProfileRepository travelerProfileRepository;
     private final GuideProfileRepository guideProfileRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final NotificationService notificationService;
 
     @Transactional(readOnly = true)
     public List<ConversationResponse> getUserConversations(Long userId) {
@@ -81,7 +84,7 @@ public class ChatService {
         } else {
             // Initiating new (or loading existing conceptually equal conversation)
             if (request.getTourId() == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "tourId is required to start a conversation.");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Chat initialization failed: tourId is required.");
             }
             conversation = findOrCreateConversation(sender, request.getTourId(), request.getBookingId());
         }
@@ -97,6 +100,19 @@ public class ChatService {
         conversationRepository.save(conversation);
 
         MessageResponse response = mapToMessageResponse(message);
+        
+        // Figure out recipient
+        Long recipientId = senderId.equals(conversation.getTraveler().getId()) ? 
+                conversation.getGuide().getId() : conversation.getTraveler().getId();
+                
+        notificationService.createNotification(
+                recipientId,
+                NotificationType.NEW_MESSAGE,
+                "New Message",
+                "You have a new message from " + sender.getFullName(),
+                conversation.getId().toString(),
+                "CONVERSATION"
+        );
 
         // Emit to WebSocket so the other party sees it instantly if they have the chat open
         messagingTemplate.convertAndSend("/topic/chat/" + conversation.getId(), response);
@@ -114,7 +130,7 @@ public class ChatService {
 
         // If travelerUserId is null, it means the guide tried to initiate a chat with "nobody" using just a tour ID.
         if (travelerUserId == null && bookingId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Guides cannot initiate a tour-level conversation without a target traveler.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Chat initialization failed: Guides cannot initiate a tour-level conversation without a target traveler.");
         }
 
         // If a booking is provided, we can strictly extract both parties and validate ownership
@@ -131,13 +147,20 @@ public class ChatService {
             }
         }
 
-        // Try to find existing
-        List<Conversation> existing = conversationRepository.findAllConversationsForTour(travelerUserId, guideUserId, tourId);
+        // Try to find existing conversation specifically for THIS booking if provided
+        if (booking != null) {
+            Optional<Conversation> existingWithBooking = conversationRepository.findExactConversationWithBooking(travelerUserId, guideUserId, tourId, bookingId);
+            if (existingWithBooking.isPresent()) {
+                return existingWithBooking.get();
+            }
+        }
 
-        if (!existing.isEmpty()) {
-            Conversation conv = existing.get(0);
-            // If we have a booking now and the conversation didn't have one, update it to point to the booking
-            if (booking != null && conv.getBooking() == null) {
+        // Try to find a pre-booking (general tour) conversation if no bookingId provided or no booking-specific chat exists
+        Optional<Conversation> existingWithoutBooking = conversationRepository.findExactConversationWithoutBooking(travelerUserId, guideUserId, tourId);
+        if (existingWithoutBooking.isPresent()) {
+            Conversation conv = existingWithoutBooking.get();
+            // If we have a booking now, attach it to the general conversation to promote it
+            if (booking != null) {
                 conv.setBooking(booking);
                 return conversationRepository.save(conv);
             }

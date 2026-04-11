@@ -1,5 +1,7 @@
 package com.travelmarket.backend.controller;
 
+import com.travelmarket.backend.notification.service.NotificationService;
+import com.travelmarket.backend.notification.enums.NotificationType;
 import com.travelmarket.backend.dto.*;
 import com.travelmarket.backend.entity.GuideProfile;
 import com.travelmarket.backend.entity.RefreshToken;
@@ -55,6 +57,7 @@ public class AuthController {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
     private final RateLimiterService rateLimiterService;
+    private final NotificationService notificationService;
 
     private static final String REFRESH_COOKIE = "refresh_token";
     private static final Duration REFRESH_TTL_DEFAULT = Duration.ofDays(7);
@@ -531,6 +534,15 @@ public class AuthController {
         // Optional but recommended:
         // If you have refreshTokenRepository, revoke all refresh tokens here too:
         refreshTokenRepository.revokeAllForUser(user.getId(), Instant.now());
+        
+        notificationService.createNotification(
+                user.getId(),
+                NotificationType.PASSWORD_CHANGED,
+                "Password Changed",
+                "Your password has been successfully reset. If this was not you, please contact support immediately.",
+                null,
+                null
+        );
     }
 
     @PostMapping("/email/verify/request")
@@ -655,6 +667,15 @@ public class AuthController {
 
         evt.setUsedAtUtc(Instant.now());
         emailVerificationTokenRepository.save(evt);
+        
+        notificationService.createNotification(
+                user.getId(),
+                NotificationType.EMAIL_VERIFIED,
+                "Email Verified",
+                "Your email address has been successfully verified. Thank you!",
+                null,
+                null
+        );
     }
 
     @PostMapping("/email/verify/confirm-code")
@@ -689,6 +710,15 @@ public class AuthController {
 
         evt.setUsedAtUtc(Instant.now());
         emailVerificationTokenRepository.save(evt);
+        
+        notificationService.createNotification(
+                user.getId(),
+                NotificationType.EMAIL_VERIFIED,
+                "Email Verified",
+                "Your email address has been successfully verified. Thank you!",
+                null,
+                null
+        );
 
         // Note for later:
         // You should rate-limit attempts to this endpoint (by IP/email) to prevent brute forcing 6-digit codes.

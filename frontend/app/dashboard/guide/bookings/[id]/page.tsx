@@ -24,6 +24,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { getGuideBooking, confirmBooking, rejectBooking } from '@/src/lib/api/tours'
+import { notificationsApi } from '@/src/lib/api/notifications'
 import { GuideBookingResponse, BookingStatus } from '@/src/lib/types/tour.types'
 
 export default function GuideBookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -35,6 +36,20 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
 
   useEffect(() => {
     fetchBooking()
+    // PERSISTENT SYNC: Mark all notifications for this specific booking as read
+    const syncBookingNotifs = async () => {
+      try {
+        await notificationsApi.markByReference('BOOKING_', id);
+        // LOCAL SYNC: Update the bell and sidebar immediately
+        window.dispatchEvent(new CustomEvent('notification-mark-read', { 
+          detail: { type: 'BOOKING_', referenceId: id } 
+        }));
+      } catch (err) {
+        console.error('Failed to mark booking notifications as read:', err);
+      }
+    };
+
+    syncBookingNotifs();
   }, [id])
 
   const fetchBooking = async () => {

@@ -3,6 +3,8 @@ package com.travelmarket.backend.controller;
 import com.travelmarket.backend.dto.GuideVerificationSubmitRequest;
 import com.travelmarket.backend.entity.GuideProfile;
 import com.travelmarket.backend.entity.User;
+import com.travelmarket.backend.notification.enums.NotificationType;
+import com.travelmarket.backend.notification.service.NotificationService;
 import com.travelmarket.backend.repository.GuideProfileRepository;
 import com.travelmarket.backend.repository.UserRepository;
 import jakarta.validation.Valid;
@@ -22,6 +24,7 @@ public class GuideVerificationController {
 
     private final UserRepository userRepository;
     private final GuideProfileRepository guideProfileRepository;
+    private final NotificationService notificationService;
 
     /**
      * GET /api/guide/verification/status
@@ -113,6 +116,15 @@ public class GuideVerificationController {
         gp.setIdVerificationImage(req.getIdFrontImage().trim());
 
         guideProfileRepository.save(gp);
+
+        notificationService.createNotification(
+                user.getId(),
+                NotificationType.VERIFICATION_SUBMITTED,
+                "Verification Submitted",
+                "Your identity verification documents have been successfully submitted and are awaiting admin review.",
+                null,
+                null
+        );
     }
 
     private static boolean isBlank(String s) {

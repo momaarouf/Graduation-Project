@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { notificationsApi } from '../api/notifications'
 
 /**
  * Category types for dashboard notifications.
@@ -28,8 +29,10 @@ export const useBadgeReset = (category: NotificationCategory) => {
     // Update the timestamp to "now"
     localStorage.setItem(key, now)
     
+    // PERSISTENT SYNC: Removed bulk category reset to support precision marking
+    
     // Dispatch a custom event so other components (like Sidebars) can react immediately
-    window.dispatchEvent(new CustomEvent('badge-reset', { detail: { category, timestamp: now } }))
+
   }, [category])
 }
 

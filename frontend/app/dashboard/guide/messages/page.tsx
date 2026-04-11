@@ -30,6 +30,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { chatApi, ConversationResponse, MessageResponse } from '@/src/lib/api/chat'
+import { notificationsApi } from '@/src/lib/api/notifications'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import { useChatSocket } from '@/src/lib/hooks/useChatSocket'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -1045,6 +1046,7 @@ export default function GuideMessagingPage() {
   const [realMsgs, setRealMsgs] = React.useState<MessageResponse[]>([])
   const [newMessage, setNewMessage] = React.useState('')
   const [searchTerm, setSearchTerm] = React.useState('')
+  const [isSending, setIsSending] = React.useState(false)
 
   useBadgeReset('guide-messages')
 
@@ -1091,6 +1093,22 @@ export default function GuideMessagingPage() {
   React.useEffect(() => {
     if (selectedConversation) {
       setIsLoadingMsgs(true)
+      
+      // PERSISTENT SYNC: Mark notifications for this conversation as read
+      const syncMessages = async () => {
+        try {
+          await notificationsApi.markByReference('NEW_MESSAGE', selectedConversation);
+          // LOCAL SYNC: Update the bell and sidebar immediately
+          window.dispatchEvent(new CustomEvent('notification-mark-read', { 
+            detail: { type: 'NEW_MESSAGE', referenceId: selectedConversation } 
+          }));
+        } catch (err) {
+          console.error('Failed to mark messages as read:', err);
+        }
+      };
+      
+      syncMessages();
+
       chatApi.getMessages(parseInt(selectedConversation))
         .then(msgs => {
           const unique = Array.from(new Map(msgs.map(m => [String(m.id), m])).values())
@@ -1220,16 +1238,27 @@ export default function GuideMessagingPage() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newMessage.trim() || !selectedConversation) return
-
+    if (!newMessage.trim() || !selectedConversation || isSending) return
+    
+    // Safety check: ensure selectedConversation is numeric (not 'null' or empty)
+    if (isNaN(parseInt(selectedConversation))) {
+        console.error('Invalid conversation ID:', selectedConversation)
+        return
+    }
+    
+    setIsSending(true)
     try {
       await chatApi.sendMessage({
         conversationId: parseInt(selectedConversation),
         content: newMessage
       })
       setNewMessage('')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to send:', error)
+      const errorMsg = error.response?.data?.message || error.message || 'Unknown error'
+      alert(`Failed to send message: ${errorMsg}. Please try refreshing or check your internet connection.`)
+    } finally {
+      setIsSending(false)
     }
   }
 
@@ -1408,15 +1437,20 @@ export default function GuideMessagingPage() {
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Type a message..."
-                        className="flex-1 min-w-0 px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        placeholder={isSending ? "Sending..." : "Type a message..."}
+                        disabled={isSending}
+                        className="flex-1 min-w-0 px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50"
                       />
                       <button
                         type="submit"
-                        disabled={!newMessage.trim()}
+                        disabled={!newMessage.trim() || isSending}
                         className="flex-none p-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <Send className="w-5 h-5" />
+                        {isSending ? (
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          <Send className="w-5 h-5" />
+                        )}
                       </button>
                     </form>
                   </div>

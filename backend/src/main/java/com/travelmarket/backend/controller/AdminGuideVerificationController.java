@@ -6,6 +6,9 @@ import com.travelmarket.backend.entity.User;
 import com.travelmarket.backend.repository.GuideProfileRepository;
 import com.travelmarket.backend.repository.UserRepository;
 import com.travelmarket.backend.service.AdminAuditService;
+import com.travelmarket.backend.notification.service.NotificationService;
+import com.travelmarket.backend.notification.enums.NotificationType;
+import com.travelmarket.backend.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +26,8 @@ public class AdminGuideVerificationController {
     private final GuideProfileRepository guideProfileRepository;
     private final UserRepository userRepository;
     private final AdminAuditService adminAuditService;
+    private final NotificationService notificationService;
+    private final EmailService emailService;
 
     private User currentAdmin(Authentication auth) {
         if (auth == null || auth.getName() == null) {
@@ -97,6 +102,22 @@ public class AdminGuideVerificationController {
                 "Approved guide verification",
                 details
         );
+        
+        if (gp.getUser() != null) {
+            notificationService.createNotification(
+                    gp.getUser().getId(),
+                    NotificationType.VERIFICATION_APPROVED,
+                    "Verification Approved",
+                    "Congratulations! Your guide profile has been verified.",
+                    gp.getId().toString(),
+                    "GUIDE_PROFILE"
+            );
+            emailService.send(
+                gp.getUser().getEmail(), 
+                "Your Guide Profile is Verified", 
+                "Congratulations! Your identity documents have been approved and your profile is now active on the platform."
+            );
+        }
     }
 
     @PatchMapping("/{guideProfileId}/reject")
@@ -141,6 +162,22 @@ public class AdminGuideVerificationController {
                 "Rejected guide verification",
                 details
         );
+        
+        if (gp.getUser() != null) {
+            notificationService.createNotification(
+                    gp.getUser().getId(),
+                    NotificationType.VERIFICATION_REJECTED,
+                    "Verification Rejected",
+                    "Your guide verification was rejected. Reason: " + reason.trim(),
+                    gp.getId().toString(),
+                    "GUIDE_PROFILE"
+            );
+            emailService.send(
+                gp.getUser().getEmail(), 
+                "Guide Verification Update", 
+                "Unfortunately, your verification documents were not accepted. Reason: " + reason.trim() + "\nPlease re-submit from your dashboard."
+            );
+        }
     }
 
     @PatchMapping("/{guideProfileId}/approve-override")
@@ -181,6 +218,22 @@ public class AdminGuideVerificationController {
                 "Approved guide verification (override)",
                 details
         );
+        
+        if (gp.getUser() != null) {
+            notificationService.createNotification(
+                    gp.getUser().getId(),
+                    NotificationType.VERIFICATION_APPROVED,
+                    "Verification Approved",
+                    "Congratulations! Your guide profile has been verified.",
+                    gp.getId().toString(),
+                    "GUIDE_PROFILE"
+            );
+            emailService.send(
+                gp.getUser().getEmail(), 
+                "Your Guide Profile is Verified", 
+                "Congratulations! Your identity documents have been approved and your profile is now active on the platform."
+            );
+        }
     }
 
     @GetMapping("/verified")

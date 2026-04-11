@@ -139,41 +139,36 @@ export default function TravelerDashboardLayout({
   const [mounted, setMounted] = useState(false)
   const [badges, setBadges] = useState<Record<string, number>>({
     'traveler-bookings': 0,
-    'traveler-messages': 3 // Mock 3 for now
+    'traveler-messages': 0
   })
 
-  // Fetch real counts
+  // Fetch initial notification counts on mount
   const fetchCounts = async () => {
-    try {
-      const res = await getTravelerBookings()
-      const lastViewed = localStorage.getItem('safaribub-last-viewed-traveler-bookings')
-      const lastViewedTime = lastViewed ? new Date(lastViewed).getTime() : 0
-
-      // Count only CONFIRMED bookings created AFTER the last visit
-      const unreadCount = res.data.filter(b => 
-        b.status === BookingStatus.Confirmed && 
-        new Date(b.createdAtUtc).getTime() > lastViewedTime
-      ).length
-
-      setBadges(prev => ({ ...prev, 'traveler-bookings': unreadCount }))
-    } catch (err) {
-      console.error('Failed to fetch traveler badges:', err)
-    }
+    // Note: NotificationBell already fetches unread count and broadcasts 'notification-sync'.
+    // We only need to fetch domain-specific counts if necessary.
+    // For now, let's keep it empty or minimal to let Notifications drive the UI.
   }
 
   useEffect(() => {
     if (mounted) fetchCounts()
     
-    // Listen for reset events
-    const handleReset = (e: any) => {
-      const { category } = e.detail
-      if (category === 'traveler-bookings' || category === 'traveler-messages') {
-        setBadges(prev => ({ ...prev, [category]: 0 }))
-      }
+
+
+    // Listen for notification sync events (from NotificationBell)
+    const handleNotificationSync = (e: any) => {
+      const { categories } = e.detail
+      setBadges(prev => ({
+        ...prev,
+        'traveler-messages': categories.messages,
+        'traveler-bookings': categories.bookings
+      }))
     }
 
-    window.addEventListener('badge-reset', handleReset)
-    return () => window.removeEventListener('badge-reset', handleReset)
+    window.addEventListener('notification-sync', handleNotificationSync)
+    
+    return () => {
+      window.removeEventListener('notification-sync', handleNotificationSync)
+    }
   }, [mounted])
 
   // Role guard
