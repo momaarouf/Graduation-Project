@@ -36,4 +36,6 @@ public class ConversationResponse {
     
     private Instant updatedAtUtc;
     private String lastMessageContent;
+    private Long unreadCount;
+    private Boolean lastMessageRead;
 }

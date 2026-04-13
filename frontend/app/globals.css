@@ -83,14 +83,14 @@
       MATCH BACKGROUND TO BODY
       This prevents the "black bar" or white gap when overscrolling on mobile
     */
-    background-color: #ffffff;
-    /* Light mode default */
-  }
+    background-color: #f5f2ed;
+    /* Light mode creamy background */
+}
 
   /* Dark mode html background */
   .dark {
-    background-color: #030712;
-    /* Dark mode default */
+    background-color: #0f172a;
+    /* Dark mode lighter background */
   }
 
   body {
@@ -102,17 +102,17 @@
     /* ============================================
        LIGHT MODE STYLES (DEFAULT)
        ============================================ */
-    background-color: #ffffff;
-    /* White background */
-    color: #111827;
-    /* Dark gray text */
+    background-color: #f5f2ed;
+    /* Creamy background */
+    color: #1c1917;
+    /* Warm charcoal text */
 
     /* ============================================
        DARK MODE STYLES (WHEN .dark CLASS IS PRESENT)
        ============================================ */
     .dark & {
-      background-color: #030712;
-      /* Very dark gray background */
+      background-color: #0f172a;
+      /* Lighter Slate background */
       color: #f9fafb;
       /* Light gray text */
     }
@@ -150,10 +150,10 @@
   */
   ::selection {
     /* Light mode selection */
-    background-color: #dbeafe;
-    /* Blue-100 */
-    color: #111827;
-    /* Dark text */
+    background-color: #ffedd5;
+    /* Orange-100 (Warm) */
+    color: #1c1917;
+    /* Warm charcoal text */
   }
 
   .dark ::selection {
@@ -177,8 +177,8 @@
 
   /* Light mode scrollbar */
   ::-webkit-scrollbar-track {
-    background: #f3f4f6;
-    /* gray-100 */
+    background: #f5f2ed;
+    /* bg-light.primary */
   }
 
   ::-webkit-scrollbar-thumb {
@@ -247,17 +247,17 @@
     Different grid patterns for light/dark modes
   */
   .bg-theme-grid {
-    /* Light mode grid (subtle) */
+    /* Light mode grid (Slate-200 / 0.1) */
     background-image:
-      linear-gradient(to right, rgb(209 213 219 / 0.15) 1px, transparent 1px),
-      linear-gradient(to bottom, rgb(209 213 219 / 0.15) 1px, transparent 1px);
+      linear-gradient(to right, rgb(230 226 218 / 0.15) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(230 226 218 / 0.15) 1px, transparent 1px);
     background-size: 50px 50px;
 
-    /* Dark mode grid (more visible) */
+    /* Dark mode grid (Slate-700 / 0.15) */
     .dark & {
       background-image:
-        linear-gradient(to right, rgb(75 85 99 / 0.2) 1px, transparent 1px),
-        linear-gradient(to bottom, rgb(75 85 99 / 0.2) 1px, transparent 1px);
+        linear-gradient(to right, rgb(51 65 85 / 0.15) 1px, transparent 1px),
+        linear-gradient(to bottom, rgb(51 65 85 / 0.15) 1px, transparent 1px);
     }
   }
 
@@ -267,15 +267,15 @@
     Frosted glass effect with theme-specific colors
   */
   .glass-theme {
-    /* Light mode glass */
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    /* Light mode glass (Slate-based glass) */
+    background: rgba(250, 249, 246, 0.75);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(230, 226, 218, 0.4);
 
-    /* Dark mode glass */
+    /* Dark mode glass (Slate-900 glass) */
     .dark & {
-      background: rgba(17, 24, 39, 0.7);
-      border: 1px solid rgba(55, 65, 81, 0.2);
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(51, 65, 85, 0.3);
     }
   }
 
@@ -286,20 +286,20 @@
   */
   .card-theme {
     /* Light mode card */
-    background-color: #ffffff;
-    /* White */
-    border: 1px solid #e5e7eb;
-    /* Gray-200 */
+    background-color: #faf9f6;
+    /* Linen Card */
+    border: 1px solid #e6e2da;
+    /* Stone Border */
     border-radius: 0.75rem;
     padding: 1.5rem;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 
     /* Dark mode card */
     .dark & {
-      background-color: #1f2937;
-      /* Gray-800 */
-      border-color: #374151;
-      /* Gray-700 */
+      background-color: #1e293b;
+      /* Slate-800 */
+      border-color: #334155;
+      /* Slate-700 */
       box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
     }
   }
@@ -357,6 +357,39 @@
   */
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* 
+    CHAT SPECIFIC SCROLLBAR
+    -----------------------
+    Refined, thin scrollbar for chat areas
+  */
+  .chat-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.2);
+    border-radius: 20px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  .chat-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.4);
+    background-clip: content-box;
+  }
+
+  .dark .chat-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(75, 85, 99, 0.3);
+  }
+
+  .dark .chat-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: rgba(75, 85, 99, 0.5);
   }
 }
 

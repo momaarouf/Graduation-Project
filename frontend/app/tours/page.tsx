@@ -74,14 +74,14 @@ function DesktopSidebar() {
     >
       <div className="sticky top-[80px] z-20 pb-10">
         {!isCollapsed && (
-          <div className="flex items-center justify-between px-4 py-3 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-900 mb-2">
+          <div className="flex items-center justify-between px-4 py-3 bg-blue-50/50 dark:bg-blue-900/10 backdrop-blur-sm border-b border-border-light-default dark:border-border-dark-strong mb-2 rounded-2xl">
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-gray-700 dark:text-gray-300" />
               <span className="font-semibold text-gray-900 dark:text-white">Filters</span>
             </div>
             <button
               onClick={toggleSidebar}
-              className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="p-1.5 rounded-full text-text-light-muted dark:text-text-dark-muted hover:bg-primary-light/10 dark:hover:bg-primary-dark/20 hover:text-primary-light dark:hover:text-primary-dark transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-light/20"
               aria-label="Collapse filters"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -137,12 +137,12 @@ function ToursPageContent() {
           <div className="lg:hidden mb-4">
             <button
               onClick={handleOpenMobileFilters}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/50 dark:bg-gray-900/50 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-lg text-gray-700 dark:text-gray-300 font-medium hover:bg-white/80 dark:hover:bg-gray-800 transition-colors shadow-sm"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-bg-light-paper/80 dark:bg-bg-dark-paper/80 backdrop-blur-md border border-border-light-default dark:border-border-dark-strong rounded-full text-text-light-primary dark:text-text-dark-primary font-bold hover:bg-bg-light-paper dark:hover:bg-bg-dark-paper transition-all shadow-md active:scale-95"
             >
-              <Filter className="w-4 h-4" />
+              <Filter className="w-4 h-4 text-primary-light dark:text-primary-dark" />
               Filters
               {activeFilterCount > 0 && (
-                <span className="px-1.5 py-0.5 bg-orange-600 dark:bg-orange-500 text-white text-xs rounded-full">
+                <span className="px-1.5 py-0.5 bg-primary-light dark:bg-primary-dark text-white text-[10px] font-bold rounded-full animate-bounce shadow-sm">
                   {activeFilterCount}
                 </span>
               )}

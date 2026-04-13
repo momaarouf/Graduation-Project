@@ -1008,6 +1008,8 @@ public class BookingService {
                 .cancelledAtUtc(b.getCancelledAtUtc())
                 .waiverSigned(b.getWaiverSigned())
                 .createdAtUtc(b.getCreatedAtUtc())
+                .guideId(b.getOccurrence().getTemplate().getGuide().getUser().getId())
+                .guideName(b.getOccurrence().getTemplate().getGuide().getUser().getFullName())
                 .build();
     }
 

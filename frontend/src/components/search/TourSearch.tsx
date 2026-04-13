@@ -115,7 +115,7 @@ export default function TourSearch({
               : '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
         }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="relative flex items-center bg-white dark:bg-gray-900 !border-none !ring-0 !outline-none rounded-xl overflow-hidden group"
+        className="relative flex items-center bg-bg-light-paper dark:bg-bg-dark-paper border border-border-light-default dark:border-primary-dark/20 !ring-0 !outline-none rounded-xl overflow-hidden group shadow-pop-light dark:shadow-pop-dark"
       >
         {/* Progress/Activity Line at the bottom - Premium Blue */}
         <AnimatePresence>

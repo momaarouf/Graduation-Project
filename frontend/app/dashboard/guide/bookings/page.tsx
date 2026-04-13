@@ -361,7 +361,7 @@ export default function GuideBookingsPage() {
     setIsLoading(true)
     try {
       const res = await getGuideBookings()
-      setBookings(res.data || [])
+      setBookings(res || [])
     } catch (err: any) {
       console.error('Failed to fetch bookings:', err)
       toast.error('Failed to load bookings')

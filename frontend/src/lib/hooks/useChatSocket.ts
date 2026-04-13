@@ -6,7 +6,11 @@ import SockJS from 'sockjs-client'
 import { MessageResponse } from '../api/chat'
 import { getAccessToken } from '../api/client'
 
-export const useChatSocket = (conversationId: number | null, onMessageReceived: (message: MessageResponse) => void) => {
+export const useChatSocket = (
+  conversationId: number | null, 
+  onMessageReceived: (message: MessageResponse) => void,
+  onReadReceipt?: (receipt: { conversationId: number; readerId: number; readAt: string }) => void
+) => {
   const stompClientRef = useRef<Client | null>(null)
   const [connected, setConnected] = useState(false)
 
@@ -27,8 +31,14 @@ export const useChatSocket = (conversationId: number | null, onMessageReceived: 
         
         client.subscribe(`/topic/chat/${conversationId}`, (message) => {
           if (message.body) {
-            const receivedMessage = JSON.parse(message.body) as MessageResponse
-            onMessageReceived(receivedMessage)
+            const data = JSON.parse(message.body)
+            
+            // Check if it's a read receipt or a message
+            if (data.type === 'READ_RECEIPT') {
+              onReadReceipt?.(data)
+            } else {
+              onMessageReceived(data as MessageResponse)
+            }
           }
         })
       },

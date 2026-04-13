@@ -50,8 +50,13 @@ import {
     Info,
     Award,
     TrendingUp,
-    HelpCircle
+    HelpCircle,
+    Check,
+    CheckCheck,
+    Menu,
+    Plus
 } from 'lucide-react'
+import NewChatModal from '@/src/components/chat/NewChatModal'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -106,6 +111,7 @@ interface Message {
     flagReason?: string
     hasBlurredContent: boolean
     hasSuspiciousContent: boolean
+    readAtUtc?: string
     attachments?: {
         id: string
         type: 'image' | 'file'
@@ -653,8 +659,12 @@ function MessageBubble({
                         {!isExpanded ? (
                             <div className={`flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-400 ${isOwn ? 'justify-end' : ''}`}>
                                 <span>{time}</span>
-                                {isOwn && message.status === 'read' && (
-                                    <CheckCircle className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                                {isOwn && (
+                                    message.readAtUtc ? (
+                                        <CheckCheck className="w-3 h-3 text-blue-500" strokeWidth={3} />
+                                    ) : (
+                                        <Check className="w-3 h-3 text-gray-400" strokeWidth={3} />
+                                    )
                                 )}
                             </div>
                         ) : (
@@ -667,8 +677,12 @@ function MessageBubble({
                                     <span className="text-[9px] text-gray-400 whitespace-nowrap">
                                         {new Date(message.timestamp).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })} • {time}
                                     </span>
-                                    {isOwn && message.status === 'read' && (
-                                        <CheckCircle className="w-2.5 h-2.5 text-blue-600 dark:text-blue-400" />
+                                    {isOwn && (
+                                        message.readAtUtc ? (
+                                            <CheckCheck className="w-2.5 h-2.5 text-blue-500" strokeWidth={3} />
+                                        ) : (
+                                            <Check className="w-2.5 h-2.5 text-gray-400" strokeWidth={3} />
+                                        )
                                     )}
                                 </div>
                             </motion.div>
@@ -747,7 +761,7 @@ export default function TravelerMessagingPage() {
 
     const { user } = useAuth()
     const [selectedConversation, setSelectedConversation] = useState<string | null>(null)
-    const [showMobileList, setShowMobileList] = useState(true)
+    const [showSidebar, setShowSidebar] = useState(true)
     const [isLoadingConvs, setIsLoadingConvs] = useState(true)
     const [isLoadingMsgs, setIsLoadingMsgs] = useState(false)
     const [expandedMessageId, setExpandedMessageId] = useState<string | null>(null)
@@ -756,6 +770,9 @@ export default function TravelerMessagingPage() {
     const [realConvs, setRealConvs] = useState<ConversationResponse[]>([])
     const [realMsgs, setRealMsgs] = useState<MessageResponse[]>([])
     const [isSending, setIsSending] = useState(false)
+    const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false)
+    const [filter, setFilter] = useState<'all' | 'unread' | 'suspicious'>('all')
+    const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false)
 
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -771,7 +788,7 @@ export default function TravelerMessagingPage() {
                 setRealConvs(convs)
                 if (initialConvoId) {
                     setSelectedConversation(initialConvoId)
-                    setShowMobileList(false)
+                    setShowSidebar(false)
                 } else if (initialTourId) {
                     const newConv = await chatApi.initiateConversation({
                         tourId: parseInt(initialTourId),
@@ -779,7 +796,7 @@ export default function TravelerMessagingPage() {
                     })
                     setRealConvs(prev => prev.some(c => c.id === newConv.id) ? prev : [newConv, ...prev])
                     setSelectedConversation(newConv.id.toString())
-                    setShowMobileList(false)
+                    setShowSidebar(false)
                 }
             } catch (err) { console.error(err) }
             finally { setIsLoadingConvs(false) }
@@ -787,15 +804,36 @@ export default function TravelerMessagingPage() {
         load()
     }, [user, initialConvoId, initialTourId, initialBookingId])
 
+    const handleConversationInitiated = (convId: number) => {
+        setSelectedConversation(convId.toString())
+        setShowSidebar(false)
+        setIsNewChatModalOpen(false)
+        chatApi.getConversations().then(setRealConvs)
+    }
+
     useEffect(() => {
         if (selectedConversation) {
             setIsLoadingMsgs(true)
             
-            // PERSISTENT SYNC: Mark notifications for this conversation as read
+            // PERSISTENT SYNC: Mark messages and notifications for this conversation as read
             const syncMessages = async () => {
                 try {
+                    const convId = parseInt(selectedConversation);
+                    
+                    // 1. Mark persistent messages as read in DB
+                    await chatApi.markAsRead(convId);
+                    
+                    // 2. Mark notifications as read
                     await notificationsApi.markByReference('NEW_MESSAGE', selectedConversation);
-                    // LOCAL SYNC: Update the bell and sidebar immediately
+                    
+                    // 3. Clear unread count in local state
+                    setRealConvs(prev => prev.map(c => 
+                        String(c.id) === String(selectedConversation) 
+                        ? { ...c, unreadCount: 0 } 
+                        : c
+                    ));
+
+                    // 4. Local badge sync (for Navigation/Sidebar)
                     window.dispatchEvent(new CustomEvent('notification-mark-read', { 
                         detail: { type: 'NEW_MESSAGE', referenceId: selectedConversation } 
                     }));
@@ -818,12 +856,59 @@ export default function TravelerMessagingPage() {
         }
     }, [selectedConversation])
 
+    const onReadReceipt = React.useCallback((receipt: { conversationId: number; readerId: number; readAt: string }) => {
+        if (selectedConversation && String(receipt.conversationId) === String(selectedConversation)) {
+            setRealMsgs(prev => prev.map(m => {
+                if (String(m.senderId) !== String(receipt.readerId) && !m.readAtUtc) {
+                    return { ...m, readAtUtc: receipt.readAt }
+                }
+                return m
+            }))
+        }
+        
+        setRealConvs(prev => prev.map(c => {
+            if (String(c.id) === String(receipt.conversationId)) {
+                return { ...c, lastMessageRead: true }
+            }
+            return c
+        }))
+    }, [selectedConversation])
+
+    const onMessageReceived = React.useCallback((receivedMsg: MessageResponse) => {
+        setRealMsgs(prev => {
+            const exists = prev.some(m => String(m.id) === String(receivedMsg.id))
+            if (exists) return prev
+            return [...prev, receivedMsg]
+        })
+
+        setRealConvs(prev => prev.map(c => 
+            String(c.id) === String(receivedMsg.conversationId) 
+            ? { ...c, updatedAtUtc: receivedMsg.createdAtUtc, lastMessageContent: receivedMsg.content, lastMessageRead: false } 
+            : c
+        ).sort((a, b) => new Date(b.updatedAtUtc).getTime() - new Date(a.updatedAtUtc).getTime()))
+
+        if (selectedConversation && String(receivedMsg.conversationId) === String(selectedConversation)) {
+            // If we are currently in this chat, mark as read in DB and keep unreadCount at 0
+            chatApi.markAsRead(receivedMsg.conversationId).catch(console.error)
+            setRealConvs(prev => prev.map(c => 
+                String(c.id) === String(receivedMsg.conversationId)
+                ? { ...c, unreadCount: 0, lastMessageRead: true }
+                : c
+            ))
+        } else {
+            // Increment unread count for other conversations
+            setRealConvs(prev => prev.map(c => 
+                String(c.id) === String(receivedMsg.conversationId)
+                ? { ...c, unreadCount: (c.unreadCount || 0) + 1 }
+                : c
+            ))
+        }
+    }, [selectedConversation])
+
     useChatSocket(
         selectedConversation ? parseInt(selectedConversation) : null,
-        React.useCallback((receivedMsg: MessageResponse) => {
-            setRealMsgs(prev => prev.some(m => String(m.id) === String(receivedMsg.id)) ? prev : [...prev, receivedMsg])
-            setRealConvs(prev => prev.map(c => c.id === receivedMsg.conversationId ? { ...c, updatedAtUtc: receivedMsg.createdAtUtc } : c).sort((a,b) => new Date(b.updatedAtUtc).getTime() - new Date(a.updatedAtUtc).getTime()))
-        }, [])
+        onMessageReceived,
+        onReadReceipt
     )
 
     const mappedConvs: Conversation[] = realConvs.map(c => {
@@ -844,25 +929,58 @@ export default function TravelerMessagingPage() {
                 isVerified: true, 
                 email: '' 
             },
-            lastMessage: { id: `l-${c.id}`, conversationId: c.id.toString(), senderId: '', senderName: '', content: c.lastMessageContent || 'Tap to view messages...', timestamp: timeStr, status: 'read', isFlagged: false, hasBlurredContent: false, hasSuspiciousContent: false },
-            unreadCount: 0, status: 'active', safetyLevel: 'safe', bookingConfirmed: c.bookingStatus === 'Confirmed' || c.bookingStatus === 'Completed', updatedAt: timeStr,
+            lastMessage: { 
+                id: `last-${c.id}`, 
+                conversationId: c.id.toString(), 
+                senderId: '', 
+                senderName: '', 
+                content: c.lastMessageContent || 'Tap to view messages...', 
+                timestamp: timeStr, 
+                status: (c.lastMessageRead ? 'read' : 'sent') as MessageStatus, 
+                isFlagged: false, 
+                hasBlurredContent: false, 
+                hasSuspiciousContent: false 
+            },
+            unreadCount: c.unreadCount || 0, 
+            status: 'active', 
+            safetyLevel: 'safe', 
+            bookingConfirmed: c.bookingStatus === 'Confirmed' || c.bookingStatus === 'Completed', 
+            updatedAt: timeStr,
             booking: { id: c.bookingId?.toString() || '', tourId: c.tourId.toString(), tourTitle: c.tourTitle, date: bookingDate, time: bookingTime, peopleCount: c.peopleCount || 1, totalPrice: c.totalPrice || 0, currency: c.currency || 'USD', status: (c.bookingStatus?.toLowerCase() as BookingStatus || 'pending') }
         }
     })
 
     const currentConversation = selectedConversation ? mappedConvs.find(c => c.id === selectedConversation) : null
     const messages: Message[] = realMsgs.map(m => ({
-        id: m.id.toString(), conversationId: m.conversationId.toString(), senderId: m.senderId.toString(), senderName: m.senderName, content: m.content,
+        id: m.id.toString(), 
+        conversationId: m.conversationId.toString(), 
+        senderId: m.senderId.toString(), 
+        senderName: m.senderName, 
+        content: m.content,
         timestamp: m.createdAtUtc ? (m.createdAtUtc.endsWith('Z') ? m.createdAtUtc : m.createdAtUtc + 'Z') : new Date().toISOString(),
-        status: 'read', isFlagged: false, hasBlurredContent: EMAIL_REGEX.test(m.content) || PHONE_REGEX.test(m.content),
-        hasSuspiciousContent: SUSPICIOUS_KEYWORDS.some(kw => m.content.toLowerCase().includes(kw))
+        status: 'read', 
+        isFlagged: false, 
+        hasBlurredContent: EMAIL_REGEX.test(m.content) || PHONE_REGEX.test(m.content),
+        hasSuspiciousContent: SUSPICIOUS_KEYWORDS.some(kw => m.content.toLowerCase().includes(kw)),
+        readAtUtc: m.readAtUtc
     }))
 
     const filteredConversations = mappedConvs.filter(conv => {
-        const hasMessages = conv.lastMessage && conv.lastMessage.content !== 'Tap to view messages...'
-        if (!hasMessages && selectedConversation !== conv.id) return false
-        if (!searchTerm) return true
-        return conv.guide.name.toLowerCase().includes(searchTerm.toLowerCase()) || conv.booking?.tourTitle.toLowerCase().includes(searchTerm.toLowerCase())
+        // Only show chats with messages, or the currently selected one
+        const hasMessages = conv.lastMessage && 
+                            conv.lastMessage.content && 
+                            conv.lastMessage.content !== 'Tap to view messages...'
+        const isSelected = selectedConversation === conv.id
+        
+        if (!hasMessages && !isSelected) return false
+
+        const matchesSearch = conv.guide.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            conv.booking?.tourTitle.toLowerCase().includes(searchTerm.toLowerCase())
+        if (!matchesSearch) return false
+
+        if (filter === 'unread') return conv.unreadCount > 0
+        if (filter === 'suspicious') return conv.safetyLevel !== 'safe'
+        return true
     })
 
     useEffect(() => {
@@ -910,12 +1028,89 @@ export default function TravelerMessagingPage() {
 
     return (
         <div className="h-[calc(100vh-4rem)] bg-gray-50 dark:bg-gray-950 overflow-hidden">
+            <NewChatModal 
+                isOpen={isNewChatModalOpen} 
+                onClose={() => setIsNewChatModalOpen(false)} 
+                role="TRAVELER"
+                onConversationInitiated={handleConversationInitiated} 
+            />
             <div className="h-full flex flex-col overflow-hidden">
                 <div className="flex-none bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 sm:px-6 py-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
+                            <button 
+                                onClick={() => {
+                                    window.dispatchEvent(new CustomEvent('toggle-sidebar'))
+                                }}
+                                className="lg:hidden p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400"
+                            >
+                                <Menu className="w-6 h-6" />
+                            </button>
                             <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                            <h1 className="text-lg font-bold text-gray-900 dark:text-white">Messages</h1>
+                            <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+                                Messages
+                            </h1>
+                            <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-full">
+                                {realConvs.reduce((acc, c) => acc + (c.unreadCount || 0), 0)} unread
+                            </span>
+                            <button
+                                onClick={() => setIsNewChatModalOpen(true)}
+                                className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-colors ml-1"
+                                title="New Chat"
+                            >
+                                <Plus className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {/* Filter Menu */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
+                                    className={`p-2 rounded-lg transition-colors flex items-center gap-2 ${
+                                        filter !== 'all' 
+                                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                                            : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                    }`}
+                                >
+                                    <Filter className="w-5 h-5" />
+                                    <span className="text-sm font-medium hidden sm:inline">
+                                        {filter === 'all' ? 'All' : filter === 'unread' ? 'Unread' : 'Suspicious'}
+                                    </span>
+                                </button>
+
+                                <AnimatePresence>
+                                    {isFilterMenuOpen && (
+                                        <>
+                                            <div 
+                                                className="fixed inset-0 z-20" 
+                                                onClick={() => setIsFilterMenuOpen(false)} 
+                                            />
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                                className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-100 dark:border-gray-800 z-30 py-1 overflow-hidden"
+                                            >
+                                                {(['all', 'unread', 'suspicious'] as const).map((t) => (
+                                                    <button
+                                                        key={t}
+                                                        onClick={() => {
+                                                            setFilter(t)
+                                                            setIsFilterMenuOpen(false)
+                                                        }}
+                                                        className={`w-full px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center justify-between ${
+                                                            filter === t ? 'text-blue-600 dark:text-blue-400 font-medium' : 'text-gray-600 dark:text-gray-400'
+                                                        }`}
+                                                    >
+                                                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                                                        {filter === t && <Check className="w-4 h-4" />}
+                                                    </button>
+                                                ))}
+                                            </motion.div>
+                                        </>
+                                    )}
+                                </AnimatePresence>
+                            </div>
                         </div>
                     </div>
                     <div className="relative mt-3">
@@ -925,8 +1120,8 @@ export default function TravelerMessagingPage() {
                 </div>
 
                 <div className="flex-1 flex min-h-0 overflow-hidden bg-white dark:bg-gray-900">
-                    <div className={`w-full sm:w-80 border-r border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden ${showMobileList ? 'block' : 'hidden sm:block'}`}>
-                        <div className="flex-1 overflow-y-auto">
+                    <div className={`w-full sm:w-80 border-r border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden ${showSidebar ? 'block' : 'hidden'}`}>
+                        <div className="flex-1 overflow-y-auto chat-scrollbar">
                             {isLoadingConvs ? (
                                 Array.from({ length: 5 }).map((_, i) => (
                                     <div key={i} className="p-4 border-b border-gray-100 dark:border-gray-800 animate-pulse flex items-center gap-3">
@@ -938,25 +1133,36 @@ export default function TravelerMessagingPage() {
                                     </div>
                                 ))
                             ) : filteredConversations.map(conv => (
-                                <ConversationItem key={conv.id} conversation={conv} isActive={selectedConversation === conv.id} onClick={() => { setSelectedConversation(conv.id); setShowMobileList(false); }} />
+                                <ConversationItem key={conv.id} conversation={conv} isActive={selectedConversation === conv.id} onClick={() => { setSelectedConversation(conv.id); setShowSidebar(false); }} />
                             ))}
                         </div>
                     </div>
 
-                    <div className={`flex-1 flex flex-col min-w-0 overflow-hidden bg-white dark:bg-gray-900 ${!showMobileList ? 'block' : 'hidden sm:block'}`}>
-                        {selectedConversation && currentConversation ? (
+                    <div className={`flex-1 flex flex-col overflow-hidden ${!showSidebar ? 'block' : 'hidden sm:block'}`}>
+                        {currentConversation ? (
                             <>
-                                <div className="flex-none flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-                                    <button onClick={() => setShowMobileList(true)} className="sm:hidden p-1"><ChevronLeft className="w-5 h-5" /></button>
-                                    <Link href={`/guides/${currentConversation.guide.profileId}`} className="flex items-center gap-3 flex-1 min-w-0">
-                                        <GuideAvatar guide={currentConversation.guide} size="sm" />
-                                        <div className="min-w-0">
-                                            <h2 className="font-semibold truncate">{currentConversation.guide.name}</h2>
-                                            <p className="text-xs text-gray-500 truncate">Guide</p>
-                                        </div>
-                                    </Link>
+                                <div className="flex-none h-16 px-4 sm:px-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white/50 dark:bg-gray-900/50 backdrop-blur-md sticky top-0 z-20">
+                                    <div className="flex items-center gap-3">
+                                        <button 
+                                            onClick={() => {
+                                                setSelectedConversation(null)
+                                                setShowSidebar(true)
+                                            }}
+                                            className="p-2 -ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors flex items-center group"
+                                            title="Back to List"
+                                        >
+                                            <ChevronLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+                                        </button>
+                                        <Link href={`/guides/${currentConversation.guide.profileId}`} className="flex items-center gap-3 flex-1 min-w-0">
+                                            <GuideAvatar guide={currentConversation.guide} size="sm" />
+                                            <div className="min-w-0">
+                                                <h2 className="font-semibold truncate">{currentConversation.guide.name}</h2>
+                                                <p className="text-xs text-gray-500 truncate">Guide</p>
+                                            </div>
+                                        </Link>
+                                    </div>
                                 </div>
-                                <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+                                <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 chat-scrollbar">
                                     {currentConversation.booking && <BookingInfoCard booking={currentConversation.booking} />}
                                     {isLoadingMsgs ? (
                                         <div className="space-y-4">

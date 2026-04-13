@@ -24,6 +24,8 @@ export interface ConversationResponse {
   currency?: string
   updatedAtUtc: string
   lastMessageContent?: string
+  unreadCount?: number
+  lastMessageRead?: boolean
 }
 
 export interface MessageResponse {
@@ -33,6 +35,7 @@ export interface MessageResponse {
   senderName: string
   content: string
   createdAtUtc: string
+  readAtUtc?: string
 }
 
 export interface SendMessageRequest {
@@ -61,5 +64,9 @@ export const chatApi = {
   initiateConversation: async (request: { tourId: number; bookingId?: number }): Promise<ConversationResponse> => {
     const { data } = await api.post('/api/chat/initiate', request)
     return data
+  },
+
+  markAsRead: async (conversationId: number): Promise<void> => {
+    await api.post(`/api/chat/conversations/${conversationId}/read`)
   }
 }

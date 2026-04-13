@@ -1,7 +1,9 @@
 package com.travelmarket.backend.tour.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.travelmarket.backend.dto.CategoryDiscoveryResponse;
 import com.travelmarket.backend.dto.LocationDiscoveryResponse;
+import com.travelmarket.backend.dto.PublicGuideProfileResponse;
 import com.travelmarket.backend.dto.PublicStatsResponse;
 import com.travelmarket.backend.entity.User;
 import com.travelmarket.backend.repository.GuideProfileRepository;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Public discovery and statistics endpoints.
@@ -29,6 +32,7 @@ public class PublicDiscoveryController {
     private final TourTemplateRepository tourTemplateRepository;
     private final UserRepository userRepository;
     private final GuideProfileRepository guideProfileRepository;
+    private final ObjectMapper objectMapper;
 
     @GetMapping("/stats")
     public PublicStatsResponse getStats() {
@@ -74,6 +78,39 @@ public class PublicDiscoveryController {
                     .build());
         }
         return list;
+    }
+
+    @GetMapping("/discovery/guides")
+    public List<PublicGuideProfileResponse> getGuides() throws Exception {
+        return guideProfileRepository.findVerifiedGuides().stream()
+                .map(gp -> {
+                    PublicGuideProfileResponse res = new PublicGuideProfileResponse();
+                    res.setId(gp.getId());
+                    res.setName(gp.getUser().getFullName());
+                    res.setTagline(gp.getTagline());
+                    res.setAvatarUrl(gp.getAvatarUrl());
+                    res.setCoverImageUrl(gp.getCoverImageUrl());
+                    res.setCity(gp.getBaseCity());
+                    res.setCountry(gp.getBaseCountry());
+                    res.setTourCount(gp.getTourCount());
+                    res.setTotalGuidedTrips(gp.getTotalGuidedTrips());
+                    res.setVerified(Boolean.TRUE.equals(gp.getIdVerified()));
+                    res.setMemberSince(gp.getCreatedAtUtc() != null ? gp.getCreatedAtUtc().toString() : "");
+
+                    // Map expertise from JSON
+                    if (gp.getExpertiseJson() != null && !gp.getExpertiseJson().isBlank()) {
+                        try {
+                            res.setExpertise(objectMapper.readValue(gp.getExpertiseJson(), new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {}));
+                        } catch (Exception e) {
+                            res.setExpertise(List.of());
+                        }
+                    } else {
+                        res.setExpertise(List.of());
+                    }
+
+                    return res;
+                })
+                .collect(Collectors.toList());
     }
 
     private String getFallbackImageForCategory(String category) {

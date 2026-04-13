@@ -121,8 +121,8 @@ export default function SimilarTours({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {tours.map((tour) => (
-                        <PublicTourCard key={tour.id} tour={tour} />
+                    {tours.map((tour, index) => (
+                        <PublicTourCard key={tour.id} tour={tour} showHint={index === 0} />
                     ))}
                 </div>
 

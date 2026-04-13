@@ -27,7 +27,6 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import Navigation from '@/src/components/layout/Navigation'
-import { getTravelerBookings } from '@/src/lib/api/tours'
 import { BookingStatus } from '@/src/lib/types/tour.types'
 
 // ============================================================================
@@ -270,49 +269,9 @@ export default function TravelerDashboardLayout({
               })}
             </nav>
 
-            {/* User Profile Card */}
-            {user && (
-              <div className="p-3 border-t border-gray-200 dark:border-gray-800">
-                <div className={`flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800/50 ${isCollapsed ? 'justify-center' : ''}`}>
-                  <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center flex-shrink-0 text-blue-600 dark:text-blue-400 font-bold">
-                    {user.email?.charAt(0).toUpperCase() || 'T'}
-                  </div>
-                  {!isCollapsed && (
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        Traveler
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {user.email}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
 
-            {/* Logout Button */}
-            <div className="p-3 pt-0">
-              <button
-                onClick={logout}
-                className={`
-                  flex items-center gap-3 px-3 py-2 w-full rounded-lg transition-colors
-                  text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30
-                  ${isCollapsed ? 'justify-center' : 'justify-start'}
-                  group
-                `}
-              >
-                <LogOutIcon className="w-5 h-5 flex-shrink-0" />
-                {!isCollapsed && <span className="text-sm font-medium">Logout</span>}
-                
-                {/* Tooltip for collapsed mode */}
-                {isCollapsed && (
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-                    Logout
-                  </div>
-                )}
-              </button>
-            </div>
+
+
           </div>
         </aside>
 
@@ -378,16 +337,7 @@ export default function TravelerDashboardLayout({
                     )
                   })}
 
-                  {/* Mobile Logout */}
-                  <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
-                    <button
-                      onClick={logout}
-                      className="flex items-center gap-3 px-3 py-2 w-full text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
-                    >
-                      <LogOutIcon className="w-4 h-4" />
-                      Logout
-                    </button>
-                  </div>
+
                 </nav>
               </div>
             </div>

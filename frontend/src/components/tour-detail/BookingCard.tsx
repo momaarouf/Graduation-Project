@@ -350,7 +350,7 @@ export default function BookingCard({
     // ========================================
 
     return (
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-lg overflow-hidden sticky top-24">
+        <div className="bg-bg-light-paper dark:bg-bg-dark-paper rounded-3xl border border-border-light-default dark:border-border-dark-strong shadow-xl overflow-hidden sticky top-24">
             {/* ========================================
           HEADER - PRICE & AVAILABILITY
           ======================================== */}
@@ -411,18 +411,18 @@ export default function BookingCard({
                     <div className="relative">
                         <button
                             onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-                            className="w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-left transition-colors hover:border-gray-400 dark:hover:border-gray-600"
+                            className="w-full flex items-center justify-between px-5 py-3.5 bg-bg-light-paper dark:bg-bg-dark-paper border border-border-light-default dark:border-border-dark-strong rounded-full text-left transition-all hover:border-primary-light dark:hover:border-primary-dark shadow-sm"
                         >
                             <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                                <span className="text-gray-900 dark:text-white">
+                                <Calendar className="w-4 h-4 text-primary-light" />
+                                <span className="text-text-light-primary dark:text-text-dark-primary font-bold">
                                     {getNextDateDisplay()}
                                 </span>
                             </div>
                             {isDatePickerOpen ? (
-                                <ChevronUp className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                                <ChevronUp className="w-4 h-4 text-text-light-muted" />
                             ) : (
-                                <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                                <ChevronDown className="w-4 h-4 text-text-light-muted" />
                             )}
                         </button>
 
@@ -498,25 +498,25 @@ export default function BookingCard({
                                     onClick={() => setPeopleCount(Math.max(1, peopleCount - 1))}
                                     disabled={peopleCount <= 1 || isLoading}
                                     className="
-                        w-10 h-10
-                        flex items-center justify-center
-                        bg-gray-100 dark:bg-gray-800
-                        border border-gray-300 dark:border-gray-700
-                        rounded-lg
-                        text-gray-700 dark:text-gray-300
-                        hover:bg-gray-200 dark:hover:bg-gray-700
-                        disabled:opacity-50 disabled:cursor-not-allowed
-                        transition-colors
-                      "
+                                        w-11 h-11
+                                        flex items-center justify-center
+                                        bg-gray-100 dark:bg-gray-800
+                                        border border-border-light-default dark:border-border-dark-strong
+                                        rounded-full
+                                        text-text-light-primary dark:text-text-dark-primary
+                                        hover:bg-gray-200 dark:hover:bg-gray-700
+                                        disabled:opacity-50 disabled:cursor-not-allowed
+                                        transition-all shadow-sm
+                                    "
                                     aria-label="Decrease travelers"
                                 >
                                     −
                                 </button>
                             )}
 
-                            <div className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg">
-                                <Users className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                                <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                            <div className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-100 dark:bg-gray-800/80 rounded-full border border-border-light-default dark:border-border-dark-strong shadow-inner">
+                                <Users className="w-4 h-4 text-primary-light" />
+                                <span className="text-base font-bold text-text-light-primary dark:text-text-dark-primary">
                                     {peopleCount} {peopleCount === 1 ? 'Traveler' : 'Travelers'}
                                 </span>
                             </div>
@@ -526,16 +526,16 @@ export default function BookingCard({
                                     onClick={() => setPeopleCount(Math.min(maxCapacity, peopleCount + 1))}
                                     disabled={peopleCount >= maxCapacity || isLoading}
                                     className="
-                        w-10 h-10
-                        flex items-center justify-center
-                        bg-gray-100 dark:bg-gray-800
-                        border border-gray-300 dark:border-gray-700
-                        rounded-lg
-                        text-gray-700 dark:text-gray-300
-                        hover:bg-gray-200 dark:hover:bg-gray-700
-                        disabled:opacity-50 disabled:cursor-not-allowed
-                        transition-colors
-                      "
+                                        w-11 h-11
+                                        flex items-center justify-center
+                                        bg-gray-100 dark:bg-gray-800
+                                        border border-border-light-default dark:border-border-dark-strong
+                                        rounded-full
+                                        text-text-light-primary dark:text-text-dark-primary
+                                        hover:bg-gray-200 dark:hover:bg-gray-700
+                                        disabled:opacity-50 disabled:cursor-not-allowed
+                                        transition-all shadow-sm
+                                    "
                                     aria-label="Increase travelers"
                                 >
                                     +
@@ -691,7 +691,7 @@ export default function BookingCard({
                                 <button
                                     onClick={handleBooking}
                                     disabled={!selectedDate || isLoading}
-                                    className="w-full px-6 py-4 bg-gradient-to-r from-red-600 to-rose-600 dark:from-red-700 dark:to-rose-700 text-white font-semibold rounded-lg hover:from-red-700 hover:to-rose-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                                    className="w-full px-6 py-4 bg-gradient-to-r from-red-600 to-rose-600 dark:from-red-700 dark:to-rose-700 text-white font-bold rounded-full hover:from-red-700 hover:to-rose-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl hover:shadow-red-500/20 active:scale-[0.98]"
                                 >
                                     {isLoading ? 'Cancelling...' : 'Cancel Request'}
                                 </button>
@@ -700,7 +700,7 @@ export default function BookingCard({
                                     <button
                                         onClick={handleBooking}
                                         disabled={!selectedDate || isLoading}
-                                        className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                                        className="w-full px-6 py-4 bg-gradient-to-r from-primary-light to-indigo-600 dark:from-primary-dark dark:to-indigo-700 text-white font-bold rounded-full hover:shadow-primary-light/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl active:scale-[0.98]"
                                     >
                                         {isLoading ? 'Updating...' : 'Update Booking'}
                                     </button>
@@ -708,7 +708,7 @@ export default function BookingCard({
                                     <button
                                         onClick={() => onCancelBooking?.(activeBookingId)}
                                         disabled={isLoading}
-                                        className="w-full px-6 py-3 bg-white dark:bg-gray-900 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 font-semibold rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all disabled:opacity-50 shadow-sm"
+                                        className="w-full px-6 py-3.5 bg-bg-light-paper dark:bg-gray-950 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 font-bold rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-all disabled:opacity-50 shadow-md"
                                     >
                                         Cancel Booking
                                     </button>
@@ -717,7 +717,7 @@ export default function BookingCard({
                                 <button
                                     onClick={handleBooking}
                                     disabled={!selectedDate || isLoading}
-                                    className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                                    className="w-full px-6 py-4 bg-gradient-to-r from-primary-light to-indigo-600 dark:from-primary-dark dark:to-indigo-700 text-white font-bold rounded-full hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl active:scale-[0.98]"
                                 >
                                     {bookingMode === BookingMode.INSTANT || !isRequestMode
                                         ? (isLoading ? 'Processing...' : 'Book Now')
@@ -754,7 +754,7 @@ export default function BookingCard({
                                         ? 'bg-white dark:bg-gray-900 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 shadow-sm'
                                         : 'bg-amber-600 dark:bg-amber-700 text-white font-semibold hover:bg-amber-700 dark:hover:bg-amber-800 shadow-lg hover:shadow-xl'
                                     }
-                                    rounded-lg
+                                    rounded-full
                                     transition-all
                                     active:scale-[0.98]
                                     disabled:opacity-50 disabled:cursor-not-allowed

@@ -148,7 +148,7 @@ export default function HeroSection() {
         */}
         <form
           onSubmit={handleSearch}
-          className="w-full max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-lg p-1.5 sm:p-2 border border-gray-200 dark:border-gray-800"
+          className="w-full max-w-4xl mx-auto bg-bg-light-paper dark:bg-bg-dark-paper rounded-xl sm:rounded-2xl shadow-pop-light dark:shadow-pop-dark p-1.5 sm:p-2 border border-border-light-default dark:border-border-dark-strong transition-all duration-300"
           role="search"
         >
           <div className="flex flex-col sm:flex-row gap-2">

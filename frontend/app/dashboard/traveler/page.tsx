@@ -8,18 +8,12 @@ import {
     MapPin,
     User,
     ChevronRight,
-    Star,
-    Award,
-    TrendingUp,
-    Ticket,
     Compass,
-    Users,
     Sparkles,
     Shield,
     ArrowRight,
     Search,
-    CreditCard,
-    Loader2
+    CreditCard
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
@@ -96,7 +90,7 @@ export default function TravelerDashboardPage() {
                     getTravelerBookings()
                 ])
                 setProfile(profileData)
-                setBookings(bookingsData.data || [])
+                setBookings(bookingsData || [])
             } catch (error) {
                 console.error('Failed to fetch dashboard data:', error)
                 toast.error('Could not load detailed stats')
@@ -169,7 +163,7 @@ export default function TravelerDashboardPage() {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.1 }}
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"
                     >
                         <StatCard 
                             icon={Compass} 
@@ -178,21 +172,15 @@ export default function TravelerDashboardPage() {
                             color="blue" 
                         />
                         <StatCard 
-                            icon={Award} 
-                            label="Loyalty Tier" 
-                            value={profile?.loyaltyTier || 'Bronze'} 
+                            icon={MapPin} 
+                            label="Base Location" 
+                            value={profile?.country || 'Lebanon'} 
                             color="amber" 
                         />
                         <StatCard 
-                            icon={TrendingUp} 
-                            label="Weekly Streak" 
-                            value={0} 
-                            color="emerald" 
-                        />
-                        <StatCard 
                             icon={Shield} 
-                            label="Verification" 
-                            value={profile?.emailVerified ? 'Verified' : 'Pending'} 
+                            label="Profile Status" 
+                            value={user?.profileCompleted ? 'Complete' : 'Pending'} 
                             color="purple" 
                         />
                     </motion.div>
@@ -298,103 +286,31 @@ export default function TravelerDashboardPage() {
                                 )}
                             </GlassCard>
 
-                            {/* SAVED TOURS / RECENT TRIPS */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <GlassCard className="p-6">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="p-2 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-xl">
-                                            <Star className="w-5 h-5" />
-                                        </div>
-                                        <h3 className="font-bold text-gray-900 dark:text-white">Recent Activity</h3>
+                            {/* RECENT ACTIVITY */}
+                            <GlassCard className="p-6">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl">
+                                        <Clock className="w-5 h-5" />
                                     </div>
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-2 h-2 rounded-full bg-blue-500" />
-                                            <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">Joined the {profile?.loyaltyTier} Tier</p>
-                                        </div>
+                                    <h3 className="font-bold text-gray-900 dark:text-white">Recent Activity</h3>
+                                </div>
+                                <div className="space-y-4">
+                                    {user?.profileCompleted && (
                                         <div className="flex items-center gap-3">
                                             <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                                            <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">Completed profile setup</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">Completed your profile setup</p>
                                         </div>
+                                    )}
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-2 h-2 rounded-full bg-blue-500" />
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">Joined SafariHub</p>
                                     </div>
-                                </GlassCard>
-
-                                <GlassCard className="p-6">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="p-2 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-xl">
-                                            <Ticket className="w-5 h-5" />
-                                        </div>
-                                        <h3 className="font-bold text-gray-900 dark:text-white">Referral Reward</h3>
-                                    </div>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mb-4">
-                                        Invite a friend and get <span className="text-gray-900 dark:text-white font-bold">$20 credit.</span>
-                                    </p>
-                                    <button className="w-full py-2 bg-gray-950 dark:bg-white text-white dark:text-gray-950 rounded-xl text-xs font-black hover:opacity-90 transition-opacity">
-                                        Share Link
-                                    </button>
-                                </GlassCard>
-                            </div>
+                                </div>
+                            </GlassCard>
                         </div>
 
                         {/* SIDEBAR AREA */}
                         <div className="space-y-6">
-                            {/* LOYALTY PROGRESS */}
-                            <GlassCard className="p-6 overflow-hidden relative">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
-                                <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-wider text-xs mb-6">Loyalty Progress</h3>
-                                
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-bold text-gray-900 dark:text-white">{profile?.loyaltyTier} Status</span>
-                                    <span className="text-xs font-bold text-blue-600 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 rounded-full">
-                                        {profile?.completedTrips || 0} / 25 Trips
-                                    </span>
-                                </div>
-                                <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-4">
-                                    <motion.div 
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${Math.min(((profile?.completedTrips || 0) / 25) * 100, 100)}%` }}
-                                        transition={{ duration: 1, ease: "easeOut" }}
-                                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full" 
-                                    />
-                                </div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
-                                    {Math.max(25 - (profile?.completedTrips || 0), 0)} more trips to unlock <span className="text-gray-900 dark:text-white font-bold">Platinum</span> benefits!
-                                </p>
-                            </GlassCard>
-
-                            {/* QUICK LINKS */}
-                            <GlassCard className="p-6">
-                                <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-wider text-xs mb-4">Shortcuts</h3>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <Link href="/dashboard/traveler/profile" className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group">
-                                        <User className="w-6 h-6 text-blue-600 group-hover:scale-110 transition-transform mb-2" />
-                                        <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400">Profile</span>
-                                    </Link>
-                                    <Link href="/dashboard/traveler/bookings" className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all group">
-                                        <Clock className="w-6 h-6 text-purple-600 group-hover:scale-110 transition-transform mb-2" />
-                                        <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400">Activity</span>
-                                    </Link>
-                                    <Link href="/dashboard/traveler/settings" className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all group">
-                                        <Users className="w-6 h-6 text-emerald-600 group-hover:scale-110 transition-transform mb-2" />
-                                        <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400">Account</span>
-                                    </Link>
-                                    <Link href="/auth/reset-password" className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all group">
-                                        <Shield className="w-6 h-6 text-amber-600 group-hover:scale-110 transition-transform mb-2" />
-                                        <span className="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400">Security</span>
-                                    </Link>
-                                </div>
-                            </GlassCard>
-
-                            {/* NEWSLETTER/PROMO */}
-                            <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-[2.5rem] text-white relative overflow-hidden group shadow-2xl">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/30 transition-colors" />
-                                <Sparkles className="w-10 h-10 text-blue-400 mb-4" />
-                                <h3 className="text-xl font-black leading-tight mb-2">Beirut Edition Tours</h3>
-                                <p className="text-sm text-gray-400 mb-6 font-medium">Get exclusive early access to hidden gems in Byblos.</p>
-                                <button className="px-6 py-2.5 bg-white text-gray-950 rounded-xl text-xs font-black hover:bg-blue-50 transition-colors">
-                                    Notify Me
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>

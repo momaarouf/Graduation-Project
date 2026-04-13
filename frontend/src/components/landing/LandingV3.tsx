@@ -22,6 +22,7 @@ import {
   CategoryDiscoveryResponse,
   LocationDiscoveryResponse
 } from '@/src/lib/api/discovery'
+import { GlobePolaroids } from '@/src/components/ui/globe-polaroids'
 
 
 
@@ -32,6 +33,7 @@ import {
 /**
  * Cinematic Hero Section
  * Uses a large background image, parallax effects, and a floating search card.
+ * Now features an interactive 3D Globe with Polaroid memories.
  */
 function HeroV3() {
   const router = useRouter()
@@ -59,60 +61,75 @@ function HeroV3() {
 
   return (
     <section 
-      className="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden pt-16"
+      className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-24 pb-12"
     >
-
-      {/* Hero Content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-8">
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-4xl mx-auto"
-        >
-          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-gray-900 dark:text-white leading-[0.95] tracking-tight mb-6">
-            Beyond the <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 via-amber-500 to-blue-600 dark:from-orange-400 dark:via-amber-200 dark:to-blue-400">
-              Tourist Trail.
-            </span>
-          </h1>
-          <p className="text-lg sm:text-xl text-gray-500 dark:text-white/50 font-medium tracking-wide mb-10">
-            With guides who call it home.
-          </p>
-
+      {/* Hero Content Grid */}
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-8">
+          
+          {/* Left Column: Messaging & Search */}
           <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -5, scale: 1.01 }}
-            transition={{ duration: 1.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full max-w-2xl mx-auto mt-12 mb-8 bg-white/95 dark:bg-gray-900/90 backdrop-blur-2xl rounded-[2.5rem] p-3 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] border border-white/20 dark:border-gray-800 relative z-[60]"
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            className="flex-1 text-center lg:text-left"
           >
-            <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-3">
-              <div className="flex-1 relative group hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl transition-all">
-                <Search className="absolute left-7 top-1/2 -translate-y-1/2 text-gray-400 w-6 h-6 group-hover:text-orange-500 transition-colors pointer-events-none" />
-                <div className="flex flex-col pl-16 pr-6 py-4">
-                  <span className="text-[10px] uppercase tracking-[0.2em] font-black text-gray-400 group-hover:text-orange-500/70 transition-colors text-left">Explore Lebanon & Turkey</span>
-                  <input 
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Where do you want to go?"
-                    className={`w-full bg-transparent text-gray-900 dark:text-white border-0 focus:ring-0 font-bold placeholder-gray-400 p-0 leading-tight transition-all duration-300 ${
-                      searchQuery.length > 25 ? 'text-lg' : 'text-xl'
-                    }`}
-                  />
-                </div>
-              </div>
+            <h1 className="text-5xl sm:text-7xl md:text-8xl font-black text-gray-900 dark:text-white leading-[0.95] tracking-tight mb-8">
+              Beyond the <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 via-amber-500 to-blue-600 dark:from-orange-400 dark:via-amber-200 dark:to-blue-400">
+                Tourist Trail.
+              </span>
+            </h1>
+            <p className="text-lg sm:text-xl text-gray-500 dark:text-white/50 font-medium tracking-wide mb-10 max-w-2xl mx-auto lg:mx-0">
+              With guides who call it home.
+            </p>
 
-              <button 
-                type="submit" 
-                className="bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all text-white px-10 py-4 md:py-0 rounded-[1.8rem] font-black text-lg shadow-2xl shadow-orange-600/30"
-              >
-                Let's Go
-              </button>
-            </form>
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -5, scale: 1.01 }}
+              transition={{ duration: 1.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="w-full max-w-2xl mx-auto lg:ml-0 bg-white/95 dark:bg-gray-900/90 backdrop-blur-2xl rounded-[2.5rem] p-3 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] border border-white/20 dark:border-gray-800 relative z-[60]"
+            >
+              <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-3">
+                <div className="flex-1 relative group hover:bg-gray-50 dark:hover:bg-white/5 rounded-2xl transition-all">
+                  <Search className="absolute left-7 top-1/2 -translate-y-1/2 text-gray-400 w-6 h-6 group-hover:text-orange-500 transition-colors pointer-events-none" />
+                  <div className="flex flex-col pl-16 pr-6 py-4">
+                    <span className="text-[10px] uppercase tracking-[0.2em] font-black text-gray-400 group-hover:text-orange-500/70 transition-colors text-left uppercase whitespace-nowrap">Explore Lebanon & Turkey</span>
+                    <input 
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Where do you want to go?"
+                      className={`w-full bg-transparent text-gray-900 dark:text-white border-0 focus:ring-0 font-bold placeholder-gray-400 p-0 leading-tight transition-all duration-300 ${
+                        searchQuery.length > 25 ? 'text-lg' : 'text-xl'
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all text-white px-10 py-5 lg:py-0 rounded-[1.8rem] font-black text-lg shadow-2xl shadow-orange-600/30"
+                >
+                  Let's Go
+                </button>
+              </form>
+            </motion.div>
           </motion.div>
-        </motion.div>
+
+          {/* Right Column: Hero Visual (The Globe) */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, rotate: -5 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            transition={{ duration: 1.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="flex-1 w-full max-w-lg lg:max-w-xl aspect-square relative"
+          >
+            <div className="absolute inset-0 bg-blue-500/10 dark:bg-blue-400/5 blur-[120px] rounded-full animate-pulse" />
+            <GlobePolaroids speed={0.0025} className="relative z-10 w-full h-full" />
+          </motion.div>
+
+        </div>
       </div>
       
       {/* Animated Scroll Down Indicator */}

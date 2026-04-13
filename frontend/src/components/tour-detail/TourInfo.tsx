@@ -96,19 +96,19 @@ export default function TourInfo({
     return (
         <div className="space-y-10">
             {/* Quick Specs / Tags & Languages */}
-            <section className="flex flex-wrap gap-4 pb-6 border-b border-gray-100 dark:border-gray-800">
+            <section className="flex flex-wrap gap-4 pb-6 border-b border-border-light-default dark:border-border-dark-strong/30">
                 {/* Duration */}
                 {(displayHours > 0 || displayMinutes > 0) && (
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={`${displayHours}-${displayMinutes}`}
-                            initial={{ opacity: 0, y: 5 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -5 }}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-colors ${
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full border shadow-sm transition-all ${
                                 isOverridden 
                                     ? 'bg-indigo-50 dark:bg-indigo-900/40 border-indigo-200 dark:border-indigo-700/50' 
-                                    : 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800/30'
+                                    : 'bg-primary-light/10 dark:bg-primary-dark/10 border-primary-light/20 dark:border-primary-dark/20'
                             }`}
                         >
                             {isOverridden ? (
@@ -126,11 +126,11 @@ export default function TourInfo({
 
                 {/* Languages */}
                 {languageList.length > 0 && (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
-                        <Globe className="w-4 h-4 text-gray-500" />
-                        <div className="flex gap-2">
+                    <div className="flex items-center gap-2 px-5 py-2 bg-gray-100 dark:bg-gray-800/80 rounded-full border border-border-light-default dark:border-border-dark-strong shadow-sm transition-all hover:shadow-md">
+                        <Globe className="w-4 h-4 text-text-light-muted dark:text-text-dark-muted" />
+                        <div className="flex gap-2.5">
                             {languageList.map((lang, i) => (
-                                <span key={i} className="text-[10px] font-black uppercase tracking-widest text-gray-600 dark:text-gray-400">
+                                <span key={i} className="text-[10px] font-black uppercase tracking-[0.15em] text-text-light-primary dark:text-text-dark-primary">
                                     {typeof lang === 'string' ? lang : (lang.language || JSON.stringify(lang))}
                                 </span>
                             ))}
@@ -153,13 +153,13 @@ export default function TourInfo({
                 </div>
             </section>
 
-            <hr className="border-gray-100 dark:border-gray-800" />
+            <div className="py-2" />
 
             {/* ========================================
           HALAL CERTIFICATION DETAILS
           ======================================== */}
             {isHalalCertified && halalCertificationDetails && (
-                <section className="p-5 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 rounded-2xl">
+                <section className="p-6 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/10 rounded-xl shadow-sm">
                     <div className="flex items-start gap-3">
                         <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-full flex items-center justify-center flex-shrink-0">
                             <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
@@ -176,7 +176,7 @@ export default function TourInfo({
                 </section>
             )}
 
-            <hr className="border-gray-100 dark:border-gray-800" />
+            <div className="py-2" />
 
             {/* ========================================
           ROUTE & MEETING POINT (MAP)
@@ -201,7 +201,7 @@ export default function TourInfo({
                     </div>
 
                     {meetingPoint.instructions && (
-                        <div className="flex items-start gap-3 p-3 bg-blue-50/50 dark:bg-blue-900/10 rounded-lg">
+                        <div className="flex items-start gap-3 p-4 bg-primary-light/5 dark:bg-primary-dark/5 rounded-xl border border-primary-light/10">
                             <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                             <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
                                 {meetingPoint.instructions}
@@ -228,7 +228,7 @@ export default function TourInfo({
                 </div>
             </section>
 
-            <hr className="border-gray-100 dark:border-gray-800" />
+            <div className="py-2" />
 
             {/* ========================================
           ITINERARY DETAILS (LIST)
@@ -251,8 +251,8 @@ export default function TourInfo({
                                 <div className="absolute left-[19px] top-[40px] bottom-0 w-0.5 bg-gray-200 dark:bg-gray-800" />
                             )}
 
-                            {/* Order number */}
-                            <div className="relative z-10 w-10 h-10 rounded-2xl bg-blue-600 dark:bg-blue-500 text-white text-sm font-black flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/20 rotate-3">
+                            {/* Order number - Standard Circle */}
+                            <div className="relative z-10 w-10 h-10 rounded-full bg-primary-light dark:bg-primary-dark text-white text-sm font-black flex items-center justify-center flex-shrink-0 shadow-md">
                                 {index + 1}
                             </div>
 
@@ -261,14 +261,14 @@ export default function TourInfo({
                                     {stop.title}
                                 </h3>
                                 <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                                    <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800/50 px-2 py-1 rounded-md">
-                                        <Clock className="w-3.5 h-3.5 text-blue-500" />
-                                        <span className="font-medium">{stop.duration}</span>
+                                    <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-xl border border-border-light-default dark:border-border-dark-strong">
+                                        <Clock className="w-3.5 h-3.5 text-primary-light" />
+                                        <span className="font-bold text-[11px] uppercase tracking-wider">{stop.duration}</span>
                                     </div>
                                     {stop.location && (
-                                        <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800/50 px-2 py-1 rounded-md">
+                                        <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-xl border border-border-light-default dark:border-border-dark-strong">
                                             <MapPin className="w-3.5 h-3.5 text-orange-500" />
-                                            <span className="font-medium">{stop.location.name}</span>
+                                            <span className="font-bold text-[11px] uppercase tracking-wider">{stop.location.name}</span>
                                         </div>
                                     )}
                                 </div>
@@ -281,7 +281,7 @@ export default function TourInfo({
                 </div>
             </section>
 
-            <hr className="border-gray-100 dark:border-gray-800" />
+            <div className="py-2" />
 
             {/* ========================================
           INCLUSIONS & EXCLUSIONS
@@ -320,12 +320,12 @@ export default function TourInfo({
                 </div>
             </section>
 
-            <hr className="border-gray-100 dark:border-gray-800" />
+            <div className="py-2" />
 
             {/* ========================================
           REQUIREMENTS & WHAT TO BRING
           ======================================== */}
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-2xl">
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 bg-gray-50 dark:bg-gray-900/40 rounded-xl border border-border-light-default/50 dark:border-border-dark-strong/20">
                 {/* Requirements */}
                 {requirements && requirements.length > 0 && (
                     <div className="space-y-4">
@@ -363,7 +363,7 @@ export default function TourInfo({
                 )}
             </section>
 
-            <hr className="border-gray-100 dark:border-gray-800 opacity-60" />
+            <div className="py-2" />
 
             {/* ========================================
           SAFETY MEASURES
@@ -375,7 +375,7 @@ export default function TourInfo({
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {safetyList.map((measure, i) => (
-                            <div key={i} className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-sm text-gray-600 dark:text-gray-400">
+                            <div key={i} className="flex items-center gap-2 p-3.5 bg-gray-100 dark:bg-gray-800/80 border border-border-light-default dark:border-border-dark-strong rounded-full text-sm font-bold text-text-light-muted dark:text-text-dark-muted shadow-sm shadow-black/5">
                                 <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                                 <span>{measure}</span>
                             </div>

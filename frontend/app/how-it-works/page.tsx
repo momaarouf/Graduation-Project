@@ -1,732 +1,468 @@
-// ============================================================================
-// HOW IT WORKS PAGE - FIXED
-// ============================================================================
-// LOCATION: /frontend/src/app/how-it-works/page.tsx
-// 
-// FIXES APPLIED:
-// 1. Added PageLayout wrapper (includes Navigation and Footer)
-// 2. Improved step number styling with gradient and glow
-// 3. Enhanced hover effects on cards
-// 4. Added smooth transitions and animations
-// 5. Better visual hierarchy
-// ============================================================================
+"use client"
 
-import { Metadata } from 'next'
-import Link from 'next/link'
-import Image from 'next/image'
-import {
-  Search,
-  Calendar,
-  CreditCard,
-  MapPin,
-  Users,
-  Star,
-  Shield,
-  CheckCircle,
-  Compass,
-  Award,
-  TrendingUp,
-  MessageSquare,
-  Smartphone,
-  Camera,
-  Globe,
-  Heart,
-  Zap,
-  Clock,
-  ArrowRight,
+import { Metadata } from "next"
+import Link from "next/link"
+import { 
+  ShieldCheck, 
+  Globe, 
+  MapPin, 
+  MessageCircle, 
+  CheckCircle2,
   ChevronRight,
+  TrendingUp,
+  CreditCard,
+  Target,
+  ArrowRight,
+  Sparkles,
   ChevronDown,
-  ChevronLeft,
-  Sparkles
-} from 'lucide-react'
-import PageLayout from '@/src/components/layout/PageLayout'
+  Coffee,
+  Moon,
+  Shield,
+  Search,
+  FileText,
+  Video,
+  Clock,
+  Heart,
+  HelpCircle,
+  BellDot,
+  ChefHat,
+  Globe2,
+  UserCheck2,
+  FileSearch,
+  MessageSquare,
+  Bell,
+  Star,
+  Users,
+  RefreshCw,
+  FileEdit
+} from "lucide-react"
+import { motion } from "framer-motion"
+import PageLayout from "@/src/components/layout/PageLayout"
+import HowItWorksFlow from "@/src/components/how-it-works/HowItWorksFlow"
+import CinematicBackground from "@/src/components/layout/CinematicBackground"
 
-export const metadata: Metadata = {
-  title: 'How It Works | SafariHub',
-  description: 'Learn how SafariHub connects travelers with verified local guides for authentic halal-friendly experiences in Lebanon and Turkey.',
-  openGraph: {
-    title: 'How SafariHub Works',
-    description: 'Your guide to authentic travel experiences',
-    images: ['/images/og/how-it-works.jpg'],
-  }
-}
+// Since this is a client component, we use a separate SEO wrapper or define it here
+// Note: Next.js 16/15 handles metadata differently in client components, 
+// usually you define it in a parent layout.tsx or a separate server metadata file.
 
-// ============================================================================
-// STATISTICS
-// ============================================================================
 
-const STATISTICS = [
-  { value: '15K+', label: 'Happy Travelers', icon: Users, color: 'blue' },
-  { value: '1,200+', label: 'Verified Guides', icon: Award, color: 'amber' },
-  { value: '4.8/5', label: 'Average Rating', icon: Star, color: 'emerald' },
-  { value: '48h', label: 'Payout Protection', icon: Shield, color: 'purple' },
-]
-
-// ============================================================================
-// TRAVELER STEPS
-// ============================================================================
-
-const TRAVELER_STEPS = [
+const safetyFeatures = [
   {
-    icon: Search,
-    title: 'Find Your Tour',
-    description: 'Browse hundreds of halal-friendly tours in Lebanon and Turkey. Filter by location, price, duration, and interests.',
-    details: [
-      'Search by destination or activity',
-      'Filter by halal certification',
-      'Read verified traveler reviews',
-      'Compare prices and itineraries'
-    ],
-    color: 'blue'
+    title: "Identity Verification",
+    description: "Every guide undergoes a mandatory 1-on-1 ID and document verification process.",
+    icon: ShieldCheck,
+    color: "blue"
   },
   {
-    icon: Calendar,
-    title: 'Book Instantly or Request',
-    description: 'Choose your preferred date and group size. Book instantly or send a request to the guide.',
-    details: [
-      'Instant Book: Payment → Confirmed',
-      'Request to Book: Guide responds within 24h',
-      'Group discounts for 4+ people',
-      '15-minute cart lock during payment'
-    ],
-    color: 'amber'
-  },
-  {
+    title: "Secure Escrow",
+    description: "Payments are held safely and only released 48h after the tour is completed successfully.",
     icon: CreditCard,
-    title: 'Pay Securely',
-    description: 'All payments are processed through our secure platform. Your money is protected.',
-    details: [
-      '256-bit SSL encryption',
-      'Funds held safely until tour completion',
-      'Multiple payment methods',
-      '48-hour refund guarantee'
-    ],
-    color: 'emerald'
+    color: "orange"
   },
   {
+    title: "Real-time Tracking",
+    description: "Digital handshake through QR codes ensures traveler and guide meet at the right spot.",
     icon: MapPin,
-    title: 'Meet Your Guide',
-    description: 'On tour day, meet your verified guide at the meeting point. Scan QR code to check in.',
-    details: [
-      'QR code handshake at meeting point',
-      'Real-time guide location sharing',
-      'Emergency contact provided',
-      'Tour starts on time'
-    ],
-    color: 'purple'
+    color: "emerald"
   },
   {
+    title: "Safe Communication",
+    description: "Built-in chat with automated content filtering to protect your privacy and safety.",
+    icon: MessageCircle,
+    color: "purple"
+  }
+]
+
+const halalValues = [
+  {
+    title: "Prayer-First Travel",
+    description: "Tours in cities like Beirut and Istanbul are scheduled around local prayer times with pre-vetted accessible prayer spaces.",
+    icon: BellDot,
+    color: "blue"
+  },
+  {
+    title: "Verified Halal Food",
+    description: "Every dining stop is vetted against our strict certification standards, ensuring zero alcohol and 100% halal-only menus.",
+    icon: ChefHat,
+    color: "emerald"
+  },
+  {
+    title: "Cultural Modesty",
+    description: "We provide gender-sensitive guide options and clear modesty dress-code guidelines to respect local and traveler values.",
+    icon: Globe2,
+    color: "purple"
+  }
+]
+
+const guideVerificationSteps = [
+  {
+    step: "01",
+    title: "1-on-1 Account Audit",
+    icon: UserCheck2,
+    description: "Beyond basic ID check (National ID back image required), our team conducts a manual audit of every guide's professional background."
+  },
+  {
+    step: "02",
+    title: "Manual Tour Review",
+    icon: FileSearch,
+    description: "No tour goes live without scrutiny. Every master Tour Template is manually reviewed by an Admin for safety, pricing, and cultural alignment."
+  },
+  {
+    step: "03",
+    title: "QR Handshake Seal",
+    icon: ShieldCheck,
+    description: "The digital handshake triggers 48h payout protection. Payouts are only released after a safe, successful tour completion."
+  }
+]
+
+const ecosystemFeatures = [
+  {
+    title: "Real-time Chat",
+    description: "Connect instantly with guides via our WebSocket-powered messenger for pre-trip questions or on-tour coordination.",
+    icon: MessageSquare,
+    color: "blue"
+  },
+  {
+    title: "Smart Notifications",
+    description: "Instant alerts for booking confirmations, message replies, and secure payout updates across all your devices.",
+    icon: Bell,
+    color: "amber"
+  },
+  {
+    title: "Premium Reviews",
+    description: "Post-tour only reviews with multi-dimensional ratings (Guide, Tour, Value) and guide-verified response threads.",
     icon: Star,
-    title: 'Enjoy & Review',
-    description: 'Experience authentic local culture. Leave a review and earn loyalty points.',
-    details: [
-      'Share your experience',
-      'Earn loyalty tier discounts',
-      'Get reminders to review',
-      'Guides can respond to reviews'
-    ],
-    color: 'pink'
-  }
-]
-
-// ============================================================================
-// GUIDE STEPS
-// ============================================================================
-
-const GUIDE_STEPS = [
-  {
-    icon: Shield,
-    title: 'Get Verified',
-    description: 'Complete our manual ID verification process to build trust with travelers.',
-    details: [
-      'Upload government ID',
-      'Take a selfie with your ID',
-      'Admin review within 24-48 hours',
-      'Receive "Verified Guide" badge'
-    ],
-    color: 'blue'
+    color: "purple"
   },
   {
-    icon: Compass,
-    title: 'Create Your Tours',
-    description: 'Set up your profile and create tours with flexible scheduling and pricing.',
-    details: [
-      'One-time or recurring tours',
-      'Set min/max capacity',
-      'Dynamic pricing for weekends/holidays',
-      'Halal certification options'
-    ],
-    color: 'amber'
+    title: "Flexible Booking",
+    description: "Easily edit your traveler count or switch to a different tour date up to 48 hours before the start without penalty.",
+    icon: FileEdit,
+    color: "emerald"
   },
   {
+    title: "Waitlist System",
+    description: "Automatic FIFO (First-In-First-Out) promotion logic ensuring you hit the top of the list the moment a spot opens.",
     icon: Users,
-    title: 'Connect with Travelers',
-    description: 'Receive booking requests and messages from travelers around the world.',
-    details: [
-      'Safe chat with contact info blur',
-      'Booking notifications',
-      'Respond to traveler questions',
-      'Build your reputation'
-    ],
-    color: 'emerald'
+    color: "indigo"
   },
   {
-    icon: TrendingUp,
-    title: 'Earn & Grow',
-    description: 'Get paid securely and earn badges as you build your impact score.',
-    details: [
-      '48-hour payout freeze for safety',
-      'Tiered fees (as low as 8%)',
-      'Impact score and badges',
-      'Promo codes for marketing'
-    ],
-    color: 'purple'
+    title: "Automatic Sync",
+    description: "Platform-wide sync for cancellations and no-shows, keeping tour availability accurate and fair for everyone.",
+    icon: RefreshCw,
+    color: "rose"
   }
 ]
 
-// ============================================================================
-// FAQ PREVIEW
-// ============================================================================
-
-const FAQ_ITEMS = [
+const faqs = [
   {
-    question: 'Is SafariHub really free for travelers?',
-    answer: 'Yes! Creating an account and browsing tours is completely free. You only pay when you book a tour.'
+    question: "What is the 15-minute cart lock?",
+    answer: "For Instant Book tours, we lock your selected seats for 15 minutes. This gives you time to complete your secure payment without losing your spot."
   },
   {
-    question: 'How are guides verified?',
-    answer: 'Every guide goes through manual ID verification. They upload a government ID and a selfie, which our team reviews within 24-48 hours.'
+    question: "How do refunds and cancellations work?",
+    answer: "We follow a tiered policy: 100% refund for cancellations >48h before start, 50% for 24-48h, and 0% for cancellations within 24 hours."
   },
   {
-    question: 'What if I need to cancel?',
-    answer: 'Free cancellation up to 48 hours before the tour. Between 24-48 hours, 50% refund. Within 24 hours, no refund.'
+    question: "What happens if a tour doesn't reach minimum capacity?",
+    answer: "If a tour has a minimum traveler requirement and it isn't met 48 hours before the start, the system automatically cancels the occurrence and issues a full refund."
   },
   {
-    question: 'Are tours really halal-friendly?',
-    answer: 'Yes! Tours marked with the Halal badge include prayer spaces, halal food options, and gender-sensitive guides when requested.'
+    question: "How does the waitlist promotion work?",
+    answer: "If a tour is full, you can join a deterministic waitlist. If a confirmed traveler cancels, the next traveler in line is automatically promoted and notified."
+  },
+  {
+    question: "Can I edit my booking after it's confirmed?",
+    answer: "Yes. You can edit your traveler count or switch tour dates through your dashboard. If the new date is full, you'll have the option to join the waitlist."
+  },
+  {
+    question: "How does the QR handshake work?",
+    answer: "When you meet your guide, they scan your booking QR code. This marks the tour as 'InProgress', activates insurance, and begins the 48h payout freeze window."
   }
 ]
-
-// ============================================================================
-// STEP CARD COMPONENT - ENHANCED
-// ============================================================================
-
-interface StepCardProps {
-  icon: React.ElementType
-  title: string
-  description: string
-  details: string[]
-  index: number
-  isTraveler?: boolean
-  color: string
-}
-
-function StepCard({ icon: Icon, title, description, details, index, isTraveler = true, color }: StepCardProps) {
-  const colorClasses = {
-    blue: {
-      bg: 'bg-blue-50 dark:bg-blue-950/30',
-      border: 'border-blue-200 dark:border-blue-800',
-      text: 'text-blue-600 dark:text-blue-400',
-      gradient: 'from-blue-600 to-indigo-600',
-      light: 'bg-blue-100 dark:bg-blue-900/50',
-      shadow: 'shadow-blue-500/20'
-    },
-    amber: {
-      bg: 'bg-amber-50 dark:bg-amber-950/30',
-      border: 'border-amber-200 dark:border-amber-800',
-      text: 'text-amber-600 dark:text-amber-400',
-      gradient: 'from-amber-600 to-orange-600',
-      light: 'bg-amber-100 dark:bg-amber-900/50',
-      shadow: 'shadow-amber-500/20'
-    },
-    emerald: {
-      bg: 'bg-emerald-50 dark:bg-emerald-950/30',
-      border: 'border-emerald-200 dark:border-emerald-800',
-      text: 'text-emerald-600 dark:text-emerald-400',
-      gradient: 'from-emerald-600 to-teal-600',
-      light: 'bg-emerald-100 dark:bg-emerald-900/50',
-      shadow: 'shadow-emerald-500/20'
-    },
-    purple: {
-      bg: 'bg-purple-50 dark:bg-purple-950/30',
-      border: 'border-purple-200 dark:border-purple-800',
-      text: 'text-purple-600 dark:text-purple-400',
-      gradient: 'from-purple-600 to-pink-600',
-      light: 'bg-purple-100 dark:bg-purple-900/50',
-      shadow: 'shadow-purple-500/20'
-    },
-    pink: {
-      bg: 'bg-pink-50 dark:bg-pink-950/30',
-      border: 'border-pink-200 dark:border-pink-800',
-      text: 'text-pink-600 dark:text-pink-400',
-      gradient: 'from-pink-600 to-rose-600',
-      light: 'bg-pink-100 dark:bg-pink-900/50',
-      shadow: 'shadow-pink-500/20'
-    }
-  }
-
-  const classes = colorClasses[color as keyof typeof colorClasses]
-
-  return (
-    <div className={`
-      relative group
-      flex gap-6 p-6 sm:p-8
-      rounded-2xl border-2
-      ${classes.bg} ${classes.border}
-      hover:shadow-xl ${classes.shadow}
-      transition-all duration-500
-      hover:-translate-y-1
-      cursor-default
-      backdrop-blur-sm
-    `}>
-      {/* Step Number - Enhanced */}
-      <div className="absolute -top-4 -left-4 sm:-top-5 sm:-left-5 z-10">
-        <div className={`
-          relative
-          w-10 h-10 sm:w-12 sm:h-12
-          rounded-xl
-          bg-gradient-to-r ${classes.gradient}
-          flex items-center justify-center
-          text-white font-bold text-lg sm:text-xl
-          shadow-lg ${classes.shadow}
-          group-hover:scale-110 group-hover:rotate-3
-          transition-all duration-300
-          before:absolute before:inset-0 before:rounded-xl
-          before:bg-white/20 before:scale-0 before:group-hover:scale-100
-          before:transition-transform before:duration-300
-        `}>
-          {index + 1}
-        </div>
-        {/* Glow effect */}
-        <div className={`
-          absolute -inset-1 rounded-xl blur-md opacity-0
-          group-hover:opacity-20 transition-opacity duration-300
-          bg-gradient-to-r ${classes.gradient}
-        `} />
-      </div>
-
-      {/* Icon */}
-      <div className="flex-shrink-0 mt-2">
-        <div className={`
-          relative
-          w-14 h-14 sm:w-16 sm:h-16
-          rounded-xl
-          bg-white dark:bg-gray-900
-          border-2 ${classes.border}
-          flex items-center justify-center
-          group-hover:scale-110 group-hover:rotate-3
-          transition-all duration-300
-          shadow-md group-hover:shadow-xl
-        `}>
-          <Icon className={`w-7 h-7 sm:w-8 sm:h-8 ${classes.text} transition-transform duration-300`} />
-          
-          {/* Icon glow */}
-          <div className={`
-            absolute -inset-2 rounded-full blur-md opacity-0
-            group-hover:opacity-30 transition-opacity duration-300
-            ${classes.light}
-          `} />
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <h3 className={`
-          text-xl sm:text-2xl font-bold mb-3
-          text-gray-900 dark:text-white
-          group-hover:${classes.text}
-          transition-colors duration-300
-        `}>
-          {title}
-        </h3>
-        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
-          {description}
-        </p>
-        <ul className="space-y-2">
-          {details.map((detail, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
-              <div className={`
-                flex-shrink-0 w-5 h-5 rounded-full
-                ${classes.light} ${classes.text}
-                flex items-center justify-center mt-0.5
-                group-hover:scale-110 transition-transform duration-200
-              `}>
-                <CheckCircle className="w-3 h-3" />
-              </div>
-              <span>{detail}</span>
-            </li>
-          ))}
-        </ul>
-
-        {/* Decorative corner accent */}
-        <div className={`
-          absolute top-4 right-4 w-12 h-12 rounded-full
-          opacity-0 group-hover:opacity-10 transition-opacity duration-500
-          ${classes.light}
-        `} />
-      </div>
-    </div>
-  )
-}
-
-// ============================================================================
-// STAT CARD COMPONENT
-// ============================================================================
-
-interface StatCardProps {
-  icon: React.ElementType
-  value: string
-  label: string
-  color: string
-}
-
-function StatCard({ icon: Icon, value, label, color }: StatCardProps) {
-  const colorClasses = {
-    blue: 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400',
-    amber: 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400',
-    emerald: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400',
-    purple: 'bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400'
-  }
-
-  return (
-    <div className={`
-      group relative
-      p-6 rounded-xl
-      bg-white dark:bg-gray-900
-      border border-gray-200 dark:border-gray-800
-      hover:shadow-xl hover:-translate-y-1
-      transition-all duration-300
-      overflow-hidden
-    `}>
-      {/* Background decoration */}
-      <div className={`
-        absolute top-0 right-0 w-24 h-24 rounded-full
-        ${colorClasses[color as keyof typeof colorClasses]}
-        opacity-0 group-hover:opacity-10
-        transition-opacity duration-500
-        -translate-y-12 translate-x-12
-      `} />
-
-      <div className="relative">
-        <div className={`
-          inline-flex p-3 rounded-xl mb-3
-          ${colorClasses[color as keyof typeof colorClasses]}
-          group-hover:scale-110 group-hover:rotate-3
-          transition-all duration-300
-        `}>
-          <Icon className="w-5 h-5" />
-        </div>
-        <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-          {value}
-        </div>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          {label}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ============================================================================
-// MAIN PAGE - WITH PAGE LAYOUT
-// ============================================================================
 
 export default function HowItWorksPage() {
   return (
     <PageLayout>
-      {/* Main container - full viewport minus navbar */}
-      <div className="h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-4rem)] flex flex-col bg-white dark:bg-gray-950">
+      <div className="flex flex-col w-full relative overflow-hidden transition-colors duration-500 bg-bg-light-primary dark:bg-bg-dark-primary">
         
-        {/* ========================================
-            HERO SECTION - Takes remaining height
-            ======================================== */}
-        <section className="flex-1 min-h-screen bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-800 dark:via-indigo-800 dark:to-purple-800 text-white overflow-hidden">
-          {/* Animated background */}
-          <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
-            <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
-          </div>
-          
-          {/* Scrollable content container */}
-          <div className="relative h-full overflow-y-auto">
-            <div className="container-safe mx-auto max-w-7xl py-8 sm:py-12 md:py-16 min-h-full flex items-center">
-              <div className="w-full max-w-3xl mx-auto text-center">
-                {/* Pre-header badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium">
-                  <Sparkles className="w-4 h-4" />
-                  <span>YOUR JOURNEY STARTS HERE</span>
-                </div>
+        {/* --- HERO SECTION (Original Content with New Background) --- */}
+        <section className="relative min-h-[90vh] flex flex-col items-center justify-center overflow-hidden pt-20">
+          <CinematicBackground intensity="high">
+            <div className="relative z-10 w-full max-w-7xl mx-auto px-4 text-center">
+              {/* Pre-header badge */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-black/5 dark:bg-white/5 backdrop-blur-md rounded-full text-xs sm:text-sm font-bold border border-black/10 dark:border-white/10 text-text-light-primary dark:text-text-dark-primary"
+              >
+                <Sparkles className="w-4 h-4 text-amber-500" />
+                <span className="tracking-widest">YOUR JOURNEY STARTS HERE</span>
+              </motion.div>
 
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                  How{' '}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-300">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.1 }}
+              >
+                <h1 className="text-5xl sm:text-7xl md:text-8xl font-black text-text-light-primary dark:text-text-dark-primary leading-[0.95] tracking-tight mb-8">
+                  How <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-300">
                     SafariHub
-                  </span>{' '}
-                  Works
+                  </span> Works.
                 </h1>
-                <p className="text-lg sm:text-xl text-blue-100 mb-12 max-w-2xl mx-auto">
-                  Whether you're a traveler seeking authentic experiences or a guide ready to share your expertise,
-                  we make the process simple and secure.
+                <p className="text-lg sm:text-xl text-text-light-secondary dark:text-text-dark-secondary font-medium tracking-wide mb-12 max-w-2xl mx-auto">
+                  Explore Lebanon and Turkey through our admin-vetted master templates. 
+                  Whether you're discoverying gems or guiding them, SafariHub ensures 100% vetted security and cultural alignment.
                 </p>
+              </motion.div>
 
-                {/* Quick Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
-                  {STATISTICS.map((stat, index) => (
-                    <StatCard
-                      key={index}
-                      icon={stat.icon}
-                      value={stat.value}
-                      label={stat.label}
-                      color={stat.color}
-                    />
+
+              {/* Scroll indicator */}
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1, y: [0, 8, 0] }}
+                transition={{ delay: 1, duration: 2, repeat: Infinity }}
+                className="absolute bottom-4 left-1/2 -translate-x-1/2"
+              >
+                <ChevronDown className="w-6 h-6 text-gray-400 dark:text-white/20" />
+              </motion.div>
+            </div>
+          </CinematicBackground>
+        </section>
+
+        {/* --- FLOW SECTION (Role Switcher) --- */}
+        <section className="py-24 relative">
+          <div className="container-safe mx-auto">
+            <div className="text-center mb-16 px-4">
+              <h2 className="text-3xl sm:text-5xl font-black text-text-light-primary dark:text-text-dark-primary mb-6">How It Works.</h2>
+              <p className="text-text-light-secondary dark:text-text-dark-secondary max-w-xl mx-auto font-medium">
+                Choose your role to see the journey. We've simplified the process so you can focus on the experience.
+              </p>
+            </div>
+            <HowItWorksFlow />
+          </div>
+        </section>
+
+        {/* --- TRUST & SAFETY SECTION --- */}
+        <section className="py-24 px-4 bg-bg-light-secondary/50 dark:bg-transparent">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+              <div>
+                <h2 className="text-4xl sm:text-6xl font-black text-text-light-primary dark:text-text-dark-primary mb-8 leading-tight tracking-tight">
+                  Your Safety is Our <br />
+                  <span className="text-emerald-600 dark:text-emerald-400">Protocol.</span>
+                </h2>
+                <div className="space-y-8">
+                  {safetyFeatures.map((f, i) => (
+                    <div key={i} className="flex gap-6 group">
+                      <div className={`flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-3 duration-500 ${
+                         f.color === 'blue' ? 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' : 
+                         f.color === 'orange' ? 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' : 
+                         f.color === 'emerald' ? 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30' : 
+                         'text-purple-600 bg-purple-100 dark:bg-purple-900/30'
+                      }`}>
+                        <f.icon className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{f.title}</h3>
+                        <p className="text-gray-500 dark:text-white/40 leading-relaxed font-medium">
+                          {f.description}
+                        </p>
+                      </div>
+                    </div>
                   ))}
                 </div>
+              </div>
 
-                {/* Scroll indicator */}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-bounce">
-                  <ChevronDown className="w-6 h-6 text-white/60" />
+              {/* Decorative Trust Badge Grid */}
+              <div className="relative">
+                <div className="absolute inset-0 bg-blue-500/10 dark:bg-blue-500/5 blur-[120px] rounded-full" />
+                <div className="grid grid-cols-2 gap-4 relative z-10">
+                  <div className="bg-white dark:bg-white/5 backdrop-blur-3xl p-8 rounded-[3rem] border dark:border-white/10 shadow-2xl translate-y-8">
+                    <Target className="w-12 h-12 text-blue-600 dark:text-blue-400 mb-4" />
+                    <h4 className="font-black text-gray-900 dark:text-white text-lg">99.9% Reliable</h4>
+                    <p className="text-gray-500 dark:text-white/40 text-sm mt-2">Uptime on all booking processes.</p>
+                  </div>
+                  <div className="bg-white dark:bg-white/5 backdrop-blur-3xl p-8 rounded-[3rem] border dark:border-white/10 shadow-2xl">
+                    <TrendingUp className="w-12 h-12 text-orange-600 dark:text-orange-400 mb-4" />
+                    <h4 className="font-black text-gray-900 dark:text-white text-lg">Impact Score</h4>
+                    <p className="text-gray-500 dark:text-white/40 text-sm mt-2">Every review builds the community.</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
-      </div>
 
-        {/* ========================================
-            FOR TRAVELERS SECTION
-            ======================================== */}
-        <section className="py-20 sm:py-24 bg-white dark:bg-gray-950">
-          <div className="container-safe mx-auto max-w-7xl">
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <span className="inline-block px-4 py-2 mb-4 bg-gradient-to-r from-orange-600 to-amber-600 text-white text-sm font-bold rounded-full shadow-lg">
-                FOR TRAVELERS
-              </span>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                Discover Authentic Experiences
+        {/* --- HALAL-FIRST VALUES --- */}
+        <section className="py-24 px-4 relative overflow-hidden">
+          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none" />
+          <div className="max-w-7xl mx-auto relative z-10">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl sm:text-6xl font-black text-text-light-primary dark:text-text-dark-primary mb-6 tracking-tight">
+                Our <span className="text-emerald-600 dark:text-emerald-400">Halal-First</span> Values.
               </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-400">
-                From booking to check-in, here's how you'll experience halal-friendly travel with SafariHub.
+              <p className="text-text-light-secondary dark:text-text-dark-secondary font-medium max-w-xl mx-auto uppercase tracking-widest text-sm">
+                Travel without compromising your faith.
               </p>
             </div>
 
-            <div className="space-y-6 max-w-4xl mx-auto">
-              {TRAVELER_STEPS.map((step, index) => (
-                <StepCard
-                  key={index}
-                  icon={step.icon}
-                  title={step.title}
-                  description={step.description}
-                  details={step.details}
-                  index={index}
-                  isTraveler={true}
-                  color={step.color}
-                />
-              ))}
-            </div>
-
-            <div className="text-center mt-12">
-              <Link
-                href="/tours"
-                className="group relative inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
-              >
-                <span className="relative z-10">Browse Tours</span>
-                <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* ========================================
-            FOR GUIDES SECTION
-            ======================================== */}
-        <section className="py-20 sm:py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
-          <div className="container-safe mx-auto max-w-7xl">
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <span className="inline-block px-4 py-2 mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold rounded-full shadow-lg">
-                FOR GUIDES
-              </span>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                Share Your Expertise
-              </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-400">
-                Turn your passion into income. Here's how to become a verified guide on SafariHub.
-              </p>
-            </div>
-
-            <div className="space-y-6 max-w-4xl mx-auto">
-              {GUIDE_STEPS.map((step, index) => (
-                <StepCard
-                  key={index}
-                  icon={step.icon}
-                  title={step.title}
-                  description={step.description}
-                  details={step.details}
-                  index={index}
-                  isTraveler={false}
-                  color={step.color}
-                />
-              ))}
-            </div>
-
-            <div className="text-center mt-12">
-              <Link
-                href="/guide/onboarding"
-                className="group relative inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
-              >
-                <span className="relative z-10">Become a Guide</span>
-                <ArrowRight className="relative z-10 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* ========================================
-            KEY FEATURES GRID - Enhanced
-            ======================================== */}
-        <section className="py-20 sm:py-24 bg-white dark:bg-gray-950">
-          <div className="container-safe mx-auto max-w-7xl">
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                Why Choose SafariHub?
-              </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-400">
-                Built with trust, safety, and halal-friendly travel at its core.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[
-                { icon: Shield, title: 'Verified Guides', desc: 'Every guide manually ID-verified by our team. No exceptions.', color: 'blue' },
-                { icon: Heart, title: 'Halal-Friendly', desc: 'Prayer spaces, halal food, and gender-sensitive guides available.', color: 'emerald' },
-                { icon: CreditCard, title: 'Secure Payments', desc: '48-hour payout freeze protects both travelers and guides.', color: 'amber' },
-                { icon: Clock, title: '24/7 Support', desc: 'Our team is always here to help with any issues.', color: 'purple' }
-              ].map((feature, index) => {
-                const Icon = feature.icon
-                const colorClasses = {
-                  blue: 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400',
-                  emerald: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400',
-                  amber: 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400',
-                  purple: 'bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400'
-                }
-
-                return (
-                  <div
-                    key={index}
-                    className="group relative p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
-                  >
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-transparent to-current/5" />
-                    
-                    <div className={`
-                      inline-flex p-3 rounded-xl mb-4
-                      ${colorClasses[feature.color as keyof typeof colorClasses]}
-                      group-hover:scale-110 group-hover:rotate-3
-                      transition-all duration-300
-                    `}>
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                      {feature.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                      {feature.desc}
-                    </p>
-
-                    {/* Decorative corner */}
-                    <div className={`
-                      absolute bottom-0 right-0 w-12 h-12 rounded-full
-                      ${colorClasses[feature.color as keyof typeof colorClasses]}
-                      opacity-0 group-hover:opacity-10
-                      transition-opacity duration-500
-                    `} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {halalValues.map((v, i) => (
+                <div key={i} className="bg-bg-light-primary/50 dark:bg-white/5 backdrop-blur-xl border border-border-light-default dark:border-border-dark-default p-10 rounded-[3rem] hover:shadow-2xl transition-all duration-500 group">
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-8 transition-transform group-hover:scale-110 group-hover:rotate-3 duration-500 ${
+                    v.color === 'blue' ? 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' : 
+                    v.color === 'emerald' ? 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30' : 
+                    'text-purple-600 bg-purple-100 dark:bg-purple-900/30'
+                  }`}>
+                    <v.icon className="w-8 h-8" />
                   </div>
-                )
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* ========================================
-            FAQ PREVIEW - Enhanced
-            ======================================== */}
-        <section className="py-20 sm:py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
-          <div className="container-safe mx-auto max-w-4xl">
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                Frequently Asked Questions
-              </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-400">
-                Quick answers to common questions.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {FAQ_ITEMS.map((item, index) => (
-                <div
-                  key={index}
-                  className="group p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-                >
-                  <h3 className="font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {item.question}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {item.answer}
+                  <h3 className="text-2xl font-black text-text-light-primary dark:text-text-dark-primary mb-4">{v.title}</h3>
+                  <p className="text-text-light-secondary dark:text-text-dark-secondary leading-relaxed font-medium">
+                    {v.description}
                   </p>
                 </div>
               ))}
             </div>
+          </div>
+        </section>
 
-            <div className="text-center mt-8">
-              <Link
-                href="/faq"
-                className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:gap-2 transition-all group"
-              >
-                <span>View all FAQs</span>
-                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
+        {/* --- GUIDE STANDARDS (Manual Verification) --- */}
+        <section className="py-24 px-4 bg-bg-light-secondary/50 dark:bg-white/5">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+              <div className="order-2 lg:order-1">
+                <div className="grid grid-cols-1 gap-4">
+                  {guideVerificationSteps.map((s, i) => (
+                    <div key={i} className="flex gap-6 items-center bg-bg-light-primary dark:bg-bg-dark-primary/50 p-6 rounded-3xl border border-border-light-default dark:border-white/5 shadow-sm">
+                      <div className="text-3xl font-black text-text-light-muted dark:text-text-dark-muted/30">{s.step}</div>
+                      <div className="w-12 h-12 bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
+                        <s.icon className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-text-light-primary dark:text-text-dark-primary">{s.title}</h4>
+                        <p className="text-xs text-text-light-secondary dark:text-text-dark-secondary">{s.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="order-1 lg:order-2">
+                <h2 className="text-4xl sm:text-6xl font-black text-text-light-primary dark:text-text-dark-primary mb-8 leading-tight tracking-tight">
+                  Vetted for your <br />
+                  <span className="text-blue-600 dark:text-blue-400">Peace of Mind.</span>
+                </h2>
+                <p className="text-lg text-text-light-secondary dark:text-text-dark-secondary leading-relaxed font-medium mb-8">
+                  We don't just verify identities. Every guide undergoes a manual 1-on-1 audit, and every individual tour is reviewed for quality, safety, and cultural compliance.
+                </p>
+                <div className="flex items-center gap-4 text-sm font-bold text-text-light-primary dark:text-text-dark-primary">
+                  <ShieldCheck className="w-5 h-5 text-blue-600" />
+                  <span>Only the top 15% of tour templates pass our audit.</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ========================================
-            FINAL CTA - Enhanced
-            ======================================== */}
-        <section className="relative py-20 sm:py-24 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-800 dark:via-indigo-800 dark:to-purple-800 text-white overflow-hidden">
-          {/* Animated background */}
-          <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl animate-pulse" />
-          </div>
+        {/* --- PLATFORM ECOSYSTEM SECTION --- */}
+        <section className="py-24 px-4 bg-bg-light-secondary/50 dark:bg-white/[0.02]">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-5xl font-black text-text-light-primary dark:text-text-dark-primary mb-6">
+                The Multi-Layered <br className="sm:hidden" />
+                <span className="text-blue-600 dark:text-blue-400">Platform Ecosystem.</span>
+              </h2>
+              <p className="text-lg text-text-light-secondary dark:text-text-dark-secondary max-w-2xl mx-auto font-medium">
+                Our technical backbone handles the complexity so you can focus on the experience.
+                Every interaction is powered by real-time logic and secure protocols.
+              </p>
+            </div>
 
-          <div className="container-safe mx-auto max-w-4xl text-center relative z-10">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
-              Ready to Start Your Journey?
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {ecosystemFeatures.map((feature, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="p-8 bg-bg-light-primary dark:bg-white/5 rounded-[2.5rem] border border-border-light-default dark:border-white/10 shadow-xl shadow-black/[0.02] hover:shadow-blue-500/10 transition-all group"
+                >
+                  <div className={`w-14 h-14 rounded-2xl bg-${feature.color}-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                    <feature.icon className={`w-7 h-7 text-${feature.color}-600 dark:text-${feature.color}-400`} />
+                  </div>
+                  <h3 className="text-xl font-bold text-text-light-primary dark:text-text-dark-primary mb-3">{feature.title}</h3>
+                  <p className="text-text-light-secondary dark:text-text-dark-secondary leading-relaxed text-sm font-medium">
+                    {feature.description}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* --- FAQ SECTION --- */}
+        <section className="py-24 px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-16">
+              <HelpCircle className="w-12 h-12 text-blue-600 dark:text-blue-400 mx-auto mb-6" />
+              <h2 className="text-3xl sm:text-5xl font-black text-text-light-primary dark:text-text-dark-primary mb-4">Common Questions.</h2>
+              <p className="text-text-light-secondary dark:text-text-dark-secondary font-medium">Everything you need to know about the platform.</p>
+            </div>
+
+            <div className="space-y-4">
+              {faqs.map((faq, i) => (
+                <div key={i} className="p-8 bg-bg-light-secondary/50 dark:bg-white/5 rounded-3xl border border-border-light-default dark:border-white/10 group hover:border-blue-500/40 transition-all">
+                  <h4 className="text-lg font-bold text-text-light-primary dark:text-text-dark-primary mb-2 flex items-center justify-between">
+                    {faq.question}
+                    <ChevronRight className="w-5 h-5 text-text-light-muted group-hover:text-blue-500 transition-colors" />
+                  </h4>
+                  <p className="text-text-light-secondary dark:text-text-dark-secondary text-sm leading-relaxed">
+                    {faq.answer}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* --- FINAL CTA (Original Vibrancy) --- */}
+        <section className="relative py-32 px-4 overflow-hidden">
+          {/* Re-introducing the vibrant background the user missed */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-900 dark:via-indigo-900 dark:to-purple-950" />
+          
+          {/* Animated Glows */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-amber-500/20 rounded-full blur-[120px] animate-pulse" />
+          
+          <div className="relative z-10 max-w-4xl mx-auto text-center">
+            <h2 className="text-4xl sm:text-7xl font-black text-white mb-8 tracking-tight leading-tight">
+              Ready to <br />
+              <span className="text-amber-400">Discover?</span>
             </h2>
-            <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">
-              Join thousands of travelers and guides already using SafariHub.
+            <p className="text-xl text-white/70 mb-12 max-w-xl mx-auto font-medium">
+              Join thousands of travelers and local experts on SafariHub. 
+              The most authentic way to explore Lebanon and Turkey.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
+            
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              <Link 
                 href="/tours"
-                className="group relative px-8 py-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+                className="group px-12 py-5 bg-white text-blue-600 hover:bg-white/90 transition-all rounded-[2rem] font-black text-xl flex items-center justify-center gap-3 shadow-2xl shadow-black/20"
               >
-                <span className="relative z-10">Find a Tour</span>
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                Find a Tour
+                <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <Link
-                href="/guide/onboarding"
-                className="group relative px-8 py-4 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white font-semibold rounded-xl transition-all duration-300 overflow-hidden"
+              <Link 
+                href="/auth/signup"
+                className="group px-12 py-5 bg-white/10 backdrop-blur-md text-white border-2 border-white/20 hover:bg-white/20 transition-all rounded-[2rem] font-black text-xl flex items-center justify-center gap-3"
               >
-                <span className="relative z-10">Become a Guide</span>
-                <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                Become a Guide
               </Link>
             </div>
           </div>
         </section>
-      
+      </div>
     </PageLayout>
   )
 }

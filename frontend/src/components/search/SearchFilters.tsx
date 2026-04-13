@@ -366,12 +366,12 @@ export default function SearchFilters({
     // ========================================
 
     return (
-        <div className={`w-full bg-white dark:bg-gray-950 ${isMobile ? 'fixed inset-0 z-50 overflow-y-auto' : ''}`}>
+        <div className={`w-full bg-blue-50/20 dark:bg-blue-900/5 ${isMobile ? 'fixed inset-0 z-50 overflow-y-auto' : ''} rounded-3xl overflow-hidden`}>
 
             {/* ========================================
                 HEADER - Mobile drawer header
                 ======================================== */}
-            <div className={`sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 ${isMobile ? '' : 'hidden'}`}>
+            <div className={`sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-white/80 dark:bg-bg-dark-paper/80 backdrop-blur-md border-b border-border-light-default dark:border-border-dark-strong ${isMobile ? '' : 'hidden'}`}>
                 <div className="flex items-center gap-2">
                     <Filter className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                     <h2 className="font-semibold text-gray-900 dark:text-white">
@@ -450,7 +450,7 @@ export default function SearchFilters({
                                     <div className="relative min-w-[120px]">
                                         <Listbox value={selectedCountry || ''} onChange={(val) => setSelectedCountry(val as Country || null)}>
                                             <div className="relative">
-                                                <ListboxButton className="relative w-full flex items-center justify-between gap-2 px-2 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-[11px] font-medium text-gray-700 dark:text-gray-300 hover:border-blue-400 dark:hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
+                                                <ListboxButton className="relative w-full flex items-center justify-between gap-2 px-3 py-1.5 bg-bg-light-paper dark:bg-gray-800 border border-border-light-default dark:border-gray-700 rounded-full text-[11px] font-bold text-text-light-primary dark:text-text-dark-primary hover:border-primary-light dark:hover:border-primary-dark focus:outline-none focus:ring-2 focus:ring-primary-light/20 transition-all duration-200">
                                                     <span className="block truncate">
                                                         {selectedCountry ? CountryLabels[selectedCountry] : 'All countries'}
                                                     </span>
@@ -626,8 +626,8 @@ export default function SearchFilters({
                                 }}
                                 className={`px-4 py-3 rounded-xl text-sm font-medium transition-all border ${
                                     filters.maxGroupSize === 8 && !filters.minGroupSize
-                                        ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white shadow-sm'
-                                        : 'bg-white dark:bg-transparent border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-900 dark:hover:border-white'
+                                        ? 'bg-primary-light dark:bg-primary-dark text-white border-primary-light dark:border-primary-dark shadow-md'
+                                        : 'bg-white dark:bg-transparent border-border-light-default dark:border-border-dark-strong text-text-light-primary dark:text-text-dark-primary hover:border-primary-light dark:hover:border-primary-dark'
                                 }`}
                             >
                                 Small (1-8)
@@ -645,8 +645,8 @@ export default function SearchFilters({
                                 }}
                                 className={`px-4 py-3 rounded-xl text-sm font-medium transition-all border ${
                                     filters.minGroupSize === 9 && filters.maxGroupSize === 20
-                                        ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white shadow-sm'
-                                        : 'bg-white dark:bg-transparent border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-900 dark:hover:border-white'
+                                        ? 'bg-primary-light dark:bg-primary-dark text-white border-primary-light dark:border-primary-dark shadow-md'
+                                        : 'bg-white dark:bg-transparent border-border-light-default dark:border-border-dark-strong text-text-light-primary dark:text-text-dark-primary hover:border-primary-light dark:hover:border-primary-dark'
                                 }`}
                             >
                                 Medium (9-20)
@@ -664,8 +664,8 @@ export default function SearchFilters({
                                 }}
                                 className={`px-4 py-3 rounded-xl text-sm font-medium transition-all border col-span-2 ${
                                     filters.minGroupSize === 21 && !filters.maxGroupSize
-                                        ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white shadow-sm'
-                                        : 'bg-white dark:bg-transparent border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-900 dark:hover:border-white'
+                                        ? 'bg-primary-light dark:bg-primary-dark text-white border-primary-light dark:border-primary-dark shadow-md'
+                                        : 'bg-white dark:bg-transparent border-border-light-default dark:border-border-dark-strong text-text-light-primary dark:text-text-dark-primary hover:border-primary-light dark:hover:border-primary-dark'
                                 }`}
                             >
                                 Large (21+)
@@ -783,8 +783,8 @@ export default function SearchFilters({
                 MOBILE APPLY BUTTON
                 ======================================== */}
             {isMobile && (
-                <div className="sticky bottom-0 p-4 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800">
-                    <button onClick={onClose} className="w-full px-4 py-3 bg-blue-600 dark:bg-blue-700 text-white font-semibold rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                <div className="sticky bottom-0 p-4 bg-bg-light-paper dark:bg-bg-dark-paper border-t border-border-light-default dark:border-border-dark-strong">
+                    <button onClick={onClose} className="w-full px-4 py-3.5 bg-primary-light dark:bg-primary-dark text-white font-bold rounded-full hover:bg-primary-light-hover dark:hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2">
                         Show Results
                         {activeFilterCount > 0 && (
                             <span className="ml-2 px-1.5 py-0.5 bg-white/20 rounded-full text-xs">

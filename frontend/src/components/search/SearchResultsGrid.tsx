@@ -388,8 +388,8 @@ export default function SearchResultsGrid({
             )}
 
             <div className={gridClasses}>
-                {filteredTours.map(tour => (
-                    <PublicTourCard key={tour.id} tour={tour} />
+                {filteredTours.map((tour, index) => (
+                    <PublicTourCard key={tour.id} tour={tour} showHint={index === 0} />
                 ))}
             </div>
         </div>

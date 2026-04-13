@@ -544,15 +544,16 @@ export default function TravelerBookingsPage() {
             // Fetch bookings, waitlist entries, and reviews in parallel
             const [bookingsRes, waitlistRes, reviewsRes] = await Promise.all([
                 getTravelerBookings(),
-                getMyWaitlist().catch(() => ({ data: [] as WaitlistResponse[] })),
-                getTravelerReviews().catch(() => ({ data: { content: [] } }))
+                getMyWaitlist().catch(() => [] as WaitlistResponse[]),
+                getTravelerReviews().catch(() => ({ content: [] }))
             ])
-            setBookings(bookingsRes.data || [])
-            setWaitlistEntries(waitlistRes.data || [])
+            setBookings(bookingsRes || [])
+            setWaitlistEntries(waitlistRes || [])
             
             // Extract the set of booking IDs that already have reviews
+            // Note: reviewsRes might be the direct object content if getTravelerReviews was updated
             const reviewedIds = new Set<number>(
-                (reviewsRes.data?.content || []).map((r: any) => r.bookingId)
+                (reviewsRes?.content || []).map((r: any) => r.bookingId)
             )
             setReviewedBookingIds(reviewedIds)
         } catch (err: any) {

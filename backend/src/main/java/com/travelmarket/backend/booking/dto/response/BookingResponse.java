@@ -66,4 +66,8 @@ public class BookingResponse {
 
     private Boolean waiverSigned;
     private Instant createdAtUtc;
+
+    // ── Guide Context (for traveler messaging logistics) ────────────────────
+    private Long guideId;
+    private String guideName;
 }

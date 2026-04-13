@@ -174,7 +174,7 @@ export default function PriceRangeFilter({
                         placeholder="Min"
                         min={absoluteMin}
                         max={maxPrice || absoluteMax}
-                        className="w-full pl-8 pr-3 py-2.5 text-[15px] font-medium bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 dark:focus:ring-white dark:focus:border-white transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full pl-8 pr-3 py-2.5 text-[15px] font-medium bg-bg-light-paper dark:bg-bg-dark-paper border border-border-light-default dark:border-border-dark-strong rounded-full text-text-light-primary dark:text-text-dark-primary placeholder-text-light-muted focus:outline-none focus:ring-1 focus:ring-primary-light focus:border-primary-light dark:focus:ring-primary-dark dark:focus:border-primary-dark transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         aria-label="Minimum price"
                     />
                 </div>
@@ -193,7 +193,7 @@ export default function PriceRangeFilter({
                         placeholder="Max"
                         min={minPrice || absoluteMin}
                         max={absoluteMax}
-                        className="w-full pl-8 pr-3 py-2.5 text-[15px] font-medium bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 dark:focus:ring-white dark:focus:border-white transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full pl-8 pr-3 py-2.5 text-[15px] font-medium bg-bg-light-paper dark:bg-bg-dark-paper border border-border-light-default dark:border-border-dark-strong rounded-xl text-text-light-primary dark:text-text-dark-primary placeholder-text-light-muted focus:outline-none focus:ring-1 focus:ring-primary-light focus:border-primary-light dark:focus:ring-primary-dark dark:focus:border-primary-dark transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         aria-label="Maximum price"
                     />
                 </div>
@@ -213,7 +213,7 @@ export default function PriceRangeFilter({
                         <button
                             key={index}
                             onClick={() => handleQuickRange(range.min, range.max)}
-                            className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors duration-200 ${isActive ? 'bg-blue-600 dark:bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors duration-200 ${isActive ? 'bg-primary-light dark:bg-primary-dark text-white shadow-md' : 'bg-bg-light-secondary dark:bg-bg-dark-secondary text-text-light-secondary dark:text-text-dark-secondary hover:bg-bg-light-hover dark:hover:bg-bg-dark-hover border border-border-light-default dark:border-border-dark-strong'}`}
                         >
                             {range.label}
                         </button>

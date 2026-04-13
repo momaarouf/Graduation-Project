@@ -353,6 +353,8 @@ export interface BookingResponse {
   cancelledAtUtc: string | null      // set when booking is cancelled
   message: string | null             // traveler's note during booking
   tourId: number                     // template ID for navigation
+  guideId: number                    // guide user ID
+  guideName: string                  // guide full name
   createdAtUtc: string
 }
 

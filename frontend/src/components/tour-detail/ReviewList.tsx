@@ -220,7 +220,7 @@ export default function ReviewList({
     const formatRating = (rating: number) => (rating || 0).toFixed(1)
 
     return (
-        <section id="reviews" className="pt-10 border-t border-gray-200 dark:border-gray-800">
+        <section id="reviews" className="py-4">
             <div className="space-y-8">
                 {/* Debug Toggle for Admins/Guides */}
                 {isAuthorized && (
@@ -274,10 +274,10 @@ export default function ReviewList({
                     <div className="relative">
                         <button 
                             onClick={() => setActiveDropdown(activeDropdown === 'filter' ? null : 'filter')}
-                            className={`flex items-center gap-2 text-sm font-semibold transition-colors ${filterRating ? 'text-blue-600' : 'text-gray-700 dark:text-gray-300'}`}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full border border-border-light-default dark:border-border-dark-strong text-sm font-bold shadow-sm transition-all hover:shadow-md ${filterRating ? 'bg-primary-light/10 text-primary-light border-primary-light/30' : 'bg-white dark:bg-gray-950 text-text-light-muted dark:text-text-dark-muted'}`}
                         >
                             <Filter className="w-4 h-4" /> 
-                            {filterRating ? `${filterRating} Stars` : 'Filter by rating'}
+                            {filterRating ? `${filterRating} Stars` : 'Filter reviews'}
                         </button>
                         
                         <AnimatePresence>
@@ -288,7 +288,7 @@ export default function ReviewList({
                                         initial={{ opacity: 0, y: 10 }} 
                                         animate={{ opacity: 1, y: 0 }} 
                                         exit={{ opacity: 0, y: 10 }}
-                                        className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl z-20 overflow-hidden"
+                                        className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-xl z-20 overflow-hidden"
                                     >
                                         <div className="p-2 space-y-1">
                                             <button onClick={() => { setFilterRating(null); setActiveDropdown(null); }} className="w-full text-left px-3 py-2 text-sm rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 font-medium translate-colors">All Ratings</button>
@@ -305,7 +305,7 @@ export default function ReviewList({
                     <div className="relative">
                         <button 
                             onClick={() => setActiveDropdown(activeDropdown === 'sort' ? null : 'sort')}
-                            className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300"
+                            className="flex items-center gap-2 px-4 py-2 rounded-full border border-border-light-default dark:border-border-dark-strong bg-white dark:bg-gray-950 text-text-light-muted dark:text-text-dark-muted text-sm font-bold shadow-sm transition-all hover:shadow-md"
                         >
                             {sortBy === 'newest' ? 'Most Relevant' : sortBy === 'highest' ? 'Highest Rating' : 'Lowest Rating'} 
                             <ChevronDown className={`w-4 h-4 transition-transform ${activeDropdown === 'sort' ? 'rotate-180' : ''}`} />
@@ -319,7 +319,7 @@ export default function ReviewList({
                                         initial={{ opacity: 0, y: 10 }} 
                                         animate={{ opacity: 1, y: 0 }} 
                                         exit={{ opacity: 0, y: 10 }}
-                                        className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl z-20 overflow-hidden"
+                                        className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-xl z-20 overflow-hidden"
                                     >
                                         <div className="p-2 space-y-1">
                                             <button onClick={() => { setSortBy('newest'); setActiveDropdown(null); }} className="w-full text-left px-3 py-2 text-sm rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 font-medium translate-colors">Most Relevant</button>
@@ -363,9 +363,9 @@ export default function ReviewList({
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <p className="font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">{review.travelerName}</p>
+                                            <p className="font-bold text-text-light-primary dark:text-text-dark-primary group-hover:text-primary-light dark:group-hover:text-primary-dark transition-colors">{review.travelerName}</p>
                                             {review.travelerTier && (
-                                                <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold uppercase">{review.travelerTier}</span>
+                                                <span className="px-2 py-0.5 bg-primary-light/10 text-primary-light rounded-full text-[10px] font-black uppercase tracking-widest border border-primary-light/20">{review.travelerTier}</span>
                                             )}
                                         </div>
                                         <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -421,14 +421,14 @@ export default function ReviewList({
                                 <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{review.comment}</p>
                             </div>
 
-                            {/* Guide Reply */}
+                            {/* Guide Reply - Bubble Style */}
                             {review.guideReply && (
-                                <div className="ml-6 p-4 bg-gray-50 dark:bg-gray-800/50 border-l-2 border-blue-500 rounded-r-2xl space-y-2">
+                                <div className="ml-10 p-5 bg-gray-50 dark:bg-gray-900/40 border border-border-light-default dark:border-border-dark-strong rounded-xl rounded-tl-none space-y-2 shadow-sm">
                                     <div className="flex items-center gap-2">
-                                        <p className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">Guide Response</p>
-                                        <CheckCircle className="w-3 h-3 text-blue-500" />
+                                        <p className="text-[10px] font-black text-primary-light uppercase tracking-[0.2em]">Guide Response</p>
+                                        <CheckCircle className="w-3" />
                                     </div>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 italic">
+                                    <p className="text-sm text-text-light-muted dark:text-text-dark-muted italic leading-relaxed">
                                         "{typeof review.guideReply === 'string' ? review.guideReply : review.guideReply.comment}"
                                     </p>
                                 </div>
@@ -463,7 +463,7 @@ export default function ReviewList({
                     ))}
 
                     {!isFullPage && totalReviews > reviews.length && (
-                        <Link href={`/tours/${tourId}/reviews`} className="w-full py-4 block text-center text-sm font-bold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-800 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all font-outfit">
+                        <Link href={`/tours/${tourId}/reviews`} className="w-full py-4 block text-center text-sm font-black uppercase tracking-widest text-text-light-primary dark:text-text-dark-primary border border-border-light-default dark:border-border-dark-strong rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 transition-all shadow-md hover:shadow-lg active:scale-[0.98]">
                             Read all {totalReviews} reviews
                         </Link>
                     )}
@@ -479,10 +479,10 @@ export default function ReviewList({
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">Reply to {reviews.find(r => r.id === replyingTo)?.travelerName}'s feedback</h3>
                                 <button onClick={() => setReplyingTo(null)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"><X className="w-5 h-5 text-gray-500" /></button>
                             </div>
-                            <textarea value={replyContent} onChange={(e) => setReplyContent(e.target.value)} placeholder="Write your professional response..." rows={5} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-0 focus:ring-2 focus:ring-blue-500 rounded-2xl text-gray-900 dark:text-white placeholder:text-gray-500 outline-none resize-none" />
-                            <div className="flex gap-3">
-                                <button onClick={() => setReplyingTo(null)} className="flex-1 py-3 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-2xl transition-colors">Cancel</button>
-                                <button onClick={handleReply} disabled={!replyContent.trim() || isSubmittingReply} className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-bold rounded-2xl transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2">
+                            <textarea value={replyContent} onChange={(e) => setReplyContent(e.target.value)} placeholder="Write your professional response..." rows={5} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-0 focus:ring-2 focus:ring-blue-500 rounded-xl text-gray-900 dark:text-white placeholder:text-gray-500 outline-none resize-none" />
+                            <div className="flex gap-4">
+                                <button onClick={() => setReplyingTo(null)} className="flex-1 py-3 text-sm font-bold text-text-light-muted dark:text-text-dark-muted hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all border border-border-light-default dark:border-border-dark-strong">Cancel</button>
+                                <button onClick={handleReply} disabled={!replyContent.trim() || isSubmittingReply} className="flex-1 py-3 bg-primary-light hover:bg-primary-light-hover disabled:opacity-50 text-white text-sm font-bold rounded-full transition-all shadow-xl shadow-primary-light/20 flex items-center justify-center gap-2">
                                     {isSubmittingReply ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Post Reply
                                 </button>
                             </div>

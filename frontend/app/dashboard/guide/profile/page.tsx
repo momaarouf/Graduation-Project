@@ -1072,14 +1072,14 @@ export default function GuideProfilePage() {
       
       // Refresh tours list to reflect change in modal
       const toursRes = await getGuideTours()
-      setTours(toursRes.data)
+      setTours(toursRes)
       
       // Refresh profile portfolio list (what's actually shown on profile)
       if (user?.guideProfileId) {
         const portfolioRes = await getGuidePortfolio(user.guideProfileId)
         setProfile(prev => ({
           ...prev,
-          portfolio: portfolioRes.data
+          portfolio: portfolioRes
             .filter((t: any) => !!t.coverImageUrl)
             .map((t: any) => ({
               id: String(t.id),
@@ -1114,18 +1114,18 @@ export default function GuideProfilePage() {
           getGuideTours()
         ])
         
-        const data = profileRes.data
-        setBookings(bookingsRes.data)
-        setTours(toursRes.data)
+        const data = profileRes
+        setBookings(bookingsRes)
+        setTours(toursRes)
         
         // Fetch real portfolio data if guideProfileId exists
         if (user.guideProfileId) {
           try {
             const portfolioRes = await getGuidePortfolio(user.guideProfileId)
-            if (portfolioRes.data.length > 0) {
+            if (portfolioRes.length > 0) {
               setProfile(prev => ({
                 ...prev,
-                portfolio: portfolioRes.data
+                portfolio: portfolioRes
                   .filter((tour: any) => !!tour.coverImageUrl)
                   .map((tour: any) => ({
                     id: String(tour.id),

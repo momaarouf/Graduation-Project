@@ -33,7 +33,9 @@ import { chatApi, ConversationResponse, MessageResponse } from '@/src/lib/api/ch
 import { notificationsApi } from '@/src/lib/api/notifications'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import { useChatSocket } from '@/src/lib/hooks/useChatSocket'
+import NewChatModal from '@/src/components/chat/NewChatModal'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'react-hot-toast'
 import {
   MessageSquare,
   Send,
@@ -43,6 +45,7 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
+  ArrowLeft,
   Phone,
   Mail,
   AlertTriangle,
@@ -57,14 +60,19 @@ import {
   EyeOff,
   Ban,
   Star,
+  Award,
+  Menu,
+  RefreshCw,
   Calendar,
   MapPin,
   X,
   Info,
   DollarSign,
-  Award,
   TrendingUp,
-  HelpCircle
+  HelpCircle,
+  Check,
+  CheckCheck,
+  Plus
 } from 'lucide-react'
 
 // ============================================================================
@@ -115,6 +123,7 @@ interface Message {
   flagReason?: string
   hasBlurredContent: boolean
   hasSuspiciousContent: boolean
+  readAtUtc?: string
   attachments?: {
     id: string
     type: 'image' | 'file'
@@ -760,8 +769,12 @@ function MessageBubble({
             {!isExpanded ? (
               <div className={`flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-400 ${isOwn ? 'justify-end' : ''}`}>
                  <span>{time}</span>
-                 {isOwn && message.status === 'read' && (
-                   <CheckCircle className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                 {isOwn && (
+                   message.readAtUtc ? (
+                     <CheckCheck className="w-3 h-3 text-blue-500" strokeWidth={3} />
+                   ) : (
+                     <Check className="w-3 h-3 text-gray-400" strokeWidth={3} />
+                   )
                  )}
               </div>
             ) : (
@@ -774,8 +787,12 @@ function MessageBubble({
                    <span className="text-[9px] text-gray-400 whitespace-nowrap">
                      {new Date(message.timestamp).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })} • {time}
                    </span>
-                   {isOwn && message.status === 'read' && (
-                     <CheckCircle className="w-2.5 h-2.5 text-blue-600 dark:text-blue-400" />
+                   {isOwn && (
+                     message.readAtUtc ? (
+                       <CheckCheck className="w-2.5 h-2.5 text-blue-500" strokeWidth={3} />
+                     ) : (
+                       <Check className="w-2.5 h-2.5 text-gray-400" strokeWidth={3} />
+                     )
                    )}
                 </div>
               </motion.div>
@@ -1035,7 +1052,7 @@ export default function GuideMessagingPage() {
 
   const { user } = useAuth()
   const [selectedConversation, setSelectedConversation] = React.useState<string | null>(null)
-  const [showMobileList, setShowMobileList] = React.useState(true)
+  const [showSidebar, setShowSidebar] = React.useState(true)
   const [isLoadingConvs, setIsLoadingConvs] = React.useState(true)
   const [isLoadingMsgs, setIsLoadingMsgs] = React.useState(false)
   const [expandedMessageId, setExpandedMessageId] = React.useState<string | null>(null)
@@ -1048,7 +1065,21 @@ export default function GuideMessagingPage() {
   const [searchTerm, setSearchTerm] = React.useState('')
   const [isSending, setIsSending] = React.useState(false)
 
+  const [showFilterMenu, setShowFilterMenu] = useState(false)
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false)
+  const [filter, setFilter] = useState<'all' | 'unread' | 'suspicious'>('all')
+  const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false)
+  const [showMoreMenu, setShowMoreMenu] = useState(false)
+
   useBadgeReset('guide-messages')
+
+  const handleConversationInitiated = (convId: number) => {
+    setSelectedConversation(convId.toString())
+    setShowSidebar(false)
+    setIsNewChatModalOpen(false)
+    // Refresh conversations list to ensure the new one appears (or wait for socket)
+    chatApi.getConversations().then(setRealConvs)
+  }
 
   React.useEffect(() => {
     if (!user) return
@@ -1062,22 +1093,44 @@ export default function GuideMessagingPage() {
         // Handle direct redirection from bookings
         if (initialConvoId) {
           setSelectedConversation(initialConvoId)
-          setShowMobileList(false)
-        } else if (initialTourId) {
+          setShowSidebar(false)
+        } else if (initialTourId || initialBookingId) {
+          const tId = (initialTourId && initialTourId !== 'null' && initialTourId !== 'undefined')
+            ? parseInt(initialTourId)
+            : NaN;
+          const bId = (initialBookingId && initialBookingId !== 'null' && initialBookingId !== 'undefined') 
+            ? parseInt(initialBookingId) 
+            : NaN;
+
+          // GUIDES cannot initiate a chat without a valid bookingId (backend restriction)
+          // Exception: if bookingId is present, tourId can be deduced on backend.
+          if (isNaN(bId) && isNaN(tId)) {
+            console.warn('Guide tried to initiate chat with invalid context:', { initialTourId, initialBookingId });
+            // Only show toast if they actually clicked something intent-based
+            if (initialTourId || initialBookingId) {
+                toast.error("Invalid chat link: missing booking context.");
+            }
+            setIsLoadingConvs(false)
+            return
+          }
+
           try {
              const newConv = await chatApi.initiateConversation({
-                tourId: parseInt(initialTourId),
-                bookingId: initialBookingId ? parseInt(initialBookingId) : undefined
+                tourId: tId,
+                bookingId: bId
              })
              
              setRealConvs(prev => {
-                if (prev.some(c => c.id === newConv.id)) return prev
+                const exists = prev.find(c => c.id === newConv.id)
+                if (exists) return prev
                 return [newConv, ...prev]
              })
              setSelectedConversation(newConv.id.toString())
-             setShowMobileList(false)
-          } catch (e) {
+             setShowSidebar(false)
+          } catch (e: any) {
              console.error('Failed to initiate:', e)
+             const errorMsg = e.response?.data?.message || e.message || 'Failed to start conversation'
+             toast.error(errorMsg)
           }
         }
       } catch (err) {
@@ -1094,11 +1147,25 @@ export default function GuideMessagingPage() {
     if (selectedConversation) {
       setIsLoadingMsgs(true)
       
-      // PERSISTENT SYNC: Mark notifications for this conversation as read
+      // PERSISTENT SYNC: Mark messages and notifications for this conversation as read
       const syncMessages = async () => {
         try {
+          const convId = parseInt(selectedConversation);
+          
+          // 1. Mark persistent messages as read in DB
+          await chatApi.markAsRead(convId);
+          
+          // 2. Mark notifications as read
           await notificationsApi.markByReference('NEW_MESSAGE', selectedConversation);
-          // LOCAL SYNC: Update the bell and sidebar immediately
+          
+          // 3. Clear unread count in local state
+          setRealConvs(prev => prev.map(c => 
+            String(c.id) === String(selectedConversation) 
+            ? { ...c, unreadCount: 0 } 
+            : c
+          ));
+
+          // 4. Local badge sync (for Navigation/Sidebar)
           window.dispatchEvent(new CustomEvent('notification-mark-read', { 
             detail: { type: 'NEW_MESSAGE', referenceId: selectedConversation } 
           }));
@@ -1121,23 +1188,64 @@ export default function GuideMessagingPage() {
     }
   }, [selectedConversation])
 
+  const onReadReceipt = React.useCallback((receipt: { conversationId: number; readerId: number; readAt: string }) => {
+    // If the receipt is for our currently selected conversation, update all our sent messages to "read"
+    if (selectedConversation && String(receipt.conversationId) === String(selectedConversation)) {
+      setRealMsgs(prev => prev.map(m => {
+        // If we were the sender and it wasn't read before, mark it as read
+        if (String(m.senderId) !== String(receipt.readerId) && !m.readAtUtc) {
+          return { ...m, readAtUtc: receipt.readAt }
+        }
+        return m
+      }))
+    }
+    
+    // Also update the conversation list to show the checkmarks status
+    setRealConvs(prev => prev.map(c => {
+      if (String(c.id) === String(receipt.conversationId)) {
+        return { ...c, lastMessageRead: true }
+      }
+      return c
+    }))
+  }, [selectedConversation])
+
+  const onMessageReceived = React.useCallback((receivedMsg: MessageResponse) => {
+    // Update messages list
+    setRealMsgs(prev => {
+      const exists = prev.some(m => String(m.id) === String(receivedMsg.id))
+      if (exists) return prev
+      return [...prev, receivedMsg]
+    })
+
+    // Update conversations list metadata
+    setRealConvs(prev => prev.map(c => 
+      String(c.id) === String(receivedMsg.conversationId) 
+      ? { ...c, updatedAtUtc: receivedMsg.createdAtUtc, lastMessageContent: receivedMsg.content, lastMessageRead: false } 
+      : c
+    ).sort((a, b) => new Date(b.updatedAtUtc).getTime() - new Date(a.updatedAtUtc).getTime()))
+
+    // If this message belongs to the current open conversation, mark it as read immediately
+    if (selectedConversation && String(receivedMsg.conversationId) === String(selectedConversation)) {
+      chatApi.markAsRead(receivedMsg.conversationId).catch(console.error)
+      setRealConvs(prev => prev.map(c => 
+        String(c.id) === String(receivedMsg.conversationId)
+        ? { ...c, unreadCount: 0, lastMessageRead: true }
+        : c
+      ))
+    } else {
+      // Increment unread count in sidebar for other conversations
+      setRealConvs(prev => prev.map(c => 
+        String(c.id) === String(receivedMsg.conversationId)
+        ? { ...c, unreadCount: (c.unreadCount || 0) + 1 }
+        : c
+      ))
+    }
+  }, [selectedConversation])
+
   useChatSocket(
     selectedConversation ? parseInt(selectedConversation) : null,
-    React.useCallback((receivedMsg: MessageResponse) => {
-      // Update messages list
-      setRealMsgs(prev => {
-        const exists = prev.some(m => String(m.id) === String(receivedMsg.id))
-        if (exists) return prev
-        return [...prev, receivedMsg]
-      })
-
-      // Update conversations list timestamp for real-time sorting
-      setRealConvs(prev => prev.map(c => 
-        c.id === receivedMsg.conversationId 
-        ? { ...c, updatedAtUtc: receivedMsg.createdAtUtc } 
-        : c
-      ).sort((a, b) => new Date(b.updatedAtUtc).getTime() - new Date(a.updatedAtUtc).getTime()))
-    }, [])
+    onMessageReceived,
+    onReadReceipt
   )
 
   const mappedConvs: Conversation[] = realConvs.map(c => {
@@ -1163,8 +1271,23 @@ export default function GuideMessagingPage() {
         totalTrips: c.travelerTripsCount || 0,
         loyaltyTier: (c.travelerLoyaltyTier ? c.travelerLoyaltyTier.toLowerCase() as any : 'bronze')
       },
-      lastMessage: { id: `last-${c.id}`, conversationId: c.id.toString(), senderId: '', senderName: '', content: c.lastMessageContent || 'Tap to view messages...', timestamp: timeStr, status: 'read', isFlagged: false, hasBlurredContent: false, hasSuspiciousContent: false },
-      unreadCount: 0, status: 'active', safetyLevel: 'safe', bookingConfirmed: c.bookingStatus === 'Confirmed' || c.bookingStatus === 'Completed', updatedAt: timeStr,
+      lastMessage: { 
+        id: `last-${c.id}`, 
+        conversationId: c.id.toString(), 
+        senderId: '', 
+        senderName: '', 
+        content: c.lastMessageContent || 'Tap to view messages...', 
+        timestamp: timeStr, 
+        status: (c.lastMessageRead ? 'read' : 'sent') as MessageStatus, 
+        isFlagged: false, 
+        hasBlurredContent: false, 
+        hasSuspiciousContent: false 
+      },
+      unreadCount: c.unreadCount || 0, 
+      status: 'active', 
+      safetyLevel: 'safe', 
+      bookingConfirmed: c.bookingStatus === 'Confirmed' || c.bookingStatus === 'Completed', 
+      updatedAt: timeStr,
       booking: { 
         id: c.bookingId?.toString() || '', 
         tourId: c.tourId.toString(), 
@@ -1197,15 +1320,23 @@ export default function GuideMessagingPage() {
       status: 'read',
       isFlagged: false,
       hasBlurredContent: hasPII,
-      hasSuspiciousContent: hasSuspicion
+      hasSuspiciousContent: hasSuspicion,
+      readAtUtc: m.readAtUtc
     }
   })
 
   const filteredConversations = mappedConvs.filter(conv => {
-    const hasMessages = conv.lastMessage && conv.lastMessage.content !== 'Tap to view messages...'
+    // Only show chats with messages, or the currently selected one
+    const hasMessages = conv.lastMessage && 
+                        conv.lastMessage.content && 
+                        conv.lastMessage.content !== 'Tap to view messages...'
     const isSelected = selectedConversation === conv.id
     
     if (!hasMessages && !isSelected) return false
+
+    // Apply Filter Type
+    if (filter === 'unread' && conv.unreadCount === 0) return false
+    if (filter === 'suspicious' && conv.safetyLevel === 'safe') return false
 
     if (!searchTerm) return true
     const term = searchTerm.toLowerCase()
@@ -1276,6 +1407,15 @@ export default function GuideMessagingPage() {
           <div className="flex-none bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 sm:px-6 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => {
+                    // Custom event to tell layout to open sidebar
+                    window.dispatchEvent(new CustomEvent('toggle-sidebar'))
+                  }}
+                  className="lg:hidden p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400"
+                >
+                  <Menu className="w-6 h-6" />
+                </button>
                 <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 <h1 className="text-lg font-bold text-gray-900 dark:text-white">
                   Messages
@@ -1283,15 +1423,80 @@ export default function GuideMessagingPage() {
                 <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-full">
                   {mappedConvs.reduce((acc, c) => acc + c.unreadCount, 0)} unread
                 </span>
+                <button
+                  onClick={() => setIsNewChatModalOpen(true)}
+                  className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-colors ml-1"
+                  title="New Chat"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
               </div>
               <div className="flex items-center gap-2">
                 <SafetyInfoPanel />
-                <button className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                  <Filter className="w-4 h-4" />
-                </button>
-                <button className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                  <MoreVertical className="w-4 h-4" />
-                </button>
+                
+                {/* Filter Menu */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
+                    className={`p-2 rounded-lg transition-colors flex items-center gap-2 ${
+                        filter !== 'all' 
+                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
+                            : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    <Filter className="w-5 h-5" />
+                    <span className="text-sm font-medium hidden sm:inline">
+                        {filter === 'all' ? 'All' : filter === 'unread' ? 'Unread' : 'Suspicious'}
+                    </span>
+                  </button>
+                  {isFilterMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50 overflow-hidden">
+                      <div className="p-2 space-y-1">
+                        {(['all', 'unread', 'suspicious'] as const).map((t) => (
+                          <button
+                            key={t}
+                            onClick={() => {
+                              setFilter(t)
+                              setIsFilterMenuOpen(false)
+                            }}
+                            className={`w-full px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center justify-between ${
+                              filter === t ? 'text-blue-600 dark:text-blue-400 font-medium' : 'text-gray-600 dark:text-gray-400'
+                            }`}
+                          >
+                            {t.charAt(0).toUpperCase() + t.slice(1)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* More Menu */}
+                <div className="relative">
+                  <button 
+                    onClick={() => setShowMoreMenu(!showMoreMenu)}
+                    className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    <MoreVertical className="w-4 h-4" />
+                  </button>
+                  {showMoreMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50 overflow-hidden">
+                      <div className="p-2">
+                        <button className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                          <CheckCircle className="w-3 h-3" />
+                          Mark all as read
+                        </button>
+                        <button 
+                          onClick={() => window.location.reload()}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        >
+                          <RefreshCw className="w-3 h-3" />
+                          Refresh List
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             <div className="relative mt-3">
@@ -1307,8 +1512,8 @@ export default function GuideMessagingPage() {
           </div>
 
           <div className="flex-1 flex min-h-0 overflow-hidden bg-white dark:bg-gray-900">
-            <div className={`w-full sm:w-80 border-r border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden ${showMobileList ? 'block' : 'hidden sm:block'}`}>
-              <div className="flex-1 overflow-y-auto">
+            <div className={`w-full sm:w-80 border-r border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden ${showSidebar ? 'block' : 'hidden'}`}>
+              <div className="flex-1 overflow-y-auto chat-scrollbar">
                 {isLoadingConvs ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <div key={i} className="p-4 border-b border-gray-100 dark:border-gray-800 animate-pulse">
@@ -1329,7 +1534,7 @@ export default function GuideMessagingPage() {
                       isActive={selectedConversation === conv.id}
                       onClick={() => {
                         setSelectedConversation(conv.id)
-                        setShowMobileList(false)
+                        setShowSidebar(false)
                       }}
                     />
                   ))
@@ -1344,16 +1549,20 @@ export default function GuideMessagingPage() {
               </div>
             </div>
 
-            <div className={`flex-1 flex flex-col min-w-0 overflow-hidden bg-white dark:bg-gray-900 ${!showMobileList ? 'block' : 'hidden sm:block'}`}>
-              {selectedConversation && currentConversation ? (
+            <div className={`flex-1 flex flex-col overflow-hidden ${!showSidebar ? 'block' : 'hidden sm:block'}`}>
+              {currentConversation ? (
                 <>
-                  <div className="flex-none flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <button
-                        onClick={() => setShowMobileList(true)}
-                        className="sm:hidden p-1 text-gray-500 hover:text-gray-700"
+                  <div className="flex-none h-16 px-4 sm:px-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white/50 dark:bg-gray-900/50 backdrop-blur-md sticky top-0 z-20">
+                    <div className="flex items-center gap-3">
+                      <button 
+                         onClick={() => {
+                           setSelectedConversation(null)
+                           setShowSidebar(true)
+                         }}
+                         className="p-2 -ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors flex items-center group"
+                         title="Back to List"
                       >
-                        <ChevronLeft className="w-5 h-5" />
+                         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                       </button>
                       <Link href={`/travelers/${currentConversation.traveler.profileId}`} className="flex items-center gap-3 min-w-0 hover:opacity-80 transition-opacity">
                         <TravelerAvatar traveler={currentConversation.traveler} size="sm" />
@@ -1377,7 +1586,7 @@ export default function GuideMessagingPage() {
 
                   <div 
                     ref={scrollContainerRef}
-                    className="flex-1 overflow-y-auto p-4 space-y-4"
+                    className="flex-1 overflow-y-auto p-4 space-y-4 chat-scrollbar"
                   >
                     {currentConversation.booking && (
                       <BookingInfoCard booking={currentConversation.booking} />
@@ -1460,7 +1669,14 @@ export default function GuideMessagingPage() {
               )}
             </div>
           </div>
-        </div>
       </div>
+
+      <NewChatModal
+        isOpen={isNewChatModalOpen}
+        onClose={() => setIsNewChatModalOpen(false)}
+        role="GUIDE"
+        onConversationInitiated={(id: number) => handleConversationInitiated(id)}
+      />
+    </div>
   )
 }

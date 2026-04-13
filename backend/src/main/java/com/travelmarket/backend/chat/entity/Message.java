@@ -33,6 +33,9 @@ public class Message {
     @Column(name = "created_at_utc", nullable = false, updatable = false)
     private Instant createdAtUtc;
 
+    @Column(name = "read_at_utc")
+    private Instant readAtUtc;
+
     @PrePersist
     protected void onCreate() {
         createdAtUtc = Instant.now();

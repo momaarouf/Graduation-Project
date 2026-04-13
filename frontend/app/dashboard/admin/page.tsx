@@ -6,14 +6,10 @@ import {
   Shield, 
   Scale, 
   TrendingUp, 
-  TrendingDown, 
   ArrowRight, 
   ChevronRight, 
   AlertCircle,
   Clock,
-  CheckCircle2,
-  MoreVertical,
-  Search,
   History,
   Sparkles
 } from 'lucide-react'
@@ -98,8 +94,7 @@ export default function AdminDashboardPage() {
     totalUsers: 0,
     pendingVerifications: 0,
     auditEventsCount: 0,
-    pendingTours: 0,
-    revenue: 4250 // Still mock until Financials milestone
+    pendingTours: 0
   })
   const [recentAudits, setRecentAudits] = useState<AuditEventResponse[]>([])
   const [pendingVerifs, setPendingVerifs] = useState<GuideProfileResponse[]>([])
@@ -158,15 +153,13 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <StatCard 
           title="Total Platform Users" 
           value={stats.totalUsers} 
           icon={Users} 
           color="blue" 
           isLoading={isLoading}
-          trend="+4.2%"
-          direction="up"
         />
         <StatCard 
           title="Pending Verifications" 
@@ -176,19 +169,10 @@ export default function AdminDashboardPage() {
           isLoading={isLoading}
         />
         <StatCard 
-          title="Tour Reviews" 
+          title="Tour Reviews Required" 
           value={stats.pendingTours} 
           icon={TrendingUp} 
           color="purple" 
-          isLoading={isLoading}
-          trend={stats.pendingTours > 5 ? "Action Required" : "Stable"}
-          direction={stats.pendingTours > 5 ? "up" : "down"}
-        />
-        <StatCard 
-          title="Gross Revenue" 
-          value={`$${stats.revenue.toLocaleString()}`} 
-          icon={CheckCircle2} 
-          color="emerald" 
           isLoading={isLoading}
         />
       </div>
@@ -322,25 +306,6 @@ export default function AdminDashboardPage() {
                 className="block w-full text-center py-2.5 mt-2 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 transition-colors border border-gray-100 dark:border-gray-800"
               >
                 Open Verification Queue
-              </Link>
-            </div>
-          </div>
-
-          {/* Quick Support / Contact Card */}
-          <div className="bg-gradient-to-br from-indigo-600 to-blue-700 dark:from-indigo-700 dark:to-blue-900 rounded-2xl p-6 text-white shadow-lg overflow-hidden relative">
-            <div className="absolute -right-6 -bottom-6 opacity-10">
-              <Scale className="w-32 h-32 rotate-12" />
-            </div>
-            <h3 className="font-bold mb-2">Platform Controls</h3>
-            <p className="text-xs text-blue-100 leading-relaxed opacity-90 mb-4">
-              Need to perform a global system action? Access advanced modules below.
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <Link href="/dashboard/admin/disputes" className="bg-white/10 hover:bg-white/20 p-2 rounded-lg text-[11px] font-medium text-center transition-colors border border-white/10">
-                Disputes
-              </Link>
-              <Link href="/dashboard/admin/payouts" className="bg-white/10 hover:bg-white/20 p-2 rounded-lg text-[11px] font-medium text-center transition-colors border border-white/10">
-                Payouts
               </Link>
             </div>
           </div>

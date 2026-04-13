@@ -31,6 +31,7 @@ interface User {
   profileCompleted: boolean;
   emailVerified: boolean;
   agreedToTerms: boolean;
+  avatarUrl?: string;
 }
 
 interface AuthContextType {
@@ -63,12 +64,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Backend returns Pascal case: Traveler, Guide, Admin.
 // We normalize to uppercase for consistency in the frontend.
-const normalizeUser = (raw: MeResponse): User => ({
+const normalizeUser = (raw: MeResponse, avatarUrl?: string): User => ({
   ...raw,
   userId: raw.userId?.toString(),
   travelerProfileId: raw.travelerProfileId?.toString(),
   guideProfileId: raw.guideProfileId?.toString(),
   role: raw.role.toUpperCase() as User['role'],
+  avatarUrl: avatarUrl || undefined,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -111,7 +113,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Normalize role to uppercase before storing (backend returns Pascal case)
         const userRes = await apiAuthMe();
-        setUser(normalizeUser(userRes));
+        
+        // Fetch profile avatar based on role
+        let avatarUrl: string | undefined;
+        try {
+          if (userRes.role === 'Traveler') {
+            const profile = await apiClient.get('/api/traveler/profile');
+            avatarUrl = profile.data.avatarUrl;
+          } else if (userRes.role === 'Guide') {
+            const profile = await apiClient.get('/api/guide/profile');
+            avatarUrl = profile.data.avatarUrl;
+          }
+        } catch (avatarError) {
+          console.debug('Failed to fetch profile avatar during bootstrap', avatarError);
+        }
+
+        setUser(normalizeUser(userRes, avatarUrl));
       } catch (error) {
         console.debug('Bootstrap: no active session');
         clearAccessToken();
@@ -184,7 +201,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAccessToken(response.token);
       // Fetch full user info after login; normalize role from Pascal to uppercase
       const userRes = await apiAuthMe();
-      const normalized = normalizeUser(userRes);
+      
+      let avatarUrl: string | undefined;
+      try {
+        if (userRes.role === 'Traveler') {
+          const profile = await apiClient.get('/api/traveler/profile');
+          avatarUrl = profile.data.avatarUrl;
+        } else if (userRes.role === 'Guide') {
+          const profile = await apiClient.get('/api/guide/profile');
+          avatarUrl = profile.data.avatarUrl;
+        }
+      } catch (e) {}
+
+      const normalized = normalizeUser(userRes, avatarUrl);
       setUser(normalized);
       // Redirect based on role
       if (normalized.role === 'ADMIN') router.push('/dashboard/admin');
@@ -299,7 +328,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   /** Re-fetch user data from /api/auth/me to refresh client state */
   const refetchUser = async (): Promise<void> => {
     const userRes = await authMe();
-    setUser(normalizeUser(userRes));
+    
+    let avatarUrl: string | undefined;
+    try {
+      if (userRes.role === 'Traveler') {
+        const profile = await apiClient.get('/api/traveler/profile');
+        avatarUrl = profile.data.avatarUrl;
+      } else if (userRes.role === 'Guide') {
+        const profile = await apiClient.get('/api/guide/profile');
+        avatarUrl = profile.data.avatarUrl;
+      }
+    } catch (e) {}
+
+    setUser(normalizeUser(userRes, avatarUrl));
   };
 
   return (

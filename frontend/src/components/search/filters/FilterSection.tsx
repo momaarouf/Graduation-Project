@@ -35,7 +35,7 @@ export default function FilterSection({
     const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
     return (
-        <div className={`w-full py-5 border-b border-gray-200 dark:border-gray-800 last:border-0 ${className}`}>
+        <div className={`w-full py-5 border-b border-border-light-default/50 dark:border-border-dark-strong/30 last:border-0 hover:bg-primary-light/5 dark:hover:bg-primary-dark/5 px-4 -mx-4 rounded-2xl transition-all duration-300 ${className}`}>
             {/* ========================================
           SECTION HEADER - Clean & Sleek
           ======================================== */}
@@ -47,15 +47,19 @@ export default function FilterSection({
             >
                 <div className="flex items-center gap-3">
                     {/* Minimalist Title */}
-                    <span className="text-[15px] font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <span className="text-[15px] font-bold text-text-light-primary dark:text-text-dark-primary group-hover:text-primary-light dark:group-hover:text-primary-dark transition-colors">
                         {title}
                     </span>
+                    {/* Subtle dot indicator when expanded */}
+                    {isExpanded && (
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary-light dark:bg-primary-dark animate-pulse" />
+                    )}
                 </div>
 
-                {/* Minimalist Chevron */}
-                <span className="text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-                    <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
-                </span>
+                {/* Minimalist Chevron - Circular Backdrop on Hover */}
+                <div className="flex items-center justify-center w-8 h-8 rounded-full group-hover:bg-primary-light/10 dark:group-hover:bg-primary-dark/10 transition-colors">
+                    <ChevronDown className={`w-5 h-5 text-text-light-muted dark:text-text-dark-muted group-hover:text-primary-light dark:group-hover:text-primary-dark transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                </div>
             </button>
 
             {/* ========================================

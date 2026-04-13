@@ -40,3 +40,25 @@ export const getDiscoveryLocations = async (): Promise<LocationDiscoveryResponse
   const response = await apiClient.get('/api/public/discovery/locations');
   return response.data;
 };
+
+export interface PublicGuideProfileResponse {
+  id: number;
+  name: string;
+  tagline: string;
+  avatarUrl: string;
+  coverImageUrl: string;
+  city: string;
+  country: string;
+  expertise: string[];
+  tourCount: number;
+  totalGuidedTrips: number;
+  averageRating: number;
+  verified: boolean;
+  memberSince: string;
+}
+
+/** Fetch verified guides for discovery directory */
+export const getDiscoveryGuides = async (): Promise<PublicGuideProfileResponse[]> => {
+  const response = await apiClient.get('/api/public/discovery/guides');
+  return response.data;
+};

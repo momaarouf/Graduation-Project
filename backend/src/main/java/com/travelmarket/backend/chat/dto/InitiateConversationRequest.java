@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InitiateConversationRequest {
-    @NotNull(message = "tourId is required")
+    // Optional if bookingId is provided
     private Long tourId;
     
     // Optional

@@ -83,7 +83,7 @@ export default function TourGuide({ guide, tourId, tourTitle }: any) {
                 {/* Avatar & Basic Info */}
                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
                     <Link href={profileUrl} className="relative group shrink-0">
-                        <div className="w-20 h-20 ring-4 ring-white dark:ring-gray-900 rounded-2xl overflow-hidden shadow-md group-hover:shadow-lg transition-all duration-300">
+                        <div className="w-20 h-20 ring-4 ring-white dark:ring-gray-900 rounded-[1.5rem] overflow-hidden shadow-md group-hover:shadow-lg transition-all duration-300">
                             {guide.avatar ? (
                                 <Image
                                     src={guide.avatar}
@@ -129,7 +129,7 @@ export default function TourGuide({ guide, tourId, tourTitle }: any) {
                                 <Globe className="w-3.5 h-3.5 text-gray-400" />
                                 <div className="flex gap-1.5">
                                     {stats.languages.slice(0, 3).map((lang: any, i: number) => (
-                                        <span key={i} className="text-[10px] uppercase font-bold tracking-wider text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-2 py-0.5 rounded">
+                                        <span key={i} className="text-[10px] uppercase font-bold tracking-widest text-text-light-muted dark:text-text-dark-muted bg-bg-light-paper dark:bg-bg-dark-paper border border-border-light-default dark:border-border-dark-strong px-3 py-1 rounded-full shadow-sm">
                                             {typeof lang === 'string' ? lang : lang.language}
                                         </span>
                                     ))}
@@ -147,18 +147,18 @@ export default function TourGuide({ guide, tourId, tourTitle }: any) {
                     <button 
                         onClick={handleMessageClick}
                         disabled={isSending}
-                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-all shadow-sm disabled:opacity-50"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-white dark:bg-gray-950 border border-border-light-default dark:border-border-dark-strong rounded-full text-sm font-bold text-text-light-primary dark:text-text-dark-primary hover:bg-gray-50 dark:hover:bg-gray-800 transition-all shadow-md disabled:opacity-50"
                     >
                         {isSending ? (
-                            <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
+                            <Loader2 className="w-4 h-4 text-primary-light animate-spin" />
                         ) : (
-                            <MessageSquare className="w-4 h-4 text-blue-600" />
+                            <MessageSquare className="w-4 h-4 text-primary-light" />
                         )}
                         {isSending ? 'Sending...' : 'Message'}
                     </button>
                     <Link 
                         href={profileUrl}
-                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition-all shadow-sm"
+                        className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-primary-light hover:bg-primary-light-hover text-white rounded-full text-sm font-bold transition-all shadow-lg hover:shadow-primary-light/20"
                     >
                         View Profile
                         <ChevronRight className="w-4 h-4" />

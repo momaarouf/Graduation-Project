@@ -791,7 +791,7 @@ export default function GuideOnTourPage() {
         setIsLoading(true)
         try {
             const res = await getGuideBookings()
-            const bookings: GuideBookingResponse[] = res.data || []
+            const bookings: GuideBookingResponse[] = res || []
 
             // Group bookings by occurrence — each occurrence = one tour run
             const grouped = bookings.reduce((acc, booking) => {
@@ -844,7 +844,7 @@ export default function GuideOnTourPage() {
         setIsProcessing(true)
         try {
             const res = await checkInByQrToken(qrToken)
-            toast.success(`${res.data.traveler?.fullName || 'Traveler'} checked in!`)
+            toast.success(`${res.traveler?.fullName || 'Traveler'} checked in!`)
             fetchActiveBookings()
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'QR check-in failed';

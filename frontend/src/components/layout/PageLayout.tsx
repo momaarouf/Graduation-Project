@@ -20,7 +20,7 @@ interface PageLayoutProps {
 
 export default function PageLayout({ children }: PageLayoutProps) {
     return (
-        <div className="min-h-screen w-full flex flex-col bg-white dark:bg-gray-950">
+        <div className="min-h-screen w-full flex flex-col bg-bg-light-primary dark:bg-bg-dark-primary">
             {/* Navigation - fixed position, always visible */}
             <Navigation />
 
