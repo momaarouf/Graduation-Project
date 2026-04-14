@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "notifications")
@@ -40,16 +40,24 @@ public class Notification {
     @Column(name = "reference_type")
     private String referenceType; // e.g., "BOOKING", "MESSAGE", "TOUR"
 
+    /**
+     * UTC timestamp of when this notification was created (or last grouped-updated).
+     *
+     * Stored as Instant to map correctly to PostgreSQL TIMESTAMPTZ.
+     * DO NOT use LocalDateTime here — it drops timezone context and would
+     * silently corrupt if the JVM timezone ever deviates from UTC.
+     */
     @Column(name = "created_at_utc", nullable = false)
-    private LocalDateTime createdAtUtc;
+    private Instant createdAtUtc;
 
     @Column(name = "is_read", nullable = false)
     private boolean read = false;
 
     @PrePersist
     protected void onCreate() {
+        // Only set if not already assigned (e.g. grouping logic may have set it)
         if (this.createdAtUtc == null) {
-            this.createdAtUtc = LocalDateTime.now(java.time.ZoneOffset.UTC);
+            this.createdAtUtc = Instant.now();
         }
     }
 }

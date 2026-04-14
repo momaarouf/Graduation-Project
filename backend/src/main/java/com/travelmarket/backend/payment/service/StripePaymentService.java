@@ -21,6 +21,7 @@ import com.travelmarket.backend.repository.TravelerPaymentMethodRepository;
 import com.travelmarket.backend.repository.TravelerProfileRepository;
 import com.travelmarket.backend.notification.enums.NotificationType;
 import com.travelmarket.backend.notification.service.NotificationService;
+import com.travelmarket.backend.service.TimeService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -78,6 +79,8 @@ public class StripePaymentService {
     private final TravelerProfileRepository travelerRepository;
     private final TravelerPaymentMethodRepository paymentMethodRepository;
     private final NotificationService notificationService;
+    /** Centralized UTC time source — do not call Instant.now() directly in this class */
+    private final TimeService timeService;
 
     @Value("${stripe.secret-key}")
     private String stripeSecretKey;
@@ -195,8 +198,8 @@ public class StripePaymentService {
         // 5. Persist the Payment record (status = Authorized, payout = Pending)
         Payment payment = buildPaymentRecord(booking, sessionId, checkoutUrl);
 
-        // Link cart expiry: 30-minute window either way
-        booking.setCartExpiresAtUtc(Instant.now().plus(30, ChronoUnit.MINUTES));
+        // Link cart expiry: 30-minute window either way (via TimeService for testability)
+        booking.setCartExpiresAtUtc(timeService.getCurrentUtc().plus(30, ChronoUnit.MINUTES));
         bookingRepository.save(booking);
 
         Payment saved = paymentRepository.save(payment);
@@ -217,7 +220,7 @@ public class StripePaymentService {
                     ? booking.getCurrency() : "USD").toLowerCase();
 
             // Session expiry: now + 30 minutes (Unix timestamp in seconds)
-            long expiresAt = Instant.now().plus(30, ChronoUnit.MINUTES).getEpochSecond();
+            long expiresAt = timeService.getCurrentUtc().plus(30, ChronoUnit.MINUTES).getEpochSecond();
 
             SessionCreateParams params = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.PAYMENT)
@@ -269,7 +272,7 @@ public class StripePaymentService {
         p.setStatus(PaymentStatus.Authorized);
         p.setPayoutStatus(PayoutStatus.Pending);
         p.setCheckoutUrl(checkoutUrl);
-        p.setAuthorizedAtUtc(Instant.now());
+        p.setAuthorizedAtUtc(timeService.getCurrentUtc());
         p.setRawProviderStatus(mockMode ? "mock.session.created" : "checkout.session.created");
         return p;
     }
@@ -340,7 +343,7 @@ public class StripePaymentService {
 
         // ── Update Payment: funds captured ────────────────────────────────────
         payment.setStatus(PaymentStatus.Captured);
-        payment.setCapturedAtUtc(Instant.now());
+        payment.setCapturedAtUtc(timeService.getCurrentUtc());
         payment.setAmountCaptured(payment.getAmountAuthorized());   // full capture
         payment.setRawProviderStatus("checkout.session.completed");
         payment.setCheckoutUrl(null);   // session complete — URL is expired anyway
@@ -396,7 +399,7 @@ public class StripePaymentService {
         Booking booking = payment.getBooking();
         if (booking.getStatus() == BookingStatus.PendingPayment) {
             booking.setStatus(BookingStatus.Expired);
-            booking.setCancelledAtUtc(Instant.now());
+            booking.setCancelledAtUtc(timeService.getCurrentUtc());
             booking.setCancellationReason("Payment not completed within 30-minute window");
             bookingRepository.save(booking);
             
@@ -443,10 +446,10 @@ public class StripePaymentService {
                 return;
             }
 
-            // Anchor: use completedAtUtc from booking (or now if not set yet)
+            // Anchor: use completedAtUtc from booking (or now via TimeService if not set yet)
             Instant completedAt = booking.getCompletedAtUtc() != null
                     ? booking.getCompletedAtUtc()
-                    : Instant.now();
+                    : timeService.getCurrentUtc();
 
             // Add freeze window (0 hours in demo mode → eligible immediately)
             Instant eligibleAt = completedAt.plus(payoutFreezeHours, ChronoUnit.HOURS);
@@ -517,7 +520,7 @@ public class StripePaymentService {
 
         // Simulate payment captured
         payment.setStatus(PaymentStatus.Captured);
-        payment.setCapturedAtUtc(Instant.now());
+        payment.setCapturedAtUtc(timeService.getCurrentUtc());
         payment.setAmountCaptured(payment.getAmountAuthorized());
         payment.setRawProviderStatus("mock.payment.confirmed");
         payment.setCheckoutUrl(null);
@@ -568,7 +571,7 @@ public class StripePaymentService {
         Booking booking = payment.getBooking();
         if (booking.getStatus() == BookingStatus.PendingPayment) {
             booking.setStatus(BookingStatus.Expired);
-            booking.setCancelledAtUtc(Instant.now());
+            booking.setCancelledAtUtc(timeService.getCurrentUtc());
             booking.setCancellationReason("[MOCK] Payment declined or session expired");
             bookingRepository.save(booking);
             

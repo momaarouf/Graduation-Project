@@ -7,6 +7,7 @@ import com.travelmarket.backend.notification.enums.NotificationType;
 import com.travelmarket.backend.notification.repository.NotificationRepository;
 import com.travelmarket.backend.repository.UserRepository;
 import com.travelmarket.backend.service.EmailService;
+import com.travelmarket.backend.service.TimeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,6 +29,8 @@ public class NotificationService {
     private final SimpMessagingTemplate messagingTemplate;
     private final UserRepository userRepository;
     private final EmailService emailService;
+    // Centralized time service — use this instead of LocalDateTime.now() or Instant.now() inline
+    private final TimeService timeService;
 
     /**
      * Creates or updates an in-app notification and sends an email.
@@ -42,7 +45,7 @@ public class NotificationService {
             Optional<Notification> existing = notificationRepository.findByUserIdAndTypeAndReferenceIdAndReadFalse(userId, type, referenceId);
             if (existing.isPresent()) {
                 notification = existing.get();
-                notification.setCreatedAtUtc(java.time.LocalDateTime.now(java.time.ZoneOffset.UTC));
+                notification.setCreatedAtUtc(timeService.getCurrentUtc()); // Refresh timestamp on group
                 log.info("Grouping notification for chat {} (In-App row updated)", referenceId);
             } else {
                 notification = Notification.builder()

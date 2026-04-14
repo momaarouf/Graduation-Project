@@ -15,6 +15,7 @@ import com.travelmarket.backend.entity.User;
 import com.travelmarket.backend.payment.service.StripePaymentService;
 import com.travelmarket.backend.repository.GuideProfileRepository;
 import com.travelmarket.backend.repository.TravelerProfileRepository;
+import com.travelmarket.backend.service.TimeService;
 import com.travelmarket.backend.tour.entity.TourOccurrence;
 import com.travelmarket.backend.tour.enums.TourOccurrenceStatus;
 import com.travelmarket.backend.tour.repository.TourOccurrenceRepository;
@@ -48,6 +49,8 @@ public class BookingService {
     private final GuideProfileRepository guideRepository;
     private final ObjectMapper objectMapper;
     private final NotificationService notificationService;
+    /** Centralized UTC time — use this everywhere instead of Instant.now() inline */
+    private final TimeService timeService;
     @Lazy
     private final StripePaymentService stripePaymentService;
 
@@ -116,7 +119,7 @@ public class BookingService {
             // StripePaymentService.createCheckoutSession() may override this to 30 min
             // for real Stripe sessions (Stripe's minimum session window) — that is fine;
             // the backend job will still clean up if payment is never initiated at all.
-            booking.setCartExpiresAtUtc(Instant.now().plus(15, ChronoUnit.MINUTES));
+            booking.setCartExpiresAtUtc(timeService.getCurrentUtc().plus(15, ChronoUnit.MINUTES));
         } else {
             // Request to Book: seat is ALSO reserved immediately to prevent overbooking
             // while the guide reviews. Guide has 24 h to respond.
@@ -181,7 +184,7 @@ public class BookingService {
                     "This booking cannot be cancelled in its current state");
         }
 
-        Instant now = Instant.now();
+        Instant now = timeService.getCurrentUtc();
         Instant startTime = booking.getOccurrence().getStartTimeUtc();
         long hoursUntilStart = Duration.between(now, startTime).toHours();
 
@@ -389,7 +392,7 @@ public class BookingService {
 
         // 2. Cancel the current booking
         booking.setStatus(BookingStatus.Cancelled);
-        booking.setCancelledAtUtc(Instant.now());
+        booking.setCancelledAtUtc(timeService.getCurrentUtc());
         booking.setCancellationReason("Moved to waitlist during edit");
         bookingRepository.save(booking);
 
@@ -476,7 +479,7 @@ public class BookingService {
         releaseSeats(booking.getOccurrence(), booking.getPeopleCount());
         promoteFromWaitlist(booking.getOccurrence());
         booking.setStatus(BookingStatus.Cancelled);
-        booking.setCancelledAtUtc(Instant.now());
+        booking.setCancelledAtUtc(timeService.getCurrentUtc());
         booking.setCancellationReason(
                 request != null && request.getReason() != null && !request.getReason().isBlank()
                         ? request.getReason()
@@ -529,7 +532,7 @@ public class BookingService {
         validateCheckInTime(booking);
 
         booking.setStatus(BookingStatus.InProgress);
-        booking.setCheckedInAtUtc(Instant.now());
+        booking.setCheckedInAtUtc(timeService.getCurrentUtc());
 
         return mapToGuideResponse(bookingRepository.save(booking));
     }
@@ -547,7 +550,7 @@ public class BookingService {
         // completedAtUtc anchors the payout freeze window.
         // COMPLETED status also unlocks review eligibility.
         booking.setStatus(BookingStatus.Completed);
-        booking.setCompletedAtUtc(Instant.now());
+        booking.setCompletedAtUtc(timeService.getCurrentUtc());
 
         // Increment traveler's total completed trips
         TravelerProfile traveler = booking.getTraveler();
@@ -585,7 +588,7 @@ public class BookingService {
         promoteFromWaitlist(booking.getOccurrence());
 
         booking.setStatus(BookingStatus.Cancelled);
-        booking.setCancelledAtUtc(Instant.now());
+        booking.setCancelledAtUtc(timeService.getCurrentUtc());
         booking.setCancellationReason(
                 request != null && request.getReason() != null && !request.getReason().isBlank()
                         ? request.getReason()
@@ -667,7 +670,7 @@ public class BookingService {
                         "Waitlist entry not found"));
 
         // Soft-delete the entry and decrement the occurrence counter
-        entry.setDeletedAtUtc(Instant.now());
+        entry.setDeletedAtUtc(timeService.getCurrentUtc());
         waitlistRepository.save(entry);
 
         TourOccurrence occurrence = entry.getOccurrence();
@@ -729,8 +732,8 @@ public class BookingService {
 
                 // Mark the waitlist entry as promoted and soft-delete it
                 entry.setPromoted(true);
-                entry.setPromotedAtUtc(Instant.now());
-                entry.setDeletedAtUtc(Instant.now());
+                entry.setPromotedAtUtc(timeService.getCurrentUtc());
+                entry.setDeletedAtUtc(timeService.getCurrentUtc());
                 waitlistRepository.save(entry);
 
                 // Decrement the waitlist counter
@@ -788,7 +791,7 @@ public class BookingService {
             throw new ResponseStatusException(HttpStatus.GONE,
                     "This occurrence is temporarily unavailable");
         }
-        if (o.getStartTimeUtc().isBefore(Instant.now())) {
+        if (o.getStartTimeUtc().isBefore(timeService.getCurrentUtc())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "This occurrence has already started");
         }

@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 @Builder
@@ -22,7 +22,11 @@ public class NotificationResponse {
     private String referenceId;
     @JsonProperty("referenceType")
     private String referenceType;
-    private LocalDateTime createdAtUtc;
+    /**
+     * UTC timestamp when this notification was created (or last updated for grouped notifications).
+     * Serialized as ISO-8601 string with 'Z' suffix: "2026-04-15T18:00:00Z"
+     */
+    private Instant createdAtUtc;
     @JsonProperty("isRead")
     private boolean read;
 }
