@@ -84,8 +84,8 @@ export default function BookingCardWrapper({
     const fetchAuthDetails = async () => {
       try {
         const res = await getPublicTourDetail(Number(tourId))
-        setActiveBookings(res.data.activeBookings || [])
-        setActiveWaitlistEntries(res.data.activeWaitlistEntries || [])
+        setActiveBookings(res.activeBookings || [])
+        setActiveWaitlistEntries(res.activeWaitlistEntries || [])
       } catch (err) {
         console.error('Failed to fetch user-specific tour details:', err)
       }
@@ -144,7 +144,7 @@ export default function BookingCardWrapper({
         waiverSigned: waiverSigned
       })
       toast.success('Tour booked successfully!')
-      router.push(`/bookings/confirmation?id=${res.data.id}`)
+      router.push(`/bookings/confirmation?id=${res.id}`)
     } catch (err: any) {
       if (err.response?.status !== 403) {
         console.error('Booking failed:', err)
@@ -218,7 +218,7 @@ export default function BookingCardWrapper({
         message: message 
       })
       toast.success('Booking request sent to guide!')
-      router.push(`/bookings/confirmation?id=${res.data.id}`)
+      router.push(`/bookings/confirmation?id=${res.id}`)
     } catch (err: any) {
       if (err.response?.status !== 403) {
         console.error('Request failed:', err)
@@ -324,7 +324,7 @@ export default function BookingCardWrapper({
         confirmWaitlistTransition: confirmWaitlist
       })
       
-      if (res.data.status === 'Cancelled') {
+      if (res.status === 'Cancelled') {
         toast.success("You have been moved to the waitlist!")
       } else {
         toast.success('Booking updated successfully!')
@@ -348,7 +348,7 @@ export default function BookingCardWrapper({
   const handleConfirmCancel = async (bookingId: number) => {
     setIsLoading(true)
     try {
-      await cancelBooking(bookingId, 'Cancelled by traveler from tour page')
+      await cancelBooking(bookingId, { reason: 'Cancelled by traveler from tour page' })
       toast.success('Booking request cancelled')
       
       // Remove only this booking from our local synchronous list

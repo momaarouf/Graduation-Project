@@ -576,6 +576,8 @@ export interface GetTourReviewsParams {
   tourId: number
   page?: number
   limit?: number
+  rating?: number | null
+  sort?: string
 }
 
 export interface UpdateBookingRequest {

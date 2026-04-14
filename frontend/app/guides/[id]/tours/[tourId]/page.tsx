@@ -68,7 +68,7 @@ export default function PortfolioDetailPage() {
       try {
         setLoading(true)
         const res = await getPortfolioTourDetail(guideId, tourId)
-        setTour(res.data)
+        setTour(res)
       } catch (err) {
         console.error('Failed to load portfolio detail:', err)
         setError(true)

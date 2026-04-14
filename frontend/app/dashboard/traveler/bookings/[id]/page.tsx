@@ -25,7 +25,8 @@ import {
   User,
   Phone,
   Smartphone,
-  RefreshCw
+  RefreshCw,
+  CreditCard
 } from 'lucide-react'
 
 import { getTravelerBooking, cancelBooking, getTravelerReviews } from '@/src/lib/api/tours'
@@ -423,9 +424,20 @@ Thank you for choosing TravelMarket!
                     </div>
                   )}
 
+                  {booking.status === BookingStatus.PendingPayment && (
+                    <button
+                      onClick={() => router.push(`/bookings/confirmation?id=${booking.id}`)}
+                      className="w-full mt-4 py-4 bg-indigo-600 dark:bg-indigo-700 text-white font-bold rounded-2xl flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20"
+                    >
+                      <CreditCard className="w-5 h-5" />
+                      Pay Now
+                    </button>
+                  )}
+
                   {booking.status !== BookingStatus.Completed && 
                    booking.status !== BookingStatus.Cancelled && 
                    booking.status !== BookingStatus.Expired && 
+                   booking.status !== BookingStatus.PendingPayment &&
                    new Date(booking.startTimeUtc).getTime() > Date.now() && (
                     <Link
                       href={`/tours/${booking.tourId}`}

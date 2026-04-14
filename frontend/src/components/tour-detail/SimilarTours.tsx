@@ -47,14 +47,14 @@ export default function SimilarTours({
                     category: category || undefined
                 })
                 
-                let filtered = (response.data || [])
+                let filtered = (Array.isArray(response) ? response : [])
                     .filter(t => t.id.toString() !== currentTourId)
 
                 // 2. Fallback: if no tours in same city/category, fetch same city (any category)
                 if (filtered.length < limit) {
                     console.log('[SimilarTours DEBUG] Fewer city/category matches found. Falling back to city-only search.')
                     const cityOnlyResponse = await getPublicTours({ cities: city ? [city] : undefined })
-                    const cityOnlyTours = (cityOnlyResponse.data || [])
+                    const cityOnlyTours = (Array.isArray(cityOnlyResponse) ? cityOnlyResponse : [])
                         .filter(t => t.id.toString() !== currentTourId && !filtered.some(f => f.id === t.id))
                     filtered = [...filtered, ...cityOnlyTours]
                 }
@@ -63,7 +63,7 @@ export default function SimilarTours({
                 if (filtered.length < limit) {
                      console.log('[SimilarTours DEBUG] Falling back to global category-wide search.')
                      const globalCatResponse = await getPublicTours({ category: category || undefined }) 
-                     const globalCatTours = (globalCatResponse.data || [])
+                     const globalCatTours = (Array.isArray(globalCatResponse) ? globalCatResponse : [])
                         .filter(t => t.id.toString() !== currentTourId && !filtered.some(f => f.id === t.id))
                      filtered = [...filtered, ...globalCatTours]
                 }

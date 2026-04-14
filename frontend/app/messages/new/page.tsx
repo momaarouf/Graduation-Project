@@ -356,7 +356,7 @@ export default function NewMessagePage() {
                 Cancel
               </Link>
               <button
-                onClick={handleSend}
+                onClick={handleSendMessage}
                 disabled={!message.trim() || isSending}
                 className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
               >

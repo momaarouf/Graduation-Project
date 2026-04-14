@@ -68,8 +68,7 @@ export async function generateMetadata(
     // In Phase 2: fetch tour data from API
     // For Phase 1: use mock data
     const { id } = await params
-    const res = await getPublicTourDetail(Number(id))
-    const tour = res.data
+    const tour = await getPublicTourDetail(Number(id))
 
     if (!tour) {
         return {
@@ -154,20 +153,20 @@ export default async function TourDetailPage({ params}:PageProps ) {
         const [tourRes, reviewsRes, routeRes] = await Promise.allSettled([
             getPublicTourDetail(Number(id)),
             // Reusing getTourReviews instead of raw axios for consistency
-            getTourReviews(id, 0, 10).catch(() => ({ data: null })),
+            getTourReviews(id, { tourId: Number(id), page: 0, limit: 10 }).catch(() => null),
             getTourRoute(Number(id)).catch(() => ({ data: null }))
         ])
 
         if (tourRes.status === 'fulfilled') {
-            tour = tourRes.value.data
+            tour = tourRes.value
         }
 
         if (reviewsRes.status === 'fulfilled') {
-            reviewSummary = (reviewsRes.value as any).data
+            reviewSummary = reviewsRes.value
         }
 
         if (routeRes.status === 'fulfilled') {
-            tour.route = (routeRes.value as any).data?.waypoints || []
+            tour.route = (routeRes.value as any)?.waypoints || []
         }
     } catch (err) {
         console.error(`[Server] Error loading tour detail for ${id}:`, err)
@@ -276,7 +275,7 @@ export default async function TourDetailPage({ params}:PageProps ) {
                         {/* REVIEWS SECTION */}
                         <div className="bg-bg-light-paper dark:bg-bg-dark-paper rounded-3xl p-6 sm:p-8 shadow-xl border border-border-light-default dark:border-border-dark-strong">
                             <ReviewList
-                                reviews={reviewSummary?.reviews.content.map((r: any) => ({
+                                reviews={reviewSummary?.reviews?.content?.map((r: any) => ({
                                   // Map backend ReviewResponse to standardized ReviewDetail
                                   ...r,
                                   id: String(r.id),
@@ -316,6 +315,7 @@ export default async function TourDetailPage({ params}:PageProps ) {
                                 groupDiscountThreshold={tour.groupDiscountThreshold}
                                 groupDiscountPercent={tour.groupDiscountPercent}
                                 activeBookingId={tour.activeBookings?.[0]?.id}
+                                activeBookingStatus={tour.activeBookings?.[0]?.status}
                                 activeBookingOccurrenceId={tour.activeBookings?.[0]?.occurrenceId}
                                 activeBookingPeopleCount={tour.activeBookings?.[0]?.peopleCount}
                             />

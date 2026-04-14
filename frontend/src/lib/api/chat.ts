@@ -61,7 +61,7 @@ export const chatApi = {
     return data
   },
 
-  initiateConversation: async (request: { tourId: number; bookingId?: number }): Promise<ConversationResponse> => {
+  initiateConversation: async (request: { tourId?: number; bookingId?: number }): Promise<ConversationResponse> => {
     const { data } = await api.post('/api/chat/initiate', request)
     return data
   },

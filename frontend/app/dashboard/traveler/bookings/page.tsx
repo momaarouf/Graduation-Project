@@ -6,8 +6,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { getTravelerBookings, cancelBooking, getMyWaitlist, leaveWaitlist, getTravelerReviews } from '@/src/lib/api/tours'
-import { createPaymentSession } from '@/src/lib/api/payment'
-import MockPaymentSimulator from '@/src/components/payment/MockPaymentSimulator'
 import { BookingResponse, BookingStatus, WaitlistResponse } from '@/src/lib/types/tour.types'
 import {
     Calendar,
@@ -293,10 +291,10 @@ interface BookingCardProps {
     booking: BookingResponse
     onCancel: (booking: BookingResponse) => void
     isReviewed: boolean
-    onMockPayment: (booking: BookingResponse, sessionId: string) => void
+    isReviewed: boolean
 }
 
-function BookingCard({ booking, onCancel, isReviewed, onMockPayment }: BookingCardProps) {
+function BookingCard({ booking, onCancel, isReviewed }: BookingCardProps) {
     const router = useRouter()
     const [isPaying, setIsPaying] = useState(false)
     const date = new Date(booking.startTimeUtc)
@@ -316,32 +314,10 @@ function BookingCard({ booking, onCancel, isReviewed, onMockPayment }: BookingCa
     const isFuture = date.getTime() > Date.now()
     const canCancel = isUpcoming && isFuture
 
-    const handlePayNow = async (e: React.MouseEvent) => {
+    const handlePayNow = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
-        setIsPaying(true)
-        try {
-            const response = await createPaymentSession(booking.id)
-            if (response.checkoutUrl) {
-                if (response.checkoutUrl.startsWith('MOCK')) {
-                    const match = response.checkoutUrl.match(/mock_sess_[a-f0-9]+/i)
-                    const sessionId = match ? match[0] : null
-                    if (sessionId) {
-                        onMockPayment(booking, sessionId)
-                    } else {
-                        toast.error('Could not parse mock session ID')
-                    }
-                } else {
-                    window.location.href = response.checkoutUrl
-                }
-            } else {
-                toast.error('Could not initiate payment session')
-            }
-        } catch (err: any) {
-            toast.error(err.response?.data?.message || 'Payment failed to start')
-        } finally {
-            setIsPaying(false)
-        }
+        router.push(`/bookings/confirmation?id=${booking.id}`)
     }
 
     return (
@@ -522,11 +498,6 @@ export default function TravelerBookingsPage() {
     const [isLoading, setIsLoading] = React.useState(true)
     const [isCancelling, setIsCancelling] = React.useState(false)
     const [isLeavingWaitlist, setIsLeavingWaitlist] = React.useState<number | null>(null)
-    const [isProcessingMock, setIsProcessingMock] = React.useState(false)
-
-    // Mock Payment Simulator state
-    const [showMockDialog, setShowMockDialog] = React.useState(false)
-    const [mockSessionId, setMockSessionId] = React.useState<string | null>(null)
 
     useBadgeReset('traveler-bookings')
     const [activeFilter, setActiveFilter] = React.useState('all')
@@ -629,11 +600,6 @@ export default function TravelerBookingsPage() {
         }
     }
 
-    const handleMockPayment = (booking: BookingResponse, sessionId: string) => {
-        setSelectedBooking(booking)
-        setMockSessionId(sessionId)
-        setShowMockDialog(true)
-    }
 
     // handleSimulateMockAction removed - logic moved to MockPaymentSimulator component
 
@@ -755,7 +721,6 @@ export default function TravelerBookingsPage() {
                                     key={booking.id}
                                     booking={booking}
                                     onCancel={handleCancelClick}
-                                    onMockPayment={handleMockPayment}
                                     isReviewed={reviewedBookingIds.has(booking.id)}
                                 />
                             ))}
@@ -831,21 +796,6 @@ export default function TravelerBookingsPage() {
                 </div>
             </div>
 
-            {/* --- MOCK PAYMENT SIMULATOR MODAL --- */}
-            {showMockDialog && mockSessionId && selectedBooking && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <MockPaymentSimulator 
-                        sessionId={mockSessionId}
-                        amount={selectedBooking.finalPrice}
-                        currency={selectedBooking.currency}
-                        onSuccess={() => {
-                            fetchBookings()
-                            setShowMockDialog(false)
-                        }}
-                        onCancel={() => setShowMockDialog(false)}
-                    />
-                </div>
-            )}
 
             <CancellationModal
                 booking={selectedBooking}

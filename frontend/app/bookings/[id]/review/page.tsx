@@ -90,13 +90,13 @@ export default function ReviewPage() {
       try {
         const [bookingRes, reviewsRes] = await Promise.all([
           getTravelerBooking(bookingId),
-          getTravelerReviews().catch(() => ({ data: { content: [] } }))
+          getTravelerReviews().catch(() => ({ content: [] }))
         ])
         
-        setBooking(bookingRes.data)
+        setBooking(bookingRes)
 
         // Check if already reviewed
-        const reviewed = (reviewsRes.data?.content || []).some(
+        const reviewed = (reviewsRes.content || []).some(
           (r: any) => r.bookingId === bookingId
         )
         if (reviewed) {
@@ -107,7 +107,7 @@ export default function ReviewPage() {
         }
 
         // Guard: must be COMPLETED
-        if (bookingRes.data.status !== BookingStatus.Completed) {
+        if (bookingRes.status !== BookingStatus.Completed) {
           router.push(`/dashboard/traveler/bookings/${bookingId}`)
         }
       } catch (err: any) {

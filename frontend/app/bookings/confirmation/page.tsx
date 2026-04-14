@@ -114,9 +114,9 @@ export default function BookingConfirmationPage() {
       }
       try {
         const res = await getTravelerBooking(Number(bookingId))
-        setBooking(res.data)
+        setBooking(res)
 
-        if (res.data.status === BookingStatus.PendingPayment) {
+        if (res.status === BookingStatus.PendingPayment) {
           await fetchPaymentMethods(true)
         }
       } catch {
@@ -203,7 +203,7 @@ export default function BookingConfirmationPage() {
       toast.success('Payment successful!')
       // Refresh booking data
       const res = await getTravelerBooking(Number(bookingId))
-      setBooking(res.data)
+      setBooking(res)
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Payment failed')
     } finally {
@@ -247,7 +247,7 @@ export default function BookingConfirmationPage() {
       }
       // Refresh booking data on success
       const res = await getTravelerBooking(Number(bookingId))
-      setBooking(res.data)
+      setBooking(res)
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to process payment')
     } finally {

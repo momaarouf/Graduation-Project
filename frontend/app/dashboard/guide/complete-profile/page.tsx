@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import { guideCompleteProfile } from '@/src/lib/api/auth'
+import { getGuideProfile } from '@/src/lib/api/tours'
 import apiClient from '@/src/lib/api/client'
 import toast from 'react-hot-toast'
 import PhoneInput, { COUNTRY_CODES } from '@/src/components/ui/PhoneInput'
@@ -84,8 +85,7 @@ export default function GuideCompleteProfilePage() {
     if (!user || user.role !== 'GUIDE') return
     const fetchProfile = async () => {
       try {
-        const res = await apiClient.get('/api/guide/profile')
-        const d = res
+        const d = await getGuideProfile()
         if (d) {
           if (d.fullName)   setFullName(d.fullName)
           if (d.phoneE164)  setPhoneE164(d.phoneE164)

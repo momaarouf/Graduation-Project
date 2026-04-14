@@ -17,7 +17,7 @@ export default function GuideToursGrid({ guideId }: { guideId: string }) {
     async function fetchTours() {
       try {
         const response = await getGuidePortfolio(parseInt(guideId))
-        setTours(response.data)
+        setTours(response)
       } catch (error) {
         console.error('Failed to fetch guide tours:', error)
       } finally {

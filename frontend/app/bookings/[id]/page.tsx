@@ -176,10 +176,10 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
       setIsLoading(true)
       try {
         const res = await getTravelerBooking(Number(bookingId))
-        setBooking(res.data)
+        setBooking(res)
 
         // If PendingPayment, also fetch saved cards
-        if (res.data.status === BookingStatus.PendingPayment) {
+        if (res.status === BookingStatus.PendingPayment) {
           await fetchPaymentMethods(true)
         }
 
@@ -221,12 +221,12 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
     try {
       const res = await cancelBooking(booking.id, cancelReason ? { reason: cancelReason } : undefined)
       toast.success(
-        `Booking cancelled! ${res.data.refundPercent ? `${res.data.refundPercent}% refund` : 'No refund (within 24h window)'}`
+        `Booking cancelled! ${res.refundPercent ? `${res.refundPercent}% refund` : 'No refund (within 24h window)'}`
       )
       setShowCancelModal(false)
       // Re-fetch to show updated status
       const updated = await getTravelerBooking(booking.id)
-      setBooking(updated.data)
+      setBooking(updated)
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to cancel booking')
     } finally {
@@ -270,7 +270,7 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
       await payWithSavedCard(booking.id, selectedMethodId)
       toast.success('Payment successful!')
       const updated = await getTravelerBooking(booking.id)
-      setBooking(updated.data)
+      setBooking(updated)
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to process payment')
     } finally {
@@ -312,7 +312,7 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
       }
       
       const updated = await getTravelerBooking(booking.id)
-      setBooking(updated.data)
+      setBooking(updated)
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to process payment')
     } finally {

@@ -65,9 +65,15 @@ export default function ReviewList({
             console.log(`[ReviewList] Filtering reviews for rating ${filterRating}, sort ${sortBy}`)
             setIsFiltering(true)
             try {
-                const res = await getTourReviews(tourId, 0, isFullPage ? 50 : 10, filterRating, sortBy)
-                if (res.data?.reviews?.content) {
-                    setReviews(res.data.reviews.content.map((r: any) => ({
+                const res = await getTourReviews(tourId, { 
+                    tourId: Number(tourId),
+                    page: 0, 
+                    limit: isFullPage ? 50 : 10, 
+                    rating: filterRating, 
+                    sort: sortBy 
+                })
+                if (res.reviews?.content) {
+                    setReviews(res.reviews.content.map((r: any) => ({
                         ...r,
                         id: String(r.id),
                         travelerId: String(r.travelerId)
@@ -100,9 +106,9 @@ export default function ReviewList({
         if (user && initialReviews.length > 0) {
             const syncHelpfulStatus = async () => {
                 try {
-                    const res = await getTourReviews(tourId, 0, reviews.length || 10)
-                    if (res.data?.reviews?.content) {
-                        setReviews(prev => res.data.reviews.content.map((newReview: any) => {
+                    const res = await getTourReviews(tourId, { page: 0, limit: reviews.length || 10 })
+                    if (res.reviews?.content) {
+                        setReviews(prev => res.reviews.content.map((newReview: any) => {
                             const existing = prev.find(p => String(p.id) === String(newReview.id))
                             return {
                                 ...newReview,
@@ -168,14 +174,14 @@ export default function ReviewList({
                 if (r.id === reviewId) {
                     return {
                         ...r,
-                        helpfulCount: result.data.helpfulCount,
-                        isHelpful: result.data.isHelpful
+                        helpfulCount: result.helpfulCount,
+                        isHelpful: result.isHelpful
                     }
                 }
                 return r
             }))
 
-            toast.success(result.data.isHelpful ? 'Marked as helpful' : 'Vote removed')
+            toast.success(result.isHelpful ? 'Marked as helpful' : 'Vote removed')
         } catch (err: any) {
             toast.error(err.response?.data?.message || 'Failed to update vote')
         } finally {
@@ -199,8 +205,8 @@ export default function ReviewList({
                     return {
                         ...r,
                         guideReply: {
-                            comment: result.data.guideReply as string || replyContent,
-                            createdAt: result.data.guideRepliedAt || new Date().toISOString()
+                            comment: result.guideReply as string || replyContent,
+                            createdAt: result.guideRepliedAt || new Date().toISOString()
                         }
                     }
                 }

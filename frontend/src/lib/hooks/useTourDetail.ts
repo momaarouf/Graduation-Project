@@ -28,12 +28,10 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { 
-  TourDetail, 
-  ReviewDetail,
-  BookingMode,
-  TourStatus 
-} from '@/src/types/tour-detail.types'
-import { 
+  PublicTourDetailResponse, 
+  ReviewResponse,
+  ReviewSummaryResponse,
+  PublicTourCardResponse,
   getPublicTourDetail, 
   getTourReviews, 
   getSimilarTours,
@@ -49,11 +47,11 @@ export interface UseTourDetailProps {
   /** Tour ID from URL params */
   tourId: string
   
-  /** Initial tour data for SSR (from generateMetadata) */
-  initialTour?: TourDetail | null
+  /** Initial tour data for SSR */
+  initialTour?: PublicTourDetailResponse | null
   
   /** Initial reviews for SSR */
-  initialReviews?: PaginatedResponse<ReviewDetail>
+  initialReviews?: ReviewSummaryResponse | null
   
   /** Enable auto-refresh (default: false) */
   enableAutoRefresh?: boolean
@@ -65,13 +63,13 @@ export interface UseTourDetailProps {
 export interface UseTourDetailReturn {
   // ======== Data ========
   /** Tour detail data */
-  tour: TourDetail | null
+  tour: PublicTourDetailResponse | null
   
   /** Paginated reviews */
-  reviews: PaginatedResponse<ReviewDetail> | null
+  reviews: ReviewSummaryResponse | null
   
   /** Similar tours */
-  similarTours: TourDetail[]
+  similarTours: PublicTourCardResponse[]
   
   // ======== Loading States ========
   /** Is tour data loading */
@@ -156,11 +154,11 @@ export function useTourDetail({
   // ========================================
   // STATE - Data
   // ========================================
-  const [tour, setTour] = useState<TourDetail | null>(initialTour || null)
-  const [reviews, setReviews] = useState<PaginatedResponse<ReviewDetail> | null>(
+  const [tour, setTour] = useState<PublicTourDetailResponse | null>(initialTour || null)
+  const [reviews, setReviews] = useState<ReviewSummaryResponse | null>(
     initialReviews || null
   )
-  const [similarTours, setSimilarTours] = useState<TourDetail[]>([])
+  const [similarTours, setSimilarTours] = useState<PublicTourCardResponse[]>([])
 
   // ========================================
   // STATE - Loading
@@ -180,7 +178,7 @@ export function useTourDetail({
   // ========================================
   // STATE - Pagination
   // ========================================
-  const [currentReviewPage, setCurrentReviewPage] = useState(initialReviews?.page || 1)
+  const [currentReviewPage, setCurrentReviewPage] = useState(initialReviews?.reviews.number || 0)
 
   // ========================================
   // STATE - UI
@@ -191,7 +189,7 @@ export function useTourDetail({
   // DERIVED VALUES
   // ========================================
   const isPending = isLoadingTour || isLoadingReviews || isLoadingSimilar || isBooking
-  const hasMoreReviews = reviews?.hasNext || false
+  const hasMoreReviews = reviews?.reviews.last === false || false
 
   // ========================================
   // DATA FETCHING
@@ -207,7 +205,7 @@ export function useTourDetail({
     setTourError(null)
     
     try {
-      const data = await getTourById({ id: tourId })
+      const data = await getPublicTourDetail(Number(tourId))
       
       if (!data) {
         // Tour not found - redirect to 404
@@ -215,7 +213,7 @@ export function useTourDetail({
         return
       }
       
-      setTour(data as any)
+      setTour(data)
     } catch (error) {
       console.error('[useTourDetail] Failed to fetch tour:', error)
       setTourError(error instanceof Error ? error : new Error('Failed to fetch tour'))
@@ -233,18 +231,17 @@ export function useTourDetail({
   /**
    * Fetch reviews for the tour
    */
-  const fetchReviews = useCallback(async (page: number = 1) => {
+  const fetchReviews = useCallback(async (page: number = 0) => {
     if (!tourId) return
     
     setIsLoadingReviews(true)
     setReviewsError(null)
     
     try {
-      const data = await getTourReviews({
-        tourId,
+      const data = await getTourReviews(tourId, {
+        tourId: Number(tourId),
         page,
-        limit: 10,
-        sortBy: 'most_relevant'
+        limit: 10
       })
       
       setReviews(data)
@@ -270,7 +267,7 @@ export function useTourDetail({
       const data = await getSimilarTours({
         currentTourId: tour.id,
         city: tour.city,
-        country: tour.country,
+        countryCode: tour.countryCode,
         limit: 4
       })
       
@@ -288,14 +285,14 @@ export function useTourDetail({
   // ========================================
 
   const loadMoreReviews = useCallback(async () => {
-    if (reviews?.hasNext) {
-      await fetchReviews(reviews.page + 1)
+    if (reviews && !reviews.reviews.last) {
+      await fetchReviews(reviews.reviews.number + 1)
     }
   }, [reviews, fetchReviews])
 
   const loadPrevReviews = useCallback(async () => {
-    if (reviews?.hasPrev) {
-      await fetchReviews(reviews.page - 1)
+    if (reviews && !reviews.reviews.first) {
+      await fetchReviews(reviews.reviews.number - 1)
     }
   }, [reviews, fetchReviews])
 
@@ -384,7 +381,7 @@ export function useTourDetail({
       // Phase 2: API call
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      toast.success(`You're #${tour.waitlistCount! + 1} on the waitlist!`, {
+      toast.success(`You've been added to the waitlist!`, {
         id: 'waitlist-success',
         duration: 5000,
         icon: '⏳'

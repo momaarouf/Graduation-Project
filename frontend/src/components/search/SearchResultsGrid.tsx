@@ -226,14 +226,17 @@ export default function SearchResultsGrid({
                 filters.searchQuery ? searchGuides(filters.searchQuery) : Promise.resolve([])
             ])
 
-            setTours(res.data)
+            const toursData = Array.isArray(res) ? res : []
+            const guidesData = Array.isArray(guideRes) ? guideRes : []
+
+            setTours(toursData)
             
             // Deduplicate guides by ID
-            const uniqueGuides = Array.from(new Map(guideRes.map(g => [g.id, g])).values());
+            const uniqueGuides = Array.from(new Map(guidesData.map(g => [g.id, g])).values());
             setGuides(uniqueGuides)
             
             // Sync result count for the context
-            dispatch({ type: 'SET_TOTAL_RESULTS', payload: res.data.length })
+            dispatch({ type: 'SET_TOTAL_RESULTS', payload: toursData.length })
         } catch (err: any) {
             toast.error('Failed to update results')
         } finally {

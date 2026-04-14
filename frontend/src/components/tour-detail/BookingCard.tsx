@@ -32,10 +32,11 @@ import {
     Zap,
     Hourglass,
     Star,
-    Loader2
+    Loader2,
+    CreditCard
 } from 'lucide-react'
 import { BookingCardProps, BookingMode } from '@/src/types/tour-detail.types'
-import { PublicActiveBookingResponse } from '@/src/lib/types/tour.types'
+import { PublicActiveBookingResponse, BookingStatus } from '@/src/lib/types/tour.types'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
 export default function BookingCard({
@@ -101,8 +102,9 @@ export default function BookingCard({
     const activeBookingOccurrenceId = currentActiveBooking?.occurrenceId
     const activeBookingPeopleCount = currentActiveBooking?.peopleCount
 
-    const isEditing = !!activeBookingId && activeBookingStatus !== 'PendingGuide'
-    const isPending = !!activeBookingId && activeBookingStatus === 'PendingGuide'
+    const isAwaitingPayment = !!activeBookingId && activeBookingStatus === BookingStatus.PendingPayment
+    const isPending = !!activeBookingId && activeBookingStatus === BookingStatus.PendingGuide
+    const isEditing = !!activeBookingId && !isPending && !isAwaitingPayment
 
     // Detect if user is waitlisted for the current date
     const currentWaitlistEntry = useMemo(() => {
@@ -687,7 +689,24 @@ export default function BookingCard({
                             )}
 
                             {/* Main CTA button */}
-                            {isPending ? (
+                            {isAwaitingPayment ? (
+                                <div className="space-y-3">
+                                    <button
+                                        onClick={() => router.push(`/bookings/confirmation?id=${activeBookingId}`)}
+                                        className="w-full px-6 py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold rounded-full hover:shadow-indigo-500/20 transition-all shadow-xl active:scale-[0.98] flex items-center justify-center gap-2"
+                                    >
+                                        <CreditCard className="w-5 h-5" />
+                                        Pay Now
+                                    </button>
+                                    <button
+                                        onClick={() => onCancelBooking?.(activeBookingId)}
+                                        disabled={isLoading}
+                                        className="w-full px-6 py-3 bg-bg-light-paper dark:bg-gray-950 border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 font-bold rounded-full hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-all disabled:opacity-50"
+                                    >
+                                        Cancel Booking
+                                    </button>
+                                </div>
+                            ) : isPending ? (
                                 <button
                                     onClick={handleBooking}
                                     disabled={!selectedDate || isLoading}

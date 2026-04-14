@@ -24,8 +24,8 @@ export default async function TourReviewsPage({ params }: ReviewsPageProps) {
     try {
         // Fetch tour details and all reviews
         const [tour, tourReviews] = await Promise.all([
-            getPublicTourDetail(Number(id)).then(res => res.data),
-            getTourReviews(id, 0, 100).then(res => res.data) // Page 0, 100 items for now
+            getPublicTourDetail(Number(id)),
+            getTourReviews(id, 0, 100) // Page 0, 100 items for now
         ])
 
         if (!tour) return notFound()

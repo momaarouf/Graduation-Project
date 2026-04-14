@@ -6,6 +6,7 @@ import {
   Shield, 
   Scale, 
   TrendingUp, 
+  TrendingDown,
   ArrowRight, 
   ChevronRight, 
   AlertCircle,
@@ -226,9 +227,9 @@ export default function AdminDashboardPage() {
                       <p className="text-[10px] text-gray-400">
                         By {event.adminEmail}
                       </p>
-                      {event.detailsJson && (
+                      {event.details && (
                         <p className="text-[11px] text-gray-400 mt-1 truncate max-w-sm">
-                          {event.detailsJson}
+                          {typeof event.details === 'string' ? event.details : JSON.stringify(event.details)}
                         </p>
                       )}
                     </div>

@@ -3,6 +3,32 @@
 import apiClient from '@/src/lib/api/client'
 import { cache } from 'react'
 import {
+  type TourTemplateResponse,
+  type TourMediaResponse,
+  type PublicTourCardResponse,
+  type PublicTourDetailResponse,
+  type TourOccurrenceResponse,
+  type GuidePortfolioTourResponse,
+  type GuidePortfolioTourDetailResponse,
+  type CreateTourTemplateRequest,
+  type UpdateTourTemplateRequest,
+  type CreateOccurrenceRequest,
+  type UpdateOccurrenceRequest,
+  type PublicTourFilters,
+  type CreateBookingRequest,
+  type BookingResponse,
+  type GuideBookingResponse,
+  type WaitlistResponse,
+  type ReviewCreateRequest,
+  type ReviewResponse,
+  type ReviewSummaryResponse,
+  type ToggleHelpfulResponse,
+  type TourRouteResponse,
+  type GetTourReviewsParams,
+  type PaginatedResponse
+} from '@/src/lib/types/tour.types'
+
+export type {
   TourTemplateResponse,
   TourMediaResponse,
   PublicTourCardResponse,
@@ -24,7 +50,9 @@ import {
   ReviewSummaryResponse,
   ToggleHelpfulResponse,
   TourRouteResponse,
-} from '@/src/lib/types/tour.types'
+  GetTourReviewsParams,
+  PaginatedResponse
+}
 import { GuideProfileResponse } from '@/src/lib/types/guide.types'
 
 // ── Guide: Tour CRUD ─────────────────────────────────────────────────────────
@@ -137,7 +165,7 @@ export const getPublicTourOccurrences = (id: number) =>
   apiClient.get<TourOccurrenceResponse[]>(`/api/public/tours/${id}/occurrences`).then(r => r.data)
 
 /** Get ordered waypoints (trail) for a tour's route */
-export const getTourRoute = (id: number) =>
+export const getTourRoute = (id: number | string) =>
   apiClient.get<TourRouteResponse>(`/api/public/tours/${id}/route`).then(r => r.data)
 
 /** Radius search (near me) */
@@ -223,9 +251,9 @@ export const completeBooking = (id: number) =>
 
 // ── Reviews API ──────────────────────────────────────────────────────────────
 
-export const getTourReviews = cache((tourId: number | string, page = 0, size = 10, rating?: number | null, sort = 'newest') =>
-  apiClient.get<ReviewSummaryResponse>(`/api/reviews/tour/${tourId}`, {
-    params: { page, size, rating, sort }
+export const getTourReviews = cache((tourId: number | string, params?: GetTourReviewsParams) =>
+  apiClient.get<ReviewSummaryResponse>(`/api/public/tours/${tourId}/reviews`, {
+    params: params || { page: 0, size: 10, sort: 'newest' }
   }).then(r => r.data)
 )
 
@@ -270,4 +298,4 @@ export const getSimilarTours = (params: any) =>
   apiClient.get<PublicTourCardResponse[]>('/api/public/tours', { params }).then(r => r.data).catch(() => [])
 
 /** Export types used by callers */
-export type { GetTourReviewsParams, PaginatedResponse } from '../types/tour.types'
+// No-op at end since we export at top now
