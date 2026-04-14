@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { getTravelerBookings, cancelBooking, getMyWaitlist, leaveWaitlist, getTravelerReviews } from '@/src/lib/api/tours'
 import { BookingResponse, BookingStatus, WaitlistResponse } from '@/src/lib/types/tour.types'
+import { usePaymentCountdown } from '@/src/hooks/usePaymentCountdown'
 import {
     Calendar,
     Clock,
@@ -26,7 +27,8 @@ import {
     Smartphone,
     RefreshCw,
     CreditCard,
-    Loader2
+    Loader2,
+    AlertTriangle
 } from 'lucide-react'
 
 // TYPES - We use BookingResponse from tour.types.ts
@@ -284,17 +286,98 @@ function CancellationModal({ booking, isOpen, onClose, onConfirm, isLoading = fa
 }
 
 // ============================================================================
+// PAYMENT COUNTDOWN PILL — compact in-card timer for PendingPayment bookings
+// ============================================================================
+
+interface PaymentCountdownPillProps {
+    deadlineUtc: string
+    onExpired?: () => void
+}
+
+function PaymentCountdownPill({ deadlineUtc, onExpired }: PaymentCountdownPillProps) {
+    const countdown = usePaymentCountdown(deadlineUtc)
+    const firedRef = React.useRef(false)
+
+    // Fire onExpired exactly once when the countdown hits zero.
+    // Uses a ref so the effect doesn’t re-fire on re-renders.
+    React.useEffect(() => {
+        if (countdown?.isExpired && !firedRef.current && onExpired) {
+            firedRef.current = true
+            onExpired()
+        }
+    }, [countdown?.isExpired, onExpired])
+
+    if (!countdown) return null
+
+    if (countdown.isExpired) {
+        return (
+            <div className="flex items-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg mb-3">
+                <XCircle className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                <span className="text-xs font-bold text-red-700 dark:text-red-300">
+                    Payment window expired — booking cancelled
+                </span>
+            </div>
+        )
+    }
+
+    const isCritical = countdown.urgency === 'critical'
+    const isWarning  = countdown.urgency === 'warning'
+
+    const containerClass = isCritical
+        ? 'flex items-center gap-2.5 px-3 py-2 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg mb-3'
+        : isWarning
+        ? 'flex items-center gap-2.5 px-3 py-2 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg mb-3'
+        : 'flex items-center gap-2.5 px-3 py-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg mb-3'
+
+    const textClass = isCritical
+        ? 'text-xs font-bold text-red-700 dark:text-red-300'
+        : isWarning
+        ? 'text-xs font-bold text-orange-700 dark:text-orange-300'
+        : 'text-xs font-bold text-amber-700 dark:text-amber-300'
+
+    const timerClass = isCritical
+        ? 'text-sm font-black tabular-nums text-red-600 dark:text-red-400 animate-pulse ml-auto shrink-0'
+        : isWarning
+        ? 'text-sm font-black tabular-nums text-orange-600 dark:text-orange-400 animate-pulse ml-auto shrink-0'
+        : 'text-sm font-black tabular-nums text-amber-700 dark:text-amber-300 ml-auto shrink-0'
+
+    const barClass = isCritical ? 'bg-red-500' : isWarning ? 'bg-orange-500' : 'bg-amber-500'
+
+    return (
+        <div className="mb-3 space-y-1.5">
+            <div className={containerClass}>
+                {isCritical || isWarning
+                    ? <AlertTriangle className={`w-3.5 h-3.5 shrink-0 ${isCritical ? 'text-red-500 animate-bounce' : 'text-orange-500'}`} />
+                    : <Clock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                }
+                <span className={textClass}>
+                    {isCritical ? 'Pay now or booking cancels!' : 'Complete payment to confirm seat'}
+                </span>
+                <span className={timerClass}>{countdown.displayString}</span>
+            </div>
+            {/* Progress bar — drains from full to empty over the 15-minute window */}
+            <div className="h-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                <div
+                    className={`h-full rounded-full transition-all duration-1000 ${barClass}`}
+                    style={{ width: `${Math.max(0, Math.min(100, (countdown.totalSeconds / 900) * 100))}%` }}
+                />
+            </div>
+        </div>
+    )
+}
+
+// ============================================================================
 // BOOKING CARD COMPONENT
 // ============================================================================
 
 interface BookingCardProps {
     booking: BookingResponse
     onCancel: (booking: BookingResponse) => void
-    isReviewed: boolean
+    onExpired: (bookingId: number) => void
     isReviewed: boolean
 }
 
-function BookingCard({ booking, onCancel, isReviewed }: BookingCardProps) {
+function BookingCard({ booking, onCancel, onExpired, isReviewed }: BookingCardProps) {
     const router = useRouter()
     const [isPaying, setIsPaying] = useState(false)
     const date = new Date(booking.startTimeUtc)
@@ -400,6 +483,14 @@ function BookingCard({ booking, onCancel, isReviewed }: BookingCardProps) {
                             </button>
                         )}
                     </div>
+
+                    {/* Payment Countdown — compact pill shown on PendingPayment cards */}
+                    {booking.status === BookingStatus.PendingPayment && booking.paymentDeadlineUtc && (
+                        <PaymentCountdownPill
+                            deadlineUtc={booking.paymentDeadlineUtc}
+                            onExpired={() => onExpired(booking.id)}
+                        />
+                    )}
 
                     {/* Action buttons */}
                     <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-100 dark:border-gray-800">
@@ -600,6 +691,24 @@ export default function TravelerBookingsPage() {
         }
     }
 
+    // Optimistic expiry — called by PaymentCountdownPill when the 15-min timer hits zero.
+    // Immediately flips the booking to Expired in local state so the status badge,
+    // Pay Now button, and Cancel button all disappear without waiting for the server.
+    // The backend scheduler will have also processed the booking within 60 seconds;
+    // a background refetch is triggered as well to confirm the final server state.
+    const handleBookingExpired = (bookingId: number) => {
+        // 1. Optimistic update — instant UI feedback
+        setBookings(prev =>
+            prev.map(b =>
+                b.id === bookingId
+                    ? { ...b, status: BookingStatus.Expired }
+                    : b
+            )
+        )
+        // 2. Background refetch after 3 seconds to confirm backend state
+        setTimeout(() => fetchBookings(), 3000)
+    }
+
 
     // handleSimulateMockAction removed - logic moved to MockPaymentSimulator component
 
@@ -721,6 +830,7 @@ export default function TravelerBookingsPage() {
                                     key={booking.id}
                                     booking={booking}
                                     onCancel={handleCancelClick}
+                                    onExpired={handleBookingExpired}
                                     isReviewed={reviewedBookingIds.has(booking.id)}
                                 />
                             ))}

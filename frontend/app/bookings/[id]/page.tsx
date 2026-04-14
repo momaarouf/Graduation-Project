@@ -43,6 +43,7 @@ import {
   ChevronLeft as ChevronLeftIcon // rename if conflict
 } from 'lucide-react'
 import PageLayout from '@/src/components/layout/PageLayout'
+import PaymentCountdownBanner from '@/src/components/booking/PaymentCountdownBanner'
 
 import { getTravelerBooking, cancelBooking } from '@/src/lib/api/tours'
 import { createPaymentSession } from '@/src/lib/api/payment'
@@ -144,6 +145,19 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
   const [newCardCvv, setNewCardCvv] = useState('')
   const [saveForFuture, setSaveForFuture] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
+
+  // ── Countdown expiry handler ───────────────────────────────────────────────
+  // Fired by PaymentCountdownBanner when the 15-minute window hits zero.
+  // Re-fetches the booking so the UI reflects the backend's Expired status.
+  const handlePaymentExpired = async () => {
+    try {
+      const updated = await getTravelerBooking(Number(bookingId))
+      setBooking(updated)
+    } catch {
+      // Booking may have been deleted — navigate back to list
+      router.push('/dashboard/traveler/bookings')
+    }
+  }
 
   // ── Fetch booking from backend ──────────────────────────────────────────
 
@@ -450,6 +464,23 @@ Thank you for choosing TravelMarket!
 
             {/* Left Column - Main Info */}
             <div className="lg:col-span-2 space-y-6">
+
+              {/* ── Payment Countdown Banner (PendingPayment only) ─────────── */}
+              {booking.status === BookingStatus.PendingPayment && booking.paymentDeadlineUtc && (
+                <PaymentCountdownBanner
+                  deadlineUtc={booking.paymentDeadlineUtc}
+                  tourTitle={booking.tourTitle}
+                  onExpired={handlePaymentExpired}
+                />
+              )}
+
+              {/* If booking expired (fetched from server), show expired message */}
+              {booking.status === BookingStatus.Expired && (
+                <PaymentCountdownBanner
+                  deadlineUtc={new Date(0).toISOString()} // already past → shows expired state
+                  tourTitle={booking.tourTitle}
+                />
+              )}
 
               {/* Tour Card */}
               <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">

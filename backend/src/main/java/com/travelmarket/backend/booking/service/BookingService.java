@@ -29,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -102,12 +103,20 @@ public class BookingService {
         booking.setBookingMode(isInstant ? BookingMode.Instant : BookingMode.Request);
 
         if (isInstant) {
-            // Instant Book: seats tentatively reserved for 30 minutes while traveler pays.
-            // Booking stays in PendingPayment until StripePaymentService confirms payment.
-            // On success (webhook/mock-confirm): → Confirmed
-            // On expiry (no payment in 30 min): → Expired, seats released by cleanup job
+            // Instant Book: seats tentatively reserved while traveler completes payment.
+            // The 15-minute payment deadline starts NOW (at booking creation), not when the
+            // Stripe session is opened. This is the authoritative timeout anchor.
+            // On payment success (webhook/mock-confirm): → Confirmed, deadline cleared.
+            // On expiry (PaymentTimeoutJob fires after deadline): → Expired, seats released.
             booking.setStatus(BookingStatus.PendingPayment);
             reserveSeats(occurrence, newTotalSeats - occurrence.getSeatsReserved());
+
+            // Set the 15-minute payment deadline at booking creation time.
+            // PaymentTimeoutJob checks cartExpiresAtUtc every 60 seconds.
+            // StripePaymentService.createCheckoutSession() may override this to 30 min
+            // for real Stripe sessions (Stripe's minimum session window) — that is fine;
+            // the backend job will still clean up if payment is never initiated at all.
+            booking.setCartExpiresAtUtc(Instant.now().plus(15, ChronoUnit.MINUTES));
         } else {
             // Request to Book: seat is ALSO reserved immediately to prevent overbooking
             // while the guide reviews. Guide has 24 h to respond.
@@ -1008,6 +1017,13 @@ public class BookingService {
                 .cancelledAtUtc(b.getCancelledAtUtc())
                 .waiverSigned(b.getWaiverSigned())
                 .createdAtUtc(b.getCreatedAtUtc())
+                // Payment deadline — only meaningful while status is PendingPayment.
+                // cartExpiresAtUtc is set at booking creation (15 min) and cleared
+                // by StripePaymentService once payment is confirmed.
+                .paymentDeadlineUtc(
+                        b.getStatus() == BookingStatus.PendingPayment
+                                ? b.getCartExpiresAtUtc()
+                                : null)
                 .guideId(b.getOccurrence().getTemplate().getGuide().getUser().getId())
                 .guideName(b.getOccurrence().getTemplate().getGuide().getUser().getFullName())
                 .build();
@@ -1062,6 +1078,8 @@ public class BookingService {
 
     /**
      * Periodically called to clean up stale bookings that guides forgot to process.
+     * Handles InProgress → Completed and Confirmed → Cancelled (No-Show) transitions.
+     * Called by BookingStatusCleanupJob every hour.
      */
     @Transactional
     public void processStaleBookings() {
@@ -1079,7 +1097,7 @@ public class BookingService {
             }
             bookingRepository.save(b);
             stripePaymentService.scheduleGuidePayoutFor(b);
-            log.info("Auto-completed stale booking ID: {}", b.getId());
+            log.info("[Cleanup] Auto-completed stale InProgress booking ID: {}", b.getId());
         }
 
         // 2. Confirmed -> Cancelled (No-Show) (2 hour buffer after scheduled start)
@@ -1094,7 +1112,95 @@ public class BookingService {
             promoteFromWaitlist(b.getOccurrence());
             
             bookingRepository.save(b);
-            log.info("Auto-cancelled stale confirmed booking (No-Show) ID: {}", b.getId());
+            log.info("[Cleanup] Auto-cancelled stale confirmed booking (No-Show) ID: {}", b.getId());
+        }
+    }
+
+    // ── Payment Timeout Cleanup ────────────────────────────────────────────────
+
+    /**
+     * Expires PendingPayment bookings whose 15-minute payment window has lapsed.
+     *
+     * Called every 60 seconds by PaymentTimeoutJob.
+     *
+     * Race-condition safety:
+     *   - Query only matches status = PendingPayment — once StripePaymentService
+     *     confirms payment and flips the status to Confirmed, this method will
+     *     never touch that booking again.
+     *   - If the scheduler and the Stripe webhook fire simultaneously, JPA
+     *     optimistic locking (@Version on Booking) ensures only one writer wins.
+     *     The other will get an OptimisticLockException which is silently swallowed
+     *     here (the booking is already Confirmed, so no action needed).
+     *
+     * Notifications sent:
+     *   - Traveler: BOOKING_EXPIRED — "Your booking was cancelled (payment timeout)"
+     *   - Guide:    BOOKING_CANCELLED — "A booking was cancelled (no payment received)"
+     */
+    @Transactional
+    public void processExpiredPendingPayments() {
+        Instant now = Instant.now();
+
+        // Find all PendingPayment bookings with a cartExpiresAtUtc in the past
+        List<Booking> expired = bookingRepository.findStalePendingPaymentBookings(now);
+
+        if (expired.isEmpty()) {
+            return; // Nothing to do — avoid noisy logs on every run
+        }
+
+        log.info("[PaymentTimeout] Found {} expired PendingPayment booking(s) to process", expired.size());
+
+        for (Booking b : expired) {
+            try {
+                // ── Transition: PendingPayment → Expired ──────────────────────
+                b.setStatus(BookingStatus.Expired);
+                b.setCancelledAtUtc(now);
+                b.setCancellationReason("Payment not completed within 15-minute window");
+
+                // Release the seats that were tentatively reserved at booking creation.
+                // This allows other travelers to book or promotes the next waitlist entry.
+                releaseSeats(b.getOccurrence(), b.getPeopleCount());
+                promoteFromWaitlist(b.getOccurrence());
+
+                bookingRepository.save(b);
+
+                String tourTitle = b.getOccurrence().getTemplate().getTitle();
+                Long travelerId  = b.getTraveler().getUser().getId();
+                Long guideUserId = b.getOccurrence().getTemplate().getGuide().getUser().getId();
+                String bookingIdStr = b.getId().toString();
+
+                // ── Notify traveler ───────────────────────────────────────────
+                notificationService.createNotification(
+                        travelerId,
+                        com.travelmarket.backend.notification.enums.NotificationType.BOOKING_EXPIRED,
+                        "Booking Expired",
+                        "Your booking for \"" + tourTitle + "\" was automatically cancelled "
+                                + "because payment was not completed within 15 minutes. "
+                                + "You can book again if seats are still available.",
+                        bookingIdStr,
+                        "BOOKING"
+                );
+
+                // ── Notify guide (optional but recommended) ───────────────────
+                notificationService.createNotification(
+                        guideUserId,
+                        com.travelmarket.backend.notification.enums.NotificationType.BOOKING_CANCELLED,
+                        "Booking Cancelled (No Payment)",
+                        "A booking for \"" + tourTitle + "\" was automatically cancelled "
+                                + "because the traveler did not complete payment within 15 minutes. "
+                                + "The seat has been released.",
+                        bookingIdStr,
+                        "BOOKING"
+                );
+
+                log.info("[PaymentTimeout] ⏰ Expired PendingPayment booking ID: {} for tour: '{}'",
+                        b.getId(), tourTitle);
+
+            } catch (Exception e) {
+                // Log and continue — don't let one failed booking block the rest.
+                // Likely cause: OptimisticLockException (payment confirmed concurrently).
+                log.warn("[PaymentTimeout] Could not expire booking ID: {} — possibly confirmed concurrently. Cause: {}",
+                        b.getId(), e.getMessage());
+            }
         }
     }
 }

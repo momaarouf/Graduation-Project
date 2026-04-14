@@ -67,6 +67,14 @@ public class BookingResponse {
     private Boolean waiverSigned;
     private Instant createdAtUtc;
 
+    /**
+     * Deadline by which payment must be completed (PendingPayment only).
+     * Set to createdAtUtc + 15 minutes at booking creation.
+     * Null for all other statuses — frontend should only render the timer
+     * when status == "PendingPayment" AND this field is non-null.
+     */
+    private Instant paymentDeadlineUtc;
+
     // ── Guide Context (for traveler messaging logistics) ────────────────────
     private Long guideId;
     private String guideName;

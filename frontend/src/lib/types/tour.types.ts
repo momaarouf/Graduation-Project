@@ -356,6 +356,13 @@ export interface BookingResponse {
   guideId: number                    // guide user ID
   guideName: string                  // guide full name
   createdAtUtc: string
+  /**
+   * Deadline by which payment must be completed.
+   * Populated only when status === PendingPayment.
+   * ISO 8601 UTC string — use with the PaymentCountdown component.
+   * Null for all other statuses.
+   */
+  paymentDeadlineUtc: string | null
 }
 
 export interface PaymentResponse {

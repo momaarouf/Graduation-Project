@@ -45,6 +45,7 @@ import {
 import { createPaymentSession } from '@/src/lib/api/payment'
 import MockPaymentSimulator from '@/src/components/payment/MockPaymentSimulator'
 import { BookingResponse, BookingStatus } from '@/src/lib/types/tour.types'
+import { usePaymentCountdown } from '@/src/hooks/usePaymentCountdown'
 import { useRouter } from 'next/navigation'
 import { getTravelerBooking } from '@/src/lib/api/tours'
 
@@ -58,7 +59,13 @@ export default function BookingConfirmationPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [showQR, setShowQR] = useState(false)
   const [isPaying, setIsPaying] = useState(false)
-  const [timeLeft, setTimeLeft] = useState<string>('')
+
+  // ── Payment countdown — reads paymentDeadlineUtc from booking response ─
+  // This is the authoritative deadline set by the backend at booking creation.
+  // Do NOT compute from createdAtUtc + 30min — that was the old wrong approach.
+  const countdown = usePaymentCountdown(
+    booking?.status === BookingStatus.PendingPayment ? booking?.paymentDeadlineUtc : null
+  )
 
   // Payment Methods State
   const [savedMethods, setSavedMethods] = useState<TravelerPaymentMethod[]>([])
@@ -139,28 +146,7 @@ export default function BookingConfirmationPage() {
     return () => window.removeEventListener('focus', onFocus)
   }, [booking?.status, selectedMethodId])
 
-  // ── Countdown Timer logic ──────────────────────────────────────────────
-  useEffect(() => {
-    if (!booking || booking.status !== BookingStatus.PendingPayment) return
-
-    const timer = setInterval(() => {
-      const createdAt = new Date(booking.createdAtUtc).getTime()
-      const expiryTime = createdAt + 30 * 60 * 1000 // 30 minutes
-      const now = new Date().getTime()
-      const diff = expiryTime - now
-
-      if (diff <= 0) {
-        setTimeLeft('Expired')
-        clearInterval(timer)
-      } else {
-        const mins = Math.floor(diff / (1000 * 60))
-        const secs = Math.floor((diff % (1000 * 60)) / 1000)
-        setTimeLeft(`${mins}:${secs < 10 ? '0' : ''}${secs}`)
-      }
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [booking])
+  // (countdown handled by usePaymentCountdown hook above — no manual interval needed)
 
   const handlePayNow = async () => {
     if (!booking) return
@@ -427,9 +413,23 @@ Thank you for choosing TravelMarket!
                     <div>
                       <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight">Checkout</h3>
                       <div className="flex items-center gap-2 mt-1">
-                        <div className="px-3 py-1 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900 rounded-full text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
-                          Reserved for {timeLeft}
-                        </div>
+                        {/* Countdown pill — reads from backend paymentDeadlineUtc (15-min window) */}
+                        {countdown && !countdown.isExpired && (
+                          <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                            countdown.urgency === 'critical'
+                              ? 'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 animate-pulse'
+                              : countdown.urgency === 'warning'
+                              ? 'bg-orange-50 dark:bg-orange-950/50 border-orange-200 dark:border-orange-800 text-orange-600 dark:text-orange-400 animate-pulse'
+                              : 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-100 dark:border-indigo-900 text-indigo-600 dark:text-indigo-400'
+                          }`}>
+                            Reserved for {countdown.displayString}
+                          </div>
+                        )}
+                        {countdown?.isExpired && (
+                          <div className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
+                            Expired
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="text-right">

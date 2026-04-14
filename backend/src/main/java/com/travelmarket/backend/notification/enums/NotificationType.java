@@ -15,6 +15,7 @@ public enum NotificationType {
     BOOKING_CREATED,
     BOOKING_CONFIRMED,
     BOOKING_CANCELLED,
+    BOOKING_EXPIRED,        // PendingPayment booking auto-cancelled after 15-min timeout
     
     // Payments
     PAYMENT_SUCCESS,
