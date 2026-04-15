@@ -279,7 +279,7 @@ public class ChatService {
         travelerProfileRepository.findByUserId(conv.getTraveler().getId()).ifPresent(profile -> {
             builder.travelerProfileId(profile.getId());
             builder.travelerAvatarUrl(profile.getAvatarUrl());
-            builder.travelerLoyaltyTier(profile.getLoyaltyTier());
+            builder.travelerLoyaltyTier(profile.getLoyaltyTier() != null ? profile.getLoyaltyTier().name() : null);
             builder.travelerTripsCount(profile.getTotalCompletedTrips());
         });
 

@@ -285,7 +285,7 @@ public class ReviewService {
     private ReviewResponse toResponse(Review review, Booking booking) {
         String  travelerName      = booking.getTraveler().getUser().getFullName();
         String  travelerAvatarUrl = booking.getTraveler().getAvatarUrl();
-        String  travelerTier      = booking.getTraveler().getLoyaltyTier();
+        String  travelerTier      = booking.getTraveler().getLoyaltyTier() != null ? booking.getTraveler().getLoyaltyTier().name() : null;
         String  tourTitle         = booking.getOccurrence().getTemplate().getTitle();
         Instant tourDate          = booking.getOccurrence().getStartTimeUtc();
 
@@ -307,7 +307,7 @@ public class ReviewService {
         // Enriched via JOIN FETCH in ReviewRepository
         String  travelerName      = review.getTraveler().getUser().getFullName();
         String  travelerAvatarUrl = review.getTraveler().getAvatarUrl();
-        String  travelerTier      = review.getTraveler().getLoyaltyTier();
+        String  travelerTier      = review.getTraveler().getLoyaltyTier() != null ? review.getTraveler().getLoyaltyTier().name() : null;
         String  tourTitle         = review.getOccurrence().getTemplate().getTitle();
         Instant tourDate          = review.getOccurrence().getStartTimeUtc();
 

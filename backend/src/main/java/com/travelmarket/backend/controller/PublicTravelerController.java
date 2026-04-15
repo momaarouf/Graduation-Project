@@ -52,7 +52,7 @@ public class PublicTravelerController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM yyyy").withZone(ZoneId.of("UTC"));
         res.setMemberSince(formatter.format(user.getCreatedAtUtc()));
 
-        res.setLoyaltyTier(tp.getLoyaltyTier() != null ? tp.getLoyaltyTier() : "Bronze");
+        res.setLoyaltyTier(tp.getLoyaltyTier() != null ? tp.getLoyaltyTier().name() : "BRONZE");
         res.setCompletedTrips(tp.getTotalCompletedTrips() != null ? tp.getTotalCompletedTrips() : 0);
 
         try {

@@ -1,5 +1,6 @@
 package com.travelmarket.backend.entity;
 
+import com.travelmarket.backend.booking.enums.LoyaltyTier;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,8 +22,15 @@ public class TravelerProfile {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @Column(name = "loyalty_tier")
-    private String loyaltyTier = "Bronze";
+    /**
+     * Current loyalty tier of this traveler.
+     * Automatically recalculated by {@code PricingService.recalculateLoyaltyTier()}
+     * whenever a booking transitions to COMPLETED.
+     * Stored as an uppercase string (BRONZE / SILVER / GOLD) via {@code EnumType.STRING}.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "loyalty_tier", length = 20)
+    private LoyaltyTier loyaltyTier = LoyaltyTier.BRONZE;
 
     @Column(name = "streak_count")
     private Integer streakCount = 0;

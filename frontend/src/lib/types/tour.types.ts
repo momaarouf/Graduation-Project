@@ -363,7 +363,19 @@ export interface BookingResponse {
    * Null for all other statuses.
    */
   paymentDeadlineUtc: string | null
+  /**
+   * Loyalty tier discount percentage applied at booking creation time (e.g., 5 = 5%).
+   * Null or 0 means no tier discount was applied (BRONZE traveler).
+   */
+  tierDiscountPct?: number | null
+  /**
+   * Absolute dollar amount saved due to loyalty discount.
+   * Null or 0 means no discount was applied.
+   * Use this for the "You saved $X.XX" banner on the booking confirmation page.
+   */
+  tierDiscountAmount?: number | null
 }
+
 
 export interface PaymentResponse {
   paymentId: number

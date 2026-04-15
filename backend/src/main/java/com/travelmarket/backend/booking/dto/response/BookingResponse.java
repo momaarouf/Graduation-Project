@@ -78,4 +78,20 @@ public class BookingResponse {
     // ── Guide Context (for traveler messaging logistics) ────────────────────
     private Long guideId;
     private String guideName;
-}
+
+    // ── Loyalty discount applied to this booking ─────────────────────────────
+
+    /**
+     * Loyalty tier discount percentage applied at booking time (e.g., 5 for 5%).
+     * Null or zero means no tier discount was applied (BRONZE traveler or no discount configured).
+     * Snapshotted from the traveler's tier at booking creation — does not change if tier changes later.
+     */
+    private BigDecimal tierDiscountPct;
+
+    /**
+     * Absolute dollar savings from the loyalty discount (e.g., 7.50 saved on a $150 booking at 5%).
+     * Null or zero means no discount was applied.
+     * Useful for the "You saved $X.XX" UI banner.
+     */
+    private BigDecimal tierDiscountAmount;
+}

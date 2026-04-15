@@ -51,6 +51,8 @@ public class BookingService {
     private final NotificationService notificationService;
     /** Centralized UTC time — use this everywhere instead of Instant.now() inline */
     private final TimeService timeService;
+    /** Central pricing logic — loyalty discounts, platform fee, dynamic pricing. */
+    private final PricingService pricingService;
     @Lazy
     private final StripePaymentService stripePaymentService;
 
@@ -99,16 +101,22 @@ public class BookingService {
         booking.setPeopleCount(request.getPeopleCount());
         booking.setWaiverSigned(Boolean.TRUE.equals(request.getWaiverSigned()));
 
-        // Snapshot all pricing at booking time so future template edits don't
-        // alter historical booking records
+        // Snapshot all pricing via PricingService — applies loyalty discount + group discount
+        // + dynamic pricing (weekend/holiday) in one consistent pipeline.
         BigDecimal basePrice = occurrence.getTemplate().getBasePrice();
         booking.setBasePriceSnapshot(basePrice);
         booking.setCurrency(occurrence.getTemplate().getCurrency() != null
                 ? occurrence.getTemplate().getCurrency() : "USD");
 
-        // Snapshot platform fee (default 10% for now — feeds cancellation refund calc)
-        calculateAndSetFinalPrice(booking, occurrence.getTemplate());
-        booking.setPlatformFeeSnapshot(booking.getFinalPrice().multiply(new BigDecimal("0.10")));
+        // Build the full price breakdown (group → loyalty → dynamic → platform fee)
+        PriceBreakdown breakdown = pricingService.calculatePrice(
+                occurrence.getTemplate(), occurrence, traveler, request.getPeopleCount());
+
+        // Snapshot every discount component so cancellation / payout cards have full history
+        booking.setFinalPrice(breakdown.getFinalPrice());
+        booking.setPlatformFeeSnapshot(breakdown.getPlatformFeeAmount());
+        booking.setGroupDiscountPercentSnapshot(breakdown.getGroupDiscountPct());
+        booking.setTierDiscountPercentSnapshot(breakdown.getTierDiscountPct());
 
         // Resolve booking mode from the template and snapshot it onto the booking.
         // A guide flipping instantBook later won't affect bookings already in flight.
@@ -366,9 +374,13 @@ public class BookingService {
             }
         }
 
-        // Snapshot new pricing
-        calculateAndSetFinalPrice(booking, newOccurrence.getTemplate());
-        booking.setPlatformFeeSnapshot(booking.getFinalPrice().multiply(new BigDecimal("0.10")));
+        // Snapshot new pricing via PricingService
+        PriceBreakdown updBreakdown = pricingService.calculatePrice(
+                newOccurrence.getTemplate(), newOccurrence, booking.getTraveler(), newPeopleCount);
+        booking.setFinalPrice(updBreakdown.getFinalPrice());
+        booking.setPlatformFeeSnapshot(updBreakdown.getPlatformFeeAmount());
+        booking.setGroupDiscountPercentSnapshot(updBreakdown.getGroupDiscountPct());
+        booking.setTierDiscountPercentSnapshot(updBreakdown.getTierDiscountPct());
 
         return mapToResponse(bookingRepository.save(booking));
     }
@@ -583,9 +595,12 @@ public class BookingService {
         booking.setStatus(BookingStatus.Completed);
         booking.setCompletedAtUtc(timeService.getCurrentUtc());
 
-        // Increment traveler's total completed trips
+        // Increment traveler's total completed trips, then recalculate loyalty tier.
+        // PricingService owns the tier logic so thresholds remain configurable.
         TravelerProfile traveler = booking.getTraveler();
-        traveler.setTotalCompletedTrips((traveler.getTotalCompletedTrips() != null ? traveler.getTotalCompletedTrips() : 0) + 1);
+        traveler.setTotalCompletedTrips(
+                (traveler.getTotalCompletedTrips() != null ? traveler.getTotalCompletedTrips() : 0) + 1);
+        pricingService.recalculateLoyaltyTier(traveler);  // mutates traveler in-place
         travelerRepository.save(traveler);
 
         Booking completedBooking = bookingRepository.save(booking);
@@ -755,11 +770,17 @@ public class BookingService {
                 promoted.setCurrency(occurrence.getTemplate().getCurrency() != null
                         ? occurrence.getTemplate().getCurrency() : "USD");
                 
-                calculateAndSetFinalPrice(promoted, occurrence.getTemplate());
+                // Build pricing via PricingService so promoted traveler also gets loyalty discount
+                PriceBreakdown promoBreakdown = pricingService.calculatePrice(
+                        occurrence.getTemplate(), occurrence, entry.getTraveler(), entry.getPeopleCount());
+                promoted.setBasePriceSnapshot(occurrence.getTemplate().getBasePrice());
+                promoted.setCurrency(occurrence.getTemplate().getCurrency() != null
+                        ? occurrence.getTemplate().getCurrency() : "USD");
+                promoted.setFinalPrice(promoBreakdown.getFinalPrice());
+                promoted.setPlatformFeeSnapshot(promoBreakdown.getPlatformFeeAmount());
+                promoted.setGroupDiscountPercentSnapshot(promoBreakdown.getGroupDiscountPct());
+                promoted.setTierDiscountPercentSnapshot(promoBreakdown.getTierDiscountPct());
                 promoted.setQrCode(UUID.randomUUID().toString());
-
-                // Snapshot platform fee (default 10% for now)
-                promoted.setPlatformFeeSnapshot(promoted.getFinalPrice().multiply(new BigDecimal("0.10")));
 
                 bookingRepository.save(promoted);
 
@@ -916,90 +937,6 @@ public class BookingService {
                         "Booking not found"));
     }
 
-    private void calculateAndSetFinalPrice(Booking booking, com.travelmarket.backend.tour.entity.TourTemplate template) {
-        BigDecimal basePrice = booking.getBasePriceSnapshot();
-        if (basePrice == null) basePrice = template.getBasePrice();
-        
-        int peopleCount = booking.getPeopleCount();
-        BigDecimal subtotal = basePrice.multiply(BigDecimal.valueOf(peopleCount));
-        BigDecimal finalPrice = subtotal;
-
-        // 1. Apply group discount if applicable
-        if (Boolean.TRUE.equals(template.getHasGroupDiscount()) 
-                && template.getGroupDiscountThreshold() != null 
-                && peopleCount >= template.getGroupDiscountThreshold()) {
-            
-            BigDecimal discountPercent = template.getGroupDiscountPercent() != null 
-                    ? template.getGroupDiscountPercent() 
-                    : BigDecimal.ZERO;
-            
-            if (discountPercent.compareTo(BigDecimal.ZERO) > 0) {
-                BigDecimal discount = subtotal.multiply(discountPercent.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP));
-                finalPrice = subtotal.subtract(discount);
-                booking.setGroupDiscountPercentSnapshot(discountPercent);
-            }
-        }
-
-        // 2. Apply Dynamic Pricing (Weekends and Holidays)
-        finalPrice = applyDynamicPricing(finalPrice, template, booking.getOccurrence().getStartTimeUtc());
-        
-        booking.setFinalPrice(finalPrice.setScale(2, RoundingMode.HALF_UP));
-    }
-
-    private BigDecimal applyDynamicPricing(BigDecimal price, com.travelmarket.backend.tour.entity.TourTemplate template, Instant tourDate) {
-        String json = template.getDynamicPricing();
-        if (json == null || json.isEmpty()) return price;
-
-        try {
-            JsonNode root = objectMapper.readTree(json);
-            double weekendMultiplier = root.path("weekendMultiplier").asDouble(1.0);
-            double holidayMultiplier = root.path("holidayMultiplier").asDouble(1.0);
-
-            // Legacy & Frontend consistency check: 
-            // If the multiplier is e.g. 120 (percent), we treat it as 1.2
-            if (weekendMultiplier > 5.0) weekendMultiplier /= 100.0;
-            if (holidayMultiplier > 5.0) holidayMultiplier /= 100.0;
-            
-            ZonedDateTime zdt = tourDate.atZone(ZoneId.of("UTC")); // Or "Asia/Beirut" if preferred
-            DayOfWeek dow = zdt.getDayOfWeek();
-            int month = zdt.getMonthValue();
-            int day = zdt.getDayOfMonth();
-
-            // 1. Check for Holidays (Fixed Lebanese Holidays)
-            boolean isHoliday = isFixedLebaneseHoliday(month, day);
-            if (isHoliday && holidayMultiplier != 1.0) {
-                // Safety: prevent insane multipliers (cap at 5.0 for now)
-                double safeMultiplier = Math.min(holidayMultiplier, 5.0);
-                return price.multiply(BigDecimal.valueOf(safeMultiplier));
-            }
-
-            // 2. Check for Weekends (Sat/Sun)
-            if ((dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY) && weekendMultiplier != 1.0) {
-                double safeMultiplier = Math.min(weekendMultiplier, 5.0);
-                return price.multiply(BigDecimal.valueOf(safeMultiplier));
-            }
-
-        } catch (Exception e) {
-            // Log error or ignore parse errors
-        }
-        return price;
-    }
-
-    private boolean isFixedLebaneseHoliday(int month, int day) {
-        // Standard non-working days in Lebanon
-        if (month == 1 && day == 1) return true;   // New Year
-        if (month == 1 && day == 6) return true;   // Armenian Christmas
-        if (month == 2 && day == 9) return true;   // St Maron
-        if (month == 3 && day == 25) return true;  // Annunciation
-        if (month == 5 && day == 1) return true;   // Labour Day
-        if (month == 5 && day == 25) return true;  // Resistance & Liberation
-        if (month == 8 && day == 15) return true;  // Assumption
-        if (month == 11 && day == 1) return true;  // All Saints
-        if (month == 11 && day == 22) return true; // Independence
-        if (month == 12 && day == 25) return true; // Christmas
-        return false;
-    }
-
     /**
      * Lazy-synchronizes booking statuses based on current time.
      * Transition rules:
@@ -1025,10 +962,12 @@ public class BookingService {
                     b.setStatus(BookingStatus.Completed);
                     b.setCompletedAtUtc(b.getOccurrence().getEndTimeUtc());
 
-                    // Increment traveler's total completed trips
+                    // Increment completed trips and auto-upgrade loyalty tier
                     TravelerProfile traveler = b.getTraveler();
                     if (traveler != null) {
-                        traveler.setTotalCompletedTrips((traveler.getTotalCompletedTrips() != null ? traveler.getTotalCompletedTrips() : 0) + 1);
+                        traveler.setTotalCompletedTrips(
+                                (traveler.getTotalCompletedTrips() != null ? traveler.getTotalCompletedTrips() : 0) + 1);
+                        pricingService.recalculateLoyaltyTier(traveler); // tier auto-upgrade
                         travelerRepository.save(traveler);
                     }
 
@@ -1061,6 +1000,31 @@ public class BookingService {
     // ── DTO Mapping ───────────────────────────────────────────────────────────
 
     private BookingResponse mapToResponse(Booking b) {
+        // Compute the absolute loyalty discount amount from snapshots.
+        // tierDiscountPercentSnapshot is the percent applied at booking time.
+        // We derive the pre-discount subtotal: finalPrice / (1 - pct/100) ≈ finalPrice + discount.
+        // Simpler derivation: note that tierDiscount was applied after group discount,
+        // so: tierDiscountAmount = (preTierPrice) * pct / 100.
+        // Since we don't store preTierPrice separately, we approximate:
+        //   tierDiscountAmount = finalPrice * (tierPct / (100 - tierPct))  — only valid for small pct.
+        // Safer: just record the raw pct and let the frontend compute or show percentage.
+        // For the absolute amount, compute from basePriceSnapshot × peopleCount × (1 - groupDisc) × tierPct:
+        BigDecimal tierDiscountPct = b.getTierDiscountPercentSnapshot();
+        BigDecimal tierDiscountAmount = BigDecimal.ZERO;
+        if (tierDiscountPct != null && tierDiscountPct.compareTo(BigDecimal.ZERO) > 0
+                && b.getBasePriceSnapshot() != null && b.getPeopleCount() != null) {
+            // subtotal after group discount (approximate: we don't store it separately)
+            BigDecimal subtotal = b.getBasePriceSnapshot()
+                    .multiply(BigDecimal.valueOf(b.getPeopleCount()));
+            BigDecimal groupDisc = b.getGroupDiscountPercentSnapshot() != null
+                    ? b.getGroupDiscountPercentSnapshot() : BigDecimal.ZERO;
+            BigDecimal afterGroup = subtotal.multiply(
+                    BigDecimal.ONE.subtract(groupDisc.divide(new BigDecimal("100"), 4, java.math.RoundingMode.HALF_UP)));
+            tierDiscountAmount = afterGroup.multiply(
+                    tierDiscountPct.divide(new BigDecimal("100"), 4, java.math.RoundingMode.HALF_UP))
+                    .setScale(2, java.math.RoundingMode.HALF_UP);
+        }
+
         return BookingResponse.builder()
                 .id(b.getId())
                 .occurrenceId(b.getOccurrence().getId())
@@ -1097,8 +1061,12 @@ public class BookingService {
                                 : null)
                 .guideId(b.getOccurrence().getTemplate().getGuide().getUser().getId())
                 .guideName(b.getOccurrence().getTemplate().getGuide().getUser().getFullName())
+                // Loyalty discount snapshots — used by frontend for "You saved $X" banner
+                .tierDiscountPct(tierDiscountPct)
+                .tierDiscountAmount(tierDiscountAmount.compareTo(BigDecimal.ZERO) > 0 ? tierDiscountAmount : null)
                 .build();
     }
+
 
     private GuideBookingResponse mapToGuideResponse(Booking b) {
         return GuideBookingResponse.builder()
@@ -1166,7 +1134,9 @@ public class BookingService {
             b.setCompletedAtUtc(b.getOccurrence().getEndTimeUtc());
             com.travelmarket.backend.entity.TravelerProfile traveler = b.getTraveler();
             if (traveler != null) {
-                traveler.setTotalCompletedTrips((traveler.getTotalCompletedTrips() != null ? traveler.getTotalCompletedTrips() : 0) + 1);
+                traveler.setTotalCompletedTrips(
+                        (traveler.getTotalCompletedTrips() != null ? traveler.getTotalCompletedTrips() : 0) + 1);
+                pricingService.recalculateLoyaltyTier(traveler); // auto-upgrade tier
                 travelerRepository.save(traveler);
             }
             bookingRepository.save(b);

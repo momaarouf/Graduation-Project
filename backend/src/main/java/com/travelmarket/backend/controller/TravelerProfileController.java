@@ -2,6 +2,10 @@ package com.travelmarket.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.travelmarket.backend.booking.enums.LoyaltyTier;
+import com.travelmarket.backend.booking.service.PricingService;
+import com.travelmarket.backend.config.LoyaltyProperties;
+import com.travelmarket.backend.dto.LoyaltyStatusResponse;
 import com.travelmarket.backend.dto.TravelerCompleteProfileRequest;
 import com.travelmarket.backend.dto.TravelerProfileResponse;
 import com.travelmarket.backend.entity.TravelerProfile;
@@ -27,6 +31,10 @@ public class TravelerProfileController {
     private final UserRepository userRepository;
     private final TravelerProfileRepository travelerProfileRepository;
     private final ObjectMapper objectMapper;
+    /** Provides tier logic (thresholds, discount pcts, progress helpers). */
+    private final PricingService pricingService;
+    /** Raw config values for "next tier" discount preview. */
+    private final LoyaltyProperties loyaltyProperties;
 
     @GetMapping
     public TravelerProfileResponse getProfile(@AuthenticationPrincipal UserDetails principal) throws Exception {
@@ -133,7 +141,7 @@ public class TravelerProfileController {
         res.setEmailVerified(user.getIsEmailVerified());
         res.setPhoneVerified(user.getIsPhoneVerified());
         res.setMemberSince(user.getCreatedAtUtc() != null ? user.getCreatedAtUtc().toString() : "");
-        res.setLoyaltyTier(tp.getLoyaltyTier() != null ? tp.getLoyaltyTier() : "Bronze");
+        res.setLoyaltyTier(tp.getLoyaltyTier() != null ? tp.getLoyaltyTier().name() : LoyaltyTier.BRONZE.name());
         res.setCompletedTrips(tp.getTotalCompletedTrips() != null ? tp.getTotalCompletedTrips() : 0);
         res.setReviewReminderEnabled(tp.getReviewReminderEnabled() != null ? tp.getReviewReminderEnabled() : false);
         res.setNewsletterOptIn(user.getNewsletterOptIn() != null ? user.getNewsletterOptIn() : false);
@@ -152,5 +160,55 @@ public class TravelerProfileController {
 
     private static boolean isTrue(Boolean b) {
         return b != null && b;
+    }
+
+    // ── Loyalty Status ────────────────────────────────────────────────────────
+
+    /**
+     * Returns the authenticated traveler's full loyalty status.
+     *
+     * Response includes:
+     *   - Current tier (BRONZE / SILVER / GOLD)
+     *   - Discount % they earn today
+     *   - Number of completed trips
+     *   - Trips needed to reach the next tier (0 if already GOLD)
+     *   - Preview of the next tier and its discount rate
+     *
+     * GET /api/traveler/profile/loyalty
+     */
+    @GetMapping("/loyalty")
+    public LoyaltyStatusResponse getLoyaltyStatus(
+            @AuthenticationPrincipal UserDetails principal) {
+
+        User user = userRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getRole() != User.Role.Traveler) {
+            throw new org.springframework.security.access.AccessDeniedException("Forbidden");
+        }
+
+        TravelerProfile tp = travelerProfileRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Traveler profile missing"));
+
+        // Resolve current tier (fallback to BRONZE for new travelers)
+        LoyaltyTier currentTier = tp.getLoyaltyTier() != null ? tp.getLoyaltyTier() : LoyaltyTier.BRONZE;
+        int completedTrips = tp.getTotalCompletedTrips() != null ? tp.getTotalCompletedTrips() : 0;
+
+        // Discount % for current tier (from configurable LoyaltyProperties)
+        java.math.BigDecimal currentDiscountPct = pricingService.getTierDiscountPct(currentTier);
+
+        // Trips to next tier and next tier info
+        int tripsToNext = pricingService.tripsToNextTier(tp);
+        LoyaltyTier next = pricingService.nextTier(currentTier);
+        java.math.BigDecimal nextDiscountPct = next != null ? pricingService.getTierDiscountPct(next) : null;
+
+        return LoyaltyStatusResponse.builder()
+                .loyaltyTier(currentTier.name())
+                .discountPct(currentDiscountPct)
+                .completedTrips(completedTrips)
+                .tripsToNextTier(tripsToNext)
+                .nextTier(next != null ? next.name() : null)
+                .nextTierDiscountPct(nextDiscountPct)
+                .build();
     }
 }
