@@ -34,6 +34,8 @@ export interface MeResponse {
   profileCompleted: boolean;
   emailVerified: boolean;
   agreedToTerms: boolean;
+  emailNotificationsEnabled: boolean;
+  pushNotificationsEnabled: boolean;
 }
 
 /** POST /api/auth/accept-terms — called after OAuth signup */
@@ -81,6 +83,11 @@ export interface ResetPasswordRequest {
 export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
+}
+
+export interface UpdateNotificationPreferencesRequest {
+  emailNotificationsEnabled: boolean;
+  pushNotificationsEnabled: boolean;
 }
 
 // ==================== PROFILE COMPLETION TYPES ====================
@@ -233,9 +240,14 @@ export const passwordReset = async (data: ResetPasswordRequest): Promise<void> =
  * NOTE: Backend placeholder. Actual implementation needs PUT /api/auth/password/change
  */
 export const passwordChange = async (data: ChangePasswordRequest): Promise<void> => {
-  // Use apiClient if endpoint exists, otherwise simulate delay since user forbade backend edits
-  // await apiClient.put('/api/auth/password/change', data);
-  await new Promise(resolve => setTimeout(resolve, 1500));
+  await apiClient.post('/api/auth/password/change', data);
+};
+
+/**
+ * Update global notification preferences (email and push)
+ */
+export const updateNotificationPreferences = async (data: UpdateNotificationPreferencesRequest): Promise<void> => {
+  await apiClient.post('/api/auth/me/notifications', data);
 };
 
 // ==================== PROFILE COMPLETION ENDPOINTS ====================

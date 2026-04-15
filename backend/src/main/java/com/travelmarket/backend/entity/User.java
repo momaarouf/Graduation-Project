@@ -70,6 +70,11 @@ public class User {
 
     private String timezone = "UTC";
 
+    @Column(name = "email_notifications_enabled", nullable = false)
+    private Boolean emailNotificationsEnabled = true;
+
+    @Column(name = "push_notifications_enabled", nullable = false)
+    private Boolean pushNotificationsEnabled = true;
 
     @Column(name = "last_login_at")
     private Instant lastLoginAt;

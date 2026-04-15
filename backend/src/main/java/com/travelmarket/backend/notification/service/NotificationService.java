@@ -38,6 +38,11 @@ public class NotificationService {
     @Async
     public void createNotification(Long userId, NotificationType type, String title, String message, String referenceId, String referenceType) {
         log.info("Processing notification for user {}: {}", userId, title);
+
+        Optional<User> optUser = userRepository.findById(userId);
+        if (optUser.isEmpty()) return;
+        User user = optUser.get();
+
         Notification notification;
 
         // SMART GROUPING: If it's a message, check if there's an existing unread notification for this chat
@@ -68,19 +73,21 @@ public class NotificationService {
                     .build();
         }
 
-        // Save to DB (update existing or save new)
+        // Save to DB (update existing or save new) - We always save history internally so they appear in dashboard
         notificationRepository.save(notification);
         
-        // 1. WebSocket: Immediate UI update (Snappy experience)
-        try {
-            messagingTemplate.convertAndSend("/topic/notifications/" + userId, mapToResponse(notification));
-        } catch (Exception e) {
-            log.warn("Failed to push WebSocket update for user {}: {}", userId, e.getMessage());
+        // 1. WebSocket: Immediate UI update (Snappy experience) - Check push preference
+        if (Boolean.TRUE.equals(user.getPushNotificationsEnabled())) {
+            try {
+                messagingTemplate.convertAndSend("/topic/notifications/" + userId, mapToResponse(notification));
+            } catch (Exception e) {
+                log.warn("Failed to push WebSocket update for user {}: {}", userId, e.getMessage());
+            }
         }
 
-        // 2. Email: Dispatch after UI update (Asynchronous background task)
-        try {
-            userRepository.findById(userId).ifPresent(user -> {
+        // 2. Email: Dispatch after UI update (Asynchronous background task) - Check email preference
+        if (Boolean.TRUE.equals(user.getEmailNotificationsEnabled())) {
+            try {
                 String htmlBody = String.format(
                     "<html>" +
                     "<body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>" +
@@ -102,9 +109,9 @@ public class NotificationService {
                 
                 emailService.sendHtml(user.getEmail(), "New Message: " + title, htmlBody);
                 log.info("Email notification queued for user {}", userId);
-            });
-        } catch (Exception e) {
-            log.error("Failed to queue email notification for user {}: {}", userId, e.getMessage());
+            } catch (Exception e) {
+                log.error("Failed to queue email notification for user {}: {}", userId, e.getMessage());
+            }
         }
     }
 
@@ -123,6 +130,10 @@ public class NotificationService {
                                             String referenceId, String referenceType) {
         log.info("[NotificationService] In-app-only notification for user {}: {}", userId, title);
 
+        Optional<User> optUser = userRepository.findById(userId);
+        if (optUser.isEmpty()) return;
+        User user = optUser.get();
+
         // Build and persist the notification row
         Notification notification = Notification.builder()
                 .userId(userId)
@@ -135,12 +146,14 @@ public class NotificationService {
 
         notificationRepository.save(notification);
 
-        // Push to WebSocket topic so the bell badge updates in real-time
-        try {
-            messagingTemplate.convertAndSend("/topic/notifications/" + userId, mapToResponse(notification));
-        } catch (Exception e) {
-            // Non-fatal: user will see the notification on next page load
-            log.warn("[NotificationService] WebSocket push failed for user {}: {}", userId, e.getMessage());
+        // Push to WebSocket topic so the bell badge updates in real-time, if push notifications are enabled
+        if (Boolean.TRUE.equals(user.getPushNotificationsEnabled())) {
+            try {
+                messagingTemplate.convertAndSend("/topic/notifications/" + userId, mapToResponse(notification));
+            } catch (Exception e) {
+                // Non-fatal: user will see the notification on next page load
+                log.warn("[NotificationService] WebSocket push failed for user {}: {}", userId, e.getMessage());
+            }
         }
     }
 

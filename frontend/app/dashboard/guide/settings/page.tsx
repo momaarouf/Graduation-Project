@@ -37,7 +37,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
-import { authLogout } from '@/src/lib/api/auth'
+import { authLogout, passwordChange, updateNotificationPreferences } from '@/src/lib/api/auth'
 
 // ============================================================================
 // PASSWORD STRENGTH INDICATOR
@@ -123,13 +123,8 @@ export default function GuideSettingsPage() {
   const [timezone, setTimezone] = useState('UTC')
   
   // Notifications
-  const [emailBookings, setEmailBookings] = useState(true)
-  const [emailMessages, setEmailMessages] = useState(true)
-  const [emailPromotions, setEmailPromotions] = useState(false)
-  const [pushBookings, setPushBookings] = useState(true)
-  const [pushMessages, setPushMessages] = useState(true)
-  const [pushReminders, setPushReminders] = useState(true)
-  const [reminderFrequency, setReminderFrequency] = useState('immediate')
+  const [emailNotifications, setEmailNotifications] = useState(user?.emailNotificationsEnabled ?? true)
+  const [pushNotifications, setPushNotifications] = useState(user?.pushNotificationsEnabled ?? true)
   
   // Delete account
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -155,13 +150,50 @@ export default function GuideSettingsPage() {
     setIsSaving(true)
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      await passwordChange({
+        currentPassword,
+        newPassword
+      })
       toast.success('Password updated successfully!')
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to update password')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleForgotPassword = async () => {
+    if (!user?.email) {
+      toast.error('User email not found')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      await forgotPassword(user.email)
+      toast.success('Reset code sent to your email!')
+      router.push(`/auth/reset-password?email=${encodeURIComponent(user.email)}`)
     } catch (error) {
-      toast.error('Failed to update password')
+      toast.error('Failed to send reset code')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleSavePreferences = async () => {
+    setIsSaving(true)
+    
+    try {
+      await updateNotificationPreferences({
+        emailNotificationsEnabled: emailNotifications,
+        pushNotificationsEnabled: pushNotifications
+      });
+      toast.success('Preferences saved!')
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to save preferences')
     } finally {
       setIsSaving(false)
     }
@@ -476,125 +508,49 @@ export default function GuideSettingsPage() {
 
                     <div className="space-y-4">
                       {/* Email Notifications */}
-                      <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                        <h3 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                          <Mail className="w-4 h-4" />
-                          Email Notifications
-                        </h3>
-                        
-                        <div className="space-y-3">
-                          <label className="flex items-center justify-between cursor-pointer">
-                            <span className="text-sm text-gray-700 dark:text-gray-300">New Bookings</span>
-                            <button
-                              onClick={() => setEmailBookings(!emailBookings)}
-                              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                                emailBookings ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700'
-                              }`}
-                            >
-                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                emailBookings ? 'translate-x-5' : 'translate-x-0.5'
-                              }`} />
-                            </button>
-                          </label>
-                          
-                          <label className="flex items-center justify-between cursor-pointer">
-                            <span className="text-sm text-gray-700 dark:text-gray-300">New Messages</span>
-                            <button
-                              onClick={() => setEmailMessages(!emailMessages)}
-                              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                                emailMessages ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700'
-                              }`}
-                            >
-                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                emailMessages ? 'translate-x-5' : 'translate-x-0.5'
-                              }`} />
-                            </button>
-                          </label>
-                          
-                          <label className="flex items-center justify-between cursor-pointer">
-                            <span className="text-sm text-gray-700 dark:text-gray-300">Promotions & Updates</span>
-                            <button
-                              onClick={() => setEmailPromotions(!emailPromotions)}
-                              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                                emailPromotions ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700'
-                              }`}
-                            >
-                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                emailPromotions ? 'translate-x-5' : 'translate-x-0.5'
-                              }`} />
-                            </button>
-                          </label>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">
+                            <Mail className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Email Notifications</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Receive booking updates and messages via email</p>
+                          </div>
                         </div>
+                        <button
+                          onClick={() => setEmailNotifications(!emailNotifications)}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                            emailNotifications ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700'
+                          }`}
+                        >
+                          <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            emailNotifications ? 'translate-x-6' : 'translate-x-1'
+                          }`} />
+                        </button>
                       </div>
 
                       {/* Push Notifications */}
-                      <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                        <h3 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                          <Smartphone className="w-4 h-4" />
-                          Push Notifications
-                        </h3>
-                        
-                        <div className="space-y-3">
-                          <label className="flex items-center justify-between cursor-pointer">
-                            <span className="text-sm text-gray-700 dark:text-gray-300">New Bookings</span>
-                            <button
-                              onClick={() => setPushBookings(!pushBookings)}
-                              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                                pushBookings ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700'
-                              }`}
-                            >
-                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                pushBookings ? 'translate-x-5' : 'translate-x-0.5'
-                              }`} />
-                            </button>
-                          </label>
-                          
-                          <label className="flex items-center justify-between cursor-pointer">
-                            <span className="text-sm text-gray-700 dark:text-gray-300">New Messages</span>
-                            <button
-                              onClick={() => setPushMessages(!pushMessages)}
-                              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                                pushMessages ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700'
-                              }`}
-                            >
-                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                pushMessages ? 'translate-x-5' : 'translate-x-0.5'
-                              }`} />
-                            </button>
-                          </label>
-                          
-                          <label className="flex items-center justify-between cursor-pointer">
-                            <span className="text-sm text-gray-700 dark:text-gray-300">Booking Reminders</span>
-                            <button
-                              onClick={() => setPushReminders(!pushReminders)}
-                              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                                pushReminders ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700'
-                              }`}
-                            >
-                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                pushReminders ? 'translate-x-5' : 'translate-x-0.5'
-                              }`} />
-                            </button>
-                          </label>
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">
+                            <Smartphone className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Push Notifications</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Receive instant alerts on your device</p>
+                          </div>
                         </div>
-                      </div>
-
-                      {/* Reminder Frequency */}
-                      <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Reminder Frequency
-                        </label>
-                        <select
-                          value={reminderFrequency}
-                          onChange={(e) => setReminderFrequency(e.target.value)}
-                          className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        <button
+                          onClick={() => setPushNotifications(!pushNotifications)}
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                            pushNotifications ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700'
+                          }`}
                         >
-                          {NOTIFICATION_FREQUENCIES.map((freq) => (
-                            <option key={freq.value} value={freq.value}>
-                              {freq.label}
-                            </option>
-                          ))}
-                        </select>
+                          <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            pushNotifications ? 'translate-x-6' : 'translate-x-1'
+                          }`} />
+                        </button>
                       </div>
 
                       {/* Save Button */}

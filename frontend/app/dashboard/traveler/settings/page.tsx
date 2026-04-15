@@ -33,7 +33,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
-import { authLogout } from '@/src/lib/api/auth'
+import { authLogout, passwordChange, updateNotificationPreferences } from '@/src/lib/api/auth'
 
 // ============================================================================
 // PASSWORD STRENGTH INDICATOR
@@ -111,8 +111,8 @@ export default function TravelerSettingsPage() {
   // Preferences
   const [language, setLanguage] = useState('en')
   const [timezone, setTimezone] = useState('UTC')
-  const [emailNotifications, setEmailNotifications] = useState(true)
-  const [pushNotifications, setPushNotifications] = useState(true)
+  const [emailNotifications, setEmailNotifications] = useState(user?.emailNotificationsEnabled ?? true)
+  const [pushNotifications, setPushNotifications] = useState(user?.pushNotificationsEnabled ?? true)
   
   // Delete account
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -152,16 +152,18 @@ export default function TravelerSettingsPage() {
     setIsSaving(true)
     
     try {
-      // Phase 2: API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      await passwordChange({
+        currentPassword,
+        newPassword
+      })
       toast.success('Password updated successfully!')
       
       // Clear form
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
-    } catch (error) {
-      toast.error('Failed to update password')
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to update password')
     } finally {
       setIsSaving(false)
     }
@@ -189,11 +191,14 @@ export default function TravelerSettingsPage() {
     setIsSaving(true)
     
     try {
-      // Phase 2: API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await updateNotificationPreferences({
+        emailNotificationsEnabled: emailNotifications,
+        pushNotificationsEnabled: pushNotifications
+      });
+      // Assuming context updates or just reload the context here if needed
       toast.success('Preferences saved!')
-    } catch (error) {
-      toast.error('Failed to save preferences')
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to save preferences')
     } finally {
       setIsSaving(false)
     }

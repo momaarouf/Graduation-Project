@@ -17,5 +17,7 @@ public record MeResponse(
         Long guideProfileId,
         boolean profileCompleted,
         boolean emailVerified,
-        boolean agreedToTerms
+        boolean agreedToTerms,
+        boolean emailNotificationsEnabled,
+        boolean pushNotificationsEnabled
 ) {}

@@ -308,7 +308,9 @@ public class AuthController {
                 guideProfileId,
                 Boolean.TRUE.equals(user.getProfileCompleted()),
                 Boolean.TRUE.equals(user.getIsEmailVerified()),
-                Boolean.TRUE.equals(user.getAgreedToTerms()));
+                Boolean.TRUE.equals(user.getAgreedToTerms()),
+                user.getEmailNotificationsEnabled(),
+                user.getPushNotificationsEnabled());
     }
 
     @PostMapping("/refresh")
@@ -543,6 +545,47 @@ public class AuthController {
                 null,
                 null
         );
+    }
+
+    @PostMapping("/password/change")
+    public void changePassword(@Valid @RequestBody ChangePasswordRequest req, @AuthenticationPrincipal UserDetails principal) {
+        User user = userRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        if (!passwordEncoder.matches(req.getCurrentPassword(), user.getPasswordHash())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid current password");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(req.getNewPassword()));
+
+        // Strong logout: increment tokenVersion to revoke all existing access JWTs immediately
+        int current = (user.getTokenVersion() == null) ? 0 : user.getTokenVersion();
+        user.setTokenVersion(current + 1);
+
+        userRepository.save(user);
+
+        // Revoke all refresh tokens
+        refreshTokenRepository.revokeAllForUser(user.getId(), Instant.now());
+        
+        notificationService.createNotification(
+                user.getId(),
+                NotificationType.PASSWORD_CHANGED,
+                "Password Changed",
+                "Your password has been successfully changed. If this was not you, please contact support immediately.",
+                null,
+                null
+        );
+    }
+
+    @PostMapping("/me/notifications")
+    public void updateNotificationPreferences(@Valid @RequestBody UpdateNotificationPreferencesRequest req, @AuthenticationPrincipal UserDetails principal) {
+        User user = userRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        user.setEmailNotificationsEnabled(req.getEmailNotificationsEnabled());
+        user.setPushNotificationsEnabled(req.getPushNotificationsEnabled());
+
+        userRepository.save(user);
     }
 
     @PostMapping("/email/verify/request")
