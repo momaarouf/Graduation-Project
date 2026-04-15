@@ -13,27 +13,43 @@ import java.util.Optional;
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-    // ── Duplicate prevention ──────────────────────────────────────────────
+    // ── Duplicate prevention ──────────────────────────────────────────────────
 
     /**
-     * Check if a review already exists for this booking.
+     * Check if a NON-DELETED review already exists for this booking.
      * Used in ReviewService before creating a new review to enforce
-     * the one-review-per-booking rule at the application level
-     * (DB UNIQUE constraint is the final safety net).
+     * the one-review-per-booking rule at the application level.
+     * (DB UNIQUE constraint on booking_id is the final safety net.)
+     *
+     * Soft-delete filter: returns false if the existing review was deleted,
+     * allowing the traveler to re-submit a review after an admin purge.
      */
-    boolean existsByBookingId(Long bookingId);
+    @Query("""
+        SELECT COUNT(r) > 0 FROM Review r
+        WHERE r.bookingId = :bookingId
+          AND r.deletedAtUtc IS NULL
+    """)
+    boolean existsByBookingId(@Param("bookingId") Long bookingId);
 
     /**
-     * Fetch the review for a specific booking.
+     * Fetch the active (non-deleted) review for a specific booking.
      * Used to show the traveler their existing review from the booking detail page.
+     * Soft-delete filter: returns empty if the review has been deleted.
      */
-    Optional<Review> findByBookingId(Long bookingId);
+    @Query("""
+        SELECT r FROM Review r
+        WHERE r.bookingId = :bookingId
+          AND r.deletedAtUtc IS NULL
+    """)
+    Optional<Review> findByBookingId(@Param("bookingId") Long bookingId);
 
     // ── Public listing queries ────────────────────────────────────────────
 
     /**
-     * All visible reviews for a guide, newest first.
+     * All visible, non-deleted reviews for a guide, newest first.
      * Partial index on (guide_id) WHERE is_hidden = FALSE keeps this fast.
+     *
+     * Soft-delete filter: excludes rows where deleted_at_utc IS NOT NULL.
      */
     @Query("""
             SELECT r FROM Review r
@@ -42,6 +58,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             JOIN FETCH r.occurrence o
             WHERE r.guideId = :guideId
               AND r.hidden = false
+              AND r.deletedAtUtc IS NULL
             ORDER BY r.createdAt DESC
             """)
     Page<Review> findByGuideIdAndHiddenFalseOrderByCreatedAtDesc(
@@ -50,7 +67,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     );
 
     /**
-     * All visible reviews for a tour template with optional rating filter.
+     * All visible, non-deleted reviews for a tour template with optional rating filter.
+     *
+     * Soft-delete filter: excludes rows where deleted_at_utc IS NOT NULL.
      */
     @Query("""
             SELECT r FROM Review r
@@ -59,6 +78,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             JOIN FETCH r.occurrence o
             WHERE r.tourTemplateId = :tourTemplateId
               AND r.hidden = false
+              AND r.deletedAtUtc IS NULL
               AND (:rating IS NULL OR r.ratingOverall = :rating)
             """)
     Page<Review> findByTourTemplateIdWithFilters(
@@ -68,7 +88,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     );
 
     /**
-     * All visible reviews for a guide with optional rating filter.
+     * All visible, non-deleted reviews for a guide with optional rating filter.
+     *
+     * Soft-delete filter: excludes rows where deleted_at_utc IS NOT NULL.
      */
     @Query("""
             SELECT r FROM Review r
@@ -77,6 +99,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             JOIN FETCH r.occurrence o
             WHERE r.guideId = :guideId
               AND r.hidden = false
+              AND r.deletedAtUtc IS NULL
               AND (:rating IS NULL OR r.ratingOverall = :rating)
             """)
     Page<Review> findByGuideIdWithFilters(
@@ -88,9 +111,12 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     // ── Traveler's own reviews ────────────────────────────────────────────
 
     /**
-     * All reviews written by a specific traveler, newest first.
+     * All non-deleted reviews written by a specific traveler, newest first.
      * Used for the "My Reviews" section in the traveler dashboard.
-     * Includes hidden reviews — the traveler should see their own.
+     * Includes hidden reviews — the traveler should see their own hidden reviews.
+     * Excludes truly deleted reviews (deletedAtUtc IS NOT NULL).
+     *
+     * Soft-delete filter: excludes rows where deleted_at_utc IS NOT NULL.
      */
     @Query("""
             SELECT r FROM Review r
@@ -98,6 +124,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             JOIN FETCH t.user u
             JOIN FETCH r.occurrence o
             WHERE r.travelerId = :travelerId
+              AND r.deletedAtUtc IS NULL
             ORDER BY r.createdAt DESC
             """)
     Page<Review> findByTravelerIdOrderByCreatedAtDesc(
@@ -110,75 +137,92 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     // The WHERE is_hidden = FALSE partial indexes make these efficient.
 
     /**
-     * Average overall rating for a guide.
+     * Average overall rating for a guide (non-deleted, visible reviews only).
      * Returns null if the guide has no visible reviews yet.
+     *
+     * Soft-delete filter: excludes rows where deleted_at_utc IS NOT NULL.
      */
     @Query("""
             SELECT AVG(r.ratingOverall)
             FROM Review r
             WHERE r.guideId = :guideId
               AND r.hidden = false
+              AND r.deletedAtUtc IS NULL
             """)
     Double findAverageOverallRatingByGuideId(@Param("guideId") Long guideId);
 
     /**
-     * Total number of visible reviews for a guide.
+     * Total number of visible, non-deleted reviews for a guide.
+     *
+     * Soft-delete filter: excludes rows where deleted_at_utc IS NOT NULL.
      */
     @Query("""
             SELECT COUNT(r)
             FROM Review r
             WHERE r.guideId = :guideId
               AND r.hidden = false
+              AND r.deletedAtUtc IS NULL
             """)
     Long countVisibleReviewsByGuideId(@Param("guideId") Long guideId);
 
     /**
-     * Average overall rating for a tour template.
+     * Average overall rating for a tour template (non-deleted, visible reviews only).
      * Returns null if the tour has no visible reviews yet.
+     *
+     * Soft-delete filter: excludes rows where deleted_at_utc IS NOT NULL.
      */
     @Query("""
             SELECT AVG(r.ratingOverall)
             FROM Review r
             WHERE r.tourTemplateId = :tourTemplateId
               AND r.hidden = false
+              AND r.deletedAtUtc IS NULL
             """)
     Double findAverageOverallRatingByTourTemplateId(@Param("tourTemplateId") Long tourTemplateId);
 
     /**
-     * Total number of visible reviews for a tour template.
+     * Total number of visible, non-deleted reviews for a tour template.
+     *
+     * Soft-delete filter: excludes rows where deleted_at_utc IS NOT NULL.
      */
     @Query("""
             SELECT COUNT(r)
             FROM Review r
             WHERE r.tourTemplateId = :tourTemplateId
               AND r.hidden = false
+              AND r.deletedAtUtc IS NULL
             """)
     Long countVisibleReviewsByTourTemplateId(@Param("tourTemplateId") Long tourTemplateId);
 
     /**
-     * Star distribution for a guide — returns count per rating value (1–5).
+     * Star distribution for a guide (non-deleted, visible reviews only).
      * Used to render the rating histogram in ReviewSummaryResponse.
-     *
      * Returns List of Object[]{ratingOverall (Short), count (Long)}
+     *
+     * Soft-delete filter: excludes rows where deleted_at_utc IS NOT NULL.
      */
     @Query("""
             SELECT r.ratingOverall, COUNT(r)
             FROM Review r
             WHERE r.guideId = :guideId
               AND r.hidden = false
+              AND r.deletedAtUtc IS NULL
             GROUP BY r.ratingOverall
             """)
     java.util.List<Object[]> findRatingDistributionByGuideId(@Param("guideId") Long guideId);
 
     /**
-     * Star distribution for a tour template.
+     * Star distribution for a tour template (non-deleted, visible reviews only).
      * Returns List of Object[]{ratingOverall (Short), count (Long)}
+     *
+     * Soft-delete filter: excludes rows where deleted_at_utc IS NOT NULL.
      */
     @Query("""
             SELECT r.ratingOverall, COUNT(r)
             FROM Review r
             WHERE r.tourTemplateId = :tourTemplateId
               AND r.hidden = false
+              AND r.deletedAtUtc IS NULL
             GROUP BY r.ratingOverall
             """)
     java.util.List<Object[]> findRatingDistributionByTourTemplateId(@Param("tourTemplateId") Long tourTemplateId);

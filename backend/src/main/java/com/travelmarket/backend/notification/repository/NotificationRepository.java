@@ -42,4 +42,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Transactional
     @Query("UPDATE Notification n SET n.read = true WHERE n.userId = :userId AND CAST(n.type AS string) LIKE CONCAT(:typePrefix, '%') AND n.referenceId = :refId")
     void markAsReadByUserIdTypePrefixAndRef(@Param("userId") Long userId, @Param("typePrefix") String typePrefix, @Param("refId") String refId);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query("UPDATE Notification n SET n.read = true WHERE n.userId = :userId AND CAST(n.type AS string) LIKE 'BOOKING_%' AND n.read = false")
+    void markBookingsAsReadByUserId(@Param("userId") Long userId);
 }

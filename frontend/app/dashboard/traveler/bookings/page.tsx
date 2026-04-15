@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { getTravelerBookings, cancelBooking, getMyWaitlist, leaveWaitlist, getTravelerReviews } from '@/src/lib/api/tours'
+import { notificationsApi } from '@/src/lib/api/notifications'
 import { BookingResponse, BookingStatus, WaitlistResponse } from '@/src/lib/types/tour.types'
 import { usePaymentCountdown } from '@/src/hooks/usePaymentCountdown'
 import {
@@ -598,6 +599,12 @@ export default function TravelerBookingsPage() {
 
     React.useEffect(() => {
         fetchBookings()
+        // Mark booking notifications as read when visiting the bookings dashboard
+        notificationsApi.markBookingNotificationsRead()
+            .then(() => {
+                window.dispatchEvent(new CustomEvent('badge-refresh'))
+            })
+            .catch(err => console.error('Failed to clear notifications:', err))
     }, [])
 
     const fetchBookings = async () => {

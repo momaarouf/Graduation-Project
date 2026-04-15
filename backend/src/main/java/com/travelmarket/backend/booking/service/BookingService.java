@@ -685,6 +685,14 @@ public class BookingService {
     }
 
     @Transactional(readOnly = true)
+    public List<WaitlistResponse> getGuideWaitlist(String email) {
+        GuideProfile guide = resolveGuide(email);
+        return waitlistRepository
+                .findActiveByGuideEmail(email)
+                .stream().map(this::mapToWaitlistResponse).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public List<WaitlistResponse> getMyWaitlist(String email) {
         TravelerProfile traveler = resolveTraveler(email);
         return waitlistRepository
@@ -1130,6 +1138,9 @@ public class BookingService {
                 .tourTitle(w.getOccurrence().getTemplate().getTitle())
                 .startTimeUtc(w.getOccurrence().getStartTimeUtc())
                 .endTimeUtc(w.getOccurrence().getEndTimeUtc())
+                .travelerId(w.getTraveler().getId())
+                .travelerName(w.getTraveler().getUser().getFullName())
+                .travelerEmail(w.getTraveler().getUser().getEmail())
                 .position(w.getPosition())
                 .peopleCount(w.getPeopleCount())
                 .notified(w.getNotified())

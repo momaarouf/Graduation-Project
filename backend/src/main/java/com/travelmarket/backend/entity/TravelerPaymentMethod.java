@@ -38,8 +38,21 @@ public class TravelerPaymentMethod {
     @Column(name = "is_default")
     private Boolean isDefault = false;
 
-    @Column(name = "created_at_utc")
+    // ── Timestamps ─────────────────────────────────────────────────────────────
+
+    @Column(name = "created_at_utc", nullable = false, updatable = false)
     private Instant createdAtUtc;
+
+    /**
+     * Soft delete timestamp.
+     *
+     * Set by TravelerPaymentController when a traveler removes a card.
+     * The physical row is NEVER deleted — the Stripe payment method ID on this
+     * row may be referenced by historical Payment records for refunds and disputes.
+     * All read queries must filter WHERE deleted_at_utc IS NULL.
+     */
+    @Column(name = "deleted_at_utc")
+    private Instant deletedAtUtc;
 
     @PrePersist
     protected void onCreate() {

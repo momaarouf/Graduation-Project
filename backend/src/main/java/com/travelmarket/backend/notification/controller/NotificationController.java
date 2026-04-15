@@ -63,6 +63,13 @@ public class NotificationController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/read-bookings")
+    public ResponseEntity<Void> markBookingsAsRead(@AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = getUserId(userDetails);
+        notificationService.markBookingsAsRead(userId);
+        return ResponseEntity.ok().build();
+    }
+
     @PutMapping("/read-by-reference")
     public ResponseEntity<Void> markAsReadByReference(
             @AuthenticationPrincipal UserDetails userDetails,

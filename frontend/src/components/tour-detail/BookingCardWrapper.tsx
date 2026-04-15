@@ -285,7 +285,10 @@ export default function BookingCardWrapper({
 
     setIsLoading(true)
     try {
-      await joinWaitlist(occurrence.id || occurrence.occurrenceId, people)
+      await joinWaitlist({ 
+        occurrenceId: occurrence.id || occurrence.occurrenceId, 
+        peopleCount: people 
+      })
       toast.success('You\'ve been added to the waitlist!')
       router.push('/dashboard/traveler/bookings')
     } catch (err: any) {

@@ -18,8 +18,10 @@ import java.time.Instant;
  * VIDEO is defined in TourMediaType for future upload support.
  *
  * FK column name is tour_template_id to match the V1 schema.
- * No soft delete — media rows are physically removed when a guide
- * deletes a specific image. The parent template uses soft delete.
+ * Soft delete: set deleted_at_utc; never hard-delete media rows.
+ * This preserves audit trail and ensures old Payment/Review references
+ * remain intact even after a guide removes an image from their tour.
+ * The parent template also uses soft delete (deleted_at_utc column).
  */
 @Entity
 @Table(name = "tour_media")
@@ -62,6 +64,17 @@ public class TourMedia {
     // updated_at_utc exists in V1 schema — retained for completeness
     @Column(name = "updated_at_utc", nullable = false)
     private Instant updatedAtUtc;
+
+    /**
+     * Soft delete timestamp.
+     *
+     * Set by TourMediaService.deleteMedia() when a guide removes an image.
+     * The physical row is NEVER deleted — media history is preserved for audit.
+     * All read queries MUST filter AND m.deletedAtUtc IS NULL.
+     * Column added in V55__add_tour_media_soft_delete.sql.
+     */
+    @Column(name = "deleted_at_utc")
+    private Instant deletedAtUtc;
 
     @PrePersist
     protected void onCreate() {

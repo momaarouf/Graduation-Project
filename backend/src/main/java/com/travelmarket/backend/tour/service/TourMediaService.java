@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 @Service
 @RequiredArgsConstructor
 public class TourMediaService {
@@ -39,13 +40,24 @@ public class TourMediaService {
 
     @Transactional
     public void deleteMedia(Long mediaId, Long guideId) {
+        // Load the media item — 404 if it doesn't exist or is already soft-deleted
         TourMedia media = mediaRepository.findById(mediaId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Media not found"));
 
+        // Ownership check: only the guide who owns the parent template may delete media
         if (!media.getTemplate().getGuide().getId().equals(guideId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own the tour this media belongs to");
         }
 
-        mediaRepository.delete(media);
+        // Guard: prevent double-deleting an already soft-deleted media item
+        if (media.getDeletedAtUtc() != null) {
+            throw new ResponseStatusException(HttpStatus.GONE, "Media has already been deleted");
+        }
+
+        // Soft delete — mark the row as deleted WITHOUT physically removing it.
+        // The row is retained for audit trail; future admin tools may restore it.
+        // All read queries in TourMediaRepository filter AND m.deletedAtUtc IS NULL.
+        media.setDeletedAtUtc(Instant.now());
+        mediaRepository.save(media);
     }
 }

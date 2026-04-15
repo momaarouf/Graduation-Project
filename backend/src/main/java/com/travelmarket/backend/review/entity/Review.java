@@ -15,9 +15,12 @@ import java.time.Instant;
  *   - Booking must be in COMPLETED status
  *   - UNIQUE constraint on booking_id prevents duplicate reviews
  *
+ * Moderation vs Soft Delete:
+ *   - isHidden / hiddenReason → admin moderation (hidden from public, still in admin queue)
+ *   - deletedAtUtc            → platform purge / GDPR erasure (invisible everywhere including admin)
+ *
  * Future-ready fields (nullable, zero-cost now):
  *   - guideReply / guideRepliedAt   → guide response card
- *   - isHidden / hiddenReason       → admin moderation
  *   - reportCount                   → abuse reporting
  */
 @Entity
@@ -118,7 +121,21 @@ public class Review {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    /**
+     * Soft delete timestamp.
+     *
+     * Set when a review is permanently removed (GDPR / legal / platform purge).
+     * All read queries — public and internal — MUST filter AND r.deletedAtUtc IS NULL.
+     * This is a stronger action than isHidden: a deleted review does not appear
+     * anywhere, including admin moderation screens.
+     *
+     * DO NOT set this for routine content moderation; use isHidden instead.
+     */
+    @Column(name = "deleted_at_utc")
+    private Instant deletedAtUtc;
+
     // ── Future-ready: Guide reply ─────────────────────────────────────────
+
 
     /** Guide's public response to this review. Null until guide replies. */
     @Column(name = "guide_reply", columnDefinition = "TEXT")

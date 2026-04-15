@@ -174,6 +174,17 @@ public class BookingController {
     }
 
     /**
+     * List all active, unpromoted waitlist entries across all of the guide's
+     * own tour occurrences. This allows guides to see which tours have high
+     * unmet demand.
+     */
+    @GetMapping("/guide/waitlist")
+    public List<WaitlistResponse> getGuideWaitlist(
+            @AuthenticationPrincipal UserDetails user) {
+        return bookingService.getGuideWaitlist(user.getUsername());
+    }
+
+    /**
      * Get a single booking on one of the guide's own occurrences.
      * Returns HTTP 404 if the booking doesn't exist or belongs to another guide's tour.
      * Note: qrCode is intentionally excluded from guide responses.

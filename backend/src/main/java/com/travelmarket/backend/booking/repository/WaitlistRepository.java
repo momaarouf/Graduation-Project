@@ -86,4 +86,17 @@ public interface WaitlistRepository extends JpaRepository<WaitlistEntry, Long> {
     List<WaitlistEntry> findActiveByTravelerAndTemplate(
             @Param("email") String email, 
             @Param("templateId") Long templateId);
+
+    /**
+     * Returns all active, unpromoted waitlist entries for all occurrences 
+     * belonging to a specific guide's tour templates.
+     */
+    @Query("""
+            SELECT w FROM WaitlistEntry w
+            WHERE w.occurrence.template.guide.user.email = :email
+              AND w.deletedAtUtc IS NULL
+              AND w.promoted = false
+            ORDER BY w.createdAtUtc DESC
+            """)
+    List<WaitlistEntry> findActiveByGuideEmail(@Param("email") String email);
 }

@@ -34,6 +34,12 @@ public class WaitlistResponse {
     private Instant startTimeUtc;
     private Instant endTimeUtc;
 
+    // ── Traveler context ────────────────────────────────────────────────────
+
+    private Long travelerId;
+    private String travelerName;
+    private String travelerEmail;
+
     // ── Queue state ─────────────────────────────────────────────────────────
 
     private Integer position;           // rank in the queue (lower = earlier)

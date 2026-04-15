@@ -145,6 +145,11 @@ public class NotificationService {
     }
 
     @Transactional
+    public void markBookingsAsRead(Long userId) {
+        notificationRepository.markBookingsAsReadByUserId(userId);
+    }
+
+    @Transactional
     public void markAsReadByReference(Long userId, String typeStr, String refId) {
         try {
             NotificationType type = NotificationType.valueOf(typeStr);

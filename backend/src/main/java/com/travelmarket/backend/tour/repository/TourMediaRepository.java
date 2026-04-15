@@ -11,27 +11,32 @@ import java.util.Optional;
 public interface TourMediaRepository extends JpaRepository<TourMedia, Long> {
 
     /**
-     * All media for a template, ordered by display_order ascending.
+     * All non-deleted media for a template, ordered by display_order ascending.
      * The item at display_order = 0 (or lowest value) is the cover image.
      * Used when building TourDetailResponse and portfolio detail responses.
+     *
+     * Soft-delete filter: excludes rows where deleted_at_utc IS NOT NULL.
      */
     @Query("""
         SELECT m FROM TourMedia m
         WHERE m.template.id = :templateId
+          AND m.deletedAtUtc IS NULL
         ORDER BY m.displayOrder ASC
     """)
     List<TourMedia> findAllByTemplateIdOrdered(@Param("templateId") Long templateId);
 
     /**
-     * Cover image only — the single media item with the lowest display_order.
+     * Cover image only — the single non-deleted media item with the lowest display_order.
      * Used when building listing cards (PublicTourCardResponse,
      * GuidePortfolioTourResponse) where only the cover is needed.
      *
      * Returns the first result only; service layer calls .stream().findFirst().
+     * Soft-delete filter: excludes rows where deleted_at_utc IS NOT NULL.
      */
     @Query("""
         SELECT m FROM TourMedia m
         WHERE m.template.id = :templateId
+          AND m.deletedAtUtc IS NULL
         ORDER BY m.displayOrder ASC
     """)
     List<TourMedia> findCoverByTemplateId(@Param("templateId") Long templateId);
@@ -52,12 +57,14 @@ public interface TourMediaRepository extends JpaRepository<TourMedia, Long> {
     );
 
     /**
-     * Count of media items for a template.
+     * Count of active (non-deleted) media items for a template.
      * Used to enforce any future upload limits per tour.
+     * Soft-delete filter: excludes rows where deleted_at_utc IS NOT NULL.
      */
     @Query("""
         SELECT COUNT(m) FROM TourMedia m
         WHERE m.template.id = :templateId
+          AND m.deletedAtUtc IS NULL
     """)
     long countByTemplateId(@Param("templateId") Long templateId);
 }

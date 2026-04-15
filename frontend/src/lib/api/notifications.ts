@@ -55,5 +55,9 @@ export const notificationsApi = {
 
     markByReference: async (type: string, referenceId: string) => {
         await apiClient.put(`/api/notifications/read-by-reference?type=${type}&referenceId=${referenceId}`);
+    },
+
+    markBookingNotificationsRead: async () => {
+        await apiClient.put('/api/notifications/read-bookings');
     }
 };

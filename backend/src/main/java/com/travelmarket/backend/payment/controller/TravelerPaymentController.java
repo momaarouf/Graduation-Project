@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -73,11 +74,36 @@ public class TravelerPaymentController {
         TravelerPaymentMethod method = paymentMethodRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Payment method not found"));
 
+        // Ownership guard — a traveler may only delete their own cards
         if (!method.getTravelerProfile().getId().equals(profile.getId())) {
             throw new AccessDeniedException("Not authorized to delete this payment method");
         }
 
-        paymentMethodRepository.delete(method);
+        // Guard: prevent double-deleting a card that was already soft-deleted
+        if (method.getDeletedAtUtc() != null) {
+            throw new AccessDeniedException("This payment method has already been removed");
+        }
+
+        boolean wasDefault = Boolean.TRUE.equals(method.getIsDefault());
+
+        // Soft delete — set deletedAtUtc, NEVER physically remove the row.
+        // Stripe payment method ID references on historical Payment records must remain intact.
+        method.setDeletedAtUtc(Instant.now());
+        method.setIsDefault(false); // Clear the default flag on this card
+        paymentMethodRepository.save(method);
+
+        // If the deleted card was the default, auto-promote the next oldest active card.
+        // This prevents a traveler from having NO default card while still holding others.
+        if (wasDefault) {
+            List<TravelerPaymentMethod> remaining = paymentMethodRepository.findByTravelerProfileId(profile.getId());
+            if (!remaining.isEmpty()) {
+                // Pick the first card returned (already ordered newest-first by repository query)
+                TravelerPaymentMethod newDefault = remaining.get(0);
+                newDefault.setIsDefault(true);
+                paymentMethodRepository.save(newDefault);
+            }
+        }
+
         return ResponseEntity.noContent().build();
     }
 

@@ -529,6 +529,9 @@ export interface WaitlistResponse {
   tourTitle: string
   startTimeUtc: string
   endTimeUtc: string
+  travelerId?: number
+  travelerName?: string
+  travelerEmail?: string
   position: number              // queue rank, 1 = next to be promoted
   peopleCount: number           // seats requested
   notified: boolean             // future notification card sets this

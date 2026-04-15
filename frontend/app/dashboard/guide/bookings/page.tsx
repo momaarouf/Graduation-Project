@@ -27,8 +27,9 @@ import {
   CreditCard
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { getGuideBookings, confirmBooking, rejectBooking } from '@/src/lib/api/tours'
-import { GuideBookingResponse, BookingStatus } from '@/src/lib/types/tour.types'
+import { notificationsApi } from '@/src/lib/api/notifications'
+import { getGuideBookings, confirmBooking, rejectBooking, getGuideWaitlist } from '@/src/lib/api/tours'
+import { GuideBookingResponse, BookingStatus, WaitlistResponse } from '@/src/lib/types/tour.types'
 
 // ============================================================================
 // STATUS BADGE COMPONENT
@@ -339,11 +340,106 @@ const BookingCard = ({ booking, onConfirm, onReject, isActionLoading }: BookingC
 }
 
 // ============================================================================
+// WAITLIST CARD COMPONENT
+// ============================================================================
+
+interface WaitlistCardProps {
+  entry: WaitlistResponse
+}
+
+const WaitlistCard = ({ entry }: WaitlistCardProps) => {
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    })
+  }
+
+  return (
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden hover:shadow-md transition-all shadow-sm">
+      <div className="p-5">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+          <div className="flex items-start gap-3">
+            <div className={`p-2 rounded-lg bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400`}>
+              <Users className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-1">
+                {entry.tourTitle}
+              </h3>
+              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                <span className="flex items-center gap-1.5 font-mono bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                  POS: {entry.position}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-blue-500" />
+                  {formatDate(entry.startTimeUtc)}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full border bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800/50">
+              <Clock className="w-3.5 h-3.5" />
+              Waiting
+            </span>
+            <p className="text-[10px] text-gray-400 font-medium">Joined {new Date(entry.createdAtUtc).toLocaleDateString()}</p>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 border-t border-gray-100 dark:border-gray-800 mt-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold">
+              {entry.travelerName?.charAt(0) || 'T'}
+            </div>
+            <div>
+              <p className="font-bold text-gray-900 dark:text-white">
+                {entry.travelerName}
+              </p>
+              <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                <span className="flex items-center gap-1">
+                  <MessageSquare className="w-3 h-3" />
+                  {entry.travelerEmail}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <div className="text-right">
+              <div className="text-xl font-black text-gray-900 dark:text-white">
+                {entry.peopleCount}
+              </div>
+              <div className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                Seats Requested
+              </div>
+            </div>
+            <Link
+              href={`/dashboard/guide/messages?tourId=${entry.occurrenceId}&travelerId=${entry.travelerId}`}
+              className="p-2.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all"
+              title="Message Traveler"
+            >
+              <MessageSquare className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
 // MAIN PAGE
 // ============================================================================
 
 export default function GuideBookingsPage() {
   const [bookings, setBookings] = React.useState<GuideBookingResponse[]>([])
+  const [waitlistEntries, setWaitlistEntries] = React.useState<WaitlistResponse[]>([])
+  const [activeTab, setActiveTab] = React.useState<'bookings' | 'waitlist'>('bookings')
   const [isLoading, setIsLoading] = React.useState(true)
   const [isActionLoading, setIsActionLoading] = React.useState(false)
   const [filterStatus, setFilterStatus] = React.useState<BookingStatus | 'all'>('all')
@@ -355,16 +451,26 @@ export default function GuideBookingsPage() {
 
   useEffect(() => {
     fetchBookings()
+    // Mark booking notifications as read when visiting the bookings dashboard
+    notificationsApi.markBookingNotificationsRead()
+      .then(() => {
+        window.dispatchEvent(new CustomEvent('badge-refresh'))
+      })
+      .catch(err => console.error('Failed to clear notifications:', err))
   }, [])
 
   const fetchBookings = async () => {
     setIsLoading(true)
     try {
-      const res = await getGuideBookings()
-      setBookings(res || [])
+      const [bookingsRes, waitlistRes] = await Promise.all([
+        getGuideBookings(),
+        getGuideWaitlist()
+      ])
+      setBookings(bookingsRes || [])
+      setWaitlistEntries(waitlistRes || [])
     } catch (err: any) {
-      console.error('Failed to fetch bookings:', err)
-      toast.error('Failed to load bookings')
+      console.error('Failed to fetch data:', err)
+      toast.error('Failed to load dashboard data')
     } finally {
       setIsLoading(false)
     }
@@ -422,13 +528,17 @@ export default function GuideBookingsPage() {
       .filter(b => b.status === BookingStatus.Confirmed || b.status === BookingStatus.Completed)
       .reduce((sum, b) => sum + b.finalPrice, 0)
 
+    const waitlistSize = waitlistEntries.reduce((sum, e) => sum + e.peopleCount, 0)
+
     return {
       total: bookings.length,
       active: active.length,
       pending: pending.length,
-      revenue
+      revenue,
+      waitlistSize,
+      waitlistCount: waitlistEntries.length
     }
-  }, [bookings])
+  }, [bookings, waitlistEntries])
 
   const totalPages = Math.ceil(filteredBookings.length / itemsPerPage)
   const paginatedBookings = filteredBookings.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
@@ -492,11 +602,35 @@ export default function GuideBookingsPage() {
               color="amber"
             />
             <StatCard
-              icon={DollarSign}
-              label="Est. Revenue"
-              value={`$${stats.revenue.toLocaleString()}`}
+              icon={Users}
+              label="Waitlist Size"
+              value={stats.waitlistSize}
               color="purple"
             />
+          </div>
+
+          {/* Tab Switcher */}
+          <div className="flex items-center gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl mb-8 w-fit">
+            <button
+              onClick={() => setActiveTab('bookings')}
+              className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
+                activeTab === 'bookings'
+                  ? 'bg-white dark:bg-gray-900 text-blue-600 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+            >
+              Bookings ({filteredBookings.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('waitlist')}
+              className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
+                activeTab === 'waitlist'
+                  ? 'bg-white dark:bg-gray-900 text-blue-600 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+              }`}
+            >
+              Waitlist ({waitlistEntries.length})
+            </button>
           </div>
 
           {/* Filters */}
@@ -536,45 +670,56 @@ export default function GuideBookingsPage() {
             </div>
           </div>
 
-          {/* Results Count */}
           <div className="mb-4 flex items-center justify-between">
             <span className="text-xs font-bold text-gray-500 dark:text-gray-500 uppercase tracking-widest">
-              Showing {filteredBookings.length} results
+              Showing {activeTab === 'bookings' ? filteredBookings.length : waitlistEntries.length} {activeTab}
             </span>
           </div>
 
-          {/* Bookings List */}
+          {/* Content List */}
           <div className="space-y-4">
-            {paginatedBookings.length > 0 ? (
-              paginatedBookings.map(booking => (
-                <BookingCard
-                  key={booking.id}
-                  booking={booking}
-                  onConfirm={handleConfirm}
-                  onReject={handleReject}
-                  isActionLoading={isActionLoading}
-                />
-              ))
-            ) : (
-              <div className="text-center py-20 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                  <Calendar className="w-8 h-8 text-gray-300 dark:text-gray-700" />
+            {activeTab === 'bookings' ? (
+              paginatedBookings.length > 0 ? (
+                paginatedBookings.map(booking => (
+                  <BookingCard
+                    key={booking.id}
+                    booking={booking}
+                    onConfirm={handleConfirm}
+                    onReject={handleReject}
+                    isActionLoading={isActionLoading}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-20 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center">
+                    <Calendar className="w-8 h-8 text-gray-300 dark:text-gray-700" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                    No bookings found
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 max-w-xs mx-auto text-sm font-medium">
+                    {searchTerm ? 'We couldn\'t find any bookings matching your search criteria.' : 'You haven\'t received any bookings for your tours yet.'}
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  No bookings found
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 max-w-xs mx-auto text-sm font-medium">
-                  {searchTerm ? 'We couldn\'t find any bookings matching your search criteria.' : 'You haven\'t received any bookings for your tours yet.'}
-                </p>
-                {searchTerm && (
-                  <button
-                    onClick={() => { setSearchTerm(''); setFilterStatus('all') }}
-                    className="mt-6 text-blue-600 font-bold text-sm hover:underline"
-                  >
-                    Clear all filters
-                  </button>
-                )}
-              </div>
+              )
+            ) : (
+              waitlistEntries.length > 0 ? (
+                waitlistEntries.map(entry => (
+                  <WaitlistCard key={entry.id} entry={entry} />
+                ))
+              ) : (
+                <div className="text-center py-20 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center">
+                    <Clock className="w-8 h-8 text-gray-300 dark:text-gray-700" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                    Waitlist is empty
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 max-w-xs mx-auto text-sm font-medium">
+                    There are no travelers currently waiting for your full tours.
+                  </p>
+                </div>
+              )
             )}
           </div>
 

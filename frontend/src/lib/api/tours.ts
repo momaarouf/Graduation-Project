@@ -249,6 +249,10 @@ export const checkInByQrToken = (qrToken: string) =>
 export const completeBooking = (id: number) =>
   apiClient.post<GuideBookingResponse>(`/api/guide/bookings/${id}/complete`).then(r => r.data)
 
+/** List all active waitlist entries for my tours */
+export const getGuideWaitlist = () =>
+  apiClient.get<WaitlistResponse[]>('/api/guide/waitlist').then(r => r.data)
+
 // ── Reviews API ──────────────────────────────────────────────────────────────
 
 export const getTourReviews = cache((tourId: number | string, params?: GetTourReviewsParams) =>
