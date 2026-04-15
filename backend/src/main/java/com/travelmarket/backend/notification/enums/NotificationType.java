@@ -22,6 +22,9 @@ public enum NotificationType {
     PAYMENT_FAILED,
     PAYOUT_PROCESSED,
     
+    // Reviews
+    REVIEW_REMINDER,        // 24-hour post-trip reminder to leave a review
+
     // Chat
     NEW_MESSAGE,
     

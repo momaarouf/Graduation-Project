@@ -187,6 +187,20 @@ public class Booking {
     @Column(name = "completed_at_utc")
     private Instant completedAtUtc;
 
+    /**
+     * UTC timestamp of when the 24-hour post-trip review reminder was sent.
+     *
+     * NULL  → reminder has not been sent yet (eligible for processing by ReviewReminderJob).
+     * Non-null → reminder was already sent; ReviewReminderJob skips this booking.
+     *
+     * Anti-duplication guarantee: the scheduler query explicitly filters
+     *   WHERE review_reminder_sent_at IS NULL
+     * and the service stamps this field immediately after dispatch, so even
+     * if the job fires multiple times within the same hour the email is sent once.
+     */
+    @Column(name = "review_reminder_sent_at")
+    private Instant reviewReminderSentAt;
+
     // ── Cart / session support (future cart-timeout card) ───────────────────
 
     @Column(name = "cart_id")

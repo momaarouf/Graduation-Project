@@ -108,6 +108,42 @@ public class NotificationService {
         }
     }
 
+    /**
+     * Creates an in-app notification WITHOUT sending an email.
+     *
+     * Use this when the caller has already dispatched a dedicated email
+     * (e.g. ReviewReminderService) and only wants the notification badge/bell
+     * in the UI — avoiding a duplicate or differently-styled email.
+     *
+     * The notification is still pushed over WebSocket for instant UI refresh.
+     */
+    @Async
+    public void createNotificationInAppOnly(Long userId, NotificationType type,
+                                            String title, String message,
+                                            String referenceId, String referenceType) {
+        log.info("[NotificationService] In-app-only notification for user {}: {}", userId, title);
+
+        // Build and persist the notification row
+        Notification notification = Notification.builder()
+                .userId(userId)
+                .type(type)
+                .title(title)
+                .message(message)
+                .referenceId(referenceId)
+                .referenceType(referenceType)
+                .build();
+
+        notificationRepository.save(notification);
+
+        // Push to WebSocket topic so the bell badge updates in real-time
+        try {
+            messagingTemplate.convertAndSend("/topic/notifications/" + userId, mapToResponse(notification));
+        } catch (Exception e) {
+            // Non-fatal: user will see the notification on next page load
+            log.warn("[NotificationService] WebSocket push failed for user {}: {}", userId, e.getMessage());
+        }
+    }
+
     public Page<NotificationResponse> getUserNotifications(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return notificationRepository.findByUserIdOrderByCreatedAtUtcDesc(userId, pageable)

@@ -106,4 +106,39 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
               AND b.deletedAtUtc IS NULL
             """)
     List<Booking> findStalePendingPaymentBookings(@Param("now") Instant now);
+
+    // ── Review reminder queries ─────────────────────────────────────────────
+
+    /**
+     * Finds COMPLETED bookings eligible for the 24-hour review reminder email.
+     *
+     * Eligibility criteria (all must be true):
+     *   1. status = Completed
+     *   2. completedAtUtc falls within the 1-hour sliding window
+     *      [windowStart=now-25h, windowEnd=now-24h]
+     *      — matches the job's fixedRate so every booking is caught exactly once
+     *   3. reviewReminderSentAt IS NULL (reminder not yet dispatched)
+     *   4. deletedAtUtc IS NULL (soft-delete guard)
+     *   5. traveler.reviewReminderEnabled = true (user opt-out respected)
+     *
+     * JOIN FETCH loads traveler → user and occurrence → template eagerly
+     * so the service can build the email without additional queries.
+     */
+    @Query("""
+            SELECT b FROM Booking b
+            JOIN FETCH b.traveler t
+            JOIN FETCH t.user u
+            JOIN FETCH b.occurrence o
+            JOIN FETCH o.template tmpl
+            WHERE b.status = com.travelmarket.backend.booking.enums.BookingStatus.Completed
+              AND b.completedAtUtc >= :windowStart
+              AND b.completedAtUtc < :windowEnd
+              AND b.reviewReminderSentAt IS NULL
+              AND b.deletedAtUtc IS NULL
+              AND t.reviewReminderEnabled = true
+            """)
+    List<Booking> findCompletedBookingsEligibleForReminder(
+            @Param("windowStart") Instant windowStart,
+            @Param("windowEnd")   Instant windowEnd
+    );
 }
