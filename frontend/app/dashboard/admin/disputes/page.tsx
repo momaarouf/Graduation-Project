@@ -32,9 +32,10 @@
 
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { getAllDisputesAdmin, resolveDisputeAdmin, rejectDisputeAdmin, markUnderReviewAdmin, DisputeResponse } from '@/src/lib/api/disputes'
 import {
   Scale,
   AlertTriangle,
@@ -998,9 +999,73 @@ export default function AdminDisputeCourtPage() {
   const [showDetailsModal, setShowDetailsModal] = useState(false)
   const itemsPerPage = 5
 
+  const [realDisputes, setRealDisputes] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchDisputes = async () => {
+    setLoading(true)
+    try {
+      const res = await getAllDisputesAdmin(0, 50)
+      const mapped = res.content.map((d: DisputeResponse) => ({
+        id: d.id.toString(),
+        disputeId: `DSP-${d.id}`,
+        type: d.reason.toLowerCase(),
+        status: d.status.toLowerCase() === 'open' ? 'pending' : d.status.toLowerCase(),
+        priority: 'medium',
+        bookingId: `BK-${d.bookingId}`,
+        tourTitle: `Booking #${d.bookingId}`,
+        tourImage: '/images/tours/istanbul-ottoman.jpg',
+        tourDate: d.createdAtUtc,
+        tourLocation: 'Unknown',
+        amount: d.refundAmount || 0,
+        currency: 'USD',
+        
+        traveler: {
+          id: d.openedByRole === 'Traveler' ? d.openedByUserId : d.againstUserId,
+          name: d.openedByRole === 'Traveler' ? d.openedByFullName : d.againstFullName,
+          email: '', phone: '', totalTrips: 0, joinedAt: ''
+        },
+        
+        guide: {
+          id: d.openedByRole === 'Guide' ? d.openedByUserId : d.againstUserId,
+          name: d.openedByRole === 'Guide' ? d.openedByFullName : d.againstFullName,
+          email: '', phone: '', totalTrips: 0, impactScore: 0, joinedAt: ''
+        },
+        
+        travelerClaim: {
+          description: d.openedByRole === 'Traveler' ? d.description : (d.againstUserResponse || 'No response yet.'),
+          requestedAction: 'refund',
+          evidence: [],
+          submittedAt: d.createdAtUtc
+        },
+        
+        guideClaim: (d.openedByRole === 'Guide' || d.againstUserResponse) ? {
+          description: d.openedByRole === 'Guide' ? d.description : d.againstUserResponse,
+          response: 'dispute',
+          evidence: [],
+          submittedAt: d.createdAtUtc
+        } : null,
+        
+        history: [],
+        deadline: new Date(Date.now() + 86400000).toISOString(),
+        timeRemaining: 24
+      }))
+      setRealDisputes(mapped)
+    } catch (e) {
+      console.error('Failed to fetch disputes:', e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchDisputes()
+  }, [])
+
   // Filter disputes
   const filteredDisputes = useMemo(() => {
-    return MOCK_DISPUTES.filter(dispute => {
+    const listToFilter = realDisputes.length > 0 || !loading ? realDisputes : MOCK_DISPUTES
+    return listToFilter.filter(dispute => {
       if (filterType !== 'all' && dispute.type !== filterType) return false
       if (filterStatus !== 'all' && dispute.status !== filterStatus) return false
       if (filterPriority !== 'all' && dispute.priority !== filterPriority) return false
@@ -1028,9 +1093,19 @@ export default function AdminDisputeCourtPage() {
     setCurrentPage(1)
   }
 
-  const handleResolve = (id: string, resolution: string, amount: number, notes: string) => {
-    alert(`✅ Dispute resolved! Decision: ${resolution}, Amount: $${amount}`)
-    console.log('Resolve dispute:', id, resolution, amount, notes)
+  const handleResolve = async (id: string, resolution: string, amount: number, notes: string) => {
+    try {
+      if (resolution === 'dismiss') {
+        await rejectDisputeAdmin(Number(id), notes)
+      } else {
+        await resolveDisputeAdmin(Number(id), { resolutionNote: notes, refundAmount: amount })
+      }
+      alert(`✅ Dispute resolved! Decision: ${resolution}, Amount: $${amount}`)
+      fetchDisputes()
+    } catch (e) {
+      console.error('Failed to resolve dispute:', e)
+      alert('Error resolving dispute')
+    }
   }
 
   return (

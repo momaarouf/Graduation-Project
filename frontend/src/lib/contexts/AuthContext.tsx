@@ -32,6 +32,8 @@ interface User {
   emailVerified: boolean;
   agreedToTerms: boolean;
   avatarUrl?: string;
+  emailNotificationsEnabled: boolean;
+  pushNotificationsEnabled: boolean;
 }
 
 interface AuthContextType {

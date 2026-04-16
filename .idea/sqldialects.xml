@@ -56,6 +56,8 @@
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V59__change_loyalty_tier_enum.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V5__profile_fields.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V60__add_notification_preferences_to_users.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V61__create_disputes_table.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V62__add_dispute_against_user_response.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V6__guide_verification_front_back.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V7__fix_language_id_type.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V8__add_legacy_id_verification_image.sql" dialect="PostgreSQL" />

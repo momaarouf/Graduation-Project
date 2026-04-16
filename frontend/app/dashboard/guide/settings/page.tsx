@@ -199,36 +199,6 @@ export default function GuideSettingsPage() {
     }
   }
 
-  const handleForgotPassword = async () => {
-    if (!user?.email) {
-      toast.error('User email not found')
-      return
-    }
-
-    setIsSaving(true)
-    try {
-      await forgotPassword(user.email)
-      toast.success('Reset code sent to your email!')
-      router.push(`/auth/reset-password?email=${encodeURIComponent(user.email)}`)
-    } catch (error) {
-      toast.error('Failed to send reset code')
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  const handleSavePreferences = async () => {
-    setIsSaving(true)
-    
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Preferences saved!')
-    } catch (error) {
-      toast.error('Failed to save preferences')
-    } finally {
-      setIsSaving(false)
-    }
-  }
 
   const handleDeleteAccount = async () => {
     if (deleteText !== 'DELETE') return

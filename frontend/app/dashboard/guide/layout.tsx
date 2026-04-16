@@ -28,7 +28,8 @@ import {
   ChevronRight,
   PlusCircle,
   LogOut as LogOutIcon,
-  Settings
+  Settings,
+  Scale
 } from 'lucide-react'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import Navigation from '@/src/components/layout/Navigation'
@@ -51,6 +52,7 @@ const NAV_ITEMS = [
   { href: '/dashboard/guide/bookings', label: 'Bookings', icon: Users, badgeKey: 'guide-bookings' as const },
   { href: '/dashboard/guide/on-tour', label: 'Tour Toolkit', icon: Sparkles },
   { href: '/dashboard/guide/messages', label: 'Messages', icon: MessageSquare, badgeKey: 'guide-messages' as const },
+  { href: '/dashboard/guide/disputes', label: 'Disputes', icon: Scale },
   
   // Earnings
   { href: '/dashboard/guide/wallet', label: 'Wallet', icon: Wallet },

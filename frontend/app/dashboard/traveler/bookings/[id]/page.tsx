@@ -26,7 +26,8 @@ import {
   Phone,
   Smartphone,
   RefreshCw,
-  CreditCard
+  CreditCard,
+  Scale
 } from 'lucide-react'
 
 import { getTravelerBooking, cancelBooking, getTravelerReviews } from '@/src/lib/api/tours'
@@ -432,6 +433,16 @@ Thank you for choosing TravelMarket!
                       <CreditCard className="w-5 h-5" />
                       Pay Now
                     </button>
+                  )}
+
+                  {(booking.status === BookingStatus.Completed || booking.status === BookingStatus.InProgress) && (
+                    <Link
+                      href={`/dashboard/traveler/bookings/${booking.id}/dispute`}
+                      className="w-full mt-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all text-sm shadow-lg shadow-red-500/20"
+                    >
+                      <Scale className="w-4 h-4" />
+                      Open Dispute
+                    </Link>
                   )}
 
                   {booking.status !== BookingStatus.Completed && 

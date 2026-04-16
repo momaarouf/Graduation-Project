@@ -23,7 +23,8 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut as LogOutIcon,
-  CreditCard
+  CreditCard,
+  Scale
 } from 'lucide-react'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import Navigation from '@/src/components/layout/Navigation'
@@ -40,6 +41,7 @@ const NAV_ITEMS = [
   { href: '/dashboard/traveler/payments', label: 'Payments', icon: CreditCard },
   { href: '/dashboard/traveler/wishlist', label: 'Wishlist', icon: Heart },
   { href: '/dashboard/traveler/messages', label: 'Messages', icon: MessageSquare, badgeKey: 'traveler-messages' as const },
+  { href: '/dashboard/traveler/disputes', label: 'Disputes', icon: Scale },
   
   // Divider - visual only
   { type: 'divider' as const },

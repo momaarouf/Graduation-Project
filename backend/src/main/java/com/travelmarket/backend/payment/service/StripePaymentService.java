@@ -498,6 +498,58 @@ public class StripePaymentService {
         return (Session) deserializer.getObject().get();
     }
 
+    // ── Refund Operations ─────────────────────────────────────────────────────
+
+    /**
+     * Issues a refund for a specific booking.
+     * In mock mode, only updates DB.
+     * In real mode, calls Stripe Refund API.
+     */
+    @Transactional
+    public void issueRefund(Long bookingId, BigDecimal amount) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
+        Payment payment = paymentRepository.findByBooking(booking)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Payment not found"));
+
+        if (payment.getStatus() != PaymentStatus.Captured) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment cannot be refunded because it is not Captured.");
+        }
+
+        if (mockMode) {
+            log.info("[Stripe MOCK] Issuing refund of {} {} for BookingID: {}", amount, payment.getCurrency(), bookingId);
+            payment.setAmountRefunded(payment.getAmountRefunded().add(amount));
+            paymentRepository.save(payment);
+        } else {
+            try {
+                // Retrieve the session to get the PaymentIntent
+                Session session = Session.retrieve(payment.getStripeSessionId());
+                String paymentIntentId = session.getPaymentIntent();
+                if (paymentIntentId == null) {
+                    log.error("[Stripe] Payment intent is null for session {}", payment.getStripeSessionId());
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot refund - no payment intent on session");
+                }
+
+                long amountInCents = amount.multiply(BigDecimal.valueOf(100)).longValue();
+
+                com.stripe.param.RefundCreateParams params = com.stripe.param.RefundCreateParams.builder()
+                        .setPaymentIntent(paymentIntentId)
+                        .setAmount(amountInCents)
+                        .build();
+
+                com.stripe.model.Refund refund = com.stripe.model.Refund.create(params);
+                log.info("[Stripe] Refund successful. Refund ID: {}", refund.getId());
+
+                payment.setAmountRefunded(payment.getAmountRefunded().add(amount));
+                paymentRepository.save(payment);
+
+            } catch (StripeException e) {
+                log.error("[Stripe] Refund failed: {}", e.getMessage());
+                throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Stripe refund failed: " + e.getMessage());
+            }
+        }
+    }
+
     // ── Mock Mode: Simulate Payment Success / Failure ─────────────────────────
 
     /**

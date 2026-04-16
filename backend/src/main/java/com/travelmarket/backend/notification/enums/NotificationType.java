@@ -25,6 +25,12 @@ public enum NotificationType {
     // Reviews
     REVIEW_REMINDER,        // 24-hour post-trip reminder to leave a review
 
+    // Disputes
+    DISPUTE_OPENED,
+    DISPUTE_STATUS_CHANGED,
+    DISPUTE_RESOLVED,
+    DISPUTE_REJECTED,
+
     // Chat
     NEW_MESSAGE,
     
