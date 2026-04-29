@@ -1,4 +1,4 @@
-import Navigation from '@/src/components/layout/Navigation'
+﻿import Navigation from '@/src/components/layout/Navigation'
 import { LandingV3 } from '@/src/components/landing/LandingV3'
 import ImpactMap from '@/src/components/landing/ImpactMap'
 
@@ -10,17 +10,17 @@ import ImpactMap from '@/src/components/landing/ImpactMap'
  * ImpactMap handles the live community metrics and reviews.
  */
 export default function HomePage() {
-  return (
-    <>
-      {/* Dynamic Navigation */}
-      <Navigation />
+ return (
+ <>
+ {/* Dynamic Navigation */}
+ <Navigation />
 
-      <main className="relative overflow-hidden">
-        {/* Unified Cinematic Experience */}
-        <LandingV3 />
-      </main>
+ <main className="relative overflow-hidden">
+ {/* Unified Cinematic Experience */}
+ <LandingV3 />
+ </main>
 
-      {/* Footer is rendered by the root layout */}
-    </>
-  )
+ {/* Footer is rendered by the root layout */}
+ </>
+ )
 }

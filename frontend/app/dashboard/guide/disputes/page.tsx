@@ -4,22 +4,22 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { getMyDisputes, addDisputeResponse, DisputeResponse } from '@/src/lib/api/disputes'
-import { Scale, Clock, CheckCircle, XCircle, AlertCircle, Loader2, MessageSquare } from 'lucide-react'
+import { Scale, Clock, CheckCircle, XCircle, AlertCircle, Loader2, MessageSquare, Shield } from 'lucide-react'
 
 const DisputeStatusBadge = ({ status }: { status: string }) => {
   const styles: Record<string, string> = {
-    'OPEN': 'bg-amber-100 text-amber-700 border-amber-200',
-    'UNDER_REVIEW': 'bg-blue-100 text-blue-700 border-blue-200',
-    'RESOLVED': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-    'REJECTED': 'bg-gray-100 text-gray-700 border-gray-200'
+    'OPEN': 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+    'UNDER_REVIEW': 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+    'RESOLVED': 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+    'REJECTED': 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-full border ${styles[status]}`}>
-      {status === 'OPEN' && <Clock className="w-3.5 h-3.5" />}
-      {status === 'UNDER_REVIEW' && <AlertCircle className="w-3.5 h-3.5" />}
-      {status === 'RESOLVED' && <CheckCircle className="w-3.5 h-3.5" />}
-      {status === 'REJECTED' && <XCircle className="w-3.5 h-3.5" />}
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] rounded border ${styles[status]}`}>
+      {status === 'OPEN' && <Clock className="w-3 h-3" />}
+      {status === 'UNDER_REVIEW' && <AlertCircle className="w-3 h-3" />}
+      {status === 'RESOLVED' && <CheckCircle className="w-3 h-3" />}
+      {status === 'REJECTED' && <XCircle className="w-3 h-3" />}
       {status.replace('_', ' ')}
     </span>
   )
@@ -66,105 +66,108 @@ export default function GuideDisputesPage() {
 
   if (loading) {
     return (
-      <div className="pt-24 min-h-[60vh] bg-gray-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="pt-24 min-h-[60vh] surface-base flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary-light" />
       </div>
     )
   }
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-950 p-4 sm:p-8 min-h-[80vh]">
+    <div className="surface-base p-4 sm:p-8 min-h-[80vh]">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-            <Scale className="w-8 h-8 text-emerald-600" />
+        <div className="mb-12">
+          <h1 className="text-3xl font-black text-theme-primary flex items-center gap-4 tracking-tight">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+              <Scale className="w-6 h-6 text-emerald-500" />
+            </div>
             Dispute Resolutions
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2 text-sm">
-            Track disputes involving your tours and respond to claims.
+          <p className="text-theme-secondary mt-3 text-sm max-w-lg leading-relaxed">
+            Track disputes involving your tours and respond to claims. We aim for fair resolution for both parties.
           </p>
         </div>
 
         {disputes.length === 0 ? (
-          <div className="bg-white dark:bg-gray-900 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-800 shadow-sm">
-            <div className="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-              <Scale className="w-8 h-8 text-gray-400" />
+          <div className="surface-card rounded-[2.5rem] p-16 text-center border border-theme shadow-sm relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="w-20 h-20 mx-auto surface-base rounded-3xl flex items-center justify-center mb-6 border border-theme transform transition-transform group-hover:scale-110">
+              <Scale className="w-10 h-10 text-theme-muted opacity-50" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">No Disputes Found</h3>
-            <p className="text-gray-500 text-sm">You haven't been involved in any disputes.</p>
+            <h3 className="text-xl font-bold text-theme-primary mb-2">No Disputes Found</h3>
+            <p className="text-theme-muted text-sm max-w-xs mx-auto">You haven't been involved in any disputes.</p>
           </div>
         ) : (
           <div className="space-y-6">
             {disputes.map(dispute => {
-               // A guide might have opened the dispute (e.g., against traveler fraud)
-               // Or the traveler opened it against the guide.
-               const isDefending = dispute.againstRole === 'Guide'
+              const isDefending = dispute.againstRole === 'Guide'
 
-               return (
-                <div key={dispute.id} className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm transition-all hover:shadow-md">
-                  <div className="flex flex-col sm:flex-row justify-between gap-4">
+              return (
+                <div key={dispute.id} className="surface-card rounded-3xl p-8 border border-theme shadow-sm transition-all hover:shadow-xl hover:border-emerald-500/30">
+                  <div className="flex flex-col sm:flex-row justify-between gap-6">
                     <div className="w-full">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-bold text-gray-900 dark:text-white">
-                          Dispute #{dispute.id}
-                        </h3>
+                      <div className="flex flex-wrap items-center gap-3 mb-6">
+                        <span className="text-xs font-black uppercase tracking-widest text-emerald-600/60">Case #{dispute.id}</span>
                         <DisputeStatusBadge status={dispute.status} />
                         {!isDefending && (
-                          <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-bold rounded uppercase">You Opened This</span>
+                          <span className="px-2 py-0.5 bg-blue-500/10 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded border border-blue-500/20">You Opened This</span>
                         )}
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-4 mt-4">
-                         <div className="space-y-1">
-                            <p className="text-xs text-gray-500 uppercase tracking-wider font-bold">Opened By</p>
-                            <p className="text-sm text-gray-900 dark:text-white">{dispute.openedByFullName} ({dispute.openedByRole})</p>
-                         </div>
-                         <div className="space-y-1">
-                            <p className="text-xs text-gray-500 uppercase tracking-wider font-bold">Booking</p>
-                            <Link href={`/dashboard/guide/tours/bookings/${dispute.bookingId}`} className="text-sm text-blue-600 hover:underline">#{dispute.bookingId}</Link>
-                         </div>
-                      </div>
-
-                      <div className="mt-4">
-                        <p className="text-sm text-gray-500 mb-1">
-                          Category: <span className="font-medium text-gray-700 dark:text-gray-300">{dispute.reason.replace(/_/g, ' ')}</span>
-                        </p>
-                        <div className="p-4 bg-red-50 dark:bg-red-900/10 rounded-xl text-sm text-gray-700 dark:text-gray-300 italic border border-red-100 dark:border-red-900">
-                          <strong>Claim:</strong> "{dispute.description}"
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                        <div>
+                          <p className="text-[10px] text-theme-muted uppercase font-black tracking-tighter mb-1">Opened By</p>
+                          <p className="text-sm font-bold text-theme-primary">{dispute.openedByFullName} ({dispute.openedByRole})</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-theme-muted uppercase font-black tracking-tighter mb-1">Related Booking</p>
+                          <Link href={`/dashboard/guide/tours/bookings/${dispute.bookingId}`} className="text-sm font-bold text-primary-light hover:underline flex items-center gap-1.5">
+                            #{dispute.bookingId}
+                          </Link>
                         </div>
                       </div>
 
-                      {/* Guide Response Section if they are defending */}
+                      <div className="mb-6">
+                        <p className="text-[10px] text-theme-muted uppercase font-black tracking-tighter mb-2">Dispute Category</p>
+                        <p className="text-sm font-bold text-theme-primary mb-4">{dispute.reason.replace(/_/g, ' ')}</p>
+                        <div className="p-6 bg-red-500/5 rounded-2xl border border-red-500/20 relative overflow-hidden">
+                          <div className="absolute top-0 left-0 w-1 h-full bg-red-500/20" />
+                          <p className="text-[10px] text-red-600/60 uppercase font-black tracking-tighter mb-3">The Claim</p>
+                          <p className="text-sm text-theme-secondary leading-relaxed italic">"{dispute.description}"</p>
+                        </div>
+                      </div>
+
                       {isDefending && (
-                        <div className="mt-4">
+                        <div className="mt-6">
                           {dispute.againstUserResponse ? (
-                            <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-xl text-sm text-gray-700 dark:text-gray-300 italic border border-emerald-100 dark:border-emerald-900">
-                              <strong>Your Response:</strong> "{dispute.againstUserResponse}"
+                            <div className="p-6 bg-emerald-500/5 rounded-2xl border border-emerald-500/20 relative overflow-hidden">
+                              <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/20" />
+                              <p className="text-[10px] text-emerald-600/60 uppercase font-black tracking-tighter mb-3">Your Defense</p>
+                              <p className="text-sm text-theme-secondary leading-relaxed italic">"{dispute.againstUserResponse}"</p>
                             </div>
                           ) : (
                             dispute.status !== 'RESOLVED' && dispute.status !== 'REJECTED' ? (
                               respondingTo === dispute.id ? (
-                                <div className="mt-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
-                                  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">Submit Your Defense</label>
+                                <div className="mt-4 surface-base p-6 rounded-2xl border border-theme space-y-4">
+                                  <label className="block text-[10px] font-black uppercase tracking-widest text-theme-muted">Submit Your Defense</label>
                                   <textarea
                                     value={responseText}
                                     onChange={(e) => setResponseText(e.target.value)}
                                     placeholder="Explain your side of the story clearly. The admin will review this before making a decision."
-                                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm mb-3 resize-none"
+                                    className="w-full px-4 py-3 surface-card border border-theme rounded-xl text-sm mb-3 outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all resize-none"
                                     rows={4}
                                   />
-                                  <div className="flex gap-2">
+                                  <div className="flex gap-3">
                                     <button 
                                       onClick={() => handleSubmitResponse(dispute.id)} 
                                       disabled={isSubmitting}
-                                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg shadow disabled:opacity-50 flex items-center gap-2"
+                                      className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-2 transition-all active:scale-95"
                                     >
                                       {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
                                       Submit Response
                                     </button>
                                     <button 
                                       onClick={() => { setRespondingTo(null); setResponseText(''); }} 
-                                      className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-bold rounded-lg"
+                                      className="px-6 py-3 surface-card hover:bg-theme-muted/5 text-theme-primary text-xs font-black uppercase tracking-widest rounded-xl transition-all border border-theme"
                                     >
                                       Cancel
                                     </button>
@@ -174,7 +177,7 @@ export default function GuideDisputesPage() {
                                 <div className="mt-4">
                                   <button
                                     onClick={() => { setRespondingTo(dispute.id); setResponseText(''); }}
-                                    className="w-full sm:w-auto px-4 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
+                                    className="w-full sm:w-auto px-6 py-3 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-600 text-xs font-black uppercase tracking-widest rounded-xl transition-all border border-emerald-500/20 flex items-center justify-center gap-2"
                                   >
                                     <MessageSquare className="w-4 h-4" />
                                     Respond to Claim
@@ -186,14 +189,17 @@ export default function GuideDisputesPage() {
                         </div>
                       )}
 
-                      {/* Admin Resolution */}
                       {dispute.resolutionNote && (
-                        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl">
-                          <h4 className="text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wider mb-2">Admin Resolution</h4>
-                          <p className="text-sm text-blue-900 dark:text-blue-200">{dispute.resolutionNote}</p>
-                          {dispute.refundAmount > 0 && (
-                            <div className="mt-2 font-bold text-emerald-600">
-                              Refund Processed: ${dispute.refundAmount}
+                        <div className="mt-8 p-6 bg-blue-500/10 border border-primary-light/20 rounded-2xl">
+                          <div className="flex items-center gap-2 mb-4">
+                            <Shield className="w-4 h-4 text-primary-light" fill="currentColor" fillOpacity={0.15} />
+                            <h4 className="text-[10px] font-black text-primary-light uppercase tracking-widest">Admin Resolution</h4>
+                          </div>
+                          <p className="text-sm text-theme-primary font-medium leading-relaxed mb-4">{dispute.resolutionNote}</p>
+                          {dispute.refundAmount !== undefined && dispute.refundAmount > 0 && (
+                            <div className="pt-4 border-t border-primary-light/10 flex items-center justify-between">
+                              <span className="text-xs text-theme-muted">Deducted Amount</span>
+                              <span className="text-lg font-black text-red-500">-${dispute.refundAmount}</span>
                             </div>
                           )}
                         </div>
@@ -201,7 +207,7 @@ export default function GuideDisputesPage() {
                     </div>
                   </div>
                 </div>
-               )
+              )
             })}
           </div>
         )}

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // ============================================================================
 // OAUTH CALLBACK PAGE
@@ -6,13 +6,13 @@
 // LOCATION: /frontend/app/auth/oauth-callback/page.tsx
 //
 // Backend redirects here after Google OAuth:
-//   /auth/oauth-callback?token=JWT&role=Guide&new=1
+// /auth/oauth-callback?token=JWT&role=Guide&new=1
 //
 // Flow:
-//   1. Read ?token from URL, call loginWithToken() → hydrates AuthContext
-//   2. If ?new=1 and user hasn't agreed to terms → show inline Terms step
-//   3. Once terms accepted (POST /api/auth/accept-terms) → go to dashboard
-//   4. Existing users → go to dashboard immediately
+// 1. Read ?token from URL, call loginWithToken() → hydrates AuthContext
+// 2. If ?new=1 and user hasn't agreed to terms → show inline Terms step
+// 3. Once terms accepted (POST /api/auth/accept-terms) → go to dashboard
+// 4. Existing users → go to dashboard immediately
 // ============================================================================
 
 import { useEffect, useState } from 'react'
@@ -26,275 +26,275 @@ import Link from 'next/link'
 type Phase = 'loading' | 'terms' | 'error'
 
 export default function OAuthCallbackPage() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const { loginWithToken, user } = useAuth()
+ const router = useRouter()
+ const searchParams = useSearchParams()
+ const { loginWithToken, user } = useAuth()
 
-  const [phase, setPhase] = useState<Phase>('loading')
-  const [error, setError] = useState('')
-  const [agreedToTerms, setAgreedToTerms] = useState(false)
-  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+ const [phase, setPhase] = useState<Phase>('loading')
+ const [error, setError] = useState('')
+ const [agreedToTerms, setAgreedToTerms] = useState(false)
+ const [agreedToPrivacy, setAgreedToPrivacy] = useState(false)
+ const [isSubmitting, setIsSubmitting] = useState(false)
 
-  useEffect(() => {
-    const run = async () => {
-      const errorParam = searchParams.get('error')
-      const token = searchParams.get('token')
-      const isNew = searchParams.get('new') === '1'
+ useEffect(() => {
+ const run = async () => {
+ const errorParam = searchParams.get('error')
+ const token = searchParams.get('token')
+ const isNew = searchParams.get('new') === '1'
 
-      if (errorParam) {
-        const msgParam = searchParams.get('msg')
-        const messages: Record<string, string> = {
-          role_mismatch: 'An account with this email already exists under a different role. Please log in instead.',
-          missing_role: 'Role selection was lost. Please try signing up again.',
-          server_error: 'Server error during sign-in. ' + (msgParam ? `Details: ${msgParam}` : ''),
-        }
-        setError(messages[errorParam] || (msgParam ? `Error: ${msgParam}` : errorParam) || 'Google sign-in failed. Please try again.')
-        setPhase('error')
-        return
-      }
+ if (errorParam) {
+ const msgParam = searchParams.get('msg')
+ const messages: Record<string, string> = {
+ role_mismatch: 'An account with this email already exists under a different role. Please log in instead.',
+ missing_role: 'Role selection was lost. Please try signing up again.',
+ server_error: 'Server error during sign-in. ' + (msgParam ? `Details: ${msgParam}` : ''),
+ }
+ setError(messages[errorParam] || (msgParam ? `Error: ${msgParam}` : errorParam) || 'Google sign-in failed. Please try again.')
+ setPhase('error')
+ return
+ }
 
-      if (!token) {
-        setError('No authentication token received. Please try again.')
-        setPhase('error')
-        return
-      }
+ if (!token) {
+ setError('No authentication token received. Please try again.')
+ setPhase('error')
+ return
+ }
 
-      try {
-        // Store JWT and hydrate AuthContext with /me
-        await loginWithToken(token)
-        // After loginWithToken, the user state in context is set.
-        // We read it in the next useEffect via the `user` dep.
-        // Store isNew in sessionStorage so the next effect can use it.
-        if (isNew) sessionStorage.setItem('oauth_new', '1')
-      } catch (err: any) {
-        console.error('OAuth callback error:', err)
-        setError('Failed to complete sign-in. Please try again.')
-        setPhase('error')
-      }
-    }
+ try {
+ // Store JWT and hydrate AuthContext with /me
+ await loginWithToken(token)
+ // After loginWithToken, the user state in context is set.
+ // We read it in the next useEffect via the `user` dep.
+ // Store isNew in sessionStorage so the next effect can use it.
+ if (isNew) sessionStorage.setItem('oauth_new', '1')
+ } catch (err: any) {
+ console.error('OAuth callback error:', err)
+ setError('Failed to complete sign-in. Please try again.')
+ setPhase('error')
+ }
+ }
 
-    run()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+ run()
+ }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Once user is hydrated in context, decide what to show
-  useEffect(() => {
-    if (!user) return // still loading
+ // Once user is hydrated in context, decide what to show
+ useEffect(() => {
+ if (!user) return // still loading
 
-    const isNew = sessionStorage.getItem('oauth_new') === '1'
+ const isNew = sessionStorage.getItem('oauth_new') === '1'
 
-    if (isNew && !user.agreedToTerms) {
-      // New OAuth user — must accept terms before using the app
-      setPhase('terms')
-    } else {
-      // Existing user or terms already accepted
-      sessionStorage.removeItem('oauth_new')
-      redirect(user.role)
-    }
-  }, [user]) // eslint-disable-line react-hooks/exhaustive-deps
+ if (isNew && !user.agreedToTerms) {
+ // New OAuth user — must accept terms before using the app
+ setPhase('terms')
+ } else {
+ // Existing user or terms already accepted
+ sessionStorage.removeItem('oauth_new')
+ redirect(user.role)
+ }
+ }, [user]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const redirect = (role: string) => {
-    if (user?.role === 'ADMIN') router.push('/dashboard/admin')
-    else if (user?.role === 'GUIDE') router.push('/dashboard/guide')
-    else if (user?.role === 'TRAVELER') router.push('/dashboard/traveler')
-    else router.replace('/')
-  }
+ const redirect = (role: string) => {
+ if (user?.role === 'ADMIN') router.push('/dashboard/admin')
+ else if (user?.role === 'GUIDE') router.push('/dashboard/guide')
+ else if (user?.role === 'TRAVELER') router.push('/dashboard/traveler')
+ else router.replace('/')
+ }
 
-  const handleAcceptTerms = async () => {
-    if (!agreedToTerms || !agreedToPrivacy) return
+ const handleAcceptTerms = async () => {
+ if (!agreedToTerms || !agreedToPrivacy) return
 
-    setIsSubmitting(true)
-    try {
-      await authAcceptTerms()
-      sessionStorage.removeItem('oauth_new')
-      toast.success('Welcome to SafariHub! 🎉', { duration: 4000 })
-      if (user) redirect(user.role)
-    } catch (err: any) {
-      toast.error('Failed to save agreement. Please try again.')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+ setIsSubmitting(true)
+ try {
+ await authAcceptTerms()
+ sessionStorage.removeItem('oauth_new')
+ toast.success('Welcome to SafariHub! 🎉', { duration: 4000 })
+ if (user) redirect(user.role)
+ } catch (err: any) {
+ toast.error('Failed to save agreement. Please try again.')
+ } finally {
+ setIsSubmitting(false)
+ }
+ }
 
-  // ── Error state ──────────────────────────────────────────────────────────
-  if (phase === 'error') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4">
-        <div className="max-w-md w-full bg-white dark:bg-gray-900 rounded-2xl border border-red-200 dark:border-red-800 shadow-xl p-8 text-center space-y-4">
-          <div className="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto">
-            <AlertCircle className="w-7 h-7 text-red-600 dark:text-red-400" />
-          </div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Sign-in failed</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{error}</p>
-          <div className="flex gap-3 justify-center pt-2">
-            <button onClick={() => router.push('/auth/signup')}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition">
-              Try again
-            </button>
-            <button onClick={() => router.push('/auth/login')}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-              Log in
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
+ // ── Error state ──────────────────────────────────────────────────────────
+ if (phase === 'error') {
+ return (
+ <div className="min-h-screen flex items-center justify-center surface-section px-4">
+ <div className="max-w-md w-full surface-card rounded-2xl border border-red-200 dark:border-red-800 shadow-xl p-8 text-center space-y-4">
+ <div className="w-14 h-14 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto">
+ <AlertCircle className="w-7 h-7 text-red-600 dark:text-red-400" />
+ </div>
+ <h2 className="text-xl font-bold text-theme-primary">Sign-in failed</h2>
+ <p className="text-sm text-theme-secondary ">{error}</p>
+ <div className="flex gap-3 justify-center pt-2">
+ <button onClick={() => router.push('/auth/signup')}
+ className="px-4 py-2 bg-primary-light hover:bg-primary-light-hover text-white text-sm font-medium rounded-lg transition">
+ Try again
+ </button>
+ <button onClick={() => router.push('/auth/login')}
+ className="px-4 py-2 border border-theme-strong text-theme-secondary text-sm font-medium rounded-lg hover:surface-section dark:hover:surface-card transition">
+ Log in
+ </button>
+ </div>
+ </div>
+ </div>
+ )
+ }
 
-  // ── Terms step for new OAuth users ───────────────────────────────────────
-  if (phase === 'terms') {
-    const canSubmit = agreedToTerms && agreedToPrivacy
+ // ── Terms step for new OAuth users ───────────────────────────────────────
+ if (phase === 'terms') {
+ const canSubmit = agreedToTerms && agreedToPrivacy
 
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4 py-12">
-        <div className="max-w-lg w-full space-y-6">
+ return (
+ <div className="min-h-screen flex items-center justify-center surface-section px-4 py-12">
+ <div className="max-w-lg w-full space-y-6">
 
-          {/* Header */}
-          <div className="text-center space-y-2">
-            <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mx-auto">
-              <Shield className="w-7 h-7 text-blue-600 dark:text-blue-400" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">One last step</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Your Google account is connected. Please agree to our terms to continue.
-            </p>
-          </div>
+ {/* Header */}
+ <div className="text-center space-y-2">
+ <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto">
+ <Shield className="w-7 h-7 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
+ </div>
+ <h1 className="text-2xl font-bold text-theme-primary">One last step</h1>
+ <p className="text-sm text-theme-muted ">
+ Your Google account is connected. Please agree to our terms to continue.
+ </p>
+ </div>
 
-          {/* Account summary */}
-          {user && (
-            <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl">
-              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                {(user.fullName ?? user.email).charAt(0).toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                {user.fullName && <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{user.fullName}</p>}
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
-                <p className="text-xs text-blue-600 dark:text-blue-400 capitalize">{user.role.toLowerCase()} account</p>
-              </div>
-            </div>
-          )}
+ {/* Account summary */}
+ {user && (
+ <div className="flex items-center gap-3 p-4 bg-primary-light/10 border border-blue-200 dark:border-blue-800 rounded-xl">
+ <div className="w-10 h-10 bg-primary-light rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+ {(user.fullName ?? user.email).charAt(0).toUpperCase()}
+ </div>
+ <div className="min-w-0">
+ {user.fullName && <p className="text-sm font-semibold text-theme-primary truncate">{user.fullName}</p>}
+ <p className="text-xs text-theme-muted truncate">{user.email}</p>
+ <p className="text-xs text-primary-light dark:text-primary-dark dark:text-primary-dark capitalize">{user.role.toLowerCase()} account</p>
+ </div>
+ </div>
+ )}
 
-          {/* Agreement card */}
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-4">
-            <div className="flex items-center gap-2 mb-2">
-              <FileText className="w-4 h-4 text-gray-500" />
-              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Legal agreements</span>
-            </div>
+ {/* Agreement card */}
+ <div className="surface-card border border-theme rounded-2xl p-6 space-y-4">
+ <div className="flex items-center gap-2 mb-2">
+ <FileText className="w-4 h-4 text-theme-muted" />
+ <span className="text-sm font-semibold text-theme-secondary">Legal agreements</span>
+ </div>
 
-            <label className="flex items-start gap-3 cursor-pointer group">
-              <div className={`mt-0.5 w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center transition ${
-                agreedToTerms ? 'bg-blue-600 border-blue-600' : 'border-gray-300 dark:border-gray-600 group-hover:border-blue-400'
-              }`} onClick={() => setAgreedToTerms(!agreedToTerms)}>
-                {agreedToTerms && <CheckCircle className="w-3 h-3 text-white" />}
-              </div>
-              <span className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                I agree to the{' '}
-                <Link href="/legal/terms" target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
-                  Terms of Service
-                </Link>
-              </span>
-            </label>
+ <label className="flex items-start gap-3 cursor-pointer group">
+ <div className={`mt-0.5 w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center transition ${
+ agreedToTerms ? 'bg-primary-light border-blue-600' : 'border-theme-strong group-hover:border-primary-light dark:hover:border-primary-dark'
+ }`} onClick={() => setAgreedToTerms(!agreedToTerms)}>
+ {agreedToTerms && <CheckCircle className="w-3 h-3 text-white" />}
+ </div>
+ <span className="text-sm text-theme-secondary leading-relaxed">
+ I agree to the{' '}
+ <Link href="/legal/terms" target="_blank" className="text-primary-light dark:text-primary-dark dark:text-primary-dark hover:underline font-medium">
+ Terms of Service
+ </Link>
+ </span>
+ </label>
 
-            <label className="flex items-start gap-3 cursor-pointer group">
-              <div className={`mt-0.5 w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center transition ${
-                agreedToPrivacy ? 'bg-blue-600 border-blue-600' : 'border-gray-300 dark:border-gray-600 group-hover:border-blue-400'
-              }`} onClick={() => setAgreedToPrivacy(!agreedToPrivacy)}>
-                {agreedToPrivacy && <CheckCircle className="w-3 h-3 text-white" />}
-              </div>
-              <span className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                I agree to the{' '}
-                <Link href="/legal/privacy" target="_blank" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
-                  Privacy Policy
-                </Link>
-              </span>
-            </label>
-          </div>
+ <label className="flex items-start gap-3 cursor-pointer group">
+ <div className={`mt-0.5 w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center transition ${
+ agreedToPrivacy ? 'bg-primary-light border-blue-600' : 'border-theme-strong group-hover:border-primary-light dark:hover:border-primary-dark'
+ }`} onClick={() => setAgreedToPrivacy(!agreedToPrivacy)}>
+ {agreedToPrivacy && <CheckCircle className="w-3 h-3 text-white" />}
+ </div>
+ <span className="text-sm text-theme-secondary leading-relaxed">
+ I agree to the{' '}
+ <Link href="/legal/privacy" target="_blank" className="text-primary-light dark:text-primary-dark dark:text-primary-dark hover:underline font-medium">
+ Privacy Policy
+ </Link>
+ </span>
+ </label>
+ </div>
 
-          {/* Submit */}
-          <button
-            onClick={handleAcceptTerms}
-            disabled={!canSubmit || isSubmitting}
-            className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
-          >
-            {isSubmitting ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              'Continue to SafariHub →'
-            )}
-          </button>
+ {/* Submit */}
+ <button
+ onClick={handleAcceptTerms}
+ disabled={!canSubmit || isSubmitting}
+ className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
+ >
+ {isSubmitting ? (
+ <Loader2 className="w-5 h-5 animate-spin" />
+ ) : (
+ 'Continue to SafariHub →'
+ )}
+ </button>
 
-          <p className="text-center text-xs text-gray-400 dark:text-gray-500">
-            You can always review these documents from your account settings.
-          </p>
-        </div>
-      </div>
-    )
-  }
+ <p className="text-center text-xs text-theme-muted ">
+ You can always review these documents from your account settings.
+ </p>
+ </div>
+ </div>
+ )
+ }
 
-  // ── Enhanced Loading state ────────────────────────────────────────────────
-  const [loadingStep, setLoadingStep] = useState(0);
-  const loadingMessages = [
-    "Connecting to Google...",
-    "Securing your session...",
-    "Fetching your profile...",
-    "Almost there..."
-  ];
+ // ── Enhanced Loading state ────────────────────────────────────────────────
+ const [loadingStep, setLoadingStep] = useState(0);
+ const loadingMessages = [
+"Connecting to Google...",
+"Securing your session...",
+"Fetching your profile...",
+"Almost there..."
+ ];
 
-  useEffect(() => {
-    if (phase === 'loading') {
-      const interval = setInterval(() => {
-        setLoadingStep((prev) => (prev < loadingMessages.length - 1 ? prev + 1 : prev));
-      }, 800);
-      return () => clearInterval(interval);
-    }
-  }, [phase]);
+ useEffect(() => {
+ if (phase === 'loading') {
+ const interval = setInterval(() => {
+ setLoadingStep((prev) => (prev < loadingMessages.length - 1 ? prev + 1 : prev));
+ }, 800);
+ return () => clearInterval(interval);
+ }
+ }, [phase]);
 
-  if (phase === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] dark:bg-[#020617] relative overflow-hidden">
-        {/* Decorative background elements */}
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-400/10 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full animate-pulse delay-700" />
-        
-        <div className="relative z-10 w-full max-w-sm px-4">
-          <div className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-white/20 dark:border-gray-800/50 rounded-3xl shadow-2xl p-10 text-center">
-            <div className="relative mb-8">
-              {/* Outer spinning ring */}
-              <div className="absolute inset-0 scale-150 opacity-20">
-                <div className="w-full h-full border-4 border-blue-600 border-t-transparent rounded-full animate-[spin_3s_linear_infinite]" />
-              </div>
-              
-              <div className="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30">
-                <Loader2 className="w-10 h-10 animate-spin text-white" />
-              </div>
-            </div>
+ if (phase === 'loading') {
+ return (
+ <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] dark:bg-[#020617] relative overflow-hidden">
+ {/* Decorative background elements */}
+ <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-400/10 blur-[120px] rounded-full animate-pulse" />
+ <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full animate-pulse delay-700" />
+ 
+ <div className="relative z-10 w-full max-w-sm px-4">
+ <div className="surface-card  border border-theme rounded-3xl shadow-2xl p-10 text-center">
+ <div className="relative mb-8">
+ {/* Outer spinning ring */}
+ <div className="absolute inset-0 scale-150 opacity-20">
+ <div className="w-full h-full border-4 border-blue-600 border-t-transparent rounded-full animate-[spin_3s_linear_infinite]" />
+ </div>
+ 
+ <div className="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-blue-500/30">
+ <Loader2 className="w-10 h-10 animate-spin text-white" />
+ </div>
+ </div>
 
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-              Authenticating
-            </h2>
-            
-            <div className="space-y-4">
-              <p className="text-sm text-blue-600 dark:text-blue-400 font-medium animate-pulse">
-                {loadingMessages[loadingStep]}
-              </p>
-              
-              {/* Progress dots */}
-              <div className="flex justify-center gap-1.5">
-                {loadingMessages.map((_, i) => (
-                  <div 
-                    key={i}
-                    className={`h-1 rounded-full transition-all duration-500 ${
-                      i === loadingStep ? 'w-6 bg-blue-600' : 'w-1.5 bg-gray-200 dark:bg-gray-700'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+ <h2 className="text-xl font-bold text-theme-primary mb-2">
+ Authenticating
+ </h2>
+ 
+ <div className="space-y-4">
+ <p className="text-sm text-primary-light dark:text-primary-dark dark:text-primary-dark font-medium animate-pulse">
+ {loadingMessages[loadingStep]}
+ </p>
+ 
+ {/* Progress dots */}
+ <div className="flex justify-center gap-1.5">
+ {loadingMessages.map((_, i) => (
+ <div 
+ key={i}
+ className={`h-1 rounded-full transition-all duration-500 ${
+ i === loadingStep ? 'w-6 bg-primary-light' : 'w-1.5 surface-section'
+ }`}
+ />
+ ))}
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ );
+ }
 
-  return null; // Should not reach here
+ return null; // Should not reach here
 }

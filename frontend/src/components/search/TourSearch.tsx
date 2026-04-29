@@ -8,7 +8,7 @@
 // PURPOSE: Clean search bar - X button clears search AND all filters
 // ============================================================================
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Search, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -46,6 +46,9 @@ export default function TourSearch({
   // ========================================
   const [searchValue, setSearchValue] = useState(initialQuery)
   const [isFocused, setIsFocused] = useState(false)
+  
+  // Track previous search value to avoid redundant updates
+  const prevSearchRef = useRef(initialQuery)
 
   // ========================================
   // EFFECTS
@@ -56,16 +59,21 @@ export default function TourSearch({
     const urlQuery = searchParams.get('q') || ''
     if (urlQuery !== searchValue) {
       setSearchValue(urlQuery)
+      prevSearchRef.current = urlQuery
     }
   }, [searchParams])
 
-  // Handle search changes with debounce
+  // Handle search changes with a tiny debounce (150ms) for stability
   useEffect(() => {
     if (!onSearchChange) return
+    
+    // Don't trigger if it hasn't changed
+    if (searchValue === prevSearchRef.current && searchValue !== '') return
 
     const timeoutId = setTimeout(() => {
       onSearchChange(searchValue)
-    }, 300)
+      prevSearchRef.current = searchValue
+    }, 150)
 
     return () => clearTimeout(timeoutId)
   }, [searchValue, onSearchChange])
@@ -89,15 +97,17 @@ export default function TourSearch({
 
   const handleClear = () => {
     setSearchValue('')
+    prevSearchRef.current = ''
     const params = new URLSearchParams(searchParams.toString())
     params.delete('q')
     router.push(`/tours?${params.toString()}`, { scroll: false })
     
-    // If we want it to also clear filters (as the previous version did), we call onClearAll
-    // But user said "remove nothing more" which might mean just clear the search text.
-    // However, usually 'X' in this context should be helpful.
-    // Let's stick to just clearing the search text if they didn't explicitly ask for more.
+    if (onClearAll) {
+      onClearAll()
+    }
   }
+
+  const hasSearch = searchValue.length > 0 || (searchParams.get('q') && searchParams.get('q') !== '')
 
   return (
     <div className={`w-full ${className} relative z-30`}>
@@ -107,19 +117,19 @@ export default function TourSearch({
         animate={{ 
           opacity: 1, 
           y: 0,
-          scale: isFocused || searchValue.length > 0 ? 1.015 : 1,
-          boxShadow: searchValue.length > 0 
+          scale: isFocused || hasSearch ? 1.015 : 1,
+          boxShadow: hasSearch 
             ? '0 25px 50px -12px rgba(37, 99, 235, 0.2)' 
             : isFocused 
               ? '0 15px 30px -10px rgba(0, 0, 0, 0.15)'
               : '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
         }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="relative flex items-center bg-bg-light-paper dark:bg-bg-dark-paper border border-border-light-default dark:border-primary-dark/20 !ring-0 !outline-none rounded-xl overflow-hidden group shadow-pop-light dark:shadow-pop-dark"
+        className="relative flex items-center surface-paper border border-primary-light/20 dark:border-primary-dark/20 dark:border-primary-dark/20 !ring-0 !outline-none rounded-xl overflow-hidden group shadow-pop-light dark:shadow-pop-dark"
       >
         {/* Progress/Activity Line at the bottom - Premium Blue */}
         <AnimatePresence>
-          {searchValue.length > 0 && (
+          {hasSearch && (
             <motion.div 
               initial={{ width: 0, opacity: 0 }}
               animate={{ width: '100%', opacity: 1 }}
@@ -134,12 +144,12 @@ export default function TourSearch({
 
         {/* Ambient background shift when typing - Subtle Blue Tint */}
         <AnimatePresence>
-          {searchValue.length > 0 && (
+          {hasSearch && (
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-blue-50/10 dark:bg-blue-950/5 pointer-events-none"
+              className="absolute inset-0 bg-primary-light/5 pointer-events-none"
             />
           )}
         </AnimatePresence>
@@ -148,11 +158,11 @@ export default function TourSearch({
         <div className="relative pl-4 z-10 transition-colors duration-300">
           <motion.div
             animate={{ 
-              scale: searchValue.length > 0 ? [1, 1.2, 1] : 1,
-              color: searchValue.length > 0 ? '#2563eb' : '#9ca3af'
+              scale: hasSearch ? [1, 1.2, 1] : 1,
+              color: hasSearch ? '#2563eb' : '#9ca3af'
             }}
             transition={{ 
-              scale: { repeat: searchValue.length > 0 ? Infinity : 0, duration: 2, ease: "easeInOut" },
+              scale: { repeat: hasSearch ? Infinity : 0, duration: 2, ease: "easeInOut" },
               color: { duration: 0.3 }
             }}
           >
@@ -168,19 +178,19 @@ export default function TourSearch({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholder="Search tours..."
-          className="relative z-10 flex-1 px-3 py-4 bg-transparent !border-none !ring-0 !outline-none focus:!ring-0 focus:!outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 font-bold text-lg"
+          className="relative z-10 flex-1 px-3 py-4 bg-transparent !border-none !ring-0 !outline-none focus:!ring-0 focus:!outline-none text-theme-primary placeholder-gray-500 dark:placeholder-gray-400 font-bold text-lg"
         />
 
-        {/* 'X' Clear Button - Only when there is text */}
+        {/* 'X' Clear Button - Only when there is text OR a URL query */}
         <AnimatePresence>
-          {searchValue.length > 0 && (
+          {hasSearch && (
             <motion.button
               type="button"
               initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10 }}
               onClick={handleClear}
-              className="relative z-10 p-2 mr-2 text-gray-400 hover:text-red-500 !border-none !ring-0 !outline-none focus:!ring-0 focus:!outline-none transition-colors"
+              className="relative z-10 p-2 mr-2 text-theme-muted hover:text-danger-red !border-none !ring-0 !outline-none focus:!ring-0 focus:!outline-none transition-colors"
               aria-label="Clear search"
             >
               <X className="w-5 h-5" />
@@ -191,4 +201,4 @@ export default function TourSearch({
       </motion.form>
     </div>
   )
-}
+}

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import OnboardingBanner from './OnboardingBanner'
@@ -12,16 +12,16 @@ import OnboardingBanner from './OnboardingBanner'
  * For traveler dashboards omit idVerified.
  */
 export default function OnboardingBannerWrapper({ verificationStatus }: { verificationStatus?: 'not_submitted' | 'pending' | 'approved' | 'rejected' }) {
-  const { user } = useAuth()
-  if (!user) return null
+ const { user } = useAuth()
+ if (!user) return null
 
-  return (
-    <OnboardingBanner
-      profileCompleted={user.profileCompleted}
-      emailVerified={user.emailVerified}
-      verificationStatus={verificationStatus}
-      role={user.role as 'TRAVELER' | 'GUIDE' | 'ADMIN'}
-      userEmail={user.email}
-    />
-  )
+ return (
+ <OnboardingBanner
+ profileCompleted={user.profileCompleted}
+ emailVerified={user.emailVerified}
+ verificationStatus={verificationStatus}
+ role={user.role as 'TRAVELER' | 'GUIDE' | 'ADMIN'}
+ userEmail={user.email}
+ />
+ )
 }

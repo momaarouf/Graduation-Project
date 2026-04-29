@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // BOOKING CARD - PRICING & AVAILABILITY WIDGET
 // ============================================================================
 // LOCATION: /frontend/src/components/tour-detail/BookingCard.tsx
@@ -20,787 +20,783 @@
 import { useState, useEffect, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import {
-    Calendar,
-    Users,
-    Clock,
-    Shield,
-    CheckCircle,
-    AlertCircle,
-    ChevronDown,
-    ChevronUp,
-    Info,
-    Zap,
-    Hourglass,
-    Star,
-    Loader2,
-    CreditCard
+ Calendar,
+ Users,
+ Clock,
+ Shield,
+ CheckCircle,
+ AlertCircle,
+ ChevronDown,
+ ChevronUp,
+ Info,
+ Zap,
+ Hourglass,
+ Star,
+ Loader2,
+ CreditCard
 } from 'lucide-react'
 import { BookingCardProps, BookingMode } from '@/src/types/tour-detail.types'
 import { PublicActiveBookingResponse, BookingStatus } from '@/src/lib/types/tour.types'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
 export default function BookingCard({
-    basePrice,
-    currency,
-    priceBreakdown,
-    minCapacity,
-    maxCapacity,
-    availableSpots,
-    bookingMode,
-    nextAvailableDate,
-    upcomingDates = [],
-    isWaitlistAvailable,
-    waitlistCount = 0,
-    cancellationPolicy,
-    onBookNow,
-    onRequestBooking,
-    onJoinWaitlist,
-    onLeaveWaitlist,
-    onUpdateBooking,
-    onCancelBooking,
-    hasGroupDiscount = false,
-    groupDiscountThreshold = 4,
-    groupDiscountPercent = 5,
-    dynamicPricing,
-    activeBookings = [],
-    activeWaitlistEntries = [],
-    isLoading = false,
-    onMessageGuide
+ basePrice,
+ currency,
+ priceBreakdown,
+ minCapacity,
+ maxCapacity,
+ availableSpots,
+ bookingMode,
+ nextAvailableDate,
+ upcomingDates = [],
+ isWaitlistAvailable,
+ waitlistCount = 0,
+ cancellationPolicy,
+ onBookNow,
+ onRequestBooking,
+ onJoinWaitlist,
+ onLeaveWaitlist,
+ onUpdateBooking,
+ onCancelBooking,
+ hasGroupDiscount = false,
+ groupDiscountThreshold = 4,
+ groupDiscountPercent = 5,
+ dynamicPricing,
+ activeBookings = [],
+ activeWaitlistEntries = [],
+ isLoading = false,
+ onMessageGuide
 }: BookingCardProps) {
-    // ========================================
-    // HOOKS
-    // ========================================
-    const router = useRouter()
-    const searchParams = useSearchParams()
-    const pathname = usePathname()
+ // ========================================
+ // HOOKS
+ // ========================================
+ const router = useRouter()
+ const searchParams = useSearchParams()
+ const pathname = usePathname()
 
-    // ========================================
-    // STATE
-    // ========================================
-    const [selectedDate, setSelectedDate] = useState<string>('')
-    const [peopleCount, setPeopleCount] = useState<number>(1)
-    const [isDatePickerOpen, setIsDatePickerOpen] = useState(false)
-    const [isPricingOpen, setIsPricingOpen] = useState(false)
-    const [isRequestMode, setIsRequestMode] = useState(bookingMode === 'request')
-    const [waiverSigned, setWaiverSigned] = useState(false)
+ // ========================================
+ // STATE
+ // ========================================
+ const [selectedDate, setSelectedDate] = useState<string>('')
+ const [peopleCount, setPeopleCount] = useState<number>(1)
+ const [isDatePickerOpen, setIsDatePickerOpen] = useState(false)
+ const [isPricingOpen, setIsPricingOpen] = useState(false)
+ const [isRequestMode, setIsRequestMode] = useState(bookingMode === 'request')
+ const [waiverSigned, setWaiverSigned] = useState(false)
 
-    // ========================================
-    // IDENTITY & CONTEXT
-    // ========================================
-    
-    // Find the active booking for the currently selected date
-    // Use Number() for robust comparison between backend and frontend types
-    const currentActiveBooking = useMemo(() => {
-        if (!selectedDate || !activeBookings.length) return null
-        const occurrence = upcomingDates.find(o => o.date === selectedDate)
-        if (!occurrence) return null
-        return activeBookings.find(b => Number(b.occurrenceId) === Number(occurrence.id)) || null
-    }, [activeBookings, upcomingDates, selectedDate])
+ // ========================================
+ // IDENTITY & CONTEXT
+ // ========================================
+ 
+ // Find the active booking for the currently selected date
+ // Use Number() for robust comparison between backend and frontend types
+ const currentActiveBooking = useMemo(() => {
+ if (!selectedDate || !activeBookings.length) return null
+ const occurrence = upcomingDates.find(o => o.date === selectedDate)
+ if (!occurrence) return null
+ return activeBookings.find(b => Number(b.occurrenceId) === Number(occurrence.id)) || null
+ }, [activeBookings, upcomingDates, selectedDate])
 
-    const activeBookingId = currentActiveBooking?.id
-    const activeBookingStatus = currentActiveBooking?.status
-    const activeBookingOccurrenceId = currentActiveBooking?.occurrenceId
-    const activeBookingPeopleCount = currentActiveBooking?.peopleCount
+ const activeBookingId = currentActiveBooking?.id
+ const activeBookingStatus = currentActiveBooking?.status
+ const activeBookingOccurrenceId = currentActiveBooking?.occurrenceId
+ const activeBookingPeopleCount = currentActiveBooking?.peopleCount
 
-    const isAwaitingPayment = !!activeBookingId && activeBookingStatus === BookingStatus.PendingPayment
-    const isPending = !!activeBookingId && activeBookingStatus === BookingStatus.PendingGuide
-    const isEditing = !!activeBookingId && !isPending && !isAwaitingPayment
+ const isAwaitingPayment = !!activeBookingId && activeBookingStatus === BookingStatus.PendingPayment
+ const isPending = !!activeBookingId && activeBookingStatus === BookingStatus.PendingGuide
+ const isEditing = !!activeBookingId && !isPending && !isAwaitingPayment
 
-    // Detect if user is waitlisted for the current date
-    const currentWaitlistEntry = useMemo(() => {
-        if (!selectedDate || !activeWaitlistEntries.length) return null
-        const occurrence = upcomingDates.find(o => o.date === selectedDate)
-        if (!occurrence) return null
-        return activeWaitlistEntries.find(w => Number(w.occurrenceId) === Number(occurrence.id)) || null
-    }, [activeWaitlistEntries, upcomingDates, selectedDate])
+ // Detect if user is waitlisted for the current date
+ const currentWaitlistEntry = useMemo(() => {
+ if (!selectedDate || !activeWaitlistEntries.length) return null
+ const occurrence = upcomingDates.find(o => o.date === selectedDate)
+ if (!occurrence) return null
+ return activeWaitlistEntries.find(w => Number(w.occurrenceId) === Number(occurrence.id)) || null
+ }, [activeWaitlistEntries, upcomingDates, selectedDate])
 
-    const isWaitlisted = !!currentWaitlistEntry
+ const isWaitlisted = !!currentWaitlistEntry
 
-    // 1. Unified Sync from URL/Active Booking/Waitlist to Local State
-    useEffect(() => {
-        const urlDate = searchParams.get('date')
-        
-        // A. Priority 1: URL manually specifies a date
-        if (urlDate && upcomingDates.some(o => o.date === urlDate)) {
-            if (urlDate !== selectedDate) {
-                setSelectedDate(urlDate)
-            }
-            return
-        }
+ // 1. Unified Sync from URL/Active Booking/Waitlist to Local State
+ useEffect(() => {
+ const urlDate = searchParams.get('date')
+ 
+ // A. Priority 1: URL manually specifies a date
+ if (urlDate && upcomingDates.some(o => o.date === urlDate)) {
+ if (urlDate !== selectedDate) {
+ setSelectedDate(urlDate)
+ }
+ return
+ }
 
-        // B. Priority 2: Jump to ACTIVE BOOKING
-        if (!selectedDate && activeBookings.length > 0) {
-            const firstBooking = activeBookings[0]
-            const occurrence = upcomingDates.find(o => Number(o.id) === Number(firstBooking.occurrenceId))
-            if (occurrence) {
-                setSelectedDate(occurrence.date)
-                setPeopleCount(firstBooking.peopleCount || 1)
-                return
-            }
-        }
+ // B. Priority 2: Jump to ACTIVE BOOKING
+ if (!selectedDate && activeBookings.length > 0) {
+ const firstBooking = activeBookings[0]
+ const occurrence = upcomingDates.find(o => Number(o.id) === Number(firstBooking.occurrenceId))
+ if (occurrence) {
+ setSelectedDate(occurrence.date)
+ setPeopleCount(firstBooking.peopleCount || 1)
+ return
+ }
+ }
 
-        // C. Priority 3: Jump to WAITLIST position
-        if (!selectedDate && activeWaitlistEntries.length > 0) {
-            const firstWaitlist = activeWaitlistEntries[0]
-            const occurrence = upcomingDates.find(o => Number(o.id) === Number(firstWaitlist.occurrenceId))
-            if (occurrence) {
-                setSelectedDate(occurrence.date)
-                setPeopleCount(firstWaitlist.peopleCount || 1)
-                return
-            }
-        }
+ // C. Priority 3: Jump to WAITLIST position
+ if (!selectedDate && activeWaitlistEntries.length > 0) {
+ const firstWaitlist = activeWaitlistEntries[0]
+ const occurrence = upcomingDates.find(o => Number(o.id) === Number(firstWaitlist.occurrenceId))
+ if (occurrence) {
+ setSelectedDate(occurrence.date)
+ setPeopleCount(firstWaitlist.peopleCount || 1)
+ return
+ }
+ }
 
-        // D. Priority 4: Initial Mount - Default to first available
-        if (!selectedDate && upcomingDates.length > 0) {
-            const firstDate = upcomingDates[0].date
-            setSelectedDate(firstDate)
+ // D. Priority 4: Initial Mount - Default to first available
+ if (!selectedDate && upcomingDates.length > 0) {
+ const firstDate = upcomingDates[0].date
+ setSelectedDate(firstDate)
 
-            // Push to URL on initial select if not there
-            const params = new URLSearchParams(searchParams.toString())
-            params.set('date', firstDate)
-            router.replace(`${pathname}?${params.toString()}`, { scroll: false })
-        }
-    }, [upcomingDates, searchParams, activeBookings, activeWaitlistEntries, selectedDate, router, pathname])
+ // Push to URL on initial select if not there
+ const params = new URLSearchParams(searchParams.toString())
+ params.set('date', firstDate)
+ router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+ }
+ }, [upcomingDates, searchParams, activeBookings, activeWaitlistEntries, selectedDate, router, pathname])
 
-    // 2. Helper to handle manual date changes
-    const handleDateChange = (newDate: string) => {
-        if (newDate === selectedDate) return
-        
-        // Update local state immediately for snappy UI
-        setSelectedDate(newDate)
-        setIsDatePickerOpen(false)
+ // 2. Helper to handle manual date changes
+ const handleDateChange = (newDate: string) => {
+ if (newDate === selectedDate) return
+ 
+ // Update local state immediately for snappy UI
+ setSelectedDate(newDate)
+ setIsDatePickerOpen(false)
 
-        // Push to URL: other components will react to this
-        const params = new URLSearchParams(searchParams.toString())
-        params.set('date', newDate)
-        router.replace(`${pathname}?${params.toString()}`, { scroll: false })
-    }
+ // Push to URL: other components will react to this
+ const params = new URLSearchParams(searchParams.toString())
+ params.set('date', newDate)
+ router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+ }
 
-    // ========================================
-    // DERIVED VALUES
-    // ========================================
+ // ========================================
+ // DERIVED VALUES
+ // ========================================
 
-    /**
-     * Calculate total price with all discounts
-     * Maps to ERD: PricingEngine
-     */
-    const calculateTotalPrice = () => {
-        let pricePerPerson = basePrice
-        let appliedMultiplier = 1.0
-        let adjustmentType: 'weekend' | 'holiday' | null = null
+ /**
+ * Calculate total price with all discounts
+ * Maps to ERD: PricingEngine
+ */
+ const calculateTotalPrice = () => {
+ let pricePerPerson = basePrice
+ let appliedMultiplier = 1.0
+ let adjustmentType: 'weekend' | 'holiday' | null = null
 
-        // Apply dynamic pricing if enabled
-        if (dynamicPricing?.enabled && selectedDate) {
-            const date = new Date(selectedDate)
-            const day = date.getDay() // 0 = Sunday, 6 = Saturday
-            const month = date.getMonth() + 1
-            const dayOfMonth = date.getDate()
+ // Apply dynamic pricing if enabled
+ if (dynamicPricing?.enabled && selectedDate) {
+ const date = new Date(selectedDate)
+ const day = date.getDay() // 0 = Sunday, 6 = Saturday
+ const month = date.getMonth() + 1
+ const dayOfMonth = date.getDate()
 
-            // 1. Check for Holidays (Matching Backend Fixed Lebanese Holidays)
-            const isHoliday = (m: number, d: number) => {
-                const holidays = [
-                    {m: 1, d: 1}, {m: 1, d: 6}, {m: 2, d: 9}, {m: 3, d: 25},
-                    {m: 5, d: 1}, {m: 5, d: 25}, {m: 8, d: 15}, {m: 11, d: 1},
-                    {m: 11, d: 22}, {m: 12, d: 25}
-                ]
-                return holidays.some(h => h.m === m && h.d === d)
-            }
+ // 1. Check for Holidays (Matching Backend Fixed Lebanese Holidays)
+ const isHoliday = (m: number, d: number) => {
+ const holidays = [
+ {m: 1, d: 1}, {m: 1, d: 6}, {m: 2, d: 9}, {m: 3, d: 25},
+ {m: 5, d: 1}, {m: 5, d: 25}, {m: 8, d: 15}, {m: 11, d: 1},
+ {m: 11, d: 22}, {m: 12, d: 25}
+ ]
+ return holidays.some(h => h.m === m && h.d === d)
+ }
 
-            if (isHoliday(month, dayOfMonth)) {
-                appliedMultiplier = dynamicPricing.holidayMultiplier || 1.0
-                if (appliedMultiplier > 5.0) appliedMultiplier /= 100.0
-                adjustmentType = 'holiday'
-            } else if (day === 0 || day === 6) {
-                appliedMultiplier = dynamicPricing.weekendMultiplier || 1.0
-                if (appliedMultiplier > 5.0) appliedMultiplier /= 100.0
-                adjustmentType = 'weekend'
-            }
+ if (isHoliday(month, dayOfMonth)) {
+ appliedMultiplier = dynamicPricing.holidayMultiplier || 1.0
+ if (appliedMultiplier > 5.0) appliedMultiplier /= 100.0
+ adjustmentType = 'holiday'
+ } else if (day === 0 || day === 6) {
+ appliedMultiplier = dynamicPricing.weekendMultiplier || 1.0
+ if (appliedMultiplier > 5.0) appliedMultiplier /= 100.0
+ adjustmentType = 'weekend'
+ }
 
-            if (appliedMultiplier !== 1.0) {
-                // Safety cap matching backend (5.0x)
-                const safeMultiplier = Math.min(appliedMultiplier, 5.0)
-                pricePerPerson = basePrice * safeMultiplier
-            }
-        }
+ if (appliedMultiplier !== 1.0) {
+ // Safety cap matching backend (5.0x)
+ const safeMultiplier = Math.min(appliedMultiplier, 5.0)
+ pricePerPerson = basePrice * safeMultiplier
+ }
+ }
 
-        let subtotal = pricePerPerson * peopleCount
-        let discountAmount = 0
+ let subtotal = pricePerPerson * peopleCount
+ let discountAmount = 0
 
-        // Group discount: dynamic logic from props
-        if (hasGroupDiscount && peopleCount >= (groupDiscountThreshold || 4)) {
-            const percent = (groupDiscountPercent || 5) / 100
-            discountAmount = subtotal * percent
-            subtotal = subtotal - discountAmount 
-        }
+ // Group discount: dynamic logic from props
+ if (hasGroupDiscount && peopleCount >= (groupDiscountThreshold || 4)) {
+ const percent = (groupDiscountPercent || 5) / 100
+ discountAmount = subtotal * percent
+ subtotal = subtotal - discountAmount 
+ }
 
-        return {
-            subtotal: pricePerPerson * peopleCount,
-            discount: discountAmount,
-            total: subtotal,
-            pricePerPerson,
-            multiplier: appliedMultiplier,
-            adjustmentType
-        }
-    }
+ return {
+ subtotal: pricePerPerson * peopleCount,
+ discount: discountAmount,
+ total: subtotal,
+ pricePerPerson,
+ multiplier: appliedMultiplier,
+ adjustmentType
+ }
+ }
 
-    const price = calculateTotalPrice()
+ const price = calculateTotalPrice()
 
-    /**
-     * Determine if booking is available for the selected date
-     */
-    const selectedDateData = upcomingDates.find(d => d.date === selectedDate)
-    const rawAvailable = selectedDateData?.availableSpots ?? (availableSpots || 0)
-    
-    // Effective available spots for THIS user during an update
-    // If it's the same occurrence, they can expand into their own spots + raw spots
-    const isSameOccurrence = activeBookingId && activeBookingOccurrenceId && selectedDateData?.id === activeBookingOccurrenceId
-    const effectiveAvailable = isSameOccurrence 
-        ? (rawAvailable + (activeBookingPeopleCount || 0)) 
-        : rawAvailable
+ /**
+ * Determine if booking is available for the selected date
+ */
+ const selectedDateData = upcomingDates.find(d => d.date === selectedDate)
+ const rawAvailable = selectedDateData?.availableSpots ?? (availableSpots || 0)
+ 
+ // Effective available spots for THIS user during an update
+ // If it's the same occurrence, they can expand into their own spots + raw spots
+ const isSameOccurrence = activeBookingId && activeBookingOccurrenceId && selectedDateData?.id === activeBookingOccurrenceId
+ const effectiveAvailable = isSameOccurrence 
+ ? (rawAvailable + (activeBookingPeopleCount || 0)) 
+ : rawAvailable
 
-    const isAvailable = effectiveAvailable >= peopleCount
+ const isAvailable = effectiveAvailable >= peopleCount
 
-    // Dynamic available counter for the UI badge
-    const peopleDiff = isSameOccurrence ? (peopleCount - (activeBookingPeopleCount || 0)) : peopleCount
-    const dynamicAvailable = Math.max(0, rawAvailable - peopleDiff)
+ // Dynamic available counter for the UI badge
+ const peopleDiff = isSameOccurrence ? (peopleCount - (activeBookingPeopleCount || 0)) : peopleCount
+ const dynamicAvailable = Math.max(0, rawAvailable - peopleDiff)
 
-    /**
-     * Get availability status color
-     */
-    const getAvailabilityColor = () => {
-        // Use effectiveAvailable for the owner's status color
-        const percentage = (effectiveAvailable / maxCapacity) * 100
-        if (percentage <= 20) return 'text-red-600 dark:text-red-400'
-        if (percentage <= 50) return 'text-orange-600 dark:text-orange-400'
-        return 'text-emerald-600 dark:text-emerald-400'
-    }
+ /**
+ * Get availability status color
+ */
+ const getAvailabilityColor = () => {
+ // Use effectiveAvailable for the owner's status color
+ const percentage = (effectiveAvailable / maxCapacity) * 100
+ if (percentage <= 20) return 'text-red-600 dark:text-red-400'
+ if (percentage <= 50) return 'text-orange-600 dark:text-orange-400'
+ return 'text-success-green dark:text-emerald-400'
+ }
 
-    /**
-     * Get next available date display
-     */
-    const getNextDateDisplay = () => {
-        if (selectedDate) {
-            const date = new Date(selectedDate)
-            return date.toLocaleDateString('en-US', {
-                weekday: 'short',
-                month: 'short',
-                day: 'numeric'
-            })
-        }
-        return nextAvailableDate || 'Select date'
-    }
+ /**
+ * Get next available date display
+ */
+ const getNextDateDisplay = () => {
+ if (selectedDate) {
+ const date = new Date(selectedDate)
+ return date.toLocaleDateString('en-US', {
+ weekday: 'short',
+ month: 'short',
+ day: 'numeric'
+ })
+ }
+ return nextAvailableDate || 'Select date'
+ }
 
-    // ========================================
-    // HANDLERS
-    // ========================================
+ // ========================================
+ // HANDLERS
+ // ========================================
 
-    const handleBooking = async () => {
-        if (!isPending && !waiverSigned) {
-            toast.error('You must agree to the liability waiver to book this tour')
-            return
-        }
+ const handleBooking = async () => {
+ if (!isPending && !waiverSigned) {
+ toast.error('You must agree to the liability waiver to book this tour')
+ return
+ }
 
-        if (isEditing) {
-            if (activeBookingId && onUpdateBooking) {
-                const occurrenceId = upcomingDates.find(d => d.date === selectedDate)?.id
-                if (!occurrenceId) return
+ if (isEditing) {
+ if (activeBookingId && onUpdateBooking) {
+ const occurrenceId = upcomingDates.find(d => d.date === selectedDate)?.id
+ if (!occurrenceId) return
 
-                try {
-                    await onUpdateBooking(activeBookingId, occurrenceId, peopleCount, false)
-                } catch (error: any) {
-                    if (error.response?.status === 409) {
-                        if (window.confirm("Increase group size will move you to the waitlist and you will lose your current spot. Are you sure?")) {
-                            await onUpdateBooking(activeBookingId, occurrenceId, peopleCount, true)
-                        }
-                    } else {
-                        toast.error(error.response?.data?.message || 'Update failed')
-                    }
-                }
-            }
-            return
-        }
+ try {
+ await onUpdateBooking(activeBookingId, occurrenceId, peopleCount, false)
+ } catch (error: any) {
+ if (error.response?.status === 409) {
+ if (window.confirm("Increase group size will move you to the waitlist and you will lose your current spot. Are you sure?")) {
+ await onUpdateBooking(activeBookingId, occurrenceId, peopleCount, true)
+ }
+ } else {
+ toast.error(error.response?.data?.message || 'Update failed')
+ }
+ }
+ }
+ return
+ }
 
-        if (isPending) {
-            if (activeBookingId && onCancelBooking) {
-                onCancelBooking(activeBookingId)
-            }
-            return
-        }
+ if (isPending) {
+ if (activeBookingId && onCancelBooking) {
+ onCancelBooking(activeBookingId)
+ }
+ return
+ }
 
-        if (bookingMode === 'instant' || !isRequestMode) {
-            onBookNow(selectedDate, peopleCount, waiverSigned)
-        } else {
-            onRequestBooking(selectedDate, peopleCount, waiverSigned, '')
-        }
-    }
+ if (bookingMode === 'instant' || !isRequestMode) {
+ onBookNow(selectedDate, peopleCount, waiverSigned)
+ } else {
+ onRequestBooking(selectedDate, peopleCount, waiverSigned, '')
+ }
+ }
 
-    const handleWaitlist = () => {
-        if (!selectedDate) {
-            alert('Please select a date')
-            return
-        }
-        
-        if (isWaitlisted && currentWaitlistEntry) {
-            onLeaveWaitlist?.(currentWaitlistEntry.id)
-        } else {
-            onJoinWaitlist(selectedDate, peopleCount)
-        }
-    }
+ const handleWaitlist = () => {
+ if (!selectedDate) {
+ alert('Please select a date')
+ return
+ }
+ 
+ if (isWaitlisted && currentWaitlistEntry) {
+ onLeaveWaitlist?.(currentWaitlistEntry.id)
+ } else {
+ onJoinWaitlist(selectedDate, peopleCount)
+ }
+ }
 
-    // ========================================
-    // RENDER
-    // ========================================
+ // ========================================
+ // RENDER
+ // ========================================
 
-    return (
-        <div className="bg-bg-light-paper dark:bg-bg-dark-paper rounded-3xl border border-border-light-default dark:border-border-dark-strong shadow-xl overflow-hidden sticky top-24">
-            {/* ========================================
-          HEADER - PRICE & AVAILABILITY
-          ======================================== */}
-            <div className="p-6 border-b border-gray-200 dark:border-gray-800">
-                <div className="flex items-baseline justify-between mb-2">
-                    <div>
-                        <span className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                            {currency === 'USD' && '$'}
-                            {currency === 'TRY' && '₺'}
-                            {currency === 'LBP' && 'ل.ل '}
-                            {price.pricePerPerson}
-                        </span>
-                        <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">
-                            / person
-                        </span>
-                    </div>
+ return (
+ <div className="surface-section border border-primary-light/10 dark:border-primary-dark/10 rounded-xl shadow-2xl overflow-hidden sticky top-24">
+ {/* ========================================
+ HEADER - PRICE & AVAILABILITY
+ ======================================== */}
+ <div className="p-6 border-b border-primary-light/10 dark:border-primary-dark/10">
+ <div className="flex items-baseline justify-between mb-2">
+ <div>
+ <span className="text-2xl sm:text-3xl font-bold text-theme-primary">
+ {currency === 'USD' && '$'}
+ {currency === 'TRY' && '₺'}
+ {currency === 'LBP' && 'ل.ل '}
+ {price.pricePerPerson}
+ </span>
+ <span className="text-sm text-theme-muted ml-1">
+ / person
+ </span>
+ </div>
 
-                    {/* Availability badge */}
-                    <div className={`px-2 py-1 rounded-full text-xs font-medium ${dynamicAvailable === 0 ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' : isAvailable ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'}`}>
-                        {upcomingDates.length === 0 
-                            ? 'No dates scheduled' 
-                            : isAvailable ? `${dynamicAvailable} spots left` : (dynamicAvailable > 0 ? `Only ${dynamicAvailable} left` : 'Fully booked')
-                        }
-                    </div>
-                </div>
+ {/* Availability badge */}
+ <div className={`px-2 py-1 rounded-lg text-xs font-medium ${dynamicAvailable === 0 ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' : isAvailable ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'}`}>
+ {upcomingDates.length === 0 
+ ? 'No dates scheduled' 
+ : isAvailable ? `${dynamicAvailable} spots left` : (dynamicAvailable > 0 ? `Only ${dynamicAvailable} left` : 'Fully booked')
+ }
+ </div>
+ </div>
 
-            {/* Waitlist indicator */}
-            {isWaitlistAvailable && (() => {
-                const count = upcomingDates.find(d => d.date === selectedDate)?.waitlistCount || 0;
-                return count > 0 || !isAvailable;
-            })() && (
-                <div className="px-6 pb-4">
-                    <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg text-sm">
-                        <Hourglass className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-                        <span className="text-amber-700 dark:text-amber-300">
-                            {(() => {
-                                const count = upcomingDates.find(d => d.date === selectedDate)?.waitlistCount || 0;
-                                return count > 0 
-                                    ? `${count} ${count === 1 ? 'person' : 'people'} on waitlist`
-                                    : 'Tour is full. Join waitlist';
-                            })()}
-                        </span>
-                    </div>
-                </div>
-            )}
-            </div>
+ {/* Waitlist indicator */}
+ {isWaitlistAvailable && (() => {
+ const count = upcomingDates.find(d => d.date === selectedDate)?.waitlistCount || 0;
+ return count > 0 || !isAvailable;
+ })() && (
+ <div className="px-6 pb-4">
+ <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg text-sm">
+ <Hourglass className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+ <span className="text-amber-700 dark:text-amber-300">
+ {(() => {
+ const count = upcomingDates.find(d => d.date === selectedDate)?.waitlistCount || 0;
+ return count > 0 
+ ? `${count} ${count === 1 ? 'person' : 'people'} on waitlist`
+ : 'Tour is full. Join waitlist';
+ })()}
+ </span>
+ </div>
+ </div>
+ )}
+ </div>
 
-            {/* ========================================
-          BOOKING FORM
-          ======================================== */}
-            <div className="p-6 space-y-4">
+ {/* ========================================
+ BOOKING FORM
+ ======================================== */}
+ <div className="p-6 space-y-4">
 
-                {/* Date selection */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Select date
-                    </label>
-                    <div className="relative">
-                        <button
-                            onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-                            className="w-full flex items-center justify-between px-5 py-3.5 bg-bg-light-paper dark:bg-bg-dark-paper border border-border-light-default dark:border-border-dark-strong rounded-full text-left transition-all hover:border-primary-light dark:hover:border-primary-dark shadow-sm"
-                        >
-                            <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-primary-light" />
-                                <span className="text-text-light-primary dark:text-text-dark-primary font-bold">
-                                    {getNextDateDisplay()}
-                                </span>
-                            </div>
-                            {isDatePickerOpen ? (
-                                <ChevronUp className="w-4 h-4 text-text-light-muted" />
-                            ) : (
-                                <ChevronDown className="w-4 h-4 text-text-light-muted" />
-                            )}
-                        </button>
+ {/* Date selection */}
+ <div>
+ <label className="block text-sm font-medium text-theme-secondary mb-2">
+ Select date
+ </label>
+ <div className="relative">
+ <button
+ onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+ className="w-full flex items-center justify-between px-5 py-3.5 surface-section border border-primary-light/10 dark:border-primary-dark/10 rounded-lg text-left transition-all hover:border-primary-light dark:hover:border-primary-dark shadow-sm"
+ >
+ <div className="flex items-center gap-2">
+ <Calendar className="w-4 h-4 text-primary-light" />
+ <span className="text-theme-primary font-bold">
+ {getNextDateDisplay()}
+ </span>
+ </div>
+ {isDatePickerOpen ? (
+ <ChevronUp className="w-4 h-4 text-theme-muted" />
+ ) : (
+ <ChevronDown className="w-4 h-4 text-theme-muted" />
+ )}
+ </button>
 
-                        {/* Date picker dropdown */}
-                        {isDatePickerOpen && (
-                            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto">
-                                {upcomingDates.map((date) => {
-                                    const dateObj = new Date(date.date)
-                                    const formatted = dateObj.toLocaleDateString('en-US', {
-                                        weekday: 'short',
-                                        month: 'short',
-                                        day: 'numeric'
-                                    })
-                                    const isAvailable = date.availableSpots >= peopleCount
+ {/* Date picker dropdown */}
+ {isDatePickerOpen && (
+ <div className="absolute top-full left-0 right-0 mt-1 surface-card border border-primary-light/10 dark:border-primary-dark/10 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto">
+ {upcomingDates.map((date) => {
+ const dateObj = new Date(date.date)
+ const formatted = dateObj.toLocaleDateString('en-US', {
+ weekday: 'short',
+ month: 'short',
+ day: 'numeric'
+ })
+ const isAvailable = date.availableSpots >= peopleCount
 
-                                    return (
-                                        <button
-                                            key={date.date}
-                                            onClick={() => handleDateChange(date.date)}
-                                            className={`
-                        w-full
-                        flex items-center justify-between
-                        px-4 py-3
-                        hover:bg-gray-50 dark:hover:bg-gray-800
-                        transition-colors
-                        ${selectedDate === date.date ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
-                      `}
-                                        >
-                                            <span className="text-gray-900 dark:text-white">
-                                                {formatted}
-                                            </span>
-                                            <span className={`
-                        text-xs
-                        ${date.availableSpots > 0
-                                                    ? 'text-emerald-600 dark:text-emerald-400'
-                                                    : 'text-red-600 dark:text-red-400'
-                                                }
-                      `}>
-                                                {date.availableSpots > 0
-                                                    ? `${date.availableSpots} spots`
-                                                    : 'Full'
-                                                }
-                                            </span>
-                                        </button>
-                                    )
-                                })}
-                            </div>
-                        )}
-                    </div>
-                    
-                    {/* Compact Contact Link - moved under date selector */}
-                    <div className="pt-2 pb-4 border-b border-gray-100 dark:border-gray-800">
-                        <button
-                            type="button"
-                            onClick={() => onMessageGuide?.(selectedDate)}
-                            className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline transition-colors"
-                        >
-                            <AlertCircle className="w-3.5 h-3.5" />
-                            Have questions? Message guide
-                        </button>
-                    </div>
-                </div>
+ return (
+ <button
+ key={date.date}
+ onClick={() => handleDateChange(date.date)}
+ className={`
+ w-full
+ flex items-center justify-between
+ px-4 py-3
+ hover:surface-section dark:hover:surface-card
+ transition-colors
+ ${selectedDate === date.date ? 'bg-primary-light/10 ' : ''}
+ `}
+ >
+ <span className="text-theme-primary">
+ {formatted}
+ </span>
+ <span className={`
+ text-xs
+ ${date.availableSpots > 0
+ ? 'text-success-green dark:text-emerald-400'
+ : 'text-red-600 dark:text-red-400'
+ }
+ `}>
+ {date.availableSpots > 0
+ ? `${date.availableSpots} spots`
+ : 'Full'
+ }
+ </span>
+ </button>
+ )
+ })}
+ </div>
+ )}
+ </div>
+ 
+ {/* Compact Contact Link - moved under date selector */}
+ <div className="pt-2 pb-4 border-b border-primary-light/10 dark:border-primary-dark/10">
+ <button
+ type="button"
+ onClick={() => onMessageGuide?.(selectedDate)}
+ className="inline-flex items-center gap-1.5 text-xs font-medium text-primary-light dark:text-primary-dark dark:text-primary-dark hover:underline transition-colors"
+ >
+ <AlertCircle className="w-3.5 h-3.5" />
+ Have questions? Message guide
+ </button>
+ </div>
+ </div>
 
-                {/* Number of travelers */}
-                {!isWaitlisted && !isPending && (
-                    <div className="pt-2">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Number of travelers
-                        </label>
-                        <div className="flex items-center gap-2">
-                            {!isPending && !isWaitlisted && (
-                                <button
-                                    onClick={() => setPeopleCount(Math.max(1, peopleCount - 1))}
-                                    disabled={peopleCount <= 1 || isLoading}
-                                    className="
-                                        w-11 h-11
-                                        flex items-center justify-center
-                                        bg-gray-100 dark:bg-gray-800
-                                        border border-border-light-default dark:border-border-dark-strong
-                                        rounded-full
-                                        text-text-light-primary dark:text-text-dark-primary
-                                        hover:bg-gray-200 dark:hover:bg-gray-700
-                                        disabled:opacity-50 disabled:cursor-not-allowed
-                                        transition-all shadow-sm
-                                    "
-                                    aria-label="Decrease travelers"
-                                >
-                                    −
-                                </button>
-                            )}
+ {/* Number of travelers */}
+ {!isWaitlisted && !isPending && (
+ <div className="pt-2">
+ <label className="block text-sm font-medium text-theme-secondary mb-2">
+ Number of travelers
+ </label>
+ <div className="flex items-center gap-2">
+ {!isPending && !isWaitlisted && (
+ <button
+ onClick={() => setPeopleCount(Math.max(1, peopleCount - 1))}
+ disabled={peopleCount <= 1 || isLoading}
+ className="
+ w-11 h-11
+ flex items-center justify-center
+ surface-section
+ border border-primary-light/10 dark:border-primary-dark/10 rounded-lg
+ text-theme-primary hover:surface-section dark:hover:surface-section
+ disabled:opacity-50 disabled:cursor-not-allowed
+ transition-all shadow-sm
+"
+ aria-label="Decrease travelers"
+ >
+ −
+ </button>
+ )}
 
-                            <div className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-100 dark:bg-gray-800/80 rounded-full border border-border-light-default dark:border-border-dark-strong shadow-inner">
-                                <Users className="w-4 h-4 text-primary-light" />
-                                <span className="text-base font-bold text-text-light-primary dark:text-text-dark-primary">
-                                    {peopleCount} {peopleCount === 1 ? 'Traveler' : 'Travelers'}
-                                </span>
-                            </div>
+ <div className="flex-1 flex items-center justify-center gap-2 py-2.5 surface-section rounded-lg border border-primary-light/10 dark:border-primary-dark/10 shadow-inner">
+ <Users className="w-4 h-4 text-primary-light" />
+ <span className="text-base font-bold text-theme-primary ">
+ {peopleCount} {peopleCount === 1 ? 'Traveler' : 'Travelers'}
+ </span>
+ </div>
 
-                            {!isPending && !isWaitlisted && (
-                                <button
-                                    onClick={() => setPeopleCount(Math.min(maxCapacity, peopleCount + 1))}
-                                    disabled={peopleCount >= maxCapacity || isLoading}
-                                    className="
-                                        w-11 h-11
-                                        flex items-center justify-center
-                                        bg-gray-100 dark:bg-gray-800
-                                        border border-border-light-default dark:border-border-dark-strong
-                                        rounded-full
-                                        text-text-light-primary dark:text-text-dark-primary
-                                        hover:bg-gray-200 dark:hover:bg-gray-700
-                                        disabled:opacity-50 disabled:cursor-not-allowed
-                                        transition-all shadow-sm
-                                    "
-                                    aria-label="Increase travelers"
-                                >
-                                    +
-                                </button>
-                            )}
-                        </div>
+ {!isPending && !isWaitlisted && (
+ <button
+ onClick={() => setPeopleCount(Math.min(maxCapacity, peopleCount + 1))}
+ disabled={peopleCount >= maxCapacity || isLoading}
+ className="
+ w-11 h-11
+ flex items-center justify-center
+ surface-section
+ border border-primary-light/10 dark:border-primary-dark/10 rounded-lg
+ text-theme-primary hover:surface-section dark:hover:surface-section
+ disabled:opacity-50 disabled:cursor-not-allowed
+ transition-all shadow-sm
+"
+ aria-label="Increase travelers"
+ >
+ +
+ </button>
+ )}
+ </div>
 
-                        {/* Group discount indicator */}
-                        {hasGroupDiscount && peopleCount >= (groupDiscountThreshold || 4) && (
-                            <div className="mt-2 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
-                                <CheckCircle className="w-3.5 h-3.5" />
-                                <span>{Number(groupDiscountPercent || 5).toLocaleString('en-US', { maximumFractionDigits: 2 })}% group discount applied</span>
-                            </div>
-                        )}
-                    </div>
-                )}
+ {/* Group discount indicator */}
+ {hasGroupDiscount && peopleCount >= (groupDiscountThreshold || 4) && (
+ <div className="mt-2 flex items-center gap-1.5 text-xs text-success-green dark:text-emerald-400">
+ <CheckCircle className="w-3.5 h-3.5" />
+ <span>{Number(groupDiscountPercent || 5).toLocaleString('en-US', { maximumFractionDigits: 2 })}% group discount applied</span>
+ </div>
+ )}
+ </div>
+ )}
 
-                {/* ========================================
-            PRICE BREAKDOWN (Collapsible)
-            ======================================== */}
-                {!isWaitlisted && !isPending && (
-                    <div className="border-t border-gray-200 dark:border-gray-800 pt-4">
-                        <button
-                            onClick={() => setIsPricingOpen(!isPricingOpen)}
-                            className="
-                  w-full
-                  flex items-center justify-between
-                  text-sm
-                "
-                        >
-                            <span className="font-medium text-gray-900 dark:text-white">
-                                Price details
-                            </span>
-                            {isPricingOpen ? (
-                                <ChevronUp className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                            ) : (
-                                <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                            )}
-                        </button>
+ {/* ========================================
+ PRICE BREAKDOWN (Collapsible)
+ ======================================== */}
+ {!isWaitlisted && !isPending && (
+ <div className="border-t border-primary-light/10 dark:border-primary-dark/10 pt-4">
+ <button
+ onClick={() => setIsPricingOpen(!isPricingOpen)}
+ className="
+ w-full
+ flex items-center justify-between
+ text-sm
+"
+ >
+ <span className="font-medium text-theme-primary">
+ Price details
+ </span>
+ {isPricingOpen ? (
+ <ChevronUp className="w-4 h-4 text-theme-muted " />
+ ) : (
+ <ChevronDown className="w-4 h-4 text-theme-muted " />
+ )}
+ </button>
 
-                        {isPricingOpen && (
-                            <div className="mt-3 space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600 dark:text-gray-400">
-                                        {currency === 'USD' && '$'}
-                                        {currency === 'TRY' && '₺'}
-                                        {currency === 'LBP' && 'ل.ل '}
-                                        {basePrice} × {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
-                                    </span>
-                                    <span className="text-gray-900 dark:text-white">
-                                        {currency === 'USD' && '$'}
-                                        {currency === 'TRY' && '₺'}
-                                        {currency === 'LBP' && 'ل.ل '}
-                                        {(basePrice * peopleCount).toFixed(2)}
-                                    </span>
-                                </div>
+ {isPricingOpen && (
+ <div className="mt-3 space-y-2 text-sm">
+ <div className="flex justify-between">
+ <span className="text-theme-secondary ">
+ {currency === 'USD' && '$'}
+ {currency === 'TRY' && '₺'}
+ {currency === 'LBP' && 'ل.ل '}
+ {basePrice} × {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
+ </span>
+ <span className="text-theme-primary">
+ {currency === 'USD' && '$'}
+ {currency === 'TRY' && '₺'}
+ {currency === 'LBP' && 'ل.ل '}
+ {(basePrice * peopleCount).toFixed(2)}
+ </span>
+ </div>
 
-                                {price.multiplier !== 1.0 && (
-                                    <div className="flex justify-between text-amber-600 dark:text-amber-400">
-                                        <span className="capitalize">{price.adjustmentType} Adjustment ({ (price.multiplier * 100).toFixed(1) }%)</span>
-                                        <span>
-                                            ×{price.multiplier.toFixed(2)}
-                                        </span>
-                                    </div>
-                                )}
+ {price.multiplier !== 1.0 && (
+ <div className="flex justify-between text-amber-600 dark:text-amber-400">
+ <span className="capitalize">{price.adjustmentType} Adjustment ({ (price.multiplier * 100).toFixed(1) }%)</span>
+ <span>
+ ×{price.multiplier.toFixed(2)}
+ </span>
+ </div>
+ )}
 
-                                {hasGroupDiscount && peopleCount >= (groupDiscountThreshold || 4) && (
-                                    <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
-                                        <span>Group discount ({Number(groupDiscountPercent || 5).toLocaleString('en-US', { maximumFractionDigits: 2 })}%)</span>
-                                        <span>
-                                            -{currency === 'USD' && '$'}
-                                            {currency === 'TRY' && '₺'}
-                                            {currency === 'LBP' && 'ل.ل '}
-                                            {price.discount.toFixed(2)}
-                                        </span>
-                                    </div>
-                                )}
+ {hasGroupDiscount && peopleCount >= (groupDiscountThreshold || 4) && (
+ <div className="flex justify-between text-success-green dark:text-emerald-400">
+ <span>Group discount ({Number(groupDiscountPercent || 5).toLocaleString('en-US', { maximumFractionDigits: 2 })}%)</span>
+ <span>
+ -{currency === 'USD' && '$'}
+ {currency === 'TRY' && '₺'}
+ {currency === 'LBP' && 'ل.ل '}
+ {price.discount.toFixed(2)}
+ </span>
+ </div>
+ )}
 
-                                <div className="flex justify-between font-medium pt-2 border-t border-gray-200 dark:border-gray-800">
-                                    <span className="text-gray-900 dark:text-white">Total</span>
-                                    <span className="text-xl text-gray-900 dark:text-white">
-                                        {currency === 'USD' && '$'}
-                                        {currency === 'TRY' && '₺'}
-                                        {currency === 'LBP' && 'ل.ل '}
-                                        {price.total.toFixed(2)}
-                                    </span>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
+ <div className="flex justify-between font-medium pt-2 border-t border-primary-light/10 dark:border-primary-dark/10">
+ <span className="text-theme-primary">Total</span>
+ <span className="text-xl text-theme-primary">
+ {currency === 'USD' && '$'}
+ {currency === 'TRY' && '₺'}
+ {currency === 'LBP' && 'ل.ل '}
+ {price.total.toFixed(2)}
+ </span>
+ </div>
+ </div>
+ )}
+ </div>
+ )}
 
-                {/* Waiver / Terms Checkbox */}
-                {!isWaitlisted && !isPending && (
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <input
-                            id="waiver-check"
-                            type="checkbox"
-                            checked={waiverSigned}
-                            onChange={(e) => setWaiverSigned(e.target.checked)}
-                            className="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                        />
-                        <label htmlFor="waiver-check" className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed cursor-pointer">
-                            I agree to the <span className="text-blue-600 hover:underline">liability waiver</span> and understand the tour requirements.
-                        </label>
-                    </div>
-                )}
+ {/* Waiver / Terms Checkbox */}
+ {!isWaitlisted && !isPending && (
+ <div className="flex items-start gap-3 p-3 surface-section rounded-lg">
+ <input
+ id="waiver-check"
+ type="checkbox"
+ checked={waiverSigned}
+ onChange={(e) => setWaiverSigned(e.target.checked)}
+ className="mt-1 w-4 h-4 text-primary-light dark:text-primary-dark rounded border-primary-light/10 dark:border-primary-dark/10-strong focus:ring-primary-light dark:ring-primary-dark"
+ />
+ <label htmlFor="waiver-check" className="text-xs text-theme-secondary leading-relaxed cursor-pointer">
+ I agree to the <span className="text-primary-light dark:text-primary-dark hover:underline">liability waiver</span> and understand the tour requirements.
+ </label>
+ </div>
+ )}
 
-                {/* ========================================
-            BOOKING ACTIONS
-            ======================================== */}
-                <div className="space-y-3 pt-2">
-                    {activeBookingId || (isAvailable && !isWaitlisted) ? (
-                        <>
-                            {/* 
-                              NOTE: Only show 'Instant Book' toggle if the tour supports BOTH 
-                              or if we want to allow skipping instant book for some reason.
-                              The USER rule states: "if guide unchecked book instantly you shouldn't 
-                              put the choice for user to check it it should automaticly be request to book".
-                              So we hide the toggle if bookingMode is 'request'.
-                            */}
-                            {bookingMode === 'instant' && false && (
-                                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                    <div className="flex items-center gap-2">
-                                        <Zap className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                                        <span className="text-sm text-gray-700 dark:text-gray-300">
-                                            Request instead?
-                                        </span>
-                                    </div>
-                                    <button
-                                        onClick={() => setIsRequestMode(!isRequestMode)}
-                                        className={`
-                      relative inline-flex h-5 w-9 items-center rounded-full
-                      transition-colors duration-200
-                      ${isRequestMode
-                                                ? 'bg-amber-600 dark:bg-amber-500'
-                                                : 'bg-gray-300 dark:bg-gray-700'
-                                            }
-                    `}
-                                    >
-                                        <span
-                                            className={`
-                        inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200
-                        ${isRequestMode ? 'translate-x-5' : 'translate-x-0.5'}
-                      `}
-                                        />
-                                    </button>
-                                </div>
-                            )}
+ {/* ========================================
+ BOOKING ACTIONS
+ ======================================== */}
+ <div className="space-y-3 pt-2">
+ {activeBookingId || (isAvailable && !isWaitlisted) ? (
+ <>
+ {/* 
+ NOTE: Only show 'Instant Book' toggle if the tour supports BOTH 
+ or if we want to allow skipping instant book for some reason.
+ The USER rule states:"if guide unchecked book instantly you shouldn't 
+ put the choice for user to check it it should automaticly be request to book".
+ So we hide the toggle if bookingMode is 'request'.
+ */}
+ {bookingMode === 'instant' && false && (
+ <div className="flex items-center justify-between p-3 surface-section rounded-lg">
+ <div className="flex items-center gap-2">
+ <Zap className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+ <span className="text-sm text-theme-secondary">
+ Request instead?
+ </span>
+ </div>
+ <button
+ onClick={() => setIsRequestMode(!isRequestMode)}
+ className={`
+ relative inline-flex h-5 w-9 items-center rounded-lg
+ transition-colors duration-200
+ ${isRequestMode
+ ? 'bg-amber-600 dark:bg-amber-500'
+ : 'surface-section'
+ }
+ `}
+ >
+ <span
+ className={`
+ inline-block h-4 w-4 transform rounded-lg surface-card transition-transform duration-200
+ ${isRequestMode ? 'translate-x-5' : 'translate-x-0.5'}
+ `}
+ />
+ </button>
+ </div>
+ )}
 
-                            {/* Main CTA button */}
-                            {isAwaitingPayment ? (
-                                <div className="space-y-3">
-                                    <button
-                                        onClick={() => router.push(`/bookings/confirmation?id=${activeBookingId}`)}
-                                        className="w-full px-6 py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold rounded-full hover:shadow-indigo-500/20 transition-all shadow-xl active:scale-[0.98] flex items-center justify-center gap-2"
-                                    >
-                                        <CreditCard className="w-5 h-5" />
-                                        Pay Now
-                                    </button>
-                                    <button
-                                        onClick={() => onCancelBooking?.(activeBookingId)}
-                                        disabled={isLoading}
-                                        className="w-full px-6 py-3 bg-bg-light-paper dark:bg-gray-950 border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 font-bold rounded-full hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-all disabled:opacity-50"
-                                    >
-                                        Cancel Booking
-                                    </button>
-                                </div>
-                            ) : isPending ? (
-                                <button
-                                    onClick={handleBooking}
-                                    disabled={!selectedDate || isLoading}
-                                    className="w-full px-6 py-4 bg-gradient-to-r from-red-600 to-rose-600 dark:from-red-700 dark:to-rose-700 text-white font-bold rounded-full hover:from-red-700 hover:to-rose-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl hover:shadow-red-500/20 active:scale-[0.98]"
-                                >
-                                    {isLoading ? 'Cancelling...' : 'Cancel Request'}
-                                </button>
-                            ) : activeBookingId ? (
-                                <div className="space-y-3">
-                                    <button
-                                        onClick={handleBooking}
-                                        disabled={!selectedDate || isLoading}
-                                        className="w-full px-6 py-4 bg-gradient-to-r from-primary-light to-indigo-600 dark:from-primary-dark dark:to-indigo-700 text-white font-bold rounded-full hover:shadow-primary-light/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl active:scale-[0.98]"
-                                    >
-                                        {isLoading ? 'Updating...' : 'Update Booking'}
-                                    </button>
-                                    
-                                    <button
-                                        onClick={() => onCancelBooking?.(activeBookingId)}
-                                        disabled={isLoading}
-                                        className="w-full px-6 py-3.5 bg-bg-light-paper dark:bg-gray-950 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 font-bold rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-all disabled:opacity-50 shadow-md"
-                                    >
-                                        Cancel Booking
-                                    </button>
-                                </div>
-                            ) : (
-                                <button
-                                    onClick={handleBooking}
-                                    disabled={!selectedDate || isLoading}
-                                    className="w-full px-6 py-4 bg-gradient-to-r from-primary-light to-indigo-600 dark:from-primary-dark dark:to-indigo-700 text-white font-bold rounded-full hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl active:scale-[0.98]"
-                                >
-                                    {bookingMode === BookingMode.INSTANT || !isRequestMode
-                                        ? (isLoading ? 'Processing...' : 'Book Now')
-                                        : (isLoading ? 'Sending Request...' : 'Request to Book')}
-                                </button>
-                            )}
+ {/* Main CTA button */}
+ {isAwaitingPayment ? (
+ <div className="space-y-3">
+ <button
+ onClick={() => router.push(`/bookings/confirmation?id=${activeBookingId}`)}
+ className="w-full px-6 py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold rounded-lg hover:shadow-indigo-500/20 transition-all shadow-xl active:scale-[0.98] flex items-center justify-center gap-2"
+ >
+ <CreditCard className="w-5 h-5" />
+ Pay Now
+ </button>
+ <button
+ onClick={() => onCancelBooking?.(activeBookingId)}
+ disabled={isLoading}
+ className="w-full px-6 py-3 surface-section border border-primary-light/10 dark:border-primary-dark/10 text-theme-secondary font-bold rounded-lg hover:surface-section dark:hover:surface-base transition-all disabled:opacity-50"
+ >
+ Cancel Booking
+ </button>
+ </div>
+ ) : isPending ? (
+ <button
+ onClick={handleBooking}
+ disabled={!selectedDate || isLoading}
+ className="w-full px-6 py-4 bg-gradient-to-r from-red-600 to-rose-600 dark:from-red-700 dark:to-rose-700 text-white font-bold rounded-lg hover:from-red-700 hover:to-rose-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl hover:shadow-red-500/20 active:scale-[0.98]"
+ >
+ {isLoading ? 'Cancelling...' : 'Cancel Request'}
+ </button>
+ ) : activeBookingId ? (
+ <div className="space-y-3">
+ <button
+ onClick={handleBooking}
+ disabled={!selectedDate || isLoading}
+ className="w-full px-6 py-4 bg-gradient-to-r from-primary-light to-indigo-600 dark:from-primary-dark dark:to-indigo-700 text-white font-bold rounded-lg hover:shadow-primary-light/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl active:scale-[0.98]"
+ >
+ {isLoading ? 'Updating...' : 'Update Booking'}
+ </button>
+ 
+ <button
+ onClick={() => onCancelBooking?.(activeBookingId)}
+ disabled={isLoading}
+ className="w-full px-6 py-3.5 surface-section border border-danger-red dark:border-danger-red/50 text-red-600 dark:text-red-400 font-bold rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all disabled:opacity-50 shadow-md"
+ >
+ Cancel Booking
+ </button>
+ </div>
+ ) : (
+ <button
+ onClick={handleBooking}
+ disabled={!selectedDate || isLoading}
+ className="w-full px-6 py-4 bg-gradient-to-r from-primary-light to-indigo-600 dark:from-primary-dark dark:to-indigo-700 text-white font-bold rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl active:scale-[0.98]"
+ >
+ {bookingMode === BookingMode.INSTANT || !isRequestMode
+ ? (isLoading ? 'Processing...' : 'Book Now')
+ : (isLoading ? 'Sending Request...' : 'Request to Book')}
+ </button>
+ )}
 
-                        </>
-                    ) : (
-                        <div className="space-y-4">
-                            {isWaitlisted && currentWaitlistEntry && (
-                                <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-xl flex items-center gap-3">
-                                    <div className="w-10 h-10 flex items-center justify-center bg-emerald-100 dark:bg-emerald-800 text-emerald-600 dark:text-emerald-400 font-bold rounded-full text-lg">
-                                        #{currentWaitlistEntry.position}
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
-                                            You are on the waitlist
-                                        </p>
-                                        <p className="text-xs text-emerald-600 dark:text-emerald-400">
-                                            Entry #{currentWaitlistEntry.id}
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
+ </>
+ ) : (
+ <div className="space-y-4">
+ {isWaitlisted && currentWaitlistEntry && (
+ <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-success-green dark:border-success-green rounded-xl flex items-center gap-3">
+ <div className="w-10 h-10 flex items-center justify-center bg-emerald-100 dark:bg-emerald-800 text-success-green dark:text-emerald-400 font-bold rounded-lg text-lg">
+ #{currentWaitlistEntry.position}
+ </div>
+ <div>
+ <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
+ You are on the waitlist
+ </p>
+ <p className="text-xs text-success-green dark:text-emerald-400">
+ Entry #{currentWaitlistEntry.id}
+ </p>
+ </div>
+ </div>
+ )}
 
-                            <button
-                                onClick={handleWaitlist}
-                                disabled={(!isWaitlisted && !isWaitlistAvailable) || !selectedDate || isLoading}
-                                className={`
-                                    w-full
-                                    px-6 py-4
-                                    ${isWaitlisted 
-                                        ? 'bg-white dark:bg-gray-900 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 shadow-sm'
-                                        : 'bg-amber-600 dark:bg-amber-700 text-white font-semibold hover:bg-amber-700 dark:hover:bg-amber-800 shadow-lg hover:shadow-xl'
-                                    }
-                                    rounded-full
-                                    transition-all
-                                    active:scale-[0.98]
-                                    disabled:opacity-50 disabled:cursor-not-allowed
-                                    flex items-center justify-center gap-2
-                                `}
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                        <span>{isWaitlisted ? 'Removing...' : 'Joining...'}</span>
-                                    </>
-                                ) : (
-                                    <>{isWaitlisted ? 'Leave Waitlist' : 'Join Waitlist'}</>
-                                )}
-                            </button>
-                        </div>
-                    )}
-                </div>
+ <button
+ onClick={handleWaitlist}
+ disabled={(!isWaitlisted && !isWaitlistAvailable) || !selectedDate || isLoading}
+ className={`
+ w-full
+ px-6 py-4
+ ${isWaitlisted 
+ ? 'surface-card border border-danger-red dark:border-danger-red/50 text-red-600 dark:text-red-400 font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 shadow-sm'
+ : 'bg-amber-600 dark:bg-amber-700 text-white font-semibold hover:bg-amber-700 dark:hover:bg-amber-800 shadow-lg hover:shadow-xl'
+ }
+ rounded-lg
+ transition-all
+ active:scale-[0.98]
+ disabled:opacity-50 disabled:cursor-not-allowed
+ flex items-center justify-center gap-2
+ `}
+ >
+ {isLoading ? (
+ <>
+ <Loader2 className="w-5 h-5 animate-spin" />
+ <span>{isWaitlisted ? 'Removing...' : 'Joining...'}</span>
+ </>
+ ) : (
+ <>{isWaitlisted ? 'Leave Waitlist' : 'Join Waitlist'}</>
+ )}
+ </button>
+ </div>
+ )}
+ </div>
 
-                {/* Simplified Cancellation Policy */}
-                {!isWaitlisted && !isPending && (
-                    <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-xs text-gray-600 dark:text-gray-400">
-                        <Shield className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                        <span>Free cancellation up to {cancellationPolicy.fullRefund}h before start</span>
-                    </div>
-                )}
-            </div>
-        </div>
-    )
+ {/* Simplified Cancellation Policy */}
+ {!isWaitlisted && !isPending && (
+ <div className="flex items-center gap-2 p-3 surface-section rounded-lg text-xs text-theme-secondary ">
+ <Shield className="w-3.5 h-3.5 text-primary-light dark:text-primary-dark dark:text-primary-dark flex-shrink-0" />
+ <span>Free cancellation up to {cancellationPolicy.fullRefund}h before start</span>
+ </div>
+ )}
+ </div>
+ </div>
+ )
 }

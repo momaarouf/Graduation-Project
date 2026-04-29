@@ -1,515 +1,647 @@
-/* 
-  GLOBAL STYLES - DUAL THEME SYSTEM
-  ============================================================================
-  LOCATION: /frontend/src/app/globals.css
-  
-  PURPOSE: 
-  1. Define base styles for light/dark modes
-  2. Create custom utilities for dual theme system
-  3. Handle transitions between themes
-  
-  HOW IT WORKS:
-  - Light mode: Default styles
-  - Dark mode: Activated by .dark class on <html>
-  - Each element has separate light/dark classes
-  - Smooth transitions between themes
-  ============================================================================
+﻿/*
+ GLOBAL STYLES — ELECTRIC BLUE + ORANGE DESIGN SYSTEM
+ ============================================================================
+ PURPOSE:
+ 1. Define base styles for light/dark modes
+ 2. Expose semantic utility classes used across all pages
+ 3. Handle smooth transitions between themes
+
+ THEME MODEL:
+ - Light mode: Default (blue-tinted whites)
+ - Dark mode: .dark class on <html> (deep navy)
+ ============================================================================
 */
 
 /* Import Tailwind CSS v4 */
 @import 'tailwindcss';
 
-/* 
-  LINK CONFIGURATION (Tailwind v4 Fix)
-  ------------------------------------
-  Explicitly load the config file to ensure `darkMode: 'class'` is respected.
+/*
+ LINK CONFIG (Tailwind v4)
+ -------------------------
+ Explicitly load the config file so darkMode:'class' is respected.
 */
-@config "../tailwind.config.ts";
+@config"../tailwind.config.ts";
 
-/* 
-  BASE STYLES - DUAL THEME SETUP
-  ============================================================================
-*/
+/* ============================================================================
+ BASE STYLES
+ ============================================================================ */
 @layer base {
 
-  /* 
-    LIGHT MODE (DEFAULT)
-    --------------------
-    Bright, high contrast colors on white background
-  */
-  :root {
-    /* Color scheme for light mode (affects scrollbars, form controls) */
-    color-scheme: light;
+ :root {
+ color-scheme: light;
 
-    /* Smooth transitions for theme switching */
-    * {
-      transition-property: color, background-color, border-color, fill, stroke;
-      transition-duration: 200ms;
-      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    }
-  }
+ /* Smooth transitions for every themeable property */
+ * {
+ transition-property: color, background-color, border-color, fill, stroke;
+ transition-duration: 200ms;
+ transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+ }
+ }
 
-  /* 
-    DARK MODE (ACTIVATED BY .dark CLASS)
-    ------------------------------------
-    Muted, lower contrast colors on dark background
-  */
-  .dark {
-    /* Color scheme for dark mode */
-    color-scheme: dark;
-  }
+ .dark {
+ color-scheme: dark;
+ }
 
-  /* 
-    HTML & BODY - DUAL THEME STYLES
-    -------------------------------
-    Separate background and text colors for each theme
-  */
-  html {
-    /* Prevent font scaling on mobile */
-    -webkit-text-size-adjust: 100%;
+ html {
+ -webkit-text-size-adjust: 100%;
+ scroll-behavior: smooth;
+ overflow-x: clip;
+ overscroll-behavior-x: none;
+ min-width: 100%;
+ font-family: ui-sans-serif, system-ui, sans-serif,"Segoe UI", Roboto,"Helvetica Neue", Arial;
 
-    /* Smooth scrolling */
-    scroll-behavior: smooth;
+ /* Page background — light */
+ background-color: #f0f5ff;
+ }
 
-    /* Prevent horizontal overflow & bounce */
-    overflow-x: clip;
-    overscroll-behavior-x: none;
-    min-width: 100%;
+ /* Page background — dark */
+ .dark {
+ background-color: #040d1e;
+ }
 
-    /* System font stack */
-    font-family: ui-sans-serif, system-ui, sans-serif, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+ body {
+ min-width: 100%;
+ position: relative;
+ overflow-x: clip;
+ margin: 0;
+ padding: 0;
+ -webkit-font-smoothing: antialiased;
+ -moz-osx-font-smoothing: grayscale;
 
-    /* 
-      MATCH BACKGROUND TO BODY
-      This prevents the "black bar" or white gap when overscrolling on mobile
-    */
-    background-color: #f5f2ed;
-    /* Light mode creamy background */
-}
+ /* Light mode */
+ background-color: #f0f5ff;
+ color: #0a1628;
 
-  /* Dark mode html background */
-  .dark {
-    background-color: #0f172a;
-    /* Dark mode lighter background */
-  }
+ /* Dark mode */
+ .dark & {
+ background-color: #040d1e;
+ color: #dbeafe;
+ }
+ }
 
-  body {
-    min-width: 100%;
-    position: relative;
-    overflow-x: clip;
-    margin: 0;
-    padding: 0;
-    /* ============================================
-       LIGHT MODE STYLES (DEFAULT)
-       ============================================ */
-    background-color: #f5f2ed;
-    /* Creamy background */
-    color: #1c1917;
-    /* Warm charcoal text */
+ /* Focus ring — always blue */
+ :focus-visible {
+ outline: 2px solid;
+ outline-offset: 2px;
+ border-radius: 0.25rem;
+ outline-color: #2563eb;
 
-    /* ============================================
-       DARK MODE STYLES (WHEN .dark CLASS IS PRESENT)
-       ============================================ */
-    .dark & {
-      background-color: #0f172a;
-      /* Lighter Slate background */
-      color: #f9fafb;
-      /* Light gray text */
-    }
+ .dark & {
+ outline-color: #3b82f6;
+ }
+ }
 
-    /* Better font rendering */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+ /* Text selection */
+ ::selection {
+ background-color: rgba(37, 99, 235, 0.15);
+ color: #0a1628;
+ }
 
-  /* 
-    FOCUS INDICATORS - DUAL THEME
-    -----------------------------
-    Different focus colors for light/dark modes
-  */
-  :focus-visible {
-    outline: 2px solid;
-    outline-offset: 2px;
-    border-radius: 0.25rem;
+ .dark ::selection {
+ background-color: rgba(59, 130, 246, 0.25);
+ color: #dbeafe;
+ }
 
-    /* Light mode focus color */
-    outline-color: #2563eb;
-    /* Bright blue */
+ /* Scrollbars */
+ ::-webkit-scrollbar { width: 10px; height: 10px; }
 
-    /* Dark mode focus color */
-    .dark & {
-      outline-color: #3b82f6;
-      /* Softer blue */
-    }
-  }
+ ::-webkit-scrollbar-track { background: rgba(240, 245, 255, 0.80); }
+ ::-webkit-scrollbar-thumb { border-radius: 5px; background: #a0b8f0; }
+ ::-webkit-scrollbar-thumb:hover { background: #7a96c0; }
 
-  /* 
-    SELECTION STYLES - DUAL THEME
-    -----------------------------
-    Different text selection colors
-  */
-  ::selection {
-    /* Light mode selection */
-    background-color: #ffedd5;
-    /* Orange-100 (Warm) */
-    color: #1c1917;
-    /* Warm charcoal text */
-  }
+ .dark ::-webkit-scrollbar-track { background: rgba(4, 13, 30, 0.85); }
+ .dark ::-webkit-scrollbar-thumb { border-radius: 5px; background: #112240; border: 2px solid #040d1e; }
+ .dark ::-webkit-scrollbar-thumb:hover { background: #1a3566; }
 
-  .dark ::selection {
-    /* Dark mode selection */
-    background-color: #1e3a8a;
-    /* Blue-900 */
-    color: #f9fafb;
-    /* Light text */
-  }
-
-  /* 
-    SCROLLBAR STYLES - DUAL THEME
-    -----------------------------
-    Custom scrollbars for each theme.
-    Using explicit .dark selectors for reliable theme matching.
-  */
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-
-  /* Light mode scrollbar */
-  ::-webkit-scrollbar-track {
-    background: #f5f2ed;
-    /* bg-light.primary */
-  }
-
-  ::-webkit-scrollbar-thumb {
-    border-radius: 5px;
-    background: #9ca3af;
-    /* gray-400 */
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #6b7280;
-    /* gray-500 */
-  }
-
-  /* Dark mode scrollbar - Blends with gray-950 (#030712) background */
-  .dark ::-webkit-scrollbar-track {
-    background: #030712;
-  }
-
-  .dark ::-webkit-scrollbar-thumb {
-    border-radius: 5px;
-    background: #1f2937;
-    /* gray-800 */
-    border: 2px solid #030712;
-  }
-
-  .dark ::-webkit-scrollbar-thumb:hover {
-    background: #374151;
-    /* gray-700 */
-  }
-
-  /* 
-    MOBILE OPTIMIZATIONS
-    --------------------
-    Applied on screens < 640px
-  */
-  @media (max-width: 640px) {
-    html {
-      /* Consistent base font size */
-      font-size: 16px;
-    }
-
-    body {
-      /* Optimize text rendering on mobile */
-      text-rendering: optimizeLegibility;
-    }
-
-    /* Better touch targets (WCAG 2.1) */
-    button,
-    a {
-      min-height: 44px;
-      min-width: 44px;
-    }
-  }
-}
-
-/* 
-  CUSTOM UTILITIES - DUAL THEME SYSTEM
-  ============================================================================
-  These utilities automatically switch between light/dark modes
-*/
-@layer utilities {
-
-  /* 
-    BACKGROUND GRID PATTERN
-    -----------------------
-    Different grid patterns for light/dark modes
-  */
-  .bg-theme-grid {
-    /* Light mode grid (Slate-200 / 0.1) */
-    background-image:
-      linear-gradient(to right, rgb(230 226 218 / 0.15) 1px, transparent 1px),
-      linear-gradient(to bottom, rgb(230 226 218 / 0.15) 1px, transparent 1px);
-    background-size: 50px 50px;
-
-    /* Dark mode grid (Slate-700 / 0.15) */
-    .dark & {
-      background-image:
-        linear-gradient(to right, rgb(51 65 85 / 0.15) 1px, transparent 1px),
-        linear-gradient(to bottom, rgb(51 65 85 / 0.15) 1px, transparent 1px);
-    }
-  }
-
-  /* 
-    GLASS MORPHISM EFFECT
-    ---------------------
-    Frosted glass effect with theme-specific colors
-  */
-  .glass-theme {
-    /* Light mode glass (Slate-based glass) */
-    background: rgba(250, 249, 246, 0.75);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(230, 226, 218, 0.4);
-
-    /* Dark mode glass (Slate-900 glass) */
-    .dark & {
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid rgba(51, 65, 85, 0.3);
-    }
-  }
-
-  /* 
-    CARD COMPONENT - DUAL THEME
-    ---------------------------
-    Cards automatically switch between light/dark styles
-  */
-  .card-theme {
-    /* Light mode card */
-    background-color: #faf9f6;
-    /* Linen Card */
-    border: 1px solid #e6e2da;
-    /* Stone Border */
-    border-radius: 0.75rem;
-    padding: 1.5rem;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-
-    /* Dark mode card */
-    .dark & {
-      background-color: #1e293b;
-      /* Slate-800 */
-      border-color: #334155;
-      /* Slate-700 */
-      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
-    }
-  }
-
-  /* Mobile optimization for cards */
-  @media (max-width: 640px) {
-    .card-theme {
-      padding: 1rem;
-      border-radius: 0.5rem;
-    }
-  }
-
-  /* 
-    CONTAINER WITH SAFE PADDING
-    ---------------------------
-    Consistent horizontal padding
-  */
-  .container-safe {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-
-  @media (min-width: 640px) {
-    .container-safe {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .container-safe {
-      padding-left: 2rem;
-      padding-right: 2rem;
-    }
-  }
-
-  /* 
-    HIDE SCROLLBAR
-    --------------
-    Hide scrollbar but keep scrolling
-  */
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* 
-    TEXT BALANCE
-    ------------
-    Better text wrapping
-  */
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  /* 
-    CHAT SPECIFIC SCROLLBAR
-    -----------------------
-    Refined, thin scrollbar for chat areas
-  */
-  .chat-scrollbar::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .chat-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .chat-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(156, 163, 175, 0.2);
-    border-radius: 20px;
-    border: 2px solid transparent;
-    background-clip: content-box;
-  }
-
-  .chat-scrollbar:hover::-webkit-scrollbar-thumb {
-    background: rgba(156, 163, 175, 0.4);
-    background-clip: content-box;
-  }
-
-  .dark .chat-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(75, 85, 99, 0.3);
-  }
-
-  .dark .chat-scrollbar:hover::-webkit-scrollbar-thumb {
-    background: rgba(75, 85, 99, 0.5);
-  }
-}
-
-/* 
-  ANIMATION CLASSES
-  ============================================================================
-  Reusable animations
-*/
-.animate-fade-in {
-  animation: fade-in 0.5s ease-out;
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-/* 
-  PRINT STYLES
-  ============================================================================
-  Optimize for printing
-*/
-@media print {
-  .no-print {
-    display: none !important;
-  }
-
-  body {
-    background: white !important;
-    color: black !important;
-  }
-
-  a {
-    color: black !important;
-    text-decoration: underline !important;
-  }
+ /* Mobile touch targets */
+ @media (max-width: 640px) {
+ html { font-size: 16px; }
+ body { text-rendering: optimizeLegibility; }
+ button, a { min-height: 44px; min-width: 44px; }
+ }
 }
 
 /* ============================================================================
-   ADD TO GLOBALS.CSS - HALF-STAR RATING SUPPORT
-   ============================================================================
-   LOCATION: /frontend/src/app/globals.css
-   
-   PURPOSE: Enable half-star ratings in tour cards
-   
-   HOW IT WORKS:
-   1. Full star: Normal fill
-   2. Half star: Two overlapping stars
-   3. Clip-path cuts the top star in half
-   4. Perfect for ratings like 4.5, 3.5, etc.
-   ============================================================================ */
+ UTILITY CLASSES — SEMANTIC THEME TOKENS
+ ============================================================================ */
+@layer utilities {
 
-/* 
-  HALF-STAR CLIPPING UTILITY
-  -------------------------
-  Used in SearchResultsGrid component for accurate rating display
-  Cuts the star in half vertically to show partial ratings
-*/
-.clip-half {
-  clip-path: inset(0 50% 0 0);
+ /* ── SURFACE BACKGROUNDS ─────────────────────────────────────────────── */
+
+ /* Level 0 — page background */
+ .surface-base {
+ background-color: #f0f5ff;
+ .dark & { background-color: #040d1e; }
+ }
+
+ /* Level 1 — alternating sections */
+ .surface-section {
+ background-color: #e4ecff;
+ .dark & { background-color: #071428; }
+ }
+
+ /* Level 2 — cards, panels, sidebars */
+ .surface-card {
+ background-color: #ffffff;
+ .dark & { background-color: #0c1f3d; }
+ }
+
+ /* Level 3 — modals, drawers, tickets */
+ .surface-paper {
+ background-color: #ffffff;
+ .dark & { background-color: #122850; }
+ }
+
+ /* Interactive hover (dark only meaningful — light is section tint) */
+ .surface-hover {
+ background-color: #e4ecff;
+ .dark & { background-color: #1a3566; }
+ }
+
+ /* ── TEXT ─────────────────────────────────────────────────────────────── */
+
+ .text-theme-primary {
+ color: #0a1628;
+ .dark & { color: #dbeafe; }
+ }
+
+ .text-theme-secondary {
+ color: #3d5a8a;
+ .dark & { color: #6ea6e8; }
+ }
+
+ .text-theme-muted {
+ color: #7a96c0;
+ .dark & { color: #2d5a96; }
+ }
+
+ /* ── BORDERS ──────────────────────────────────────────────────────────── */
+
+ .border-theme {
+ border-color: #c8d8f8;
+ .dark & { border-color: #112240; }
+ }
+
+ .border-theme-strong {
+ border-color: #a0b8f0;
+ .dark & { border-color: #1a3566; }
+ }
+
+ /* ── COMPONENT COMPOSITES ─────────────────────────────────────────────── */
+
+ /* Card — surface-card + border-theme + shadow + rounded-xl + p-6 */
+ .card-theme {
+ background-color: #ffffff;
+ border: 1px solid #c8d8f8;
+ border-radius: 0.75rem;
+ padding: 1.5rem;
+ box-shadow: 0 1px 3px 0 rgba(37, 99, 235, 0.06), 0 1px 2px -1px rgba(37, 99, 235, 0.04);
+
+ .dark & {
+ background-color: #0c1f3d;
+ border-color: #112240;
+ box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
+ }
+ }
+
+ @media (max-width: 640px) {
+ .card-theme { padding: 1rem; border-radius: 0.5rem; }
+ }
+
+ /* Paper — elevated surface for modals/drawers */
+ .paper-theme {
+ background-color: #ffffff;
+ border: 1px solid #a0b8f0;
+ border-radius: 0.75rem;
+ box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.1), 0 8px 10px -6px rgba(37, 99, 235, 0.08);
+
+ .dark & {
+ background-color: #122850;
+ border-color: #1a3566;
+ box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+ }
+ }
+
+ /* Glass — frosted glass for sticky navbars */
+ .glass-theme {
+    backdrop-filter: blur(12px);
+ background: rgba(240, 245, 255, 0.80);
+ 
+ border: 1px solid #c8d8f8;
+
+ .dark & {
+ background: rgba(4, 13, 30, 0.85);
+ border: 1px solid #112240;
+ }
+ }
+
+ /* Input — white/section bg + border-theme + blue focus ring */
+ .input-theme {
+ background-color: #ffffff;
+ border: 1px solid #c8d8f8;
+ color: #0a1628;
+ border-radius: 0.5rem;
+
+ .dark & {
+ background-color: #071428;
+ border-color: #112240;
+ color: #dbeafe;
+ }
+
+ &::placeholder {
+ color: #7a96c0;
+ .dark & { color: #2d5a96; }
+ }
+
+ &:focus {
+ outline: none;
+ border-color: #2563eb;
+ box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+ .dark & {
+ border-color: #3b82f6;
+ box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+ }
+ }
+ }
+
+ /* ── BUTTONS ──────────────────────────────────────────────────────────── */
+
+ /* Primary — blue, trust actions */
+ .btn-primary {
+ background-color: #2563eb;
+ color: #ffffff;
+ border: 1px solid transparent;
+ border-radius: 0.5rem;
+ font-weight: 600;
+ cursor: pointer;
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ transition: background-color 200ms, box-shadow 200ms;
+
+ &:hover {
+ background-color: #1d4ed8;
+ box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25);
+ }
+
+ &:focus-visible {
+ outline: none;
+ box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.4);
+ }
+
+ &:disabled {
+ opacity: 0.5;
+ cursor: not-allowed;
+ }
+
+ .dark & {
+ background-color: #3b82f6;
+
+ &:hover {
+ background-color: #2563eb;
+ box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+ }
+ }
+ }
+
+ /* Accent — orange, urgency/excitement actions */
+ .btn-accent {
+ background-color: #f97316;
+ color: #ffffff;
+ border: 1px solid transparent;
+ border-radius: 0.5rem;
+ font-weight: 600;
+ cursor: pointer;
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ transition: background-color 200ms, box-shadow 200ms;
+
+ &:hover {
+ background-color: #ea580c;
+ box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.25);
+ }
+
+ &:focus-visible {
+ outline: none;
+ box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.4);
+ }
+
+ &:disabled {
+ opacity: 0.5;
+ cursor: not-allowed;
+ }
+
+ .dark & {
+ background-color: #fb923c;
+
+ &:hover {
+ background-color: #f97316;
+ box-shadow: 0 0 0 4px rgba(251, 146, 60, 0.3);
+ }
+ }
+ }
+
+ /* ── BADGES ───────────────────────────────────────────────────────────── */
+
+ /* Blueprint for all badges */
+ .badge-base {
+ display: inline-flex;
+ align-items: center;
+ padding: 0.125rem 0.625rem;
+ border-radius: 9999px;
+ font-size: 0.75rem;
+ font-weight: 600;
+ line-height: 1.5;
+ }
+
+ /* Blue — primary actions, confirmed, active */
+ .badge-primary {
+ background-color: rgba(37, 99, 235, 0.1);
+ color: #2563eb;
+ display: inline-flex;
+ align-items: center;
+ padding: 0.125rem 0.625rem;
+ border-radius: 9999px;
+ font-size: 0.75rem;
+ font-weight: 600;
+ line-height: 1.5;
+
+ .dark & {
+ background-color: rgba(59, 130, 246, 0.14);
+ color: #3b82f6;
+ }
+ }
+
+ /* Orange — featured, urgency */
+ .badge-accent {
+ background-color: rgba(249, 115, 22, 0.1);
+ color: #f97316;
+ display: inline-flex;
+ align-items: center;
+ padding: 0.125rem 0.625rem;
+ border-radius: 9999px;
+ font-size: 0.75rem;
+ font-weight: 600;
+ line-height: 1.5;
+
+ .dark & {
+ background-color: rgba(251, 146, 60, 0.14);
+ color: #fb923c;
+ }
+ }
+
+ /* Neutral — drafts, inactive */
+ .badge-neutral {
+ background-color: rgba(122, 150, 192, 0.12);
+ color: #3d5a8a;
+ display: inline-flex;
+ align-items: center;
+ padding: 0.125rem 0.625rem;
+ border-radius: 9999px;
+ font-size: 0.75rem;
+ font-weight: 600;
+ line-height: 1.5;
+
+ .dark & {
+ background-color: rgba(45, 90, 150, 0.2);
+ color: #6ea6e8;
+ }
+ }
+
+ /* Success — completed, verified, paid */
+ .badge-success {
+ background-color: rgba(22, 163, 74, 0.1);
+ color: #16a34a;
+ display: inline-flex;
+ align-items: center;
+ padding: 0.125rem 0.625rem;
+ border-radius: 9999px;
+ font-size: 0.75rem;
+ font-weight: 600;
+ line-height: 1.5;
+
+ .dark & {
+ background-color: rgba(34, 197, 94, 0.14);
+ color: #22c55e;
+ }
+ }
+
+ /* Warning — pending, caution */
+ .badge-warning {
+ background-color: rgba(245, 158, 11, 0.1);
+ color: #d97706;
+ display: inline-flex;
+ align-items: center;
+ padding: 0.125rem 0.625rem;
+ border-radius: 9999px;
+ font-size: 0.75rem;
+ font-weight: 600;
+ line-height: 1.5;
+
+ .dark & {
+ background-color: rgba(251, 191, 36, 0.14);
+ color: #fbbf24;
+ }
+ }
+
+ /* Danger — errors, bans, cancelled */
+ .badge-danger {
+ background-color: rgba(239, 68, 68, 0.1);
+ color: #ef4444;
+ display: inline-flex;
+ align-items: center;
+ padding: 0.125rem 0.625rem;
+ border-radius: 9999px;
+ font-size: 0.75rem;
+ font-weight: 600;
+ line-height: 1.5;
+
+ .dark & {
+ background-color: rgba(248, 113, 113, 0.14);
+ color: #f87171;
+ }
+ }
+
+ /* ── SEMANTIC SHORTCUTS ────────────────────────────────────────────────── */
+
+ /* Price / money amounts — always blue (trust) */
+ .text-price {
+ color: #2563eb;
+ .dark & { color: #3b82f6; }
+ }
+
+ /* Star ratings — always orange */
+ .text-star {
+ color: #f97316;
+ .dark & { color: #fb923c; }
+ }
+
+ /* Urgency copy —"Limited spots","Selling fast" — always orange */
+ .text-urgent {
+ color: #f97316;
+ .dark & { color: #fb923c; }
+ }
+
+ /* ── NAVIGATION ───────────────────────────────────────────────────────── */
+
+ /* Active nav item */
+ .nav-item-active {
+ background-color: rgba(37, 99, 235, 0.08);
+ color: #2563eb;
+
+ .dark & {
+ background-color: rgba(59, 130, 246, 0.12);
+ color: #3b82f6;
+ }
+ }
+
+ /* ── BACKGROUND GRID ──────────────────────────────────────────────────── */
+
+ .bg-theme-grid {
+ background-image:
+ linear-gradient(to right, rgb(200 216 248 / 0.2) 1px, transparent 1px),
+ linear-gradient(to bottom, rgb(200 216 248 / 0.2) 1px, transparent 1px);
+ background-size: 50px 50px;
+
+ .dark & {
+ background-image:
+ linear-gradient(to right, rgb(17 34 64 / 0.4) 1px, transparent 1px),
+ linear-gradient(to bottom, rgb(17 34 64 / 0.4) 1px, transparent 1px);
+ }
+ }
+
+ /* ── LOADING SKELETONS ────────────────────────────────────────────────── */
+
+ .shimmer-light {
+ background: linear-gradient(90deg, #e4ecff 25%, #f0f5ff 50%, #e4ecff 75%);
+ background-size: 200% 100%;
+ animation: shimmer 1.5s infinite;
+ }
+
+ .shimmer-dark {
+ background: linear-gradient(90deg, #071428 25%, #0c1f3d 50%, #071428 75%);
+ background-size: 200% 100%;
+ animation: shimmer 1.5s infinite;
+ }
+
+ /* ── HELPERS ──────────────────────────────────────────────────────────── */
+
+ .container-safe {
+ padding-left: 1rem;
+ padding-right: 1rem;
+
+ @media (min-width: 640px) {
+ padding-left: 1.5rem;
+ padding-right: 1.5rem;
+ }
+
+ @media (min-width: 1024px) {
+ padding-left: 2rem;
+ padding-right: 2rem;
+ }
+ }
+
+ .scrollbar-hide {
+ -ms-overflow-style: none;
+ scrollbar-width: none;
+ }
+
+ .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+ .text-balance { text-wrap: balance; }
+
+ /* Chat scrollbar */
+ .chat-scrollbar::-webkit-scrollbar { width: 6px; }
+ .chat-scrollbar::-webkit-scrollbar-track { background: transparent; }
+ .chat-scrollbar::-webkit-scrollbar-thumb {
+ background: rgba(160, 184, 240, 0.3);
+ border-radius: 20px;
+ border: 2px solid transparent;
+ background-clip: content-box;
+ }
+ .chat-scrollbar:hover::-webkit-scrollbar-thumb {
+ background: rgba(160, 184, 240, 0.5);
+ background-clip: content-box;
+ }
+ .dark .chat-scrollbar::-webkit-scrollbar-thumb {
+ background: rgba(17, 34, 64, 0.6);
+ }
+ .dark .chat-scrollbar:hover::-webkit-scrollbar-thumb {
+ background: rgba(26, 53, 102, 0.8);
+ }
 }
 
-/* 
-  ADDITIONAL SEARCH PAGE STYLES
-  ----------------------------
-  These will be used by the search page layout
-*/
+/* ============================================================================
+ ANIMATIONS
+ ============================================================================ */
+
+.animate-fade-in {
+ animation: fade-in 0.5s ease-out;
+}
+
+@keyframes fade-in {
+ from { opacity: 0; }
+ to { opacity: 1; }
+}
+
+@keyframes shimmer {
+ 0% { background-position: 200% 0; }
+ 100% { background-position: -200% 0; }
+}
+
+/* ============================================================================
+ HALF-STAR RATING SUPPORT
+ ============================================================================ */
+
+.clip-half {
+ clip-path: inset(0 50% 0 0);
+}
+
+/* ============================================================================
+ SEARCH PAGE LAYOUT
+ ============================================================================ */
+
 .search-layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+ display: flex;
+ flex-direction: column;
+ min-height: 100vh;
 }
 
 .search-container {
-  width: 100%;
-  max-width: 1440px;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 1rem;
-  padding-right: 1rem;
+ width: 100%;
+ max-width: 1440px;
+ margin-left: auto;
+ margin-right: auto;
+ padding-left: 1rem;
+ padding-right: 1rem;
+
+ @media (min-width: 640px) {
+ padding-left: 1.5rem;
+ padding-right: 1.5rem;
+ }
+
+ @media (min-width: 1024px) {
+ padding-left: 2rem;
+ padding-right: 2rem;
+ }
 }
 
-@media (min-width: 640px) {
-  .search-container {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .search-container {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-}
-
-/* 
-  CARD HOVER ENHANCEMENTS
-  ----------------------
-  Smooth transitions for interactive elements
-*/
+/* Tour card image zoom */
 .tour-card-image {
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+ transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tour-card:hover .tour-card-image {
-  transform: scale(1.05);
+ transform: scale(1.05);
 }
 
-/* 
-  SHIMMER ANIMATION
-  -----------------
-  Used in TourSearch.tsx and other loaders
-*/
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
+/* ============================================================================
+ PRINT STYLES
+ ============================================================================ */
+
+@media print {
+ .no-print { display: none !important; }
+ body { background: white !important; color: black !important; }
+ a { color: black !important; text-decoration: underline !important; }
+}

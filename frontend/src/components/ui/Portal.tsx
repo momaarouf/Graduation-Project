@@ -1,10 +1,10 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 interface PortalProps {
-  children: ReactNode
+ children: ReactNode
 }
 
 /**
@@ -12,17 +12,17 @@ interface PortalProps {
  * This solves z-index and stacking context issues in deeply nested components.
  */
 export default function Portal({ children }: PortalProps) {
-  const [mounted, setMounted] = useState(false)
+ const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-    return () => setMounted(false)
-  }, [])
+ useEffect(() => {
+ setMounted(true)
+ return () => setMounted(false)
+ }, [])
 
-  // Only render on client after mounting
-  if (!mounted || typeof document === 'undefined') {
-    return null
-  }
+ // Only render on client after mounting
+ if (!mounted || typeof document === 'undefined') {
+ return null
+ }
 
-  return createPortal(children, document.body)
+ return createPortal(children, document.body)
 }

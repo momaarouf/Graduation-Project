@@ -1,56 +1,56 @@
-import apiClient from './client'
+﻿import apiClient from './client'
 
 const get = <T>(url: string) => apiClient.get<T>(url).then(res => res.data)
 const post = <T>(url: string, data: any) => apiClient.post<T>(url, data).then(res => res.data)
 const patch = <T>(url: string, data: any) => apiClient.patch<T>(url, data).then(res => res.data)
 
 export interface OpenDisputeRequest {
-  bookingId: number
-  reason: 
-    | 'POOR_SERVICE'
-    | 'NO_SHOW'
-    | 'PAYMENT_ISSUE'
-    | 'FRAUD'
-    | 'SAFETY'
-    | 'QUALITY'
-    | 'OTHER'
-  description: string
+ bookingId: number
+ reason: 
+ | 'POOR_SERVICE'
+ | 'NO_SHOW'
+ | 'PAYMENT_ISSUE'
+ | 'FRAUD'
+ | 'SAFETY'
+ | 'QUALITY'
+ | 'OTHER'
+ description: string
 }
 
 export interface ResolveDisputeRequest {
-  resolutionNote: string
-  refundAmount?: number
+ resolutionNote: string
+ refundAmount?: number
 }
 
 export interface AddDisputeResponseRequest {
-  response: string
+ response: string
 }
 
 export interface DisputeResponse {
-  id: number
-  bookingId: number
-  openedByUserId: number
-  openedByFullName: string
-  openedByRole: string
-  againstUserId: number
-  againstFullName: string
-  againstRole: string
-  reason: string
-  description: string
-  againstUserResponse?: string
-  status: 'OPEN' | 'UNDER_REVIEW' | 'RESOLVED' | 'REJECTED'
-  resolutionNote?: string
-  refundAmount?: number
-  createdAtUtc: string
-  updatedAtUtc: string
+ id: number
+ bookingId: number
+ openedByUserId: number
+ openedByFullName: string
+ openedByRole: string
+ againstUserId: number
+ againstFullName: string
+ againstRole: string
+ reason: string
+ description: string
+ againstUserResponse?: string
+ status: 'OPEN' | 'UNDER_REVIEW' | 'RESOLVED' | 'REJECTED'
+ resolutionNote?: string
+ refundAmount?: number
+ createdAtUtc: string
+ updatedAtUtc: string
 }
 
 export interface PaginatedDisputes {
-  content: DisputeResponse[]
-  totalPages: number
-  totalElements: number
-  size: number
-  number: number
+ content: DisputeResponse[]
+ totalPages: number
+ totalElements: number
+ size: number
+ number: number
 }
 
 // Traveler / Guide endpoints

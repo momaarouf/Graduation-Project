@@ -38,34 +38,38 @@ export default function OpenDisputePage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-950 p-4 sm:p-8 min-h-screen">
+    <div className="surface-base p-4 sm:p-8 min-h-screen">
       <div className="max-w-2xl mx-auto">
         <Link
           href={`/dashboard/traveler/bookings/${bookingId}`}
-          className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors mb-6 group"
+          className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-theme-secondary hover:text-primary-light transition-colors mb-12 group"
         >
-          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          <span>Back to Booking</span>
+          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          <span>Back to Booking Detail</span>
         </Link>
 
-        <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 border border-gray-200 dark:border-gray-800 shadow-xl space-y-6">
+        <div className="surface-card rounded-[2.5rem] p-10 sm:p-12 border border-theme shadow-2xl space-y-10 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-red-500/20" />
+          
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-              <Scale className="w-6 h-6 text-red-500" />
+            <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center mb-6 border border-red-500/20">
+              <Scale className="w-8 h-8 text-red-500" />
+            </div>
+            <h1 className="text-3xl font-black text-theme-primary mb-3 tracking-tight">
               Open a Dispute
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
-              If something went wrong during your trip, submit this form. An administrator will review your claim and reach out.
+            <p className="text-theme-secondary text-sm leading-relaxed max-w-md">
+              If something went wrong during your trip, submit this form. An administrator will review your claim and reach out within 24-48 hours.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">Reason</label>
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="space-y-3">
+              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-theme-muted ml-1">What is the primary issue?</label>
               <select
                 value={reason}
                 onChange={(e) => setReason(e.target.value as OpenDisputeRequest['reason'])}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none"
+                className="w-full px-5 py-4 surface-base border border-theme rounded-2xl text-sm font-medium text-theme-primary focus:ring-2 focus:ring-red-500/20 focus:border-red-500/50 outline-none transition-all appearance-none cursor-pointer"
               >
                 <option value="POOR_SERVICE">Poor Service</option>
                 <option value="NO_SHOW">Guide No-Show</option>
@@ -77,24 +81,35 @@ export default function OpenDisputePage({ params }: { params: Promise<{ id: stri
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">Detailed Description</label>
+            <div className="space-y-3">
+              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-theme-muted ml-1">Detailed Statement</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Explain what happened in detail..."
-                rows={5}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 outline-none resize-none"
+                placeholder="Explain what happened in detail... Be as specific as possible with dates and times."
+                rows={6}
+                className="w-full px-5 py-4 surface-base border border-theme rounded-2xl text-sm font-medium text-theme-primary focus:ring-2 focus:ring-red-500/20 focus:border-red-500/50 outline-none resize-none transition-all"
               />
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-red-500/20 disabled:opacity-50"
+              className="w-full py-5 bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl flex items-center justify-center gap-3 transition-all shadow-xl shadow-red-500/20 disabled:opacity-50 active:scale-[0.98]"
             >
-              {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Dispute'}
+              {isSubmitting ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <Scale className="w-4 h-4" />
+                  Submit Dispute Claim
+                </>
+              )}
             </button>
+            
+            <p className="text-[10px] text-theme-muted text-center italic">
+              By submitting, you agree to provide additional evidence if requested by our moderators.
+            </p>
           </form>
         </div>
       </div>

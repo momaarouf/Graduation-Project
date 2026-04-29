@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // THEME PROVIDER - DUAL THEME MANAGER
 // ============================================================================
 // LOCATION: /frontend/src/lib/providers/ThemeProvider.tsx
@@ -18,41 +18,41 @@ import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import type { ThemeProviderProps } from 'next-themes'
 
 export function ThemeProvider({ 
-  children, 
-  ...props 
+ children, 
+ ...props 
 }: ThemeProviderProps) {
-  return (
-    <NextThemesProvider
-      // ============================================
-      // CRITICAL SETTINGS - DO NOT CHANGE
-      // ============================================
-      
-      // Use class-based dark mode (Tailwind expects .dark class)
-      attribute="class"
-      
-      // Default to system preference
-      defaultTheme="system"
-      
-      // Enable system preference detection
-      enableSystem={true}
-      
-      // Set CSS color-scheme property (affects scrollbars, form controls)
-      enableColorScheme={true}
-      
-      // Smooth transitions between themes
-      disableTransitionOnChange={false}
-      
-      // Custom localStorage key for persistence
-      storageKey="safaribub-theme"
-      
-      // ============================================
-      // Pass any additional props
-      // ============================================
-      {...props}
-    >
-      {children}
-    </NextThemesProvider>
-  )
+ return (
+ <NextThemesProvider
+ // ============================================
+ // CRITICAL SETTINGS - DO NOT CHANGE
+ // ============================================
+ 
+ // Use class-based dark mode (Tailwind expects .dark class)
+ attribute="class"
+ 
+ // Default to system preference
+ defaultTheme="system"
+ 
+ // Enable system preference detection
+ enableSystem={true}
+ 
+ // Set CSS color-scheme property (affects scrollbars, form controls)
+ enableColorScheme={true}
+ 
+ // Smooth transitions between themes
+ disableTransitionOnChange={false}
+ 
+ // Custom localStorage key for persistence
+ storageKey="safaribub-theme"
+ 
+ // ============================================
+ // Pass any additional props
+ // ============================================
+ {...props}
+ >
+ {children}
+ </NextThemesProvider>
+ )
 }
 
 // ============================================================================

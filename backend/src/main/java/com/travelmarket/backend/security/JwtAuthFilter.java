@@ -81,17 +81,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(auth);
 
-            filterChain.doFilter(request, response);
-
         } catch (DisabledException | LockedException | AccountExpiredException e) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json");
             response.getWriter().write("{\"message\":\"" + e.getMessage() + "\"}");
+            return;
         } catch (Exception e) {
             log.error("JWT auth filter error", e);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write("{\"message\":\"Unauthorized\"}");
+            return;
         }
+
+        // Call doFilter OUTSIDE the try-catch block so that application exceptions 
+        // (like 500 Internal Server Errors) don't get swallowed and turned into 401s.
+        filterChain.doFilter(request, response);
     }
 }

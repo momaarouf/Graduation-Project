@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // TRAVELER DASHBOARD - WISHLIST
 // ============================================================================
 // LOCATION: /frontend/src/app/dashboard/traveler/wishlist/page.tsx
@@ -9,9 +9,9 @@
 import WishlistContent from '@/src/components/wishlist/WishlistContent'
 
 export default function TravelerWishlistPage() {
-  return (
-    <div className="p-4 sm:p-6 lg:p-8">
-      <WishlistContent />
-    </div>
-  )
+ return (
+ <div className="p-4 sm:p-6 lg:p-8">
+ <WishlistContent />
+ </div>
+ )
 }

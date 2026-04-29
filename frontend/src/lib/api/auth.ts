@@ -1,131 +1,131 @@
-import apiClient from './client';
+﻿import apiClient from './client';
 
 // ==================== AUTH TYPES ====================
 export interface RegisterRequest {
-  email: string;
-  password: string;
-  role: 'Traveler' | 'Guide';
-  fullName: string;
-  agreedToTerms: boolean;
-  agreedToPrivacy: boolean;
-  newsletterOptIn: boolean;
-  marketingOptIn: boolean;
+ email: string;
+ password: string;
+ role: 'Traveler' | 'Guide';
+ fullName: string;
+ agreedToTerms: boolean;
+ agreedToPrivacy: boolean;
+ newsletterOptIn: boolean;
+ marketingOptIn: boolean;
 }
 
 export interface LoginRequest {
-  email: string;
-  password: string;
-  rememberMe?: boolean;
+ email: string;
+ password: string;
+ rememberMe?: boolean;
 }
 
 export interface AuthResponse {
-  token: string;
-  email: string;
-  role: string;
+ token: string;
+ email: string;
+ role: string;
 }
 
 export interface MeResponse {
-  userId: string;
-  email: string;
-  fullName?: string;
-  role: 'Traveler' | 'Guide' | 'Admin';
-  travelerProfileId?: string;
-  guideProfileId?: string;
-  profileCompleted: boolean;
-  emailVerified: boolean;
-  agreedToTerms: boolean;
-  emailNotificationsEnabled: boolean;
-  pushNotificationsEnabled: boolean;
+ userId: string;
+ email: string;
+ fullName?: string;
+ role: 'Traveler' | 'Guide' | 'Admin';
+ travelerProfileId?: string;
+ guideProfileId?: string;
+ profileCompleted: boolean;
+ emailVerified: boolean;
+ agreedToTerms: boolean;
+ emailNotificationsEnabled: boolean;
+ pushNotificationsEnabled: boolean;
 }
 
 /** POST /api/auth/accept-terms — called after OAuth signup */
 export const authAcceptTerms = async (): Promise<void> => {
-  const { default: apiClient } = await import('./client');
-  await apiClient.post('/api/auth/accept-terms');
+ const { default: apiClient } = await import('./client');
+ await apiClient.post('/api/auth/accept-terms');
 };
 
 // ==================== EMAIL VERIFICATION TYPES ====================
 export interface EmailVerifyRequest {
-  email: string;
+ email: string;
 }
 
 export interface EmailVerifyDevResponse {
-  message: string;
-  token: string;
-  code?: string; // Only in dev mode
+ message: string;
+ token: string;
+ code?: string; // Only in dev mode
 }
 
 export interface EmailVerifyConfirmTokenRequest {
-  token: string;
+ token: string;
 }
 
 export interface EmailVerifyConfirmCodeRequest {
-  email: string;
-  code: string;
+ email: string;
+ code: string;
 }
 
 // ==================== PASSWORD RESET TYPES ====================
 export interface ForgotPasswordRequest {
-  email: string;
+ email: string;
 }
 
 export interface ForgotPasswordDevResponse {
-  message: string;
-  token: string;
-  code?: string; // Only in dev mode
+ message: string;
+ token: string;
+ code?: string; // Only in dev mode
 }
 
 export interface ResetPasswordRequest {
-  token: string;
-  newPassword: string;
+ token: string;
+ newPassword: string;
 }
 
 export interface ChangePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
+ currentPassword: string;
+ newPassword: string;
 }
 
 export interface UpdateNotificationPreferencesRequest {
-  emailNotificationsEnabled: boolean;
-  pushNotificationsEnabled: boolean;
+ emailNotificationsEnabled: boolean;
+ pushNotificationsEnabled: boolean;
 }
 
 // ==================== PROFILE COMPLETION TYPES ====================
 export interface TravelerCompleteProfileRequest {
-  fullName: string;
-  phoneE164: string;
-  country: string;
-  city: string;
-  nationality?: string;
-  dateOfBirth?: string; // YYYY-MM-DD format
-  preferences?: string[];
+ fullName: string;
+ phoneE164: string;
+ country: string;
+ city: string;
+ nationality?: string;
+ dateOfBirth?: string; // YYYY-MM-DD format
+ preferences?: string[];
 }
 
 export interface GuideCompleteProfileRequest {
-  fullName: string;
-  phoneE164: string;
-  country: string;
-  city: string;
-  bio: string;
-  expertise?: string[];
-  languages: Array<{
-    name: string;
-    proficiency: string;
-  }>;
+ fullName: string;
+ phoneE164: string;
+ country: string;
+ city: string;
+ bio: string;
+ expertise?: string[];
+ languages: Array<{
+ name: string;
+ proficiency: string;
+ }>;
 }
 export interface GuideVerificationSubmitRequest {
-  documentType: 'NATIONAL_ID' | 'PASSPORT';
-  idFrontImage: string;
-  idBackImage?: string;
-  selfieImage: string;
+ documentType: 'NATIONAL_ID' | 'PASSPORT';
+ idFrontImage: string;
+ idBackImage?: string;
+ selfieImage: string;
 }
 
 export interface GuideVerificationStatusResponse {
-  status: 'not_submitted' | 'pending' | 'approved' | 'rejected';
-  submittedAt?: string;
-  verifiedAt?: string;
-  rejectionReason?: string;
-  documentType?: 'NATIONAL_ID' | 'PASSPORT';
+ status: 'not_submitted' | 'pending' | 'approved' | 'rejected';
+ submittedAt?: string;
+ verifiedAt?: string;
+ rejectionReason?: string;
+ documentType?: 'NATIONAL_ID' | 'PASSPORT';
 }
 
 // ==================== AUTHENTICATION ENDPOINTS ====================
@@ -136,8 +136,8 @@ export interface GuideVerificationStatusResponse {
  * Browser automatically receives refresh_token as HttpOnly cookie
  */
 export const authRegister = async (data: RegisterRequest): Promise<AuthResponse> => {
-  const response = await apiClient.post('/api/auth/register', data);
-  return response.data;
+ const response = await apiClient.post('/api/auth/register', data);
+ return response.data;
 };
 
 /**
@@ -145,8 +145,8 @@ export const authRegister = async (data: RegisterRequest): Promise<AuthResponse>
  * Returns access token; refresh token is set as HttpOnly cookie
  */
 export const authLogin = async (data: LoginRequest): Promise<AuthResponse> => {
-  const response = await apiClient.post('/api/auth/login', data);
-  return response.data;
+ const response = await apiClient.post('/api/auth/login', data);
+ return response.data;
 };
 
 /**
@@ -154,8 +154,8 @@ export const authLogin = async (data: LoginRequest): Promise<AuthResponse> => {
  * Must include credentials in the request
  */
 export const authRefresh = async (): Promise<AuthResponse> => {
-  const response = await apiClient.post('/api/auth/refresh', {});
-  return response.data;
+ const response = await apiClient.post('/api/auth/refresh', {});
+ return response.data;
 };
 
 /**
@@ -163,7 +163,7 @@ export const authRefresh = async (): Promise<AuthResponse> => {
  * After this, frontend must clear access token from memory/localStorage
  */
 export const authLogout = async (): Promise<void> => {
-  await apiClient.post('/api/auth/logout', {});
+ await apiClient.post('/api/auth/logout', {});
 };
 
 /**
@@ -172,7 +172,7 @@ export const authLogout = async (): Promise<void> => {
  * Frontend must clear access token and redirect to login on all tabs/windows
  */
 export const authLogoutAll = async (): Promise<void> => {
-  await apiClient.post('/api/auth/logout-all', {});
+ await apiClient.post('/api/auth/logout-all', {});
 };
 
 /**
@@ -181,8 +181,8 @@ export const authLogoutAll = async (): Promise<void> => {
  * Returns user role and profile IDs needed for dashboard routing
  */
 export const authMe = async (): Promise<MeResponse> => {
-  const response = await apiClient.get('/api/auth/me');
-  return response.data;
+ const response = await apiClient.get('/api/auth/me');
+ return response.data;
 };
 
 // ==================== EMAIL VERIFICATION ENDPOINTS ====================
@@ -193,8 +193,8 @@ export const authMe = async (): Promise<MeResponse> => {
  * In dev mode, response includes the code for testing
  */
 export const emailVerifyRequest = async (data: EmailVerifyRequest): Promise<EmailVerifyDevResponse> => {
-  const response = await apiClient.post('/api/auth/email/verify/request', data);
-  return response.data;
+ const response = await apiClient.post('/api/auth/email/verify/request', data);
+ return response.data;
 };
 
 /**
@@ -202,7 +202,7 @@ export const emailVerifyRequest = async (data: EmailVerifyRequest): Promise<Emai
  * This is the simplest method - just send token received via email
  */
 export const emailVerifyConfirmToken = async (data: EmailVerifyConfirmTokenRequest): Promise<void> => {
-  await apiClient.post('/api/auth/email/verify/confirm-token', data);
+ await apiClient.post('/api/auth/email/verify/confirm-token', data);
 };
 
 /**
@@ -210,7 +210,7 @@ export const emailVerifyConfirmToken = async (data: EmailVerifyConfirmTokenReque
  * Alternative method - send email + 6-digit code manually
  */
 export const emailVerifyConfirmCode = async (data: EmailVerifyConfirmCodeRequest): Promise<void> => {
-  await apiClient.post('/api/auth/email/verify/confirm-code', data);
+ await apiClient.post('/api/auth/email/verify/confirm-code', data);
 };
 
 // ==================== PASSWORD RESET ENDPOINTS ====================
@@ -222,8 +222,8 @@ export const emailVerifyConfirmCode = async (data: EmailVerifyConfirmCodeRequest
  * Rate limited: 3 requests per 15 min per IP & email
  */
 export const passwordForgotRequest = async (data: ForgotPasswordRequest): Promise<ForgotPasswordDevResponse> => {
-  const response = await apiClient.post('/api/auth/password/forgot', data);
-  return response.data;
+ const response = await apiClient.post('/api/auth/password/forgot', data);
+ return response.data;
 };
 
 /**
@@ -232,7 +232,7 @@ export const passwordForgotRequest = async (data: ForgotPasswordRequest): Promis
  * User must login again with new password
  */
 export const passwordReset = async (data: ResetPasswordRequest): Promise<void> => {
-  await apiClient.post('/api/auth/password/reset', data);
+ await apiClient.post('/api/auth/password/reset', data);
 };
 
 /**
@@ -240,14 +240,14 @@ export const passwordReset = async (data: ResetPasswordRequest): Promise<void> =
  * NOTE: Backend placeholder. Actual implementation needs PUT /api/auth/password/change
  */
 export const passwordChange = async (data: ChangePasswordRequest): Promise<void> => {
-  await apiClient.post('/api/auth/password/change', data);
+ await apiClient.post('/api/auth/password/change', data);
 };
 
 /**
  * Update global notification preferences (email and push)
  */
 export const updateNotificationPreferences = async (data: UpdateNotificationPreferencesRequest): Promise<void> => {
-  await apiClient.post('/api/auth/me/notifications', data);
+ await apiClient.post('/api/auth/me/notifications', data);
 };
 
 // ==================== PROFILE COMPLETION ENDPOINTS ====================
@@ -257,7 +257,7 @@ export const updateNotificationPreferences = async (data: UpdateNotificationPref
  * Required call to move from onboarding to active traveler status
  */
 export const travelerCompleteProfile = async (data: TravelerCompleteProfileRequest): Promise<void> => {
-  await apiClient.post('/api/traveler/profile/complete', data);
+ await apiClient.post('/api/traveler/profile/complete', data);
 };
 
 /**
@@ -266,7 +266,7 @@ export const travelerCompleteProfile = async (data: TravelerCompleteProfileReque
  * Must include bio (30-2000 chars) and at least one language
  */
 export const guideCompleteProfile = async (data: GuideCompleteProfileRequest): Promise<void> => {
-  await apiClient.post('/api/guide/profile/complete', data);
+ await apiClient.post('/api/guide/profile/complete', data);
 };
 
 // ==================== GUIDE VERIFICATION ENDPOINTS ====================
@@ -282,13 +282,13 @@ export const guideCompleteProfile = async (data: GuideCompleteProfileRequest): P
  * - selfieImage always required
  */
 export const guideVerificationSubmit = async (data: GuideVerificationSubmitRequest): Promise<void> => {
-  await apiClient.post('/api/guide/verification/submit', data);
+ await apiClient.post('/api/guide/verification/submit', data);
 };
 
 /**
  * Get current verification status for the logged-in guide
  */
 export const guideGetVerificationStatus = async (): Promise<GuideVerificationStatusResponse> => {
-  const response = await apiClient.get('/api/guide/verification/status');
-  return response.data;
+ const response = await apiClient.get('/api/guide/verification/status');
+ return response.data;
 };

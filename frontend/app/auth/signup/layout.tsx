@@ -1,18 +1,18 @@
-import { Metadata } from 'next'
+﻿import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'Create Account | SafariHub - Travel Marketplace',
-    description: 'Join SafariHub to discover authentic travel experiences with verified guides.',
-    robots: {
-        index: false,
-        follow: false,
-    },
+ title: 'Create Account | SafariHub - Travel Marketplace',
+ description: 'Join SafariHub to discover authentic travel experiences with verified guides.',
+ robots: {
+ index: false,
+ follow: false,
+ },
 }
 
 export default function SignupLayout({
-    children,
+ children,
 }: {
-    children: React.ReactNode
+ children: React.ReactNode
 }) {
-    return <>{children}</>
+ return <>{children}</>
 }

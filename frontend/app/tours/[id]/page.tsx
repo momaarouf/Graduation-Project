@@ -57,86 +57,86 @@ import { Suspense } from 'react'
 // ============================================================================
 
 interface PageProps {
-    params: Promise<{ id: string }>
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+ params: Promise<{ id: string }>
+ searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 export async function generateMetadata(
-    { params }: PageProps,
-    parent: ResolvingMetadata
+ { params }: PageProps,
+ parent: ResolvingMetadata
 ): Promise<Metadata> {
-    // In Phase 2: fetch tour data from API
-    // For Phase 1: use mock data
-    const { id } = await params
-    const tour = await getPublicTourDetail(Number(id))
+ // In Phase 2: fetch tour data from API
+ // For Phase 1: use mock data
+ const { id } = await params
+ const tour = await getPublicTourDetail(Number(id))
 
-    if (!tour) {
-        return {
-            title: 'Tour Not Found',
-            description: 'The requested tour could not be found.'
-        }
-    }
+ if (!tour) {
+ return {
+ title: 'Tour Not Found',
+ description: 'The requested tour could not be found.'
+ }
+ }
 
-    const previousImages = (await parent).openGraph?.images || []
-    const tourUrl = `https://safaribub.com/tours/${id}`
-    const itinerary = parseItinerary(tour.itinerary)
-    const mainImage = tour.media?.[0]?.url || '/images/defaults/tour-hero.jpg'
+ const previousImages = (await parent).openGraph?.images || []
+ const tourUrl = `https://safaribub.com/tours/${id}`
+ const itinerary = parseItinerary(tour.itinerary)
+ const mainImage = tour.media?.[0]?.url || '/images/defaults/tour-hero.jpg'
 
-    return {
-        title: `${tour.title || 'Tour'} | SafariHub`,
-        description: tour.description?.substring(0, 160) || '',
-        keywords: [
-            tour.locationName || '',
-            tour.region || '',
-            tour.countryCode || '',
-            'halal tour',
-            'muslim friendly',
-            'guided tour',
-            'travel',
-            ...(itinerary || []).map((stop: any) => stop.title).slice(0, 5)
-        ].join(', '),
+ return {
+ title: `${tour.title || 'Tour'} | SafariHub`,
+ description: tour.description?.substring(0, 160) || '',
+ keywords: [
+ tour.locationName || '',
+ tour.region || '',
+ tour.countryCode || '',
+ 'halal tour',
+ 'muslim friendly',
+ 'guided tour',
+ 'travel',
+ ...(itinerary || []).map((stop: any) => stop.title).slice(0, 5)
+ ].join(', '),
 
-        openGraph: {
-            title: tour.title,
-            description: tour.description?.substring(0, 160) || '',
-            url: tourUrl,
-            siteName: 'SafariHub',
-            images: [
-                {
-                    url: mainImage,
-                    width: 1200,
-                    height: 630,
-                    alt: tour.title || 'Tour Image'
-                },
-                ...previousImages
-            ],
-            locale: 'en_US',
-            type: 'website',
-        },
+ openGraph: {
+ title: tour.title,
+ description: tour.description?.substring(0, 160) || '',
+ url: tourUrl,
+ siteName: 'SafariHub',
+ images: [
+ {
+ url: mainImage,
+ width: 1200,
+ height: 630,
+ alt: tour.title || 'Tour Image'
+ },
+ ...previousImages
+ ],
+ locale: 'en_US',
+ type: 'website',
+ },
 
-        twitter: {
-            card: 'summary_large_image',
-            title: tour.title,
-            description: tour.description?.substring(0, 160) || '',
-            images: [mainImage],
-        },
+ twitter: {
+ card: 'summary_large_image',
+ title: tour.title,
+ description: tour.description?.substring(0, 160) || '',
+ images: [mainImage],
+ },
 
-        alternates: {
-            canonical: tourUrl,
-        },
+ alternates: {
+ canonical: tourUrl,
+ },
 
-        robots: {
-            index: true,
-            follow: true,
-            googleBot: {
-                index: true,
-                follow: true,
-                'max-video-preview': -1,
-                'max-image-preview': 'large',
-                'max-snippet': -1,
-            },
-        },
-    }
+ robots: {
+ index: true,
+ follow: true,
+ googleBot: {
+ index: true,
+ follow: true,
+ 'max-video-preview': -1,
+ 'max-image-preview': 'large',
+ 'max-snippet': -1,
+ },
+ },
+ }
 }
 
 // ============================================================================
@@ -144,198 +144,198 @@ export async function generateMetadata(
 // ============================================================================
 
 export default async function TourDetailPage({ params}:PageProps ) {
-    const {id} =await params
-    // Parallel fetch for tour data and reviews for maximum throughput
-    let tour: any = null
-    let reviewSummary: any = null
+ const {id} =await params
+ // Parallel fetch for tour data and reviews for maximum throughput
+ let tour: any = null
+ let reviewSummary: any = null
 
-    try {
-        const [tourRes, reviewsRes, routeRes] = await Promise.allSettled([
-            getPublicTourDetail(Number(id)),
-            // Reusing getTourReviews instead of raw axios for consistency
-            getTourReviews(id, { tourId: Number(id), page: 0, limit: 10 }).catch(() => null),
-            getTourRoute(Number(id)).catch(() => ({ data: null }))
-        ])
+ try {
+ const [tourRes, reviewsRes, routeRes] = await Promise.allSettled([
+ getPublicTourDetail(Number(id)),
+ // Reusing getTourReviews instead of raw axios for consistency
+ getTourReviews(id, { page: 0, size: 10 }).catch(() => null),
+ getTourRoute(Number(id)).catch(() => ({ data: null }))
+ ])
 
-        if (tourRes.status === 'fulfilled') {
-            tour = tourRes.value
-        }
+ if (tourRes.status === 'fulfilled') {
+ tour = tourRes.value
+ }
 
-        if (reviewsRes.status === 'fulfilled') {
-            reviewSummary = reviewsRes.value
-        }
+ if (reviewsRes.status === 'fulfilled') {
+ reviewSummary = reviewsRes.value
+ }
 
-        if (routeRes.status === 'fulfilled') {
-            tour.route = (routeRes.value as any)?.waypoints || []
-        }
-    } catch (err) {
-        console.error(`[Server] Error loading tour detail for ${id}:`, err)
-    }
+ if (routeRes.status === 'fulfilled') {
+ tour.route = (routeRes.value as any)?.waypoints || []
+ }
+ } catch (err) {
+ console.error(`[Server] Error loading tour detail for ${id}:`, err)
+ }
 
-    if (!tour) {
-        notFound()
-    }
+ if (!tour) {
+ notFound()
+ }
 
-    // Normalizing media for TourHero
-    const gallery = (tour.media || []).map((m: any) => ({
-        id: m.id.toString(),
-        type: (m.mediaType || 'IMAGE').toLowerCase() as 'image' | 'video',
-        url: m.url,
-        caption: m.caption,
-        displayOrder: m.displayOrder || 0
-    }))
+ // Normalizing media for TourHero
+ const gallery = (tour.media || []).map((m: any) => ({
+ id: m.id.toString(),
+ type: (m.mediaType || 'IMAGE').toLowerCase() as 'image' | 'video',
+ url: m.url,
+ caption: m.caption,
+ displayOrder: m.displayOrder || 0
+ }))
 
-    const mainImage = gallery[0]?.url || '/images/defaults/tour-hero.jpg'
-    const itinerary = parseItinerary(tour.itinerary)
-    const normalizedBookingMode = tour.instantBook ? BookingMode.INSTANT : BookingMode.REQUEST
-    const normalizedStatus = (tour.status as any) || TourStatus.SCHEDULED
-    const tourTags = parseList(tour.tags)
-    const tourLanguages = parseList(tour.languages)
+ const mainImage = gallery[0]?.url || '/images/defaults/tour-hero.jpg'
+ const itinerary = parseItinerary(tour.itinerary)
+ const normalizedBookingMode = tour.instantBook ? BookingMode.INSTANT : BookingMode.REQUEST
+ const normalizedStatus = (tour.status as any) || TourStatus.SCHEDULED
+ const tourTags = parseList(tour.tags)
+ const tourLanguages = parseList(tour.languages)
 
-    return (
-        <PageLayout>
-            <div className="relative max-w-7xl mx-auto px-4 pt-20 sm:pt-28 pb-16">
-                {/* Navigation Back - Standard Style */}
-                <Link
-                    href="/tours"
-                    className="inline-flex items-center gap-2 mb-8 group px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-full text-[10px] font-black uppercase tracking-widest text-text-light-muted dark:text-text-dark-muted hover:text-primary-light dark:hover:text-primary-dark transition-all border border-border-light-default dark:border-border-dark-strong hover:shadow-sm"
-                >
-                    <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-                    Back to all tours
-                </Link>
+ return (
+ <PageLayout>
+ <div className="relative max-w-7xl mx-auto px-4 pt-20 sm:pt-28 pb-16">
+ {/* Navigation Back - Standard Style */}
+ <Link
+ href="/tours"
+ className="inline-flex items-center gap-2 mb-8 group px-4 py-2 surface-section rounded-lg text-[10px] font-black uppercase tracking-widest text-theme-muted hover:text-primary-light dark:hover:text-primary-dark transition-all border border-primary-light/10 dark:border-primary-dark/10 hover:shadow-sm"
+ >
+ <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+ Back to all tours
+ </Link>
 
-                <Suspense fallback={<div className="h-96 flex items-center justify-center font-black animate-pulse text-gray-400">LOADING TOUR...</div>}>
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Left Column: Content - Now in a standard card container */}
-                    <div className="lg:col-span-2 space-y-6">
-                        {/* HERO SECTION */}
-                        <div className="bg-bg-light-paper dark:bg-bg-dark-paper rounded-3xl p-4 sm:p-6 shadow-xl border border-border-light-default dark:border-border-dark-strong">
-                            <TourHero
-                                id={tour.id}
-                                title={tour.title}
-                                location={tour.locationName || tour.region || ''}
-                                country={tour.countryCode as any}
-                                mainImage={mainImage}
-                                gallery={gallery}
-                                averageRating={tour.averageRating || 0}
-                                totalReviews={tour.reviewCount || 0}
-                                isHalalCertified={tour.halalFriendly}
-                                bookingMode={normalizedBookingMode}
-                                status={normalizedStatus}
-                                isPremium={tour.isPremium}
-                                isFamilyFriendly={tour.isFamilyFriendly}
-                                hasGroupDiscount={tour.hasGroupDiscount}
-                            />
-                        </div>
+ <Suspense fallback={<div className="h-96 flex items-center justify-center font-black animate-pulse text-theme-muted">LOADING TOUR...</div>}>
+ <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+ {/* Left Column: Content - Now in a standard card container */}
+ <div className="lg:col-span-2 space-y-6">
+ {/* HERO SECTION */}
+ <div className="surface-section rounded-xl p-4 sm:p-6 shadow-md border border-primary-light/10 dark:border-primary-dark/10 ">
+ <TourHero
+ id={tour.id}
+ title={tour.title}
+ location={tour.locationName || tour.region || ''}
+ country={tour.countryCode as any}
+ mainImage={mainImage}
+ gallery={gallery}
+ averageRating={tour.averageRating || 0}
+ totalReviews={tour.reviewCount || 0}
+ isHalalCertified={tour.halalFriendly}
+ bookingMode={normalizedBookingMode}
+ status={normalizedStatus}
+ isPremium={tour.isPremium}
+ isFamilyFriendly={tour.isFamilyFriendly}
+ hasGroupDiscount={tour.hasGroupDiscount}
+ />
+ </div>
 
-                        {/* INFO SECTION */}
-                        <div className="bg-bg-light-paper dark:bg-bg-dark-paper rounded-3xl p-6 sm:p-8 shadow-xl border border-border-light-default dark:border-border-dark-strong">
-                            <TourInfo
-                                description={tour.description}
-                                itinerary={itinerary}
-                                inclusions={parseList(tour.inclusions)}
-                                exclusions={parseList(tour.exclusions)}
-                                requirements={parseList(tour.requirements)}
-                                whatToBring={parseList(tour.whatToBring)}
-                                meetingPoint={{
-                                    name: tour.meetingPointName || '',
-                                    address: tour.meetingPointAddress || '',
-                                    lat: tour.meetingLatitude || undefined,
-                                    lng: tour.meetingLongitude || undefined,
-                                    instructions: tour.meetingPointInstructions || ''
-                                }}
-                                safetyMeasures={[]}
-                                isHalalCertified={tour.halalFriendly}
-                                tags={tourTags}
-                                languages={tourLanguages}
-                                durationHours={tour.durationHours}
-                                durationMinutes={tour.durationMinutes}
-                                occurrences={tour.occurrences}
-                                route={tour.route}
-                            />
-                        </div>
+ {/* INFO SECTION */}
+ <div className="surface-section border border-primary-light/10 dark:border-primary-dark/10 shadow-md rounded-xl p-6 sm:p-8 ">
+ <TourInfo
+ description={tour.description}
+ itinerary={itinerary}
+ inclusions={parseList(tour.inclusions)}
+ exclusions={parseList(tour.exclusions)}
+ requirements={parseList(tour.requirements)}
+ whatToBring={parseList(tour.whatToBring)}
+ meetingPoint={{
+ name: tour.meetingPointName || '',
+ address: tour.meetingPointAddress || '',
+ lat: tour.meetingLatitude || undefined,
+ lng: tour.meetingLongitude || undefined,
+ instructions: tour.meetingPointInstructions || ''
+ }}
+ safetyMeasures={[]}
+ isHalalCertified={tour.halalFriendly}
+ tags={tourTags}
+ languages={tourLanguages}
+ durationHours={tour.durationHours}
+ durationMinutes={tour.durationMinutes}
+ occurrences={tour.occurrences}
+ route={tour.route}
+ />
+ </div>
 
-                        {/* GUIDE SECTION */}
-                        <div className="bg-bg-light-paper dark:bg-bg-dark-paper rounded-3xl p-6 sm:p-8 shadow-xl border border-border-light-default dark:border-border-dark-strong">
-                            <TourGuide
-                                guide={{
-                                    id: tour.guideId.toString(),
-                                    displayName: tour.guideDisplayName,
-                                    verified: tour.guideVerified,
-                                    avatar: tour.guideAvatarUrl || '/images/defaults/avatar.jpg',
-                                    averageRating: tour.averageRating || 5.0,
-                                    totalReviews: tour.reviewCount || 0,
-                                    languages: tourLanguages
-                                }}
-                                tourId={tour.id}
-                                tourTitle={tour.title}
-                            />
-                        </div>
+ {/* GUIDE SECTION */}
+ <div className="surface-section border border-primary-light/10 dark:border-primary-dark/10 shadow-md rounded-xl p-6 sm:p-8 ">
+ <TourGuide
+ guide={{
+ id: tour.guideId.toString(),
+ displayName: tour.guideDisplayName,
+ verified: tour.guideVerified,
+ avatar: tour.guideAvatarUrl || '/images/defaults/avatar.jpg',
+ averageRating: tour.averageRating || 5.0,
+ totalReviews: tour.reviewCount || 0,
+ languages: tourLanguages
+ }}
+ tourId={tour.id}
+ tourTitle={tour.title}
+ />
+ </div>
 
-                        {/* REVIEWS SECTION */}
-                        <div className="bg-bg-light-paper dark:bg-bg-dark-paper rounded-3xl p-6 sm:p-8 shadow-xl border border-border-light-default dark:border-border-dark-strong">
-                            <ReviewList
-                                reviews={reviewSummary?.reviews?.content?.map((r: any) => ({
-                                  // Map backend ReviewResponse to standardized ReviewDetail
-                                  ...r,
-                                  id: String(r.id),
-                                  travelerId: String(r.travelerId),
-                                  // Ensure guideReply is handled consistently if it's a string from backend
-                                  guideReply: r.guideReply ? { 
-                                    comment: r.guideReply, 
-                                    createdAt: r.guideRepliedAt ?? r.createdAt 
-                                  } : undefined,
-                                })) ?? []}
-                                averageRating={reviewSummary?.averageOverall ?? tour.averageRating ?? 0}
-                                totalReviews={reviewSummary?.totalReviews ?? tour.reviewCount ?? 0}
-                                reviewSummary={reviewSummary?.distribution}
-                                tourGuideId={tour.guideId}
-                                tourId={id}
-                            />
-                        </div>
-                    </div>
+ {/* REVIEWS SECTION */}
+ <div className="surface-section border border-primary-light/10 dark:border-primary-dark/10 shadow-md rounded-xl p-6 sm:p-8 ">
+ <ReviewList
+  reviews={(reviewSummary?.reviews?.content || []).map((r: any) => ({
+  // Map backend ReviewResponse to standardized ReviewDetail
+  ...r,
+  id: String(r.id),
+  travelerId: String(r.travelerId),
+  // Ensure guideReply is handled consistently if it's a string from backend
+  guideReply: r.guideReply ? { 
+  comment: typeof r.guideReply === 'string' ? r.guideReply : r.guideReply.comment, 
+  createdAt: r.guideRepliedAt ?? r.createdAt 
+  } : undefined,
+  }))}
+ averageRating={reviewSummary?.averageOverall ?? tour.averageRating ?? 0}
+ totalReviews={reviewSummary?.totalReviews ?? tour.reviewCount ?? 0}
+ reviewSummary={reviewSummary?.distribution}
+ tourGuideId={tour.guideId}
+ tourId={id}
+ />
+ </div>
+ </div>
 
-                    {/* Right Column: Booking */}
-                    <div className="lg:col-span-1">
-                        <div className="sticky top-24">
-                            <BookingCardWrapper
-                                tourId={tour.id.toString()}
-                                tourTitle={tour.title}
-                                guideId={tour.guideId.toString()}
-                                guideName={tour.guideDisplayName}
-                                basePrice={tour.basePrice}
-                                currency={tour.currency}
-                                minCapacity={tour.minCapacity}
-                                maxCapacity={tour.maxCapacity}
-                                bookingMode={normalizedBookingMode}
-                                occurrences={tour.occurrences || []}
-                                waitlistCount={tour.occurrences?.[0]?.waitlistCount || 0}
-                                isWaitlistAvailable={true} // Allow waitlist whenever a specific occurrence cannot accommodate the group
-                                hasGroupDiscount={tour.hasGroupDiscount}
-                                groupDiscountThreshold={tour.groupDiscountThreshold}
-                                groupDiscountPercent={tour.groupDiscountPercent}
-                                activeBookingId={tour.activeBookings?.[0]?.id}
-                                activeBookingStatus={tour.activeBookings?.[0]?.status}
-                                activeBookingOccurrenceId={tour.activeBookings?.[0]?.occurrenceId}
-                                activeBookingPeopleCount={tour.activeBookings?.[0]?.peopleCount}
-                            />
-                        </div>
-                    </div>
-                </div>
-                </Suspense>
+ {/* Right Column: Booking */}
+ <div className="lg:col-span-1">
+ <div className="sticky top-24">
+ <BookingCardWrapper
+ tourId={tour.id.toString()}
+ tourTitle={tour.title}
+ guideId={tour.guideId.toString()}
+ guideName={tour.guideDisplayName}
+ basePrice={tour.basePrice}
+ currency={tour.currency}
+ minCapacity={tour.minCapacity}
+ maxCapacity={tour.maxCapacity}
+ bookingMode={normalizedBookingMode}
+ occurrences={tour.occurrences || []}
+ waitlistCount={tour.occurrences?.[0]?.waitlistCount || 0}
+ isWaitlistAvailable={true} // Allow waitlist whenever a specific occurrence cannot accommodate the group
+ hasGroupDiscount={tour.hasGroupDiscount}
+ groupDiscountThreshold={tour.groupDiscountThreshold}
+ groupDiscountPercent={tour.groupDiscountPercent}
+ activeBookingId={tour.activeBookings?.[0]?.id}
+ activeBookingStatus={tour.activeBookings?.[0]?.status}
+ activeBookingOccurrenceId={tour.activeBookings?.[0]?.occurrenceId}
+ activeBookingPeopleCount={tour.activeBookings?.[0]?.peopleCount}
+ />
+ </div>
+ </div>
+ </div>
+ </Suspense>
 
-                {/* Similar Tours */}
-                <div className="mt-16 pt-16 border-t border-border-light-default dark:border-border-dark-strong">
-                    <SimilarTours
-                        currentTourId={tour.id.toString()}
-                        city={tour.locationName as any}
-                        country={tour.countryCode as any}
-                        category={tour.category || undefined}
-                    />
-                </div>
-            </div>
-        </PageLayout>
-    )
+ {/* Similar Tours */}
+ <div className="mt-16 pt-16 border-t border-primary-light/10 dark:border-primary-dark/10 ">
+ <SimilarTours
+ currentTourId={tour.id.toString()}
+ city={tour.locationName as any}
+ country={tour.countryCode as any}
+ category={tour.category || undefined}
+ />
+ </div>
+ </div>
+ </PageLayout>
+ )
 }
 
 // ============================================================================

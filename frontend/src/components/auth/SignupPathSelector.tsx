@@ -1,219 +1,219 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import {
-    Compass,
-    Award,
-    Shield,
-    MapPin,
-    Star,
-    Heart,
-    Users,
-    Camera,
-    Globe,
-    CheckCircle,
-    ChevronRight,
-    Sparkles,
-    Check,
-    ArrowRight
+ Compass,
+ Award,
+ Shield,
+ MapPin,
+ Star,
+ Heart,
+ Users,
+ Camera,
+ Globe,
+ CheckCircle,
+ ChevronRight,
+ Sparkles,
+ Check,
+ ArrowRight
 } from 'lucide-react'
 import { UserRole, UserRoleLabels } from '@/src/types/auth.types'
 
 interface SignupPathSelectorProps {
-    selectedRole: UserRole | null
-    onSelect: (role: UserRole) => void
-    onNext: () => void
-    className?: string
+ selectedRole: UserRole | null
+ onSelect: (role: UserRole) => void
+ onNext: () => void
+ className?: string
 }
 
 const TRAVELER_FEATURES = [
-    'Verified Guides',
-    'Halal-Friendly Tours',
-    'Secure Payments'
+ 'Verified Guides',
+ 'Halal-Friendly Tours',
+ 'Secure Payments'
 ]
 
 const GUIDE_FEATURES = [
-    'Earn Impact Score',
-    'Global Audience',
-    'Lower Fees Over Time'
+ 'Earn Impact Score',
+ 'Global Audience',
+ 'Lower Fees Over Time'
 ]
 
 function PathCard({
-    role,
-    isSelected,
-    onSelect,
-    onGoogleSelect,
-    icon: Icon,
-    title,
-    description,
-    features,
-    isPopular = false,
-    isGoogleLoading = false
+ role,
+ isSelected,
+ onSelect,
+ onGoogleSelect,
+ icon: Icon,
+ title,
+ description,
+ features,
+ isPopular = false,
+ isGoogleLoading = false
 }: {
-    role: UserRole
-    isSelected: boolean
-    onSelect: () => void
-    onGoogleSelect: () => void
-    icon: any
-    title: string
-    description: string
-    features: string[]
-    isPopular?: boolean
-    isGoogleLoading?: boolean
+ role: UserRole
+ isSelected: boolean
+ onSelect: () => void
+ onGoogleSelect: () => void
+ icon: any
+ title: string
+ description: string
+ features: string[]
+ isPopular?: boolean
+ isGoogleLoading?: boolean
 }) {
-    return (
-        <motion.div
-            whileHover={{ y: -4 }}
-            className={`
-                relative flex flex-col p-8 rounded-3xl transition-all duration-300
-                border backdrop-blur-sm h-full
-                ${isSelected
-                    ? 'bg-blue-600/5 border-blue-600 shadow-xl shadow-blue-600/10'
-                    : 'bg-white/40 dark:bg-gray-900/40 border-gray-100 dark:border-gray-800 hover:border-blue-300 dark:hover:border-blue-700'
-                }
-            `}
-        >
-            {isPopular && (
-                <div className="absolute -top-3 left-6 z-20">
-                    <div className="px-3 py-1 bg-amber-500 text-white text-[10px] font-black rounded-full shadow-lg flex items-center gap-1 uppercase tracking-widest">
-                        <Sparkles className="w-3 h-3" />
-                        Most Popular
-                    </div>
-                </div>
-            )}
+ return (
+ <motion.div
+ whileHover={{ y: -4 }}
+ className={`
+ relative flex flex-col p-8 rounded-3xl transition-all duration-300
+ border  h-full
+ ${isSelected
+ ? 'bg-primary-light/5 border-primary-light dark:border-primary-dark shadow-xl shadow-blue-600/10'
+ : 'surface-card border-theme hover:border-primary-light dark:border-primary-dark dark:hover:border-primary-light dark:border-primary-dark'
+ }
+ `}
+ >
+ {isPopular && (
+ <div className="absolute -top-3 left-6 z-20">
+ <div className="px-3 py-1 bg-amber-500 text-white text-[10px] font-black rounded-full shadow-lg flex items-center gap-1 uppercase tracking-widest">
+ <Sparkles className="w-3 h-3" />
+ Most Popular
+ </div>
+ </div>
+ )}
 
-            <div className="flex-1 cursor-pointer" onClick={onSelect}>
-                <div className={`
-                    w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-all duration-300
-                    ${isSelected 
-                        ? 'bg-blue-600 text-white scale-110 rotate-3 shadow-lg' 
-                        : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                    }
-                `}>
-                    <Icon size={28} strokeWidth={1.5} />
-                </div>
+ <div className="flex-1 cursor-pointer" onClick={onSelect}>
+ <div className={`
+ w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-all duration-300
+ ${isSelected 
+ ? 'bg-primary-light text-white scale-110 rotate-3 shadow-lg' 
+ : 'bg-primary-light/10 text-primary-light dark:text-primary-dark dark:text-primary-dark '
+ }
+ `}>
+ <Icon size={28} strokeWidth={1.5} />
+ </div>
 
-                <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
-                    {title}
-                </h3>
-                
-                <p className="text-base text-gray-500 dark:text-gray-400 font-medium mb-8 leading-relaxed">
-                    {description}
-                </p>
+ <h3 className="text-2xl font-black text-theme-primary mb-2 tracking-tight">
+ {title}
+ </h3>
+ 
+ <p className="text-base text-theme-muted font-medium mb-8 leading-relaxed">
+ {description}
+ </p>
 
-                <ul className="mb-10 space-y-3">
-                    {features.map((feature, i) => (
-                        <li key={i} className="flex items-center gap-3 text-[10px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-widest">
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
-                            {feature}
-                        </li>
-                    ))}
-                </ul>
-            </div>
+ <ul className="mb-10 space-y-3">
+ {features.map((feature, i) => (
+ <li key={i} className="flex items-center gap-3 text-[10px] font-black text-theme-secondary uppercase tracking-widest">
+ <div className="w-1.5 h-1.5 rounded-full bg-primary-light" />
+ {feature}
+ </li>
+ ))}
+ </ul>
+ </div>
 
-            <div className="space-y-3">
-                <button
-                    onClick={onSelect}
-                    className={`
-                        w-full py-4 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2
-                        ${isSelected 
-                            ? 'bg-blue-600 text-white shadow-lg' 
-                            : 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:opacity-90'
-                        }
-                    `}
-                >
-                    Continue with Email
-                    <ChevronRight className="w-4 h-4" />
-                </button>
+ <div className="space-y-3">
+ <button
+ onClick={onSelect}
+ className={`
+ w-full py-4 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2
+ ${isSelected 
+ ? 'bg-primary-light text-white shadow-lg' 
+ : 'surface-base text-white hover:opacity-90'
+ }
+ `}
+ >
+ Continue with Email
+ <ChevronRight className="w-4 h-4" />
+ </button>
 
-                <div className="relative py-2 flex items-center gap-3">
-                    <div className="flex-1 h-px bg-gray-100 dark:bg-gray-800" />
-                    <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">or</span>
-                    <div className="flex-1 h-px bg-gray-100 dark:bg-gray-800" />
-                </div>
+ <div className="relative py-2 flex items-center gap-3">
+ <div className="flex-1 h-px surface-section" />
+ <span className="text-[10px] text-theme-muted font-black uppercase tracking-widest">or</span>
+ <div className="flex-1 h-px surface-section" />
+ </div>
 
-                <button
-                    onClick={onGoogleSelect}
-                    disabled={isGoogleLoading}
-                    className="w-full py-3.5 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50"
-                >
-                    {isGoogleLoading ? (
-                        <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                        <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0">
-                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                        </svg>
-                    )}
-                    {isGoogleLoading ? 'Connecting...' : 'Continue with Google'}
-                </button>
-            </div>
+ <button
+ onClick={onGoogleSelect}
+ disabled={isGoogleLoading}
+ className="w-full py-3.5 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest surface-card text-theme-secondary border border-theme hover:surface-section dark:hover:surface-section transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50"
+ >
+ {isGoogleLoading ? (
+ <div className="w-4 h-4 border-2 border-theme-strong border-t-transparent rounded-full animate-spin" />
+ ) : (
+ <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0">
+ <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+ <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+ <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+ <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+ </svg>
+ )}
+ {isGoogleLoading ? 'Connecting...' : 'Continue with Google'}
+ </button>
+ </div>
 
-            {isSelected && (
-                <div className="absolute top-6 right-6">
-                    <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center shadow-lg animate-in zoom-in duration-300">
-                        <Check className="w-3.5 h-3.5 text-white stroke-[4]" />
-                    </div>
-                </div>
-            )}
-        </motion.div>
-    )
+ {isSelected && (
+ <div className="absolute top-6 right-6">
+ <div className="w-6 h-6 rounded-full bg-primary-light flex items-center justify-center shadow-lg animate-in zoom-in duration-300">
+ <Check className="w-3.5 h-3.5 text-white stroke-[4]" />
+ </div>
+ </div>
+ )}
+ </motion.div>
+ )
 }
 
 interface SignupPathSelectorProps {
-    selectedRole: UserRole | null
-    onSelect: (role: UserRole) => void
-    className?: string
+ selectedRole: UserRole | null
+ onSelect: (role: UserRole) => void
+ className?: string
 }
 
 export const SignupPathSelector = ({ 
-    selectedRole, 
-    onSelect, 
-    className = '' 
+ selectedRole, 
+ onSelect, 
+ className = '' 
 }: {
-    selectedRole: UserRole | null
-    onSelect: (role: UserRole) => void
-    className?: string
+ selectedRole: UserRole | null
+ onSelect: (role: UserRole) => void
+ className?: string
 }) => {
-    const [googleLoadingRole, setGoogleLoadingRole] = useState<UserRole | null>(null);
+ const [googleLoadingRole, setGoogleLoadingRole] = useState<UserRole | null>(null);
 
-    const handleGoogleSelect = (role: UserRole) => {
-        setGoogleLoadingRole(role);
-        window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/oauth2/google/start?role=${role === UserRole.GUIDE ? 'Guide' : 'Traveler'}`;
-    };
+ const handleGoogleSelect = (role: UserRole) => {
+ setGoogleLoadingRole(role);
+ window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/oauth2/google/start?role=${role === UserRole.GUIDE ? 'Guide' : 'Traveler'}`;
+ };
 
-    return (
-        <div className={`w-full ${className}`}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <PathCard
-                    role={UserRole.TRAVELER}
-                    isSelected={selectedRole === UserRole.TRAVELER}
-                    onSelect={() => onSelect(UserRole.TRAVELER)}
-                    onGoogleSelect={() => handleGoogleSelect(UserRole.TRAVELER)}
-                    isGoogleLoading={googleLoadingRole === UserRole.TRAVELER}
-                    icon={Compass}
-                    title="I'm a Traveler"
-                    description="Discover authentic halal-friendly experiences"
-                    features={TRAVELER_FEATURES}
-                />
+ return (
+ <div className={`w-full ${className}`}>
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+ <PathCard
+ role={UserRole.TRAVELER}
+ isSelected={selectedRole === UserRole.TRAVELER}
+ onSelect={() => onSelect(UserRole.TRAVELER)}
+ onGoogleSelect={() => handleGoogleSelect(UserRole.TRAVELER)}
+ isGoogleLoading={googleLoadingRole === UserRole.TRAVELER}
+ icon={Compass}
+ title="I'm a Traveler"
+ description="Discover authentic halal-friendly experiences"
+ features={TRAVELER_FEATURES}
+ />
 
-                <PathCard
-                    role={UserRole.GUIDE}
-                    isSelected={selectedRole === UserRole.GUIDE}
-                    onSelect={() => onSelect(UserRole.GUIDE)}
-                    onGoogleSelect={() => handleGoogleSelect(UserRole.GUIDE)}
-                    isGoogleLoading={googleLoadingRole === UserRole.GUIDE}
-                    icon={Award}
-                    title="I'm a Guide"
-                    description="Share your expertise and build your business"
-                    features={GUIDE_FEATURES}
-                />
-            </div>
-        </div>
-    )
+ <PathCard
+ role={UserRole.GUIDE}
+ isSelected={selectedRole === UserRole.GUIDE}
+ onSelect={() => onSelect(UserRole.GUIDE)}
+ onGoogleSelect={() => handleGoogleSelect(UserRole.GUIDE)}
+ isGoogleLoading={googleLoadingRole === UserRole.GUIDE}
+ icon={Award}
+ title="I'm a Guide"
+ description="Share your expertise and build your business"
+ features={GUIDE_FEATURES}
+ />
+ </div>
+ </div>
+ )
 }
 
 // Keeping a default export for safety if anything expects it, 
