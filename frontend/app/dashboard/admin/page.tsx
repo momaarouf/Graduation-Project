@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useEffect } from 'react'
 import { 
@@ -50,12 +50,7 @@ const StatCard = ({ title, value, direction, trend, icon: Icon, color, isLoading
  purple: 'bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark border-primary-light/20 dark:border-primary-dark/20'
  }
 
- const iconClasses = {
- blue: 'bg-primary-light/20 dark:bg-primary-dark/20 text-primary-light dark:text-primary-dark',
- amber: 'bg-accent-light/20 dark:bg-accent-dark/20 text-accent-light dark:text-accent-dark',
- emerald: 'bg-success-green/20 text-success-green',
- purple: 'bg-primary-light/20 dark:bg-primary-dark/20 text-primary-light dark:text-primary-dark'
- }
+ 
 
  const iconClasses = {
  blue: 'bg-primary-light/20 dark:bg-primary-dark/20 dark:bg-primary-light-hover/30 text-primary-light dark:text-primary-dark',

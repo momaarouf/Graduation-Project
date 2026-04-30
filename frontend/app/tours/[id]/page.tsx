@@ -198,7 +198,7 @@ export default async function TourDetailPage({ params}:PageProps ) {
  {/* Navigation Back - Standard Style */}
  <Link
  href="/tours"
- className="inline-flex items-center gap-2 mb-8 group px-4 py-2 surface-section rounded-lg text-[10px] font-black uppercase tracking-widest text-theme-muted hover:text-primary-light dark:hover:text-primary-dark transition-all border border-primary-light/10 dark:border-primary-dark/10 hover:shadow-sm"
+ className="inline-flex items-center gap-2 mb-8 group px-0 py-2 bg-transparent text-[10px] font-black uppercase tracking-widest text-theme-secondary hover:text-primary-light dark:hover:text-primary-dark transition-all"
  >
  <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
  Back to all tours
@@ -209,7 +209,7 @@ export default async function TourDetailPage({ params}:PageProps ) {
  {/* Left Column: Content - Now in a standard card container */}
  <div className="lg:col-span-2 space-y-6">
  {/* HERO SECTION */}
- <div className="surface-section rounded-xl p-4 sm:p-6 shadow-md border border-primary-light/10 dark:border-primary-dark/10 ">
+ <div className="surface-card rounded-xl p-4 sm:p-6 shadow-xl border border-theme ">
  <TourHero
  id={tour.id}
  title={tour.title}
@@ -229,7 +229,7 @@ export default async function TourDetailPage({ params}:PageProps ) {
  </div>
 
  {/* INFO SECTION */}
- <div className="surface-section border border-primary-light/10 dark:border-primary-dark/10 shadow-md rounded-xl p-6 sm:p-8 ">
+ <div className="surface-card border border-theme shadow-xl rounded-xl p-6 sm:p-8 ">
  <TourInfo
  description={tour.description}
  itinerary={itinerary}
@@ -256,7 +256,7 @@ export default async function TourDetailPage({ params}:PageProps ) {
  </div>
 
  {/* GUIDE SECTION */}
- <div className="surface-section border border-primary-light/10 dark:border-primary-dark/10 shadow-md rounded-xl p-6 sm:p-8 ">
+ <div className="surface-card border border-theme shadow-xl rounded-xl p-6 sm:p-8 ">
  <TourGuide
  guide={{
  id: tour.guideId.toString(),
@@ -273,7 +273,7 @@ export default async function TourDetailPage({ params}:PageProps ) {
  </div>
 
  {/* REVIEWS SECTION */}
- <div className="surface-section border border-primary-light/10 dark:border-primary-dark/10 shadow-md rounded-xl p-6 sm:p-8 ">
+ <div className="surface-card border border-theme shadow-xl rounded-xl p-6 sm:p-8 ">
  <ReviewList
   reviews={(reviewSummary?.reviews?.content || []).map((r: any) => ({
   // Map backend ReviewResponse to standardized ReviewDetail
@@ -325,7 +325,7 @@ export default async function TourDetailPage({ params}:PageProps ) {
  </Suspense>
 
  {/* Similar Tours */}
- <div className="mt-16 pt-16 border-t border-primary-light/10 dark:border-primary-dark/10 ">
+ <div className="mt-16 pt-16 border-t border-theme ">
  <SimilarTours
  currentTourId={tour.id.toString()}
  city={tour.locationName as any}

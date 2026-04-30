@@ -187,30 +187,29 @@ export default function AdminSettingsPage() {
           </div>
 
           {/* Main Card */}
-          <div className="surface-card border border-theme rounded-[2.5rem] shadow-xl shadow-primary-light/5 overflow-hidden">
+          <div className="surface-card border border-theme rounded-xl shadow-xl shadow-primary-light/5 overflow-hidden">
             
             {/* Tabs */}
             <div className="flex p-2 gap-1 surface-section border-b border-theme overflow-x-auto scrollbar-hide">
-              {[
-                { id: 'account', label: 'Account', icon: Lock },
-                { id: 'general', label: 'General', icon: Globe },
-                { id: 'fees', label: 'Fees & Payouts', icon: Percent },
-                { id: 'email', label: 'Email Templates', icon: Mail },
-                { id: 'regions', label: 'Regions & Currency', icon: Globe }
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 px-6 py-2.5 text-xs font-black uppercase tracking-widest rounded-2xl transition-all duration-300 whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? 'bg-primary-light text-white shadow-lg shadow-blue-500/20 scale-[1.02]'
-                      : 'text-theme-muted hover:text-theme-secondary hover:bg-theme-muted/5'
-                  }`}
-                >
-                  <tab.icon className="w-3.5 h-3.5" />
-                  {tab.label}
-                </button>
-              ))}
+                {[{ id: 'account', label: 'Account', icon: Lock },
+                 { id: 'general', label: 'General', icon: Globe },
+                 { id: 'fees', label: 'Fees & Payouts', icon: Percent },
+                 { id: 'email', label: 'Email Templates', icon: Mail },
+                 { id: 'regions', label: 'Regions & Currency', icon: Globe }
+                ].map((tab) => (
+                 <button
+                   key={tab.id}
+                   onClick={() => setActiveTab(tab.id as any)}
+                   className={`flex items-center gap-2 px-6 py-3.5 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 whitespace-nowrap border-b-2 ${
+                     activeTab === tab.id
+                       ? 'text-primary-light dark:text-primary-dark border-primary-light dark:border-primary-dark bg-primary-light/5'
+                       : 'text-theme-muted hover:text-theme-secondary border-transparent'
+                   }`}
+                 >
+                   <tab.icon className="w-3.5 h-3.5" />
+                   {tab.label}
+                 </button>
+                ))}
             </div>
 
  {/* Tab Content */}
@@ -220,8 +219,9 @@ export default function AdminSettingsPage() {
  {activeTab === 'account' && (
  <div className="space-y-6">
  <div>
- <h2 className="text-lg font-semibold text-theme-primary mb-4">
- Change Password
+ <h2 className="text-[10px] font-black text-theme-secondary uppercase tracking-[0.25em] mb-6 flex items-center gap-2">
+ <Lock className="w-4 h-4 text-orange-500" />
+  Security Credentials
  </h2>
  
  <div className="space-y-4">
@@ -235,7 +235,7 @@ export default function AdminSettingsPage() {
  type={showCurrentPassword ? 'text' : 'password'}
  value={currentPassword}
  onChange={(e) => setCurrentPassword(e.target.value)}
- className="w-full pl-9 pr-10 py-2 surface-section border border-theme-strong rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
+ className="w-full pl-9 pr-10 py-2 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
  placeholder="Enter current password"
  />
  <button
@@ -264,7 +264,7 @@ export default function AdminSettingsPage() {
  type={showNewPassword ? 'text' : 'password'}
  value={newPassword}
  onChange={(e) => setNewPassword(e.target.value)}
- className="w-full pl-9 pr-10 py-2 surface-section border border-theme-strong rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
+ className="w-full pl-9 pr-10 py-2 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
  placeholder="Enter new password"
  />
  <button
@@ -286,7 +286,7 @@ export default function AdminSettingsPage() {
  type={showConfirmPassword ? 'text' : 'password'}
  value={confirmPassword}
  onChange={(e) => setConfirmPassword(e.target.value)}
- className="w-full pl-9 pr-10 py-2 surface-section border border-theme-strong rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
+ className="w-full pl-9 pr-10 py-2 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
  placeholder="Confirm new password"
  />
  <button
@@ -325,8 +325,9 @@ export default function AdminSettingsPage() {
 
  {/* Notification Settings */}
  <div className="pt-6 border-t border-theme">
- <h2 className="text-lg font-semibold text-theme-primary mb-4">
- Notification Preferences
+ <h2 className="text-[10px] font-black text-theme-secondary uppercase tracking-[0.25em] mb-6 flex items-center gap-2">
+ <Bell className="w-4 h-4 text-orange-500" />
+  Notification Ecosystem
  </h2>
  
  <div className="space-y-4">
@@ -605,7 +606,7 @@ export default function AdminSettingsPage() {
                   step: '0.1'
                 }
               ].map((region) => (
-                <div key={region.name} className="p-8 surface-section rounded-[2.5rem] border border-theme relative overflow-hidden group">
+                <div key={region.name} className="p-8 surface-section rounded-xl border border-theme relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary-light/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700" />
                   
                   <div className="flex items-center justify-between mb-8 relative">

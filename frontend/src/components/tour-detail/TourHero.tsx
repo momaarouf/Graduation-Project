@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // TOUR HERO - GALLERY & QUICK INFO
 // ============================================================================
 // LOCATION: /frontend/src/components/tour-detail/TourHero.tsx
@@ -223,7 +223,7 @@ export default function TourHero({
 
  {/* Location Badge (Top Left) */}
  <div className="absolute top-4 left-4 flex flex-wrap gap-2 pointer-events-none z-10">
- <span className="inline-flex items-center gap-1.5 px-3 py-1.5 surface-card rounded-lg text-sm font-bold text-theme-primary shadow-md pointer-events-auto border border-primary-light/10 dark:border-primary-dark/10 ">
+ <span className="inline-flex items-center gap-1.5 px-3 py-1.5 surface-card rounded-lg text-sm font-bold text-theme-primary shadow-md pointer-events-auto border border-theme ">
  <span className="text-base">{getCountryFlag(country as any)}</span>
  <span>{location}</span>
  </span>
@@ -278,7 +278,7 @@ export default function TourHero({
  
  rounded-xl
  shadow-2xl
- border border-primary-light/10 dark:border-primary-dark/10
+ border border-theme
  p-1.5
 "
  >
@@ -417,7 +417,7 @@ export default function TourHero({
  {/* Booking mode badge */}
  <motion.span 
  whileHover={{ scale: 1.05 }}
- className={`inline-flex items-center justify-center w-11 h-11 rounded-lg shadow-lg transition-all ${bookingMode === BookingMode.INSTANT ? 'bg-primary-light/10 text-primary-light border border-primary-light/20' : 'surface-section text-theme-muted border border-primary-light/10 dark:border-primary-dark/10 '}`}
+ className={`inline-flex items-center justify-center w-11 h-11 rounded-lg shadow-lg transition-all ${bookingMode === BookingMode.INSTANT ? 'bg-primary-light/10 text-primary-light border border-primary-light/20' : 'surface-section text-theme-muted border border-theme '}`}
  title={bookingMode === BookingMode.INSTANT ? 'Instant Confirmation' : 'Request to Book'}
  >
  {bookingMode === BookingMode.INSTANT ? (
@@ -535,7 +535,7 @@ export default function TourHero({
  <div className="flex items-center gap-3">
  <button
  onClick={() => setIsGalleryModalOpen(false)}
- className="w-12 h-12 rounded-lg surface-card hover:surface-card text-white flex items-center justify-center transition-colors  border border-primary-light/10 dark:border-primary-dark/10-strong"
+ className="w-12 h-12 rounded-lg surface-card hover:surface-card text-white flex items-center justify-center transition-colors  border border-theme-strong"
  >
  <X className="w-6 h-6" />
  </button>
@@ -546,7 +546,7 @@ export default function TourHero({
  {zoomScale === 1 && (
  <button
  onClick={(e) => { e.stopPropagation(); handlePrev(); setZoomScale(1) }}
- className="absolute left-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-lg surface-card hover:surface-card text-white flex items-center justify-center transition-all  border border-primary-light/10 dark:border-primary-dark/10-strong z-[110]"
+ className="absolute left-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-lg surface-card hover:surface-card text-white flex items-center justify-center transition-all  border border-theme-strong z-[110]"
  >
  <ChevronLeft className="w-8 h-8" />
  </button>
@@ -619,7 +619,7 @@ export default function TourHero({
 
  {/* ADVANCED ZOOM CONTROL BAR (Bottom Center) */}
  {activeMedia.type === 'image' && (
- <div className="absolute bottom-8 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/40  border border-primary-light/10 dark:border-primary-dark/10-strong rounded-xl flex items-center gap-4 z-[130] shadow-2xl">
+ <div className="absolute bottom-8 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/40  border border-theme-strong rounded-xl flex items-center gap-4 z-[130] shadow-2xl">
  <div className="flex items-center gap-1 border-r border-primary-light/10 dark:border-primary-dark/10-strong pr-3">
  <button 
  onClick={(e) => { e.stopPropagation(); handleZoomOut() }}
@@ -654,7 +654,7 @@ export default function TourHero({
  {zoomScale === 1 && (
  <button
  onClick={(e) => { e.stopPropagation(); handleNext(); setZoomScale(1) }}
- className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-lg surface-card hover:surface-card text-white flex items-center justify-center transition-all  border border-primary-light/10 dark:border-primary-dark/10-strong z-[110]"
+ className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-lg surface-card hover:surface-card text-white flex items-center justify-center transition-all  border border-theme-strong z-[110]"
  >
  <ChevronRight className="w-8 h-8" />
  </button>

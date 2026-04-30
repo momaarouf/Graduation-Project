@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // BOOKING CONFIRMATION PAGE — WIRED TO REAL BACKEND
 // ============================================================================
 // LOCATION: /frontend/app/bookings/confirmation/page.tsx
@@ -842,7 +842,7 @@ Thank you for choosing TravelMarket!
  onSuccess={async () => {
  // Refresh booking data on success
  const res = await getTravelerBooking(Number(bookingId))
- setBooking(res.data)
+ setBooking(res)
  setShowMockDialog(false)
  }}
  onCancel={() => setShowMockDialog(false)}

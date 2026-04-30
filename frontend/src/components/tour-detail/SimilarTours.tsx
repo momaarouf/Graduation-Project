@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // SIMILAR TOURS - RECOMMENDATION ENGINE
 // ============================================================================
 // LOCATION: /frontend/src/components/tour-detail/SimilarTours.tsx
@@ -88,7 +88,7 @@ export default function SimilarTours({
 
  if (isLoading) {
  return (
- <div className="pt-16 border-t border-primary-light/10 dark:border-primary-dark/10 flex flex-col items-center justify-center py-20 text-theme-muted">
+ <div className="pt-16 border-t border-theme flex flex-col items-center justify-center py-20 text-theme-muted">
  <Loader2 className="w-8 h-8 animate-spin mb-4 text-primary-light dark:text-primary-dark" />
  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-theme-muted">Finding similar experiences...</p>
  </div>
@@ -100,7 +100,7 @@ export default function SimilarTours({
  }
 
  return (
- <section className="pt-16 border-t border-primary-light/10 dark:border-primary-dark/10 ">
+ <section className="pt-16 border-t border-theme ">
  <div className="space-y-10">
  <div className="flex items-end justify-between">
  <div className="space-y-1">
@@ -129,7 +129,7 @@ export default function SimilarTours({
  {/* Mobile View All */}
  <Link
  href="/tours"
- className="sm:hidden w-full flex items-center justify-center gap-2 py-4 surface-section rounded-xl text-[10px] font-black text-theme-primary uppercase tracking-widest border border-primary-light/10 dark:border-primary-dark/10"
+ className="sm:hidden w-full flex items-center justify-center gap-2 py-4 surface-card rounded-xl text-[10px] font-black text-theme-primary uppercase tracking-widest border border-theme"
  >
  View all experiences
  <ChevronRight className="w-4 h-4" />

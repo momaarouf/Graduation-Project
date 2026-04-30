@@ -29,7 +29,8 @@ import {
  AlertCircle,
  CheckCircle,
  Loader2,
- Shield
+ Shield,
+ Bell
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
@@ -244,10 +245,10 @@ export default function TravelerSettingsPage() {
       </div>
 
       {/* Main Card */}
-      <div className="surface-card border border-theme rounded-[2.5rem] shadow-xl shadow-primary-light/5 overflow-hidden">
+      <div className="surface-card border border-theme rounded-xl shadow-xl shadow-primary-light/5 overflow-hidden transition-all duration-500">
         
         {/* Tabs */}
-        <div className="flex p-2 gap-1 surface-section border-b border-theme">
+        <div className="flex border-b border-theme">
           {[
             { id: 'account', label: 'Account', icon: Lock },
             { id: 'preferences', label: 'Preferences', icon: Globe },
@@ -259,13 +260,13 @@ export default function TravelerSettingsPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-xs font-black uppercase tracking-widest rounded-2xl transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${
                   isActive
-                    ? 'bg-primary-light text-white shadow-lg shadow-primary-light/20'
-                    : 'text-theme-muted hover:text-theme-primary hover:bg-theme-muted/5'
+                    ? 'text-primary-light dark:text-primary-dark border-b-2 border-primary-light dark:border-primary-dark bg-primary-light/5'
+                    : 'text-theme-muted hover:text-theme-secondary'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'animate-pulse' : ''}`} />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'animate-pulse' : ''}`} />
                 <span className="hidden sm:inline">{tab.label}</span>
               </button>
             )
@@ -281,9 +282,9 @@ export default function TravelerSettingsPage() {
           {activeTab === 'account' && (
             <div className="space-y-8">
               <div>
-                <h2 className="text-xl font-black text-theme-primary mb-6 flex items-center gap-2">
-                  <Lock className="w-5 h-5 text-primary-light" />
-                  Change Password
+                <h2 className="text-[10px] font-black text-theme-secondary uppercase tracking-[0.25em] mb-6 flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-orange-500" />
+                  Traveler Credentials
                 </h2>
                 
                 <div className="space-y-6">
@@ -328,7 +329,7 @@ export default function TravelerSettingsPage() {
  type={showNewPassword ? 'text' : 'password'}
  value={newPassword}
  onChange={(e) => setNewPassword(e.target.value)}
- className="w-full pl-9 pr-10 py-2 surface-section border border-theme-strong rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
+ className="w-full pl-9 pr-10 py-2 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
  placeholder="Enter new password"
  />
  <button
@@ -368,7 +369,7 @@ export default function TravelerSettingsPage() {
  type={showConfirmPassword ? 'text' : 'password'}
  value={confirmPassword}
  onChange={(e) => setConfirmPassword(e.target.value)}
- className="w-full pl-9 pr-10 py-2 surface-section border border-theme-strong rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
+ className="w-full pl-9 pr-10 py-2 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
  placeholder="Confirm new password"
  />
  <button
@@ -414,9 +415,9 @@ export default function TravelerSettingsPage() {
             <div className="space-y-10">
               {/* Language */}
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-theme-muted mb-4">
-                  <Globe className="w-3.5 h-3.5 inline mr-2" />
-                  Language Preference
+                <label className="block text-[10px] font-black uppercase tracking-widest text-theme-secondary mb-6 flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-orange-500" />
+                  Global Preferences
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {LANGUAGES.map((lang) => (
@@ -430,7 +431,7 @@ export default function TravelerSettingsPage() {
                       }`}
                     >
                       <span className="text-2xl mb-2 block">{lang.flag}</span>
-                      <span className="text-xs font-black uppercase tracking-widest">{lang.name}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest">{lang.name}</span>
                     </button>
                   ))}
                 </div>
@@ -438,9 +439,9 @@ export default function TravelerSettingsPage() {
 
               {/* Timezone */}
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-theme-muted mb-3">
-                  <Clock className="w-3.5 h-3.5 inline mr-2" />
-                  Display Timezone
+                <label className="block text-[10px] font-black uppercase tracking-widest text-theme-secondary mb-4 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-orange-500" />
+                  Regional Synchronizer
                 </label>
                 <select
                   value={timezone}
@@ -460,7 +461,10 @@ export default function TravelerSettingsPage() {
 
               {/* Notifications */}
               <div className="space-y-4">
-                <label className="block text-[10px] font-black uppercase tracking-widest text-theme-muted mb-2">Communication Preferences</label>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-theme-secondary mb-6 flex items-center gap-2">
+                  <Bell className="w-4 h-4 text-orange-500" />
+                  Communication Ecosystem
+                </label>
                 <div className="space-y-3">
                   {[
                     { id: 'email', label: 'Email Notifications', value: emailNotifications, setter: setEmailNotifications },
@@ -506,14 +510,14 @@ export default function TravelerSettingsPage() {
           {activeTab === 'security' && (
             <div className="space-y-8">
               {/* Two Factor Auth */}
-              <div className="p-8 surface-base border border-theme rounded-[2rem] relative overflow-hidden group">
+              <div className="p-8 surface-section border border-theme rounded-xl relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary-light/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-primary-light/10 transition-colors" />
                 <div className="flex items-start gap-6 relative z-10">
                   <div className="w-14 h-14 bg-primary-light/10 text-primary-light rounded-2xl flex items-center justify-center border border-primary-light/20 shadow-inner">
                     <Shield className="w-7 h-7" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-black text-theme-primary mb-2">
+                    <h3 className="text-[10px] font-black text-theme-secondary uppercase tracking-[0.25em] mb-4">
                       Two-Factor Authentication
                     </h3>
                     <p className="text-sm text-theme-secondary font-medium mb-6 leading-relaxed max-w-md">
@@ -527,10 +531,10 @@ export default function TravelerSettingsPage() {
               </div>
 
               {/* Delete Account - Danger Zone */}
-              <div className="p-8 bg-red-500/5 dark:bg-red-950/20 border border-red-500/20 rounded-[2rem] relative overflow-hidden">
+              <div className="p-8 bg-red-500/5 border border-red-500/20 rounded-xl relative overflow-hidden">
                 <div className="flex items-center gap-3 mb-4">
                   <Trash2 className="w-5 h-5 text-red-500" />
-                  <h3 className="text-lg font-black text-red-600 dark:text-red-400 uppercase tracking-tight">
+                  <h3 className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-[0.25em]">
                     Danger Zone
                   </h3>
                 </div>

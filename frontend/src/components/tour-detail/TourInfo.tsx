@@ -132,7 +132,7 @@ export default function TourInfo({
 
  {/* Languages */}
  {languageList.length > 0 && (
- <div className="flex items-center gap-2 px-5 py-2 surface-section rounded-lg border border-primary-light/10 dark:border-primary-dark/10 shadow-sm transition-all hover:shadow-md">
+ <div className="flex items-center gap-2 px-5 py-2 surface-section rounded-lg border border-theme shadow-sm transition-all hover:shadow-md">
  <Globe className="w-4 h-4 text-theme-muted " />
  <div className="flex gap-2.5">
  {languageList.map((lang, i) => (
@@ -278,12 +278,12 @@ export default function TourInfo({
  {stop.title}
  </h3>
  <div className="flex flex-wrap items-center gap-4 text-sm text-theme-muted ">
- <div className="flex items-center gap-1.5 surface-section px-3 py-1 rounded-xl border border-primary-light/10 dark:border-primary-dark/10 ">
+ <div className="flex items-center gap-1.5 surface-section px-3 py-1 rounded-xl border border-theme ">
  <Clock className="w-3.5 h-3.5 text-primary-light" />
  <span className="font-bold text-[11px] uppercase tracking-wider">{stop.duration}</span>
  </div>
  {stop.location && (
- <div className="flex items-center gap-1.5 surface-section px-3 py-1 rounded-xl border border-primary-light/10 dark:border-primary-dark/10 ">
+ <div className="flex items-center gap-1.5 surface-section px-3 py-1 rounded-xl border border-theme ">
  <MapPin className="w-3.5 h-3.5 text-orange-500" />
  <span className="font-bold text-[11px] uppercase tracking-wider">{stop.location.name}</span>
  </div>
@@ -377,7 +377,7 @@ export default function TourInfo({
  {/* ========================================
  REQUIREMENTS & WHAT TO BRING
  ======================================== */}
- <section className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 surface-section rounded-xl border border-primary-light/10 dark:border-primary-dark/10">
+ <section className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 surface-section rounded-xl border border-theme">
  {/* Requirements */}
  {requirements && requirements.length > 0 && (
  <div className="space-y-4">
@@ -425,7 +425,7 @@ export default function TourInfo({
  </h2>
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
  {safetyList.map((measure, i) => (
- <div key={i} className="flex items-center gap-2 p-3.5 surface-section border border-primary-light/10 dark:border-primary-dark/10 rounded-lg text-sm font-bold text-theme-muted shadow-sm shadow-black/5">
+ <div key={i} className="flex items-center gap-2 p-3.5 surface-section border border-theme rounded-lg text-sm font-bold text-theme-muted shadow-sm shadow-black/5">
  <Check className="w-4 h-4 text-success-green dark:text-emerald-400" />
  <span>{measure}</span>
  </div>

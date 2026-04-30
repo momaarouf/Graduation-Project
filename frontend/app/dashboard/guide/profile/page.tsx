@@ -246,8 +246,8 @@ function StatCard({ icon: Icon, label, value, change, color }: StatCardProps) {
 
  return (
  <motion.div 
- whileHover={{ y: -4, boxShadow: '0 12px 20px -5px rgb(0 0 0 / 0.1)' }}
- className="p-5 surface-card border border-theme dark:border-theme rounded-2xl shadow-sm hover:shadow-xl hover:border-primary-light dark:hover:border-primary-dark/30 transition-all duration-300"
+ whileHover={{ y: -4 }}
+ className="p-5 surface-card border border-theme dark:border-theme rounded-2xl shadow-sm transition-all duration-300"
  >
  <div className="flex items-center justify-between mb-3">
  <div className={` p-2.5 rounded-xl border ${colorClasses[color]} `}>
@@ -400,7 +400,7 @@ function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarC
   </>
   )}
   </div>
- </div>
+  </div>
  )
 }
 
@@ -419,7 +419,7 @@ function BioEditor({ bio, tagline, isEditing, onChange }: BioEditorProps) {
  return (
  <motion.div 
  whileHover={{ y: -4 }}
- className=" p-10 md:p-12 surface-card border border-theme rounded-[2.5rem] shadow-xl relative overflow-hidden group hover:shadow-primary-light/10 transition-all duration-300"
+ className="p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6"
  >
  <div className="absolute top-0 right-0 w-32 h-32 bg-primary-light/5 rounded-full -mr-16 -mt-16 blur-2xl" />
  <h3 className="text-2xl font-black text-theme-primary mb-6 tracking-tight flex items-center gap-2">
@@ -485,7 +485,7 @@ function LanguagesEditor({ languages, isEditing, onAdd, onRemove, onChange }: La
  return (
  <motion.div 
  whileHover={{ y: -4 }}
- className=" p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl hover:shadow-primary-light/10 transition-all duration-300"
+ className=" p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6"
  >
  <div className="flex items-center justify-between mb-8">
  <h3 className="text-[10px] font-black text-theme-secondary uppercase tracking-[0.25em] flex items-center gap-2">
@@ -585,7 +585,7 @@ function ExpertiseEditor({ expertise, isEditing, onAdd, onRemove, onChange }: Ex
  return (
  <motion.div 
  whileHover={{ y: -4 }}
- className=" p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl hover:shadow-primary-light/10 transition-all duration-300"
+ className=" p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6"
  >
  <div className="flex items-center justify-between mb-8">
  <h3 className="text-[10px] font-black text-theme-secondary uppercase tracking-[0.25em] flex items-center gap-2">
@@ -669,7 +669,7 @@ interface PortfolioSectionProps {
 
 function PortfolioSection({ portfolio, guideId, isEditing, onAdd, onRemove }: PortfolioSectionProps) {
  return (
- <div className=" p-10 md:p-12 surface-card border border-theme rounded-[2.5rem] shadow-xl relative overflow-hidden group hover:translate-y-[-4px] hover:shadow-primary-light/10 transition-all duration-300">
+ <div className="p-10 md:p-12 surface-card border border-theme rounded-[2.5rem] shadow-xl relative overflow-hidden group transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6">
  <div className="absolute top-0 right-0 w-32 h-32 bg-orange-600/5 rounded-full -mr-16 -mt-16 blur-2xl" />
  <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-theme">
  <h3 className="text-2xl font-black text-theme-primary tracking-tight uppercase italic">
@@ -686,7 +686,7 @@ function PortfolioSection({ portfolio, guideId, isEditing, onAdd, onRemove }: Po
  )}
  </div>
 
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
  {portfolio.length > 0 ? (
  portfolio.map((item) => (
  <div key={item.id} className=" group/item relative surface-section rounded-xl overflow-hidden border border-theme hover:border-primary-light/50 transition-all shadow-sm hover:shadow-md">
@@ -786,7 +786,7 @@ function VerificationSection({ status, rejectionReason }: VerificationSectionPro
  return (
  <motion.div 
  whileHover={{ y: -4 }}
- className="surface-card text-theme-primary rounded-[2.5rem] p-10 shadow-xl dark:shadow-2xl relative overflow-hidden group border border-theme dark:border-theme transition-all duration-300 hover:shadow-2xl"
+ className="p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6 relative overflow-hidden group"
  >
  <Shield className="absolute -bottom-6 -right-6 w-24 h-24 text-primary-light dark:text-primary-dark/10 rotate-12 transition-transform duration-500" />
  <h3 className="text-lg font-black mb-8 flex items-center gap-2">
@@ -893,7 +893,7 @@ function SocialLinks({ links, isEditing, onChange }: SocialLinksProps) {
  }
 
  return (
- <div className=" p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl hover:shadow-primary-light/10 transition-all duration-300">
+ <div className=" p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6">
  <h3 className="text-[10px] font-black text-theme-secondary mb-8 uppercase tracking-[0.25em] flex items-center gap-2">
  <Share2 className="w-4 h-4 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
  Social Presence
@@ -991,7 +991,7 @@ interface GuideInfoCardProps {
 
 function GuideInfoCard({ profile, totalTours, totalTravelers }: GuideInfoCardProps) {
  return (
- <div className=" p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl hover:shadow-primary-light/10 transition-all duration-300">
+ <div className=" p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6">
  <h3 className="text-[10px] font-black text-theme-secondary mb-8 uppercase tracking-[0.25em] flex items-center gap-2">
  <Info className="w-4 h-4 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
  Expertise Data
@@ -1326,7 +1326,7 @@ export default function GuideProfilePage() {
  return (
  <>
  {/* Page offset */}
- <div className="pt-14 sm:pt-16 min-h-screen surface-card relative overflow-hidden">
+ <div className="pt-14 sm:pt-16 min-h-screen surface-base relative overflow-hidden">
  <div className="absolute inset-x-0 top-0 h-[600px] bg-theme-grid opacity-[0.03] dark:opacity-[0.02] pointer-events-none" />
  
  <div className="container-safe mx-auto max-w-7xl py-8 sm:py-10 relative z-10">
@@ -1370,91 +1370,86 @@ export default function GuideProfilePage() {
  />
  </div>
 
- {/* Main Content Grid */}
- <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
- {/* Left Column - Main Info */}
- <div className="lg:col-span-2 space-y-10">
- <BioEditor
- bio={profile.bio}
- tagline={profile.tagline}
- isEditing={isEditing}
- onChange={handleProfileChange}
- />
- 
- <LanguagesEditor
- languages={profile.languages}
- isEditing={isEditing}
- onAdd={handleLanguageAdd}
- onRemove={handleLanguageRemove}
- onChange={handleLanguageChange}
- />
+ {/* ── Main 2-column layout: content (2/3) + sidebar (1/3) ── */}
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
 
- <ExpertiseEditor
- expertise={profile.expertise}
- isEditing={isEditing}
- onAdd={handleExpertiseAdd}
- onRemove={handleExpertiseRemove}
- onChange={handleExpertiseChange}
- />
+    {/* Left — main content, stacks naturally */}
+    <div className="lg:col-span-2 space-y-10">
+      <BioEditor
+        bio={profile.bio}
+        tagline={profile.tagline}
+        isEditing={isEditing}
+        onChange={handleProfileChange}
+      />
+      <LanguagesEditor
+        languages={profile.languages}
+        isEditing={isEditing}
+        onAdd={handleLanguageAdd}
+        onRemove={handleLanguageRemove}
+        onChange={handleLanguageChange}
+      />
+      <ExpertiseEditor
+        expertise={profile.expertise}
+        isEditing={isEditing}
+        onAdd={handleExpertiseAdd}
+        onRemove={handleExpertiseRemove}
+        onChange={handleExpertiseChange}
+      />
+      
+      <PortfolioSection
+        portfolio={profile.portfolio}
+        guideId={profile.id}
+        isEditing={isEditing}
+        onAdd={() => setIsPortfolioModalOpen(true)}
+        onRemove={(id) => handlePortfolioToggle(Number(id), true)}
+      />
+    </div>
 
- <PortfolioSection 
- portfolio={profile.portfolio} 
- guideId={profile.id}
- isEditing={isEditing}
- onAdd={() => setIsPortfolioModalOpen(true)}
- onRemove={(id) => handlePortfolioToggle(Number(id), true)}
- />
- </div>
+    {/* Right — sidebar, each card its own height */}
+    <div className="space-y-10">
+      <VerificationSection status={profile.verificationStatus} />
+      <GuideInfoCard
+        profile={profile}
+        totalTours={totalTours}
+        totalTravelers={totalTravelers}
+      />
+      <SocialLinks
+        links={profile.socialLinks}
+        isEditing={isEditing}
+        onChange={handleSocialChange}
+      />
+      <div className="p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6">
+        <h3 className="text-[10px] font-black text-theme-secondary uppercase tracking-[0.25em] flex items-center gap-2">
+          <MapPin className="w-4 h-4 text-orange-500" />
+          Service Location
+        </h3>
+        {isEditing ? (
+          <div className="space-y-3">
+            <input
+              type="text"
+              value={profile.location}
+              onChange={(e) => handleProfileChange('location', e.target.value)}
+              placeholder="City"
+              className="w-full px-3 py-2 surface-section border border-theme rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
+            />
+            <input
+              type="text"
+              value={profile.country}
+              onChange={(e) => handleProfileChange('country', e.target.value)}
+              placeholder="Country"
+              className="w-full px-3 py-2 surface-section border border-theme rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
+            />
+          </div>
+        ) : (
+          <p className="text-sm text-theme-primary">{profile.location}, {profile.country}</p>
+        )}
+      </div>
+    </div>
 
- {/* Right Column - Sidebar Info */}
- <div className="space-y-10">
- <VerificationSection
- status={profile.verificationStatus}
- />
+  </div>
 
- <GuideInfoCard 
- profile={profile} 
- totalTours={totalTours}
- totalTravelers={totalTravelers}
- />
 
- <SocialLinks
- links={profile.socialLinks}
- isEditing={isEditing}
- onChange={handleSocialChange}
- />
 
- {/* Location */}
- <div className=" p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl hover:shadow-primary-light/10 transition-all duration-300">
- <h3 className="text-[10px] font-black text-theme-secondary mb-8 uppercase tracking-[0.25em] flex items-center gap-2">
- <MapPin className="w-4 h-4 text-orange-500" />
- Service Location
- </h3>
- {isEditing ? (
- <div className="space-y-2">
- <input
- type="text"
- value={profile.location}
- onChange={(e) => handleProfileChange('location', e.target.value)}
- placeholder="City"
- className=" w-full px-3 py-2 surface-section border border-theme rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
- />
- <input
- type="text"
- value={profile.country}
- onChange={(e) => handleProfileChange('country', e.target.value)}
- placeholder="Country"
- className=" w-full px-3 py-2 surface-section border border-theme rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
- />
- </div>
- ) : (
- <p className="text-sm text-theme-primary">
- {profile.location}, {profile.country}
- </p>
- )}
- </div>
- </div>
- </div>
  </div>
  </div>
  {/* Hidden file inputs */}

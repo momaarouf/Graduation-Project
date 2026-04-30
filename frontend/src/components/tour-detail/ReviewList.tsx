@@ -256,7 +256,7 @@ export default function ReviewList({
  <div className="flex justify-end">
  <button 
  onClick={() => setShowDebugIds(!showDebugIds)}
- className="text-[10px] uppercase font-bold tracking-widest text-theme-muted hover:text-primary-light dark:text-primary-dark transition-colors flex items-center gap-1.5 px-3 py-1 rounded-lg border border-primary-light/10 dark:border-primary-dark/10"
+ className="text-[10px] uppercase font-bold tracking-widest text-theme-muted hover:text-primary-light dark:text-primary-dark transition-colors flex items-center gap-1.5 px-3 py-1 rounded-lg border border-theme"
  >
  {showDebugIds ? 'Hide Debug Info' : 'Show Debug Info'}
  </button>
@@ -294,11 +294,11 @@ export default function ReviewList({
  </div>
 
  {/* FILTERS & SORT */}
- <div className="flex items-center justify-between py-4 border-y border-primary-light/10 dark:border-primary-dark/10 relative">
+ <div className="flex items-center justify-between py-4 border-y border-theme relative">
  <div className="relative">
  <button 
  onClick={() => setActiveDropdown(activeDropdown === 'filter' ? null : 'filter')}
- className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-primary-light/10 dark:border-primary-dark/10 text-sm font-bold shadow-sm transition-all hover:shadow-md ${filterRating ? 'bg-primary-light/10 text-primary-light border-primary-light/30' : 'surface-card text-theme-muted '}`}
+ className={`flex items-center gap-2 px-4 py-2 rounded-lg border border-theme text-sm font-bold shadow-sm transition-all hover:shadow-md ${filterRating ? 'bg-primary-light/10 text-primary-light border-primary-light/30' : 'surface-card text-theme-muted '}`}
  >
  <Filter className="w-4 h-4" /> 
  {filterRating ? `${filterRating} Stars` : 'Filter reviews'}
@@ -312,7 +312,7 @@ export default function ReviewList({
  initial={{ opacity: 0, y: 10 }} 
  animate={{ opacity: 1, y: 0 }} 
  exit={{ opacity: 0, y: 10 }}
- className="absolute top-full left-0 mt-2 w-48 surface-card border border-primary-light/10 dark:border-primary-dark/10 rounded-xl shadow-xl z-20 overflow-hidden"
+ className="absolute top-full left-0 mt-2 w-48 surface-card border border-theme rounded-xl shadow-xl z-20 overflow-hidden"
  >
  <div className="p-2 space-y-1">
  <button onClick={() => { setFilterRating(null); setActiveDropdown(null); }} className="w-full text-left px-3 py-2 text-sm rounded-xl hover:surface-section dark:hover:surface-card font-medium translate-colors">All Ratings</button>
@@ -329,7 +329,7 @@ export default function ReviewList({
  <div className="relative">
  <button 
  onClick={() => setActiveDropdown(activeDropdown === 'sort' ? null : 'sort')}
- className="flex items-center gap-2 px-4 py-2 rounded-lg border border-primary-light/10 dark:border-primary-dark/10 surface-card text-theme-muted text-sm font-bold shadow-sm transition-all hover:shadow-md"
+ className="flex items-center gap-2 px-4 py-2 rounded-lg border border-theme surface-card text-theme-muted text-sm font-bold shadow-sm transition-all hover:shadow-md"
  >
  {sortBy === 'newest' ? 'Most Relevant' : sortBy === 'highest' ? 'Highest Rating' : 'Lowest Rating'} 
  <ChevronDown className={`w-4 h-4 transition-transform ${activeDropdown === 'sort' ? 'rotate-180' : ''}`} />
@@ -343,7 +343,7 @@ export default function ReviewList({
  initial={{ opacity: 0, y: 10 }} 
  animate={{ opacity: 1, y: 0 }} 
  exit={{ opacity: 0, y: 10 }}
- className="absolute top-full right-0 mt-2 w-48 surface-card border border-primary-light/10 dark:border-primary-dark/10 rounded-xl shadow-xl z-20 overflow-hidden"
+ className="absolute top-full right-0 mt-2 w-48 surface-card border border-theme rounded-xl shadow-xl z-20 overflow-hidden"
  >
  <div className="p-2 space-y-1">
  <button onClick={() => { setSortBy('newest'); setActiveDropdown(null); }} className="w-full text-left px-3 py-2 text-sm rounded-xl hover:surface-section dark:hover:surface-card font-medium translate-colors">Most Relevant</button>
@@ -425,7 +425,7 @@ export default function ReviewList({
  initial={{ opacity: 0, scale: 0.95 }} 
  animate={{ opacity: 1, scale: 1 }} 
  exit={{ opacity: 0, scale: 0.95 }}
- className="absolute top-full right-0 mt-1 w-32 surface-card border border-primary-light/10 dark:border-primary-dark/10 rounded-xl shadow-xl z-20 overflow-hidden"
+ className="absolute top-full right-0 mt-1 w-32 surface-card border border-theme rounded-xl shadow-xl z-20 overflow-hidden"
  >
  <div className="p-1">
  <button 
@@ -457,7 +457,7 @@ export default function ReviewList({
 
  {/* Guide Reply - Bubble Style */}
  {review.guideReply && (
- <div className="ml-10 p-5 surface-section border border-primary-light/10 dark:border-primary-dark/10 rounded-xl rounded-tl-none space-y-2 shadow-sm">
+ <div className="ml-10 p-5 surface-section border border-theme rounded-xl rounded-tl-none space-y-2 shadow-sm">
  <div className="flex items-center gap-2">
  <p className="text-[10px] font-black text-primary-light uppercase tracking-[0.2em]">Guide Response</p>
  <CheckCircle className="w-3" />
@@ -497,7 +497,7 @@ export default function ReviewList({
  ))}
 
  {!isFullPage && totalReviews > reviews.length && (
- <Link href={`/tours/${tourId}/reviews`} className="w-full py-4 block text-center text-sm font-black uppercase tracking-widest text-theme-primary border border-primary-light/10 dark:border-primary-dark/10 rounded-lg hover:surface-section dark:hover:surface-card transition-all shadow-md hover:shadow-lg active:scale-[0.98]">
+ <Link href={`/tours/${tourId}/reviews`} className="w-full py-4 block text-center text-sm font-black uppercase tracking-widest text-theme-primary border border-theme rounded-lg hover:surface-section dark:hover:surface-card transition-all shadow-md hover:shadow-lg active:scale-[0.98]">
  Read all {totalReviews} reviews
  </Link>
  )}
@@ -515,7 +515,7 @@ export default function ReviewList({
  </div>
  <textarea value={replyContent} onChange={(e) => setReplyContent(e.target.value)} placeholder="Write your professional response..." rows={5} className="w-full px-4 py-3 surface-section border-0 focus:ring-2 focus:ring-primary-light dark:ring-primary-dark rounded-xl text-theme-primary placeholder:text-theme-muted outline-none resize-none" />
  <div className="flex gap-4">
- <button onClick={() => setReplyingTo(null)} className="flex-1 py-3 text-sm font-bold text-theme-muted hover:surface-section dark:hover:surface-card rounded-lg transition-all border border-primary-light/10 dark:border-primary-dark/10 ">Cancel</button>
+ <button onClick={() => setReplyingTo(null)} className="flex-1 py-3 text-sm font-bold text-theme-muted hover:surface-section dark:hover:surface-card rounded-lg transition-all border border-theme ">Cancel</button>
  <button onClick={handleReply} disabled={!replyContent.trim() || isSubmittingReply} className="flex-1 py-3 bg-primary-light hover:bg-primary-light-hover disabled:opacity-50 text-white text-sm font-bold rounded-lg transition-all shadow-xl shadow-primary-light/20 flex items-center justify-center gap-2">
  {isSubmittingReply ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Post Reply
  </button>

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
@@ -490,9 +490,9 @@ function CancellationModal({ booking, isOpen, onClose, onConfirm, isLoading = fa
 
  return (
  <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 ">
- <div className="w-full max-w-md surface-card rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 border border-primary-light/10 dark:border-primary-dark/10">
+ <div className="w-full max-w-md surface-card rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 border border-theme">
  {/* Header */}
- <div className="p-6 border-b border-primary-light/10 dark:border-primary-dark/10">
+ <div className="p-6 border-b border-theme">
  <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
  <AlertCircle className="w-5 h-5" />
  <h3 className="text-lg font-bold text-primary-light dark:text-primary-dark">
@@ -521,7 +521,7 @@ function CancellationModal({ booking, isOpen, onClose, onConfirm, isLoading = fa
  {refundPercent}%
  </span>
  </div>
- <div className="flex justify-between text-sm pt-2 border-t border-primary-light/10 dark:border-primary-dark/10">
+ <div className="flex justify-between text-sm pt-2 border-t border-theme">
  <span className="font-medium text-theme-primary">Estimated refund</span>
  <span className="text-lg font-bold text-success-green dark:text-emerald-400">
  {booking.currency} {refundAmount.toFixed(2)}
@@ -538,11 +538,11 @@ function CancellationModal({ booking, isOpen, onClose, onConfirm, isLoading = fa
  </div>
 
  {/* Footer */}
- <div className="p-6 surface-section flex gap-3 border-t border-primary-light/10 dark:border-primary-dark/10">
+ <div className="p-6 surface-section flex gap-3 border-t border-theme">
  <button
  onClick={onClose}
  disabled={isLoading}
- className="flex-1 px-4 py-2 surface-card border border-primary-light/10 dark:border-primary-dark/10 text-theme-secondary font-medium rounded-lg hover:surface-section dark:hover:surface-card transition-colors disabled:opacity-50"
+ className="flex-1 px-4 py-2 surface-card border border-theme text-theme-secondary font-medium rounded-lg hover:surface-section dark:hover:surface-card transition-colors disabled:opacity-50"
  >
  Go Back
  </button>

@@ -78,8 +78,8 @@ export default function TourGuide({ guide, tourId, tourTitle }: any) {
  const profileUrl = `/guides/${guide.id}`
 
  return (
- <section className="pt-10 border-t border-primary-light/10 dark:border-primary-dark/10">
- <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6 surface-section p-6 rounded-xl border border-primary-light/10 dark:border-primary-dark/10 shadow-sm">
+ <section className="pt-10 border-t border-theme">
+ <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6 surface-section p-6 rounded-xl border border-theme shadow-sm">
  {/* Avatar & Basic Info */}
  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
  <Link href={profileUrl} className="relative group shrink-0">
@@ -129,7 +129,7 @@ export default function TourGuide({ guide, tourId, tourTitle }: any) {
  <Globe className="w-3.5 h-3.5 text-theme-muted" />
  <div className="flex gap-1.5">
  {stats.languages.slice(0, 3).map((lang: any, i: number) => (
- <span key={i} className="text-[10px] uppercase font-bold tracking-widest text-theme-muted surface-section border border-primary-light/10 dark:border-primary-dark/10 px-3 py-1 rounded-lg shadow-sm">
+ <span key={i} className="text-[10px] uppercase font-bold tracking-widest text-theme-muted surface-section border border-theme px-3 py-1 rounded-lg shadow-sm">
  {typeof lang === 'string' ? lang : lang.language}
  </span>
  ))}
@@ -147,7 +147,7 @@ export default function TourGuide({ guide, tourId, tourTitle }: any) {
  <button 
  onClick={handleMessageClick}
  disabled={isSending}
- className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-2.5 surface-card border border-primary-light/10 dark:border-primary-dark/10 rounded-lg text-sm font-bold text-theme-primary hover:surface-section dark:hover:surface-card transition-all shadow-md disabled:opacity-50"
+ className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-6 py-2.5 surface-card border border-theme rounded-lg text-sm font-bold text-theme-primary hover:surface-section dark:hover:surface-card transition-all shadow-md disabled:opacity-50"
  >
  {isSending ? (
  <Loader2 className="w-4 h-4 text-primary-light animate-spin" />

@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // GUIDE SETTINGS - GENERAL SETTINGS PAGE
 // ============================================================================
 // LOCATION: /frontend/src/app/dashboard/guide/settings/page.tsx
@@ -239,13 +239,13 @@ export default function GuideSettingsPage() {
  </div>
 
  {/* Main Card */}
- <div className="surface-card border border-theme rounded-xl shadow-sm overflow-hidden">
+ <div className="surface-card border border-theme rounded-xl shadow-xl overflow-hidden transition-all duration-500">
  
  {/* Tabs */}
  <div className="flex border-b border-theme">
  <button
  onClick={() => setActiveTab('account')}
- className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+ className={`flex-1 px-4 py-3 text-sm font-black uppercase tracking-widest transition-colors ${
  activeTab === 'account'
  ? 'text-primary-light dark:text-primary-dark dark:text-primary-dark border-b-2 border-primary-light dark:border-primary-dark'
  : 'text-theme-muted hover:text-theme-secondary dark:hover:text-gray-300'
@@ -255,7 +255,7 @@ export default function GuideSettingsPage() {
  </button>
  <button
  onClick={() => setActiveTab('notifications')}
- className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+ className={`flex-1 px-4 py-3 text-sm font-black uppercase tracking-widest transition-colors ${
  activeTab === 'notifications'
  ? 'text-primary-light dark:text-primary-dark dark:text-primary-dark border-b-2 border-primary-light dark:border-primary-dark'
  : 'text-theme-muted hover:text-theme-secondary dark:hover:text-gray-300'
@@ -265,7 +265,7 @@ export default function GuideSettingsPage() {
  </button>
  <button
  onClick={() => setActiveTab('security')}
- className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+ className={`flex-1 px-4 py-3 text-sm font-black uppercase tracking-widest transition-colors ${
  activeTab === 'security'
  ? 'text-primary-light dark:text-primary-dark dark:text-primary-dark border-b-2 border-primary-light dark:border-primary-dark'
  : 'text-theme-muted hover:text-theme-secondary dark:hover:text-gray-300'
@@ -285,9 +285,10 @@ export default function GuideSettingsPage() {
  <div className="space-y-6">
  {/* Password Change - same as traveler */}
  <div>
- <h2 className="text-lg font-semibold text-theme-primary mb-4">
- Change Password
- </h2>
+  <h2 className="text-[10px] font-black text-theme-secondary uppercase tracking-[0.25em] mb-6 flex items-center gap-2">
+  <Lock className="w-4 h-4 text-orange-500" />
+  Security Credentials
+  </h2>
  
  <div className="space-y-4">
  <div>
@@ -300,7 +301,7 @@ export default function GuideSettingsPage() {
  type={showCurrentPassword ? 'text' : 'password'}
  value={currentPassword}
  onChange={(e) => setCurrentPassword(e.target.value)}
- className="w-full pl-9 pr-10 py-2 surface-section border border-theme-strong rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
+ className="w-full pl-9 pr-10 py-2 surface-section border border-theme rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
  />
  <button
  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
@@ -312,7 +313,7 @@ export default function GuideSettingsPage() {
  <button
  onClick={handleForgotPassword}
  disabled={isSaving}
- className="mt-1 text-xs text-primary-light dark:text-primary-dark hover:text-blue-700 dark:text-primary-dark dark:hover:text-blue-300 font-medium transition-colors"
+ className="mt-1 text-xs text-primary-light dark:text-primary-dark hover:opacity-80 font-medium transition-colors"
  >
  Forgot Password?
  </button>
@@ -328,7 +329,7 @@ export default function GuideSettingsPage() {
  type={showNewPassword ? 'text' : 'password'}
  value={newPassword}
  onChange={(e) => setNewPassword(e.target.value)}
- className="w-full pl-9 pr-10 py-2 surface-section border border-theme-strong rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
+ className="w-full pl-9 pr-10 py-2 surface-section border border-theme rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
  />
  <button
  onClick={() => setShowNewPassword(!showNewPassword)}
@@ -347,9 +348,9 @@ export default function GuideSettingsPage() {
  style={{ width: `${passwordStrength.score}%` }}
  />
  </div>
- <span className="text-xs font-medium text-theme-secondary ">
- {passwordStrength.label}
- </span>
+  <span className="text-[10px] font-black uppercase tracking-widest text-theme-secondary">
+  {passwordStrength.label}
+  </span>
  </div>
  </div>
  )}
@@ -365,7 +366,7 @@ export default function GuideSettingsPage() {
  type={showConfirmPassword ? 'text' : 'password'}
  value={confirmPassword}
  onChange={(e) => setConfirmPassword(e.target.value)}
- className="w-full pl-9 pr-10 py-2 surface-section border border-theme-strong rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
+ className="w-full pl-9 pr-10 py-2 surface-section border border-theme rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
  />
  <button
  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -402,10 +403,11 @@ export default function GuideSettingsPage() {
  </div>
 
  {/* Language & Timezone */}
- <div className="pt-4 border-t border-theme">
- <h2 className="text-lg font-semibold text-theme-primary mb-4">
- Preferences
- </h2>
+  <div className="pt-8 border-t border-theme">
+  <h2 className="text-[10px] font-black text-theme-secondary uppercase tracking-[0.25em] mb-6 flex items-center gap-2">
+  <Globe className="w-4 h-4 text-orange-500" />
+  Regional Preferences
+  </h2>
  
  <div className="space-y-4">
  <div>
@@ -414,20 +416,20 @@ export default function GuideSettingsPage() {
  Language
  </label>
  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
- {LANGUAGES.map((lang) => (
- <button
- key={lang.code}
- onClick={() => setLanguage(lang.code)}
- className={`p-3 rounded-lg border text-center transition-all ${
- language === lang.code
- ? 'bg-primary-light text-white border-primary-light dark:border-primary-dark'
- : 'surface-section text-theme-secondary border-theme hover:border-primary-light dark:border-primary-dark'
- }`}
- >
- <span className="text-xl mb-1 block">{lang.flag}</span>
- <span className="text-sm">{lang.name}</span>
- </button>
- ))}
+  {LANGUAGES.map((lang) => (
+  <button
+  key={lang.code}
+  onClick={() => setLanguage(lang.code)}
+  className={`p-4 rounded-xl border text-center transition-all duration-300 ${
+  language === lang.code
+  ? 'bg-primary-light text-white border-primary-light shadow-lg shadow-primary-light/20 scale-[1.02]'
+  : 'surface-section text-theme-secondary border-theme hover:border-primary-light'
+  }`}
+  >
+  <span className="text-2xl mb-2 block">{lang.flag}</span>
+  <span className="text-[10px] font-black uppercase tracking-widest">{lang.name}</span>
+  </button>
+  ))}
  </div>
  </div>
 
@@ -439,7 +441,7 @@ export default function GuideSettingsPage() {
  <select
  value={timezone}
  onChange={(e) => setTimezone(e.target.value)}
- className="w-full px-3 py-2 surface-section border border-theme-strong rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
+ className="w-full px-3 py-2 surface-section border border-theme rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
  >
  {TIMEZONES.map((tz) => (
  <option key={tz.value} value={tz.value}>
@@ -470,24 +472,24 @@ export default function GuideSettingsPage() {
  ======================================== */}
  {activeTab === 'notifications' && (
  <div className="space-y-6">
- <div>
- <h2 className="text-lg font-semibold text-theme-primary mb-4 flex items-center gap-2">
- <Bell className="w-5 h-5" />
- Notification Settings
- </h2>
+  <div>
+  <h2 className="text-[10px] font-black text-theme-secondary uppercase tracking-[0.25em] mb-6 flex items-center gap-2">
+  <Bell className="w-4 h-4 text-orange-500" />
+  Notification Ecosystem
+  </h2>
 
  <div className="space-y-4">
  {/* Email Notifications */}
- <div className="flex items-center justify-between p-4 surface-section rounded-lg">
- <div className="flex items-center gap-3">
- <div className="p-2 bg-primary-light/20 dark:bg-primary-dark/20 text-primary-light dark:text-primary-dark dark:text-primary-dark rounded-lg">
- <Mail className="w-5 h-5" />
- </div>
- <div>
- <p className="font-medium text-theme-primary">Email Notifications</p>
- <p className="text-sm text-theme-muted ">Receive booking updates and messages via email</p>
- </div>
- </div>
+  <div className="flex items-center justify-between p-5 surface-section border border-theme rounded-2xl shadow-sm">
+  <div className="flex items-center gap-4">
+  <div className="w-12 h-12 flex items-center justify-center bg-primary-light/10 text-primary-light rounded-xl">
+  <Mail className="w-6 h-6" />
+  </div>
+  <div>
+  <p className="text-sm font-bold text-theme-primary">Email Notifications</p>
+  <p className="text-xs text-theme-muted ">Booking updates and private messages</p>
+  </div>
+  </div>
  <button
  onClick={() => setEmailNotifications(!emailNotifications)}
  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
@@ -501,16 +503,16 @@ export default function GuideSettingsPage() {
  </div>
 
  {/* Push Notifications */}
- <div className="flex items-center justify-between p-4 surface-section rounded-lg">
- <div className="flex items-center gap-3">
- <div className="p-2 bg-primary-light/20 dark:bg-primary-dark/20 text-primary-light dark:text-primary-dark dark:text-primary-dark rounded-lg">
- <Smartphone className="w-5 h-5" />
- </div>
- <div>
- <p className="font-medium text-theme-primary">Push Notifications</p>
- <p className="text-sm text-theme-muted ">Receive instant alerts on your device</p>
- </div>
- </div>
+  <div className="flex items-center justify-between p-5 surface-section border border-theme rounded-2xl shadow-sm">
+  <div className="flex items-center gap-4">
+  <div className="w-12 h-12 flex items-center justify-center bg-primary-light/10 text-primary-light rounded-xl">
+  <Smartphone className="w-6 h-6" />
+  </div>
+  <div>
+  <p className="text-sm font-bold text-theme-primary">Push Notifications</p>
+  <p className="text-xs text-theme-muted ">Instant alerts on your mobile devices</p>
+  </div>
+  </div>
  <button
  onClick={() => setPushNotifications(!pushNotifications)}
  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
@@ -546,16 +548,18 @@ export default function GuideSettingsPage() {
  {activeTab === 'security' && (
  <div className="space-y-6">
  {/* Two Factor Auth */}
- <div className="p-4 bg-primary-light/10 rounded-lg">
- <div className="flex items-start gap-3">
- <Shield className="w-5 h-5 text-primary-light dark:text-primary-dark dark:text-primary-dark mt-0.5" />
- <div>
- <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
- Two-Factor Authentication
- </h3>
- <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
- Add an extra layer of security to your account
- </p>
+  <div className="p-8 bg-primary-light/5 border border-primary-light/20 rounded-2xl">
+  <div className="flex items-start gap-4">
+  <div className="w-12 h-12 flex items-center justify-center bg-primary-light text-white rounded-xl shadow-lg shadow-primary-light/20">
+  <Shield className="w-6 h-6" />
+  </div>
+  <div>
+  <h3 className="text-sm font-bold text-theme-primary mb-1">
+  Two-Factor Authentication
+  </h3>
+  <p className="text-xs text-theme-secondary mb-4 leading-relaxed">
+  Add an extra layer of defense to your guide account. Requires a code from your mobile device to sign in.
+  </p>
  <button className="px-3 py-1.5 bg-primary-light hover:bg-primary-light-hover text-white text-sm rounded-lg transition-colors">
  Enable 2FA
  </button>
@@ -564,14 +568,14 @@ export default function GuideSettingsPage() {
  </div>
 
  {/* Delete Account - Danger Zone */}
- <div className="p-4 bg-danger-red/10 dark:bg-red-950/30 border border-danger-red dark:border-danger-red rounded-lg">
- <h3 className="font-semibold text-red-800 dark:text-red-300 mb-2 flex items-center gap-2">
- <Trash2 className="w-4 h-4" />
- Delete Account
- </h3>
- <p className="text-sm text-red-700 dark:text-red-400 mb-4">
- Once you delete your account, all your tours and earnings history will be permanently removed.
- </p>
+  <div className="p-8 bg-red-500/5 border border-red-500/20 rounded-2xl">
+  <h3 className="text-[10px] font-black text-red-600 uppercase tracking-[0.25em] mb-4 flex items-center gap-2">
+  <Trash2 className="w-4 h-4" />
+  Danger Zone
+  </h3>
+  <p className="text-xs text-theme-secondary mb-6 leading-relaxed">
+  Once you delete your account, all your tours, bookings, and earnings history will be permanently wiped. This action is irreversible.
+  </p>
 
  {!showDeleteConfirm ? (
  <button
