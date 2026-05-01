@@ -32,7 +32,9 @@ import {
  Calendar as CalendarIcon,
  QrCode,
  ChevronRight,
- Loader2
+ Loader2,
+ ChevronLeft,
+ CreditCard,
 } from 'lucide-react'
 import PageLayout from '@/src/components/layout/PageLayout'
 
@@ -70,7 +72,6 @@ export default function BookingConfirmationPage() {
  // Payment Methods State
  const [savedMethods, setSavedMethods] = useState<TravelerPaymentMethod[]>([])
  const [selectedMethodId, setSelectedMethodId] = useState<number | null>(null)
- const [showSavedCards, setShowSavedCards] = useState(false)
  const [isAddingNewCard, setIsAddingNewCard] = useState(false)
  const [isRefreshing, setIsRefreshing] = useState(false)
 
@@ -101,7 +102,6 @@ export default function BookingConfirmationPage() {
  const def = methods.find(m => m.isDefault) || methods[0]
  setSelectedMethodId(def.id)
  }
- setShowSavedCards(false)
  setIsAddingNewCard(false)
  } else {
  setIsAddingNewCard(true)
@@ -178,11 +178,6 @@ export default function BookingConfirmationPage() {
 
  const handlePayWithSavedCard = async () => {
  if (!booking || !selectedMethodId) return
- const method = savedMethods.find(m => m.id === selectedMethodId)
- if (!method) return
-
- if (!confirm(`Confirm payment of ${booking.currency} ${booking.finalPrice.toFixed(2)} using ${method.brand} •••• ${method.last4}?`)) return
-
  setIsPaying(true)
  try {
  await payWithSavedCard(booking.id, selectedMethodId)
@@ -432,197 +427,69 @@ Thank you for choosing TravelMarket!
  )}
  </div>
  </div>
- <div className="text-right">
- <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest">Amount Due</p>
- <p className="text-xl font-black text-indigo-600 dark:text-indigo-400">{booking.currency} {booking.finalPrice.toFixed(2)}</p>
- </div>
  </div>
 
- <div className="space-y-4">
+ {/* 2-State Payment UI */}
+ <div className="space-y-3 mt-4">
  {isAddingNewCard ? (
- /* Case 1: Add New Card UI */
- <div className="space-y-4 p-5 surface-section rounded-2xl border border-theme">
+ <div className="space-y-3 p-4 surface-section border border-theme rounded-xl">
  {savedMethods.length > 0 && (
- <button 
- onClick={() => setIsAddingNewCard(false)}
- className="flex items-center gap-1 text-[10px] font-black text-primary-light dark:text-primary-dark uppercase mb-2 hover:translate-x-1 transition-transform"
- >
- <CheckCircle className="w-3 h-3 rotate-180" /> Back to Saved
+ <button onClick={() => setIsAddingNewCard(false)} className="flex items-center gap-1 text-xs text-primary-light dark:text-primary-dark hover:underline">
+ <ChevronLeft className="w-3 h-3" /> Back to saved card
  </button>
  )}
- <h4 className="text-xs font-black text-theme-primary uppercase tracking-tight mb-2">New Payment Method</h4>
- <div className="space-y-3">
- <input
- type="text"
- value={newCardName}
- onChange={(e) => setNewCardName(e.target.value)}
- placeholder="CARDHOLDER NAME"
- className="w-full px-4 py-3 surface-card border border-theme rounded-xl text-xs font-bold uppercase outline-none focus:border-blue-600 transition-all shadow-sm"
- />
- <input
- type="text"
- value={newCardNumber}
- onChange={(e) => {
- const val = e.target.value.replace(/\D/g, '').replace(/(\d{4})(?=\d)/g, '$1 ').trim().slice(0, 19)
- setNewCardNumber(val)
- }}
- placeholder="0000 0000 0000 0000"
- className="w-full px-4 py-3 surface-card border border-theme rounded-xl text-xs font-bold outline-none focus:border-blue-600 transition-all shadow-sm"
- />
+ <h4 className="text-sm font-semibold text-theme-primary">New Payment Method</h4>
+ <div className="space-y-2">
+ <input type="text" value={newCardName} onChange={(e) => setNewCardName(e.target.value)} placeholder="Cardholder name" className="w-full px-3 py-2.5 surface-card border border-theme rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-light/30 transition-all" />
+ <input type="text" value={newCardNumber} onChange={(e) => { const val = e.target.value.replace(/\D/g, '').replace(/(\d{4})(?=\d)/g, '$1 ').trim().slice(0, 19); setNewCardNumber(val) }} placeholder="0000 0000 0000 0000" className="w-full px-3 py-2.5 surface-card border border-theme rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-light/30 transition-all" />
  <div className="grid grid-cols-3 gap-2">
- <select value={newCardExM} onChange={(e) => setNewCardExM(e.target.value)} className="px-2 py-3 surface-card border border-theme rounded-xl text-xs font-bold outline-none appearance-none cursor-pointer text-center">
+ <select value={newCardExM} onChange={(e) => setNewCardExM(e.target.value)} className="px-2 py-2.5 surface-card border border-theme rounded-lg text-sm outline-none appearance-none cursor-pointer text-center">
  {Array.from({length: 12}, (_, i) => String(i+1).padStart(2, '0')).map(m => (<option key={m} value={m}>{m}</option>))}
  </select>
- <select value={newCardExY} onChange={(e) => setNewCardExY(e.target.value)} className="px-2 py-3 surface-card border border-theme rounded-xl text-xs font-bold outline-none appearance-none cursor-pointer text-center">
+ <select value={newCardExY} onChange={(e) => setNewCardExY(e.target.value)} className="px-2 py-2.5 surface-card border border-theme rounded-lg text-sm outline-none appearance-none cursor-pointer text-center">
  {Array.from({length: 10}, (_, i) => (new Date().getFullYear() + i).toString()).map(y => (<option key={y} value={y}>{y}</option>))}
  </select>
- <input
- type="password"
- value={newCardCvv}
- onChange={(e) => setNewCardCvv(e.target.value.replace(/\D/g, '').slice(0, 3))}
- placeholder="CVV"
- className="px-2 py-3 surface-card border border-theme rounded-xl text-xs font-bold outline-none text-center"
- />
+ <input type="password" value={newCardCvv} onChange={(e) => setNewCardCvv(e.target.value.replace(/\D/g, '').slice(0, 3))} placeholder="CVV" className="px-2 py-2.5 surface-card border border-theme rounded-lg text-sm outline-none text-center" />
  </div>
- 
- <label className="flex items-center gap-2 cursor-pointer group px-1">
- <div 
- onClick={() => setSaveForFuture(!saveForFuture)}
- className={`w-4 h-4 rounded border transition-all flex items-center justify-center ${saveForFuture ? 'bg-primary-light border-blue-600 shadow-sm shadow-blue-600/20' : 'border-theme-strong'}`}
- >
- {saveForFuture && <CheckCircle className="w-3 h-3 text-white" />}
- </div>
- <span className="text-[10px] font-black text-theme-muted uppercase tracking-widest group-hover:text-theme-primary dark:group-hover:text-gray-300 transition-colors">Save for future use</span>
+ <label className="flex items-center gap-2 cursor-pointer">
+ <input type="checkbox" checked={saveForFuture} onChange={(e) => setSaveForFuture(e.target.checked)} className="w-4 h-4 rounded border-theme text-primary-light" />
+ <span className="text-xs text-theme-muted">Save for future use</span>
  </label>
  </div>
-
- <button
- onClick={handlePayWithNewCard}
- disabled={isPaying}
- className="w-full py-4 surface-base text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 shadow-xl shadow-black/10 dark:shadow-white/10"
- >
- {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm & Pay'}
+ <button onClick={handlePayWithNewCard} disabled={isPaying} className="w-full py-3 bg-primary-light hover:bg-primary-light-hover text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+ {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : `Pay Now — ${booking.currency} ${booking.finalPrice.toFixed(2)}`}
  </button>
+ <button onClick={handlePayNow} disabled={isPaying} className="w-full py-2 text-xs text-theme-muted hover:text-theme-secondary transition-colors">Use Stripe Checkout instead</button>
  </div>
- ) : showSavedCards ? (
- /* Case 2: Saved Card Selection UI */
- <div className="space-y-4">
- <button 
- onClick={() => setShowSavedCards(false)}
- className="flex items-center gap-1 text-[10px] font-black text-primary-light dark:text-primary-dark uppercase mb-2 hover:translate-x-1 transition-transform"
- >
- <CheckCircle className="w-3 h-3 rotate-180" /> Back
- </button>
- <div className="space-y-2">
- {savedMethods.map((m) => (
- <button
- key={m.id}
- onClick={() => setSelectedMethodId(m.id)}
- className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${
- selectedMethodId === m.id 
- ? 'border-blue-600 bg-primary-light/10 dark:bg-primary-dark/14' 
- : 'border-theme hover:border-blue-100 hover:scale-[1.01]'
- }`}
- >
+ ) : (
+ <div className="space-y-3">
+ {selectedMethodId && (
+ <div className="flex items-center justify-between p-3 surface-section border border-theme rounded-lg">
  <div className="flex items-center gap-3">
- <Users className={`w-5 h-5 ${selectedMethodId === m.id ? 'text-primary-light dark:text-primary-dark' : 'text-theme-muted'}`} />
- <div className="text-left leading-tight">
- <p className={`text-[11px] font-black uppercase tracking-tight ${selectedMethodId === m.id ? 'text-blue-900 dark:text-blue-100' : 'text-theme-secondary'}`}>
- {m.brand} •••• {m.last4}
- </p>
- <p className="text-[9px] text-theme-muted font-bold uppercase">{m.cardholderName || 'Cardholder'}</p>
+ <CreditCard className="w-4 h-4 text-primary-light dark:text-primary-dark" />
+ <div>
+ <p className="text-sm font-semibold text-theme-primary">{savedMethods.find(m => m.id === selectedMethodId)?.brand} ···· {savedMethods.find(m => m.id === selectedMethodId)?.last4}</p>
+ <p className="text-xs text-theme-muted">{savedMethods.find(m => m.id === selectedMethodId)?.cardholderName}</p>
  </div>
  </div>
- {selectedMethodId === m.id && <CheckCircle className="w-4 h-4 text-primary-light dark:text-primary-dark" />}
+ <button onClick={() => fetchPaymentMethods()} disabled={isRefreshing} className="text-theme-muted hover:text-primary-light dark:hover:text-primary-dark transition-colors">
+ <Clock className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+ </button>
+ </div>
+ )}
+ {savedMethods.length > 1 && (
+ <div className="space-y-1">
+ {savedMethods.filter(m => m.id !== selectedMethodId).map(m => (
+ <button key={m.id} onClick={() => setSelectedMethodId(m.id)} className="w-full flex items-center gap-2 px-3 py-2 text-xs text-theme-muted hover:text-theme-primary hover:surface-section rounded-lg transition-colors">
+ <CreditCard className="w-3.5 h-3.5" />{m.brand} ···· {m.last4}
  </button>
  ))}
  </div>
- 
- <button 
- onClick={() => setIsAddingNewCard(true)}
- className="w-full text-center text-[10px] font-black text-theme-muted hover:text-primary-light dark:text-primary-dark uppercase tracking-widest transition-colors py-2"
- >
- + Use a different card
- </button>
-
- <button
- onClick={handlePayWithSavedCard}
- disabled={isPaying || !selectedMethodId}
- className="w-full py-4 bg-primary-light text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-blue-600/20 disabled:opacity-50"
- >
- {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm & Pay Now'}
- </button>
- </div>
- ) : (
- /* Case 3: Simplified One-Click Focus UI */
- <div className="space-y-4">
- {selectedMethodId && (
- <div className="p-5 bg-gradient-to-br from-indigo-50 to-blue-50/50 dark:from-indigo-950/20 dark:to-blue-900/10 rounded-[2rem] border border-indigo-200/50 dark:border-indigo-800/30">
- <div className="flex items-center justify-between mb-4">
- <div className="flex items-center gap-2">
- <label className="text-[10px] font-black text-indigo-600/60 uppercase tracking-widest">Paying With</label>
- <button 
- onClick={() => fetchPaymentMethods()}
- disabled={isRefreshing}
- className={`p-1 hover:surface-card rounded-full transition-all ${isRefreshing ? 'animate-spin text-indigo-600' : 'text-indigo-400'}`}
- >
- <Clock className="w-2.5 h-2.5" />
- </button>
- </div>
- {savedMethods.length > 1 && (
- <button 
- onClick={() => setShowSavedCards(true)}
- className="text-[10px] font-black text-indigo-600 hover:text-indigo-700 uppercase tracking-widest underline decoration-2 underline-offset-2 transition-all"
- >
- Change
- </button>
  )}
- </div>
- <div className="flex items-center gap-4">
- <div className="w-12 h-12 surface-card rounded-2xl flex items-center justify-center shadow-sm">
- <Users className="w-6 h-6 text-indigo-600" />
- </div>
- <div className="min-w-0">
- <h4 className="text-sm font-black text-theme-primary uppercase tracking-tight">
- {savedMethods.find(m => m.id === selectedMethodId)?.brand} •••• {savedMethods.find(m => m.id === selectedMethodId)?.last4}
- </h4>
- <p className="text-[10px] text-theme-muted font-bold uppercase truncate">{savedMethods.find(m => m.id === selectedMethodId)?.cardholderName}</p>
- </div>
- </div>
- </div>
- )}
-
- <button
- onClick={handlePayWithSavedCard}
- disabled={isPaying || !selectedMethodId}
- className="w-full py-5 bg-indigo-600 text-white rounded-[2rem] text-sm font-black uppercase tracking-widest hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-indigo-600/30 disabled:opacity-50 relative overflow-hidden group"
- >
- <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
- {isPaying ? (
- <div className="flex items-center justify-center gap-3">
- <Loader2 className="w-5 h-5 animate-spin" />
- <span>Processing...</span>
- </div>
- ) : (
- <span>Confirm & Pay Now</span>
- )}
+ <button onClick={handlePayWithSavedCard} disabled={isPaying || !selectedMethodId} className="w-full py-3 bg-primary-light hover:bg-primary-light-hover text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+ {isPaying ? <><Loader2 className="w-4 h-4 animate-spin" /><span>Processing...</span></> : <span>Pay Now — {booking.currency} {booking.finalPrice.toFixed(2)}</span>}
  </button>
- 
- <p className="text-center text-[9px] font-black text-theme-muted uppercase tracking-widest mt-2 px-4 opacity-70">
- Secure 256-bit SSL encrypted checkout
- </p>
- </div>
- )}
-
- {(isAddingNewCard || showSavedCards) && (
- <div className="pt-2">
- <button
- onClick={handlePayNow}
- disabled={isPaying}
- className="w-full py-3 surface-section text-theme-muted text-[10px] font-black uppercase tracking-widest rounded-xl hover:surface-section transition-all border border-theme active:scale-95"
- >
- Use External Stripe Checkout
- </button>
+ <button onClick={() => setIsAddingNewCard(true)} className="w-full text-center text-xs text-theme-muted hover:text-theme-secondary transition-colors py-1">Pay with a different card</button>
  </div>
  )}
  </div>
@@ -839,13 +706,14 @@ Thank you for choosing TravelMarket!
  sessionId={mockSessionId}
  amount={booking.finalPrice}
  currency={booking.currency}
+ isOpen={true}
  onSuccess={async () => {
  // Refresh booking data on success
  const res = await getTravelerBooking(Number(bookingId))
  setBooking(res)
  setShowMockDialog(false)
  }}
- onCancel={() => setShowMockDialog(false)}
+ onClose={() => setShowMockDialog(false)}
  />
  </div>
  )}

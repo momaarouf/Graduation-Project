@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -70,7 +70,7 @@ const TIER_CONFIG: Record<LoyaltyTierType, {
 
 function GlassCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
  return (
- <div className={`surface-card  border border-theme rounded-3xl shadow-xl shadow-primary-light/5 ${className}`}>
+ <div className={`surface-card border border-theme rounded-xl ${className}`}>
  {children}
  </div>
  )
@@ -82,27 +82,20 @@ function StatCard({ icon: Icon, label, value, color }: {
  value: string | number
  color: 'blue' | 'amber' | 'emerald' | 'purple'
 }) {
- const colors: Record<string, string> = {
- blue: 'bg-primary-light dark:bg-primary-dark',
- amber: 'bg-accent-light dark:bg-accent-dark',
- emerald: 'bg-success-green',
- purple: 'bg-primary-light',
+ const iconColors: Record<string, string> = {
+ blue: 'bg-primary-light/10 text-primary-light dark:text-primary-dark',
+ amber: 'bg-accent-light/10 text-accent-light dark:text-accent-dark',
+ emerald: 'bg-success-green/10 text-success-green',
+ purple: 'bg-primary-light/10 text-primary-light dark:text-primary-dark',
  }
  return (
- <motion.div whileHover={{ y: -5 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }}>
- <GlassCard className="p-6 h-full flex flex-col justify-between overflow-hidden group">
- <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${colors[color]} opacity-5 blur-2xl group-hover:opacity-10 transition-opacity`} />
- <div className="flex items-center justify-between mb-4 relative z-10">
- <div className={`p-3 rounded-2xl bg-gradient-to-br ${colors[color]} text-white shadow-lg`}>
+ <GlassCard className="p-6">
+ <div className={`p-2.5 rounded-lg ${iconColors[color]} w-fit mb-4`}>
  <Icon className="w-5 h-5" />
  </div>
- </div>
- <div className="relative z-10">
- <div className="text-3xl font-black text-theme-primary tracking-tight mb-1">{value}</div>
- <div className="text-sm font-semibold text-theme-muted uppercase tracking-wider">{label}</div>
- </div>
+ <div className="text-3xl font-bold text-theme-primary mb-1">{value}</div>
+ <div className="text-xs text-theme-muted">{label}</div>
  </GlassCard>
- </motion.div>
  )
 }
 
@@ -112,22 +105,20 @@ function LoyaltyStatCard({ loyalty }: { loyalty: LoyaltyStatusResponse | null })
  const cfg = TIER_CONFIG[tier]
 
  return (
- <motion.div whileHover={{ y: -5 }} transition={{ type: 'spring', stiffness: 400, damping: 10 }} className="relative">
- <GlassCard className={`p-6 h-full flex flex-col justify-between overflow-hidden group ring-2 ${cfg.ring}`}>
- <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${cfg.gradient} opacity-10 blur-2xl group-hover:opacity-20 transition-opacity`} />
- <div className="flex items-center justify-between mb-4 relative z-10">
- <div className={`p-3 rounded-2xl bg-gradient-to-br ${cfg.gradient} text-white shadow-lg`}>
+ <GlassCard className={`p-6 border-l-4 ${cfg.ring.replace('ring-', 'border-l-').replace('/50', '')}`}>
+ <div className="flex items-center justify-between mb-4">
+ <div className={`p-2.5 rounded-lg ${cfg.badge} w-fit`}>
  <Trophy className="w-5 h-5" />
  </div>
- <span className={`text-xs font-black uppercase tracking-widest px-2 py-1 rounded-full ${cfg.badge}`}>
+ <span className={`text-xs font-medium px-2 py-1 rounded-full ${cfg.badge}`}>
  {cfg.icon} {cfg.label}
  </span>
  </div>
- <div className="relative z-10">
- <div className={`text-3xl font-black tracking-tight mb-1 ${cfg.text}`}>
+ <div>
+ <div className={`text-3xl font-bold mb-1 ${cfg.text}`}>
  {loyalty ? `${loyalty.discountPct}% off` : '—'}
  </div>
- <div className="text-sm font-semibold text-theme-muted uppercase tracking-wider">
+ <div className="text-xs text-theme-muted">
  Loyalty Tier
  </div>
  {loyalty && loyalty.tripsToNextTier > 0 && (
@@ -140,7 +131,6 @@ function LoyaltyStatCard({ loyalty }: { loyalty: LoyaltyStatusResponse | null })
  )}
  </div>
  </GlassCard>
- </motion.div>
  )
 }
 
@@ -172,11 +162,11 @@ function LoyaltyProgressCard({ loyalty }: { loyalty: LoyaltyStatusResponse | nul
  return (
  <GlassCard className="p-6">
  <div className="flex items-center gap-3 mb-5">
- <div className={`p-2 rounded-xl bg-gradient-to-br ${cfg.gradient} text-white shadow-md`}>
+ <div className={`p-2 rounded-lg ${cfg.badge} w-fit`}>
  <Star className="w-4 h-4" />
  </div>
  <div>
- <h3 className="font-black text-theme-primary text-sm">Loyalty Status</h3>
+ <h3 className="font-semibold text-theme-primary text-sm">Loyalty Status</h3>
  <p className="text-xs text-theme-muted">{cfg.icon} {cfg.label} Member</p>
  </div>
  </div>
@@ -208,21 +198,21 @@ function LoyaltyProgressCard({ loyalty }: { loyalty: LoyaltyStatusResponse | nul
  )}
 
  {loyalty.tripsToNextTier === 0 && (
- <div className="text-center p-3 rounded-2xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200/50 dark:border-yellow-800/30 mb-4">
- <p className="text-yellow-600 dark:text-yellow-400 font-bold text-sm">✨ Max Tier Achieved!</p>
+ <div className="text-center p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200/50 dark:border-yellow-800/30 mb-4">
+ <p className="text-yellow-600 dark:text-yellow-400 font-semibold text-sm">✨ Max Tier Achieved!</p>
  <p className="text-xs text-yellow-500 mt-1">You earn {loyalty.discountPct}% off every booking.</p>
  </div>
  )}
 
  {/* Stats row */}
  <div className="grid grid-cols-2 gap-3">
- <div className="text-center p-3 surface-section rounded-2xl">
- <div className="text-2xl font-black text-theme-primary">{loyalty.completedTrips}</div>
- <div className="text-xs text-theme-muted font-medium mt-0.5">Trips Done</div>
+ <div className="text-center p-3 surface-section rounded-xl">
+ <div className="text-2xl font-bold text-theme-primary">{loyalty.completedTrips}</div>
+ <div className="text-xs text-theme-muted mt-0.5">Trips Done</div>
  </div>
- <div className="text-center p-3 surface-section rounded-2xl">
- <div className={`text-2xl font-black ${cfg.text}`}>{loyalty.discountPct}%</div>
- <div className="text-xs text-theme-muted font-medium mt-0.5">Your Discount</div>
+ <div className="text-center p-3 surface-section rounded-xl">
+ <div className={`text-2xl font-bold ${cfg.text}`}>{loyalty.discountPct}%</div>
+ <div className="text-xs text-theme-muted mt-0.5">Your Discount</div>
  </div>
  </div>
  </GlassCard>
@@ -312,14 +302,13 @@ export default function TravelerDashboardPage() {
  Ready for your next trip to {profile?.country || 'Lebanon'}?
  </p>
  </div>
- <div className="flex gap-3">
+ <div className="flex">
  <Link
  href="/tours"
- className="px-6 py-4 bg-primary-light hover:bg-primary-light-hover text-white rounded-3xl font-bold shadow-xl shadow-primary-light/30 transition-all flex items-center gap-3 group"
+ className="px-6 py-3 bg-primary-light hover:bg-primary-light-hover text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
  >
- <Search className="w-5 h-5" />
+ <Search className="w-4 h-4" />
  Find Tours
- <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
  </Link>
  </div>
  </motion.div>
@@ -344,57 +333,44 @@ export default function TravelerDashboardPage() {
 
  {/* PAYMENT ALERT */}
  {bookings.some((b) => b.status === 'PendingPayment') && (
- <motion.div
- initial={{ opacity: 0, x: -20 }}
- animate={{ opacity: 1, x: 0 }}
- className="p-6 bg-indigo-600 rounded-[2rem] text-white shadow-xl shadow-indigo-500/30 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group"
- >
- <div className="absolute top-0 right-0 w-64 h-64 surface-card rounded-full blur-3xl -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-110" />
- <div className="flex items-center gap-6 relative z-10">
- <div className="w-14 h-14 surface-card  rounded-2xl flex items-center justify-center flex-shrink-0 border border-theme">
- <CreditCard className="w-7 h-7 text-white" />
- </div>
+ <div className="p-5 bg-indigo-600 rounded-xl text-white flex flex-col md:flex-row items-center justify-between gap-4">
+ <div className="flex items-center gap-4">
+ <CreditCard className="w-6 h-6 flex-shrink-0" />
  <div>
- <h3 className="text-xl font-black tracking-tight mb-1">Action Required: Payment Pending</h3>
- <p className="text-indigo-100 text-sm font-medium">You have an unpaid booking. Complete payment now to secure your spot.</p>
+ <h3 className="font-semibold mb-0.5">Payment Required</h3>
+ <p className="text-indigo-100 text-sm">You have an unpaid booking. Complete payment to secure your spot.</p>
  </div>
  </div>
  <Link
  href="/dashboard/traveler/bookings"
- className="px-8 py-3 surface-card text-indigo-600 rounded-2xl font-black text-sm hover:bg-indigo-50 transition-all shadow-lg active:scale-95 relative z-10"
+ className="px-5 py-2 bg-white text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex-shrink-0"
  >
  Pay Now
  </Link>
- </motion.div>
+ </div>
  )}
 
  {/* LOYALTY SAVINGS BANNER — only if a confirmed booking has a tier discount */}
  {discountedBooking && (
- <motion.div
- initial={{ opacity: 0, y: -10 }}
- animate={{ opacity: 1, y: 0 }}
- className="p-5 bg-gradient-to-r from-amber-500 to-yellow-400 rounded-[2rem] text-white shadow-xl shadow-accent-light/20 flex items-center gap-4"
- >
- <div className="w-12 h-12 surface-card rounded-2xl flex items-center justify-center flex-shrink-0">
- <Zap className="w-6 h-6 text-white" />
- </div>
+ <div className="p-4 bg-amber-500 rounded-xl text-white flex items-center gap-4">
+ <Zap className="w-5 h-5 flex-shrink-0" />
  <div>
- <p className="font-black text-sm">
- 🎉 Loyalty discount applied! You saved ${discountedBooking.tierDiscountAmount?.toFixed(2)} on &ldquo;{discountedBooking.tourTitle}&rdquo;.
+ <p className="font-semibold text-sm">
+ 🎉 Loyalty discount applied — you saved ${discountedBooking.tierDiscountAmount?.toFixed(2)} on &ldquo;{discountedBooking.tourTitle}&rdquo;
  </p>
  <p className="text-amber-100 text-xs mt-0.5">
- Your {loyalty ? loyalty.loyaltyTier.charAt(0) + loyalty.loyaltyTier.slice(1).toLowerCase() : ''} tier earns you {loyalty?.discountPct}% off every trip.
+ {loyalty?.loyaltyTier} tier earns you {loyalty?.discountPct}% off every trip.
  </p>
  </div>
- </motion.div>
+ </div>
  )}
 
  {/* UPCOMING TRIPS */}
- <GlassCard className="p-8">
- <div className="flex items-center justify-between mb-8">
+ <GlassCard className="p-6">
+ <div className="flex items-center justify-between mb-6">
  <div>
- <h2 className="text-2xl font-black text-theme-primary tracking-tight">Your Upcoming Trips</h2>
- <p className="text-sm text-theme-muted font-medium">Get ready for your next adventure</p>
+ <h2 className="text-xl font-bold text-theme-primary">Upcoming Trips</h2>
+ <p className="text-sm text-theme-muted">Your confirmed and pending bookings</p>
  </div>
  <Link href="/dashboard/traveler/bookings" className="text-sm font-bold text-primary-light dark:text-primary-dark hover:text-blue-700 flex items-center gap-1 group">
  View All
@@ -405,18 +381,18 @@ export default function TravelerDashboardPage() {
  {bookings.filter((b) =>
  ['Confirmed', 'PendingGuide', 'InProgress', 'PendingPayment'].includes(b.status as string)
  ).length > 0 ? (
- <div className="space-y-4">
+ <div className="space-y-3">
  {bookings
  .filter((b) => ['Confirmed', 'PendingGuide', 'InProgress', 'PendingPayment'].includes(b.status as string))
- .slice(0, 1)
+ .slice(0, 3)
  .map((booking) => (
  <div
  key={booking.id}
- className="p-6 surface-card rounded-3xl border border-theme flex flex-col md:flex-row md:items-center justify-between gap-4"
+ className="p-4 surface-section border border-theme rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3"
  >
- <div className="flex items-center gap-4">
- <div className="w-16 h-16 bg-primary-light/20 dark:bg-primary-dark/20 rounded-2xl flex items-center justify-center">
- <Calendar className="w-8 h-8 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
+ <div className="flex items-center gap-3">
+ <div className="w-10 h-10 bg-primary-light/10 rounded-lg flex items-center justify-center">
+ <Calendar className="w-5 h-5 text-primary-light dark:text-primary-dark" />
  </div>
  <div>
  <h4 className="font-bold text-theme-primary">{booking.tourTitle}</h4>
@@ -424,27 +400,21 @@ export default function TravelerDashboardPage() {
  <Clock className="w-4 h-4" />
  {new Date(booking.startTimeUtc).toLocaleDateString()}
  </div>
- {/* Loyalty discount indicator */}
- {booking.tierDiscountAmount && booking.tierDiscountAmount > 0 && (
- <p className="text-xs text-accent-light dark:text-accent-dark dark:text-amber-400 font-bold mt-0.5">
- 🏅 You saved ${booking.tierDiscountAmount.toFixed(2)}
- </p>
- )}
  </div>
  </div>
- <div className="flex items-center gap-3">
- <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+ <div className="flex items-center gap-2">
+ <span className={`px-2 py-1 rounded-full text-xs font-medium ${
  booking.status === 'Confirmed'
- ? 'bg-success-green/20 text-success-green dark:bg-emerald-900/30 dark:text-emerald-400'
+ ? 'bg-success-green/15 text-success-green'
  : booking.status === 'InProgress'
- ? 'bg-primary-light/20 dark:bg-primary-dark/20 text-primary-light dark:text-primary-dark dark:text-primary-dark '
+ ? 'bg-primary-light/15 text-primary-light dark:text-primary-dark'
  : booking.status === 'PendingPayment'
  ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
- : 'bg-accent-light/20 dark:bg-accent-dark/20 text-accent-light dark:text-accent-dark dark:bg-amber-900/30 dark:text-amber-400'
+ : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
  }`}>
  {booking.status === 'PendingPayment' ? 'Unpaid' : booking.status}
  </span>
- <Link href="/dashboard/traveler/bookings" className="p-2 surface-section rounded-xl hover:surface-section dark:hover:surface-section transition-colors">
+ <Link href="/dashboard/traveler/bookings" className="p-1.5 surface-section rounded-lg hover:surface-card transition-colors">
  <ChevronRight className="w-4 h-4" />
  </Link>
  </div>
@@ -452,17 +422,15 @@ export default function TravelerDashboardPage() {
  ))}
  </div>
  ) : (
- <div className="surface-section rounded-3xl p-12 text-center border-2 border-dashed border-theme">
- <div className="w-16 h-16 bg-primary-light/20 dark:bg-primary-dark/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
- <Calendar className="w-8 h-8 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
- </div>
- <h3 className="text-xl font-bold text-theme-primary mb-2">No upcoming trips yet</h3>
- <p className="text-theme-muted max-w-xs mx-auto mb-6 font-medium">
- Your passport is feeling lonely. Browse our curated tours and book your next escape!
+ <div className="surface-section rounded-xl p-10 text-center border-2 border-dashed border-theme">
+ <Calendar className="w-8 h-8 text-theme-muted mx-auto mb-3" />
+ <h3 className="font-semibold text-theme-primary mb-2">No upcoming trips yet</h3>
+ <p className="text-sm text-theme-muted max-w-xs mx-auto mb-4">
+ Browse our curated tours and book your next escape!
  </p>
  <Link
  href="/tours"
- className="inline-flex items-center gap-2 px-6 py-3 surface-card border border-theme rounded-2xl text-sm font-black hover:surface-section dark:hover:surface-card transition-colors"
+ className="inline-flex items-center gap-2 px-4 py-2 surface-card border border-theme rounded-lg text-sm font-medium hover:surface-section transition-colors"
  >
  Explore Tours
  </Link>

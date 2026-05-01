@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // TRAVELER BOOKING DETAIL PAGE — WIRED TO REAL BACKEND
 // ============================================================================
 // LOCATION: /frontend/app/bookings/[id]/page.tsx
@@ -35,12 +35,9 @@ import {
  CheckCircle,
  FileText,
  Star,
- Clock as ClockIcon,
  Loader2,
- User,
  CreditCard,
  RefreshCw,
- ChevronLeft as ChevronLeftIcon // rename if conflict
 } from 'lucide-react'
 import PageLayout from '@/src/components/layout/PageLayout'
 import PaymentCountdownBanner from '@/src/components/booking/PaymentCountdownBanner'
@@ -134,9 +131,8 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
  const [cancelReason, setCancelReason] = useState('')
  const [savedMethods, setSavedMethods] = useState<TravelerPaymentMethod[]>([])
  const [selectedMethodId, setSelectedMethodId] = useState<number | null>(null)
- const [showSavedCards, setShowSavedCards] = useState(false)
  const [isAddingNewCard, setIsAddingNewCard] = useState(false)
- 
+
  // New Card Form State
  const [newCardName, setNewCardName] = useState('')
  const [newCardNumber, setNewCardNumber] = useState('')
@@ -147,43 +143,36 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
  const [isRefreshing, setIsRefreshing] = useState(false)
 
  // ── Countdown expiry handler ───────────────────────────────────────────────
- // Fired by PaymentCountdownBanner when the 15-minute window hits zero.
- // Re-fetches the booking so the UI reflects the backend's Expired status.
  const handlePaymentExpired = async () => {
  try {
  const updated = await getTravelerBooking(Number(bookingId))
  setBooking(updated)
  } catch {
- // Booking may have been deleted — navigate back to list
  router.push('/dashboard/traveler/bookings')
  }
  }
 
- // ── Fetch booking from backend ──────────────────────────────────────────
-
  const fetchPaymentMethods = async (silent = false) => {
- if (!silent) setIsRefreshing(true)
- try {
- const methods = await getTravelerPaymentMethods()
- setSavedMethods(methods)
- if (methods.length > 0) {
- // If nothing selected yet, or old selection no longer exists
- const exists = methods.find(m => m.id === selectedMethodId)
- if (!exists || !selectedMethodId) {
- const def = methods.find(m => m.isDefault) || methods[0]
- setSelectedMethodId(def.id)
- }
- setShowSavedCards(false)
- setIsAddingNewCard(false)
- } else {
- setIsAddingNewCard(true)
- }
- } catch (err) {
- console.error('Failed to fetch payment methods:', err)
- } finally {
- setIsRefreshing(false)
- }
- }
+    if (!silent) setIsRefreshing(true)
+    try {
+      const methods = await getTravelerPaymentMethods()
+      setSavedMethods(methods)
+      if (methods.length > 0) {
+        const exists = methods.find(m => m.id === selectedMethodId)
+        if (!exists || !selectedMethodId) {
+          const def = methods.find(m => m.isDefault) || methods[0]
+          setSelectedMethodId(def.id)
+        }
+        setIsAddingNewCard(false)
+      } else {
+        setIsAddingNewCard(true)
+      }
+    } catch (err) {
+      console.error('Failed to fetch payment methods:', err)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
 
  useEffect(() => {
  const fetchBooking = async () => {
@@ -192,12 +181,10 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
  const res = await getTravelerBooking(Number(bookingId))
  setBooking(res)
 
- // If PendingPayment, also fetch saved cards
  if (res.status === BookingStatus.PendingPayment) {
  await fetchPaymentMethods(true)
  }
 
- // Handle payment success/cancel notifications once data is loaded
  if (paymentResult === 'success') {
  toast.success('Your payment was successful! Your booking is now confirmed.')
  window.history.replaceState({}, '', `/bookings/${bookingId}`)
@@ -215,7 +202,6 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
  fetchBooking()
  }, [bookingId, paymentResult])
 
- // Auto-refresh when user returns to this tab
  useEffect(() => {
  const onFocus = () => {
  if (booking?.status === BookingStatus.PendingPayment) {
@@ -224,10 +210,7 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
  }
  window.addEventListener('focus', onFocus)
  return () => window.removeEventListener('focus', onFocus)
- }, [booking?.status, selectedMethodId]) // eslint-disable-line react-hooks/exhaustive-deps
-
- // ── Cancel booking — calls real API with { data } syntax ───────────────
- // Backend computes the authoritative refundPercent and returns it.
+ }, [booking?.status, selectedMethodId])
 
  const handleCancelBooking = async () => {
  if (!booking) return
@@ -238,7 +221,6 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
  `Booking cancelled! ${res.refundPercent ? `${res.refundPercent}% refund` : 'No refund (within 24h window)'}`
  )
  setShowCancelModal(false)
- // Re-fetch to show updated status
  const updated = await getTravelerBooking(booking.id)
  setBooking(updated)
  } catch (err: any) {
@@ -248,15 +230,12 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
  }
  }
 
- // ── Initiate Stripe Payment ──────────────────────────────────────────
-
  const handlePayNow = async () => {
  if (!booking) return
  setIsPaying(true)
  try {
  const response = await createPaymentSession(booking.id)
  if (response.checkoutUrl) {
- // Redirect to Stripe or show mock instructions
  window.location.href = response.checkoutUrl
  } else {
  toast.error('Could not initiate payment session')
@@ -269,33 +248,23 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
  }
 
  const handlePayWithSavedCard = async () => {
- if (!booking || !selectedMethodId) return
- 
- // Explicit confirmation
- const method = savedMethods.find(m => m.id === selectedMethodId)
- if (!method) return
- 
- if (!confirm(`You are about to pay ${booking.currency} ${booking.finalPrice.toFixed(2)} using your ${method.brand} ending in ${method.last4}. Proceed?`)) {
- return
- }
-
- setIsPaying(true)
- try {
- await payWithSavedCard(booking.id, selectedMethodId)
- toast.success('Payment successful!')
- const updated = await getTravelerBooking(booking.id)
- setBooking(updated)
- } catch (err: any) {
- toast.error(err.response?.data?.message || 'Failed to process payment')
- } finally {
- setIsPaying(false)
- }
- }
+    if (!booking || !selectedMethodId) return
+    setIsPaying(true)
+    try {
+      await payWithSavedCard(booking.id, selectedMethodId)
+      toast.success('Payment successful!')
+      const updated = await getTravelerBooking(booking.id)
+      setBooking(updated)
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to process payment')
+    } finally {
+      setIsPaying(false)
+    }
+  }
 
  const handlePayWithNewCard = async () => {
  if (!booking) return
  
- // Validate
  if (!newCardName.trim()) return toast.error('Cardholder name required')
  if (newCardNumber.replace(/\s/g, '').length < 13) return toast.error('Invalid card number')
  if (!/^\d{3}$/.test(newCardCvv)) return toast.error('Invalid CVV')
@@ -303,7 +272,6 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
  setIsPaying(true)
  try {
  if (saveForFuture) {
- // Save first
  const saved = await saveTravelerPaymentMethod({
  brand: newCardNumber.startsWith('4') ? 'Visa' : 'Mastercard',
  last4: newCardNumber.replace(/\s/g, '').slice(-4),
@@ -312,16 +280,13 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
  expiryYear: parseInt(newCardExY),
  isDefault: false
  })
- // Then pay
  await payWithSavedCard(booking.id, saved.id)
  toast.success('Card saved and payment processed!')
  } else {
- // Just use Stripe flow for non-saved cards to be safe/PCI compliant in this demo
- // or we can simulate it. Let's redirect to Stripe for"New/No Save" logic.
  const response = await createPaymentSession(booking.id)
  if (response.checkoutUrl) {
  window.location.href = response.checkoutUrl
- return // Exit to redirect
+ return 
  }
  }
  
@@ -333,8 +298,6 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
  setIsPaying(false)
  }
  }
-
- // ── Invoice download (text placeholder) ────────────────────────────────
 
  const handleDownloadInvoice = () => {
  if (!booking) return
@@ -370,8 +333,6 @@ Thank you for choosing TravelMarket!
  toast.success('Invoice downloaded!')
  }
 
- // ── Loading state ──────────────────────────────────────────────────────
-
  if (isLoading) {
  return (
  <PageLayout>
@@ -398,8 +359,6 @@ Thank you for choosing TravelMarket!
  )
  }
 
- // ── Derived values ─────────────────────────────────────────────────────
-
  const displayStatus = getDisplayStatus(booking)
  const statusStyle = getStatusStyle(displayStatus)
  const startDate = new Date(booking.startTimeUtc)
@@ -413,7 +372,6 @@ Thank you for choosing TravelMarket!
  month: 'long', day: 'numeric', year: 'numeric'
  })
 
- // Can only cancel Confirmed or PendingGuide bookings
  const canCancel = (
  booking.status === BookingStatus.Confirmed ||
  booking.status === BookingStatus.PendingGuide
@@ -427,7 +385,6 @@ Thank you for choosing TravelMarket!
  <div className="pt-14 sm:pt-16 min-h-screen surface-section">
  <div className="container-safe mx-auto max-w-5xl py-8 sm:py-10">
 
- {/* Back Button */}
  <Link
  href="/dashboard/traveler/bookings"
  className="flex items-center gap-1.5 text-sm text-theme-secondary hover:text-primary-light dark:text-primary-dark dark:hover:text-primary-dark transition-colors mb-6 group"
@@ -436,7 +393,6 @@ Thank you for choosing TravelMarket!
  <span>Back to Bookings</span>
  </Link>
 
- {/* Header */}
  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
  <div>
  <h1 className="text-2xl sm:text-3xl font-bold text-theme-primary mb-1">
@@ -459,13 +415,10 @@ Thank you for choosing TravelMarket!
  </div>
  </div>
 
- {/* Main Grid */}
  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
- {/* Left Column - Main Info */}
  <div className="lg:col-span-2 space-y-6">
 
- {/* ── Payment Countdown Banner (PendingPayment only) ─────────── */}
  {booking.status === BookingStatus.PendingPayment && booking.paymentDeadlineUtc && (
  <PaymentCountdownBanner
  deadlineUtc={booking.paymentDeadlineUtc}
@@ -474,15 +427,13 @@ Thank you for choosing TravelMarket!
  />
  )}
 
- {/* If booking expired (fetched from server), show expired message */}
  {booking.status === BookingStatus.Expired && (
  <PaymentCountdownBanner
- deadlineUtc={new Date(0).toISOString()} // already past → shows expired state
+ deadlineUtc={new Date(0).toISOString()}
  tourTitle={booking.tourTitle}
  />
  )}
 
- {/* Tour Card */}
  <div className="surface-card border border-theme rounded-xl overflow-hidden">
  <div className="flex flex-col sm:flex-row">
  <div className="relative w-full sm:w-48 h-32 surface-section flex items-center justify-center">
@@ -510,7 +461,7 @@ Thank you for choosing TravelMarket!
  </div>
  <Link
  href={`/tours/${booking.occurrenceId}`}
- className="text-sm text-primary-light dark:text-primary-dark dark:text-primary-dark hover:underline"
+ className="text-sm text-primary-light dark:text-primary-dark hover:underline"
  >
  View tour details
  </Link>
@@ -518,47 +469,19 @@ Thank you for choosing TravelMarket!
  </div>
  </div>
 
- {/* Meeting Point */}
- {booking.meetingPointName && (
- <div className="surface-card border border-theme rounded-xl p-5">
- <h3 className="font-bold text-theme-primary mb-3 flex items-center gap-2">
- <MapPin className="w-4 h-4 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
- Meeting Point
- </h3>
- <p className="font-medium text-theme-primary mb-1">
- {booking.meetingPointName}
- </p>
- </div>
- )}
-
- {/* Price Summary */}
  <div className="surface-card border border-theme rounded-xl p-5">
  <h3 className="font-bold text-theme-primary mb-3 flex items-center gap-2">
  <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
  Price Summary
  </h3>
- <div className="space-y-2 text-sm">
- <div className="flex justify-between">
- <span className="text-theme-secondary ">
- {booking.peopleCount} {booking.peopleCount === 1 ? 'person' : 'people'}
- </span>
- <span className="text-theme-primary">
- {booking.currency} {booking.finalPrice.toFixed(2)}
- </span>
- </div>
- <div className="flex justify-between font-bold pt-2 border-t border-theme">
+ <div className="flex justify-between font-bold pt-2">
  <span className="text-theme-primary">Total</span>
  <span className="text-xl text-theme-primary">
  {booking.currency} {booking.finalPrice.toFixed(2)}
  </span>
  </div>
  </div>
- <p className="text-xs text-theme-muted mt-3">
- Booked on {bookedDate} • {booking.bookingMode === 'Instant' ? 'Instant Book' : 'Request to Book'}
- </p>
- </div>
 
- {/* Rejection / Cancellation Reason banner */}
  {booking.cancellationReason && (
  <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
  <div className="flex items-start gap-2">
@@ -581,20 +504,14 @@ Thank you for choosing TravelMarket!
  )}
  </div>
 
- {/* Right Column - Sidebar */}
  <div className="space-y-6">
 
- {/* QR Ticket Card — only for Confirmed bookings with a QR code */}
  {booking.qrCode && (
  <div className="surface-card border border-theme rounded-xl p-5">
  <div className="flex items-center gap-3 mb-3">
- <QrCode className="w-5 h-5 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
+ <QrCode className="w-5 h-5 text-primary-light dark:text-primary-dark" />
  <h3 className="font-bold text-theme-primary">QR Ticket</h3>
  </div>
- <p className="text-sm text-theme-secondary mb-4">
- Show this QR code to your guide at the meeting point
- </p>
- {/* Display the QR token — in production, render with a QR library */}
  <div className="p-4 surface-section rounded-lg text-center">
  <QrCode className="w-20 h-20 text-theme-primary mx-auto mb-2" />
  <p className="text-xs font-mono text-theme-muted break-all">{booking.qrCode}</p>
@@ -602,222 +519,151 @@ Thank you for choosing TravelMarket!
  </div>
  )}
 
- {/* Actions Card */}
  <div className="surface-card border border-theme rounded-xl p-5">
  <h3 className="font-bold text-theme-primary mb-3">
  Actions
  </h3>
  <div className="space-y-2">
- {/* Pay Now section — High Fidelity Button-First UX */}
- {booking.status === BookingStatus.PendingPayment && (
- <div className="space-y-4">
- {isAddingNewCard ? (
- /* Case 1: Adding a Fresh Card */
- <div className="space-y-4 p-5 surface-section rounded-2xl border border-theme">
- {savedMethods.length > 0 && (
- <button 
- onClick={() => setIsAddingNewCard(false)}
- className="flex items-center gap-1 text-[10px] font-black text-primary-light dark:text-primary-dark uppercase mb-2 hover:translate-x-1 transition-transform"
- >
- <ChevronLeft className="w-3 h-3" /> Back to Saved
- </button>
- )}
- 
- <h4 className="text-xs font-black text-theme-primary uppercase tracking-tight mb-2">New Payment Method</h4>
- <div className="space-y-3">
- <input
- type="text"
- value={newCardName}
- onChange={(e) => setNewCardName(e.target.value)}
- placeholder="CARDHOLDER NAME"
- className="w-full px-4 py-3 surface-card border border-theme rounded-xl text-xs font-bold uppercase outline-none focus:border-blue-600 transition-all shadow-sm"
- />
- <div className="relative">
- <input
- type="text"
- value={newCardNumber}
- onChange={(e) => {
- const val = e.target.value.replace(/\D/g, '').replace(/(\d{4})(?=\d)/g, '$1 ').trim().slice(0, 19)
- setNewCardNumber(val)
- }}
- placeholder="0000 0000 0000 0000"
- className="w-full px-4 py-3 surface-card border border-theme rounded-xl text-xs font-bold outline-none focus:border-blue-600 transition-all shadow-sm"
- />
- </div>
- <div className="grid grid-cols-3 gap-2">
- <select 
- value={newCardExM}
- onChange={(e) => setNewCardExM(e.target.value)}
- className="px-2 py-3 surface-card border border-theme rounded-xl text-xs font-bold outline-none appearance-none cursor-pointer text-center"
- >
- {Array.from({length: 12}, (_, i) => String(i+1).padStart(2, '0')).map(m => (
- <option key={m} value={m}>{m}</option>
- ))}
- </select>
- <select 
- value={newCardExY}
- onChange={(e) => setNewCardExY(e.target.value)}
- className="px-2 py-3 surface-card border border-theme rounded-xl text-xs font-bold outline-none appearance-none cursor-pointer text-center"
- >
- {Array.from({length: 10}, (_, i) => (new Date().getFullYear() + i).toString()).map(y => (
- <option key={y} value={y}>{y}</option>
- ))}
- </select>
- <input
- type="password"
- value={newCardCvv}
- onChange={(e) => setNewCardCvv(e.target.value.replace(/\D/g, '').slice(0, 3))}
- placeholder="CVV"
- className="px-2 py-3 surface-card border border-theme rounded-xl text-xs font-bold outline-none text-center"
- />
- </div>
- 
- <label className="flex items-center gap-2 cursor-pointer group px-1">
- <div 
- onClick={() => setSaveForFuture(!saveForFuture)}
- className={`w-4 h-4 rounded border transition-all flex items-center justify-center ${
- saveForFuture ? 'bg-primary-light border-blue-600 shadow-sm shadow-blue-600/20' : 'border-theme-strong hover:border-blue-300'
- }`}
- >
- {saveForFuture && <CheckCircle className="w-3 h-3 text-white" />}
- </div>
- <span className="text-[10px] font-black text-theme-muted uppercase tracking-widest group-hover:text-theme-primary dark:group-hover:text-gray-300 transition-colors">Save for future use</span>
- </label>
- </div>
-
- <button
- onClick={handlePayWithNewCard}
- disabled={isPaying}
- className="w-full py-4 surface-base text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 shadow-xl shadow-black/10 dark:shadow-white/10"
- >
- {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm & Pay'}
- </button>
- </div>
- ) : showSavedCards ? (
- /* Case 2: Choosing from Multiple Cards */
- <div className="space-y-4">
- <button 
- onClick={() => setShowSavedCards(false)}
- className="flex items-center gap-1 text-[10px] font-black text-primary-light dark:text-primary-dark uppercase mb-2 hover:translate-x-1 transition-transform"
- >
- <ChevronLeft className="w-3 h-3" /> Back
- </button>
- <div className="space-y-2">
- {savedMethods.map((m) => (
- <button
- key={m.id}
- onClick={() => setSelectedMethodId(m.id)}
- className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${
- selectedMethodId === m.id 
- ? 'border-blue-600 bg-primary-light/10 dark:bg-primary-dark/14' 
- : 'border-theme hover:border-blue-100 hover:scale-[1.01]'
- }`}
- >
- <div className="flex items-center gap-3">
- <CreditCard className={`w-5 h-5 ${selectedMethodId === m.id ? 'text-primary-light dark:text-primary-dark' : 'text-theme-muted'}`} />
- <div className="text-left leading-tight">
- <p className={`text-[11px] font-black uppercase tracking-tight ${selectedMethodId === m.id ? 'text-blue-900 dark:text-blue-100' : 'text-theme-secondary'}`}>
- {m.brand} •••• {m.last4}
- </p>
- <p className="text-[9px] text-theme-muted font-bold uppercase">{m.cardholderName || 'Cardholder'}</p>
- </div>
- </div>
- {selectedMethodId === m.id && <CheckCircle className="w-4 h-4 text-primary-light dark:text-primary-dark" />}
- </button>
- ))}
- </div>
- 
- <button 
- onClick={() => setIsAddingNewCard(true)}
- className="w-full text-center text-[10px] font-black text-theme-muted hover:text-primary-light dark:text-primary-dark uppercase tracking-widest transition-colors py-2"
- >
- + Use a different card
- </button>
-
- <button
- onClick={handlePayWithSavedCard}
- disabled={isPaying || !selectedMethodId}
- className="w-full py-4 bg-primary-light text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-blue-600/20 disabled:opacity-50"
- >
- {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm & Pay Now'}
- </button>
- </div>
- ) : (
- /* Case 3: One-Click Focus View (Default) */
- <div className="space-y-4">
- {selectedMethodId && (
- <div className="p-5 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/10 rounded-[2rem] border border-blue-200/50 dark:border-blue-800/30">
- <div className="flex items-center justify-between mb-4">
- <div className="flex items-center gap-2">
- <label className="text-[10px] font-black text-primary-light dark:text-primary-dark/60 uppercase tracking-widest">Paying With</label>
- <button 
- onClick={() => fetchPaymentMethods()}
- disabled={isRefreshing}
- className={`p-1 hover:surface-card rounded-full transition-all ${isRefreshing ? 'animate-spin text-primary-light dark:text-primary-dark' : 'text-primary-light dark:text-primary-dark'}`}
- >
- <RefreshCw className="w-2.5 h-2.5" />
- </button>
- </div>
- {savedMethods.length > 1 && (
- <button 
- onClick={() => setShowSavedCards(true)}
- className="text-[10px] font-black text-primary-light dark:text-primary-dark hover:text-blue-700 uppercase tracking-widest underline decoration-2 underline-offset-2 transition-all"
- >
- Change
- </button>
- )}
- </div>
- <div className="flex items-center gap-4">
- <div className="w-12 h-12 surface-card rounded-2xl flex items-center justify-center shadow-sm">
- <CreditCard className="w-6 h-6 text-primary-light dark:text-primary-dark" />
- </div>
- <div className="min-w-0">
- <h4 className="text-sm font-black text-theme-primary uppercase tracking-tight">
- {savedMethods.find(m => m.id === selectedMethodId)?.brand} •••• {savedMethods.find(m => m.id === selectedMethodId)?.last4}
- </h4>
- <p className="text-[10px] text-theme-muted font-bold uppercase truncate">{savedMethods.find(m => m.id === selectedMethodId)?.cardholderName}</p>
- </div>
- </div>
- </div>
- )}
-
- <button
- onClick={handlePayWithSavedCard}
- disabled={isPaying || !selectedMethodId}
- className="w-full py-5 bg-primary-light text-white rounded-[2rem] text-sm font-black uppercase tracking-widest hover:bg-primary-light-hover hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-blue-600/30 disabled:opacity-50 relative overflow-hidden group"
- >
- <span className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
- {isPaying ? (
- <div className="flex items-center justify-center gap-3">
- <Loader2 className="w-5 h-5 animate-spin" />
- <span>Processing...</span>
- </div>
- ) : (
- <span>Pay Now — {booking.currency} {booking.finalPrice.toFixed(2)}</span>
- )}
- </button>
- 
- <p className="text-center text-[9px] font-black text-theme-muted uppercase tracking-widest mt-2 px-4 opacity-60">
- Secure 256-bit SSL encrypted checkout
- </p>
- </div>
- )}
-
- {/* Fallback to Stripe (only show in"Selection" or"No-Card" mode to keep focus) */}
- {(isAddingNewCard || showSavedCards) && (
- <div className="pt-2">
- <button
- onClick={handlePayNow}
- disabled={isPaying}
- className="w-full py-3 surface-section text-theme-muted text-[10px] font-black uppercase tracking-widest rounded-xl hover:surface-section transition-all border border-theme active:scale-95"
- >
- Use External Stripe Checkout
- </button>
- </div>
- )}
- </div>
- )}
- {/* Cancel button — only for cancellable bookings */}
+          {booking.status === BookingStatus.PendingPayment && (
+            <div className="space-y-3">
+              {isAddingNewCard ? (
+                <div className="space-y-3 p-4 surface-section border border-theme rounded-xl">
+                  {savedMethods.length > 0 && (
+                    <button
+                      onClick={() => setIsAddingNewCard(false)}
+                      className="flex items-center gap-1 text-xs text-primary-light dark:text-primary-dark hover:underline"
+                    >
+                      <ChevronLeft className="w-3 h-3" />
+                      Back to saved card
+                    </button>
+                  )}
+                  <h4 className="text-sm font-semibold text-theme-primary">New Payment Method</h4>
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={newCardName}
+                      onChange={(e) => setNewCardName(e.target.value)}
+                      placeholder="Cardholder name"
+                      className="w-full px-3 py-2.5 surface-card border border-theme rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-light/30 transition-all"
+                    />
+                    <input
+                      type="text"
+                      value={newCardNumber}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '').replace(/(\d{4})(?=\d)/g, '$1 ').trim().slice(0, 19)
+                        setNewCardNumber(val)
+                      }}
+                      placeholder="0000 0000 0000 0000"
+                      className="w-full px-3 py-2.5 surface-card border border-theme rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-light/30 transition-all"
+                    />
+                    <div className="grid grid-cols-3 gap-2">
+                      <select
+                        value={newCardExM}
+                        onChange={(e) => setNewCardExM(e.target.value)}
+                        className="px-2 py-2.5 surface-card border border-theme rounded-lg text-sm outline-none appearance-none cursor-pointer text-center"
+                      >
+                        {Array.from({length: 12}, (_, i) => String(i+1).padStart(2, '0')).map(m => (
+                          <option key={m} value={m}>{m}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={newCardExY}
+                        onChange={(e) => setNewCardExY(e.target.value)}
+                        className="px-2 py-2.5 surface-card border border-theme rounded-lg text-sm outline-none appearance-none cursor-pointer text-center"
+                      >
+                        {Array.from({length: 10}, (_, i) => (new Date().getFullYear() + i).toString()).map(y => (
+                          <option key={y} value={y}>{y}</option>
+                        ))}
+                      </select>
+                      <input
+                        type="password"
+                        value={newCardCvv}
+                        onChange={(e) => setNewCardCvv(e.target.value.replace(/\D/g, '').slice(0, 3))}
+                        placeholder="CVV"
+                        className="px-2 py-2.5 surface-card border border-theme rounded-lg text-sm outline-none text-center"
+                      />
+                    </div>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={saveForFuture}
+                        onChange={(e) => setSaveForFuture(e.target.checked)}
+                        className="w-4 h-4 rounded border-theme text-primary-light focus:ring-primary-light/30"
+                      />
+                      <span className="text-xs text-theme-muted">Save for future use</span>
+                    </label>
+                  </div>
+                  <button
+                    onClick={handlePayWithNewCard}
+                    disabled={isPaying}
+                    className="w-full py-3 bg-primary-light hover:bg-primary-light-hover text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : `Pay Now — ${booking.currency} ${booking.finalPrice.toFixed(2)}`}
+                  </button>
+                  <button
+                    onClick={handlePayNow}
+                    disabled={isPaying}
+                    className="w-full py-2 text-xs text-theme-muted hover:text-theme-secondary transition-colors"
+                  >
+                    Use Stripe Checkout instead
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {selectedMethodId && (
+                    <div className="flex items-center justify-between p-3 surface-section border border-theme rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <CreditCard className="w-4 h-4 text-primary-light dark:text-primary-dark" />
+                        <div>
+                          <p className="text-sm font-semibold text-theme-primary">
+                            {savedMethods.find(m => m.id === selectedMethodId)?.brand} ···· {savedMethods.find(m => m.id === selectedMethodId)?.last4}
+                          </p>
+                          <p className="text-xs text-theme-muted">{savedMethods.find(m => m.id === selectedMethodId)?.cardholderName}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => fetchPaymentMethods()}
+                        disabled={isRefreshing}
+                        className="text-theme-muted hover:text-primary-light dark:hover:text-primary-dark transition-colors"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                      </button>
+                    </div>
+                  )}
+                  {savedMethods.length > 1 && (
+                    <div className="space-y-1">
+                      {savedMethods.filter(m => m.id !== selectedMethodId).map(m => (
+                        <button
+                          key={m.id}
+                          onClick={() => setSelectedMethodId(m.id)}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-xs text-theme-muted hover:text-theme-primary hover:surface-section rounded-lg transition-colors"
+                        >
+                          <CreditCard className="w-3.5 h-3.5" />
+                          {m.brand} ···· {m.last4}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <button
+                    onClick={handlePayWithSavedCard}
+                    disabled={isPaying || !selectedMethodId}
+                    className="w-full py-3 bg-primary-light hover:bg-primary-light-hover text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {isPaying
+                      ? <><Loader2 className="w-4 h-4 animate-spin" /><span>Processing...</span></>
+                      : <span>Pay Now — ${booking.currency} ${booking.finalPrice.toFixed(2)}</span>
+                    }
+                  </button>
+                  <button
+                    onClick={() => setIsAddingNewCard(true)}
+                    className="w-full text-center text-xs text-theme-muted hover:text-theme-secondary transition-colors py-1"
+                  >
+                    Pay with a different card
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
  {canCancel && (
  <button
  onClick={() => setShowCancelModal(true)}
@@ -827,19 +673,15 @@ Thank you for choosing TravelMarket!
  Cancel Booking
  </button>
  )}
- {/* Write Review button — shown only for Completed bookings.
- Previously disabled with"Reviews coming soon".
- Now active: navigates to the review form at /bookings/{id}/review.
- The review form page handles eligibility (backend enforces it too). */}
- {booking.status === BookingStatus.Completed && (
- <Link
- href={`/bookings/${bookingId}/review`}
- className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors"
- >
- <Star className="w-4 h-4" />
- Write Review
- </Link>
- )}
+          {booking.status === BookingStatus.Completed && (
+            <Link
+              href={`/bookings/${bookingId}/review`}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-theme text-theme-primary text-sm font-medium rounded-lg hover:surface-section transition-colors"
+            >
+              <Star className="w-4 h-4" />
+              Write Review
+            </Link>
+          )}
  <button
  onClick={handleDownloadInvoice}
  className="w-full flex items-center justify-center gap-2 px-4 py-2 surface-section text-theme-secondary text-sm font-medium rounded-lg hover:surface-section dark:hover:surface-section transition-colors"
@@ -849,11 +691,10 @@ Thank you for choosing TravelMarket!
  </button>
  </div>
 
- {/* Cancellation policy reminder */}
  {canCancel && (
  <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg">
  <p className="text-xs text-amber-800 dark:text-amber-300 flex items-start gap-1">
- <ClockIcon className="w-3 h-3 mt-0.5 flex-shrink-0" />
+ <Clock className="w-3 h-3 mt-0.5 flex-shrink-0" />
  <span>
  {hoursUntilStart > 48
  ? `Full refund if cancelled within ${formatHoursRemaining(hoursUntilStart)}`
@@ -867,40 +708,21 @@ Thank you for choosing TravelMarket!
  </div>
  )}
  </div>
-
- {/* Support Card */}
- <div className="bg-primary-light/10 border border-blue-200 dark:border-blue-800 rounded-xl p-5">
- <h3 className="font-bold text-blue-900 dark:text-blue-100 mb-2">
- Need Help?
- </h3>
- <p className="text-sm text-blue-800 dark:text-blue-300 mb-3">
- Our support team is available 24/7
- </p>
- <Link
- href="/contact"
- className="inline-flex items-center gap-1 text-sm text-primary-light dark:text-primary-dark dark:text-primary-dark hover:underline"
- >
- Contact Support
- </Link>
- </div>
  </div>
  </div>
  </div>
  </div>
 
- {/* ── Cancellation Confirmation Modal ──────────────────────────────── */}
  {showCancelModal && booking && (
  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 ">
  <div className="w-full max-w-md surface-card rounded-2xl shadow-2xl overflow-hidden">
- {/* Header */}
- <div className="bg-gradient-to-r from-red-600 to-red-700 dark:from-red-700 dark:to-red-800 px-6 py-4">
- <h3 className="text-lg font-bold text-white flex items-center gap-2">
- <XCircle className="w-5 h-5" />
- Cancel Booking
- </h3>
- </div>
+          <div className="bg-red-600 dark:bg-red-700 px-6 py-4">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <XCircle className="w-5 h-5" />
+              Cancel Booking
+            </h3>
+          </div>
 
- {/* Content */}
  <div className="p-6 space-y-4">
  <p className="text-sm text-theme-secondary ">
  Are you sure you want to cancel <span className="font-semibold text-theme-primary">{booking.tourTitle}</span>?

@@ -425,7 +425,7 @@ export default function SearchFilters({
  leaveFrom="opacity-100"
  leaveTo="opacity-0"
  >
- <ListboxOptions className="absolute z-50 mt-1 max-h-60 w-48 overflow-auto right-0 rounded-xl surface-card py-1 text-xs shadow-xl ring-1 ring-black/5 dark:ring-white/10 focus:outline-none">
+ <ListboxOptions className="absolute z-50 mt-1 max-h-60 w-48 overflow-auto right-0 rounded-xl surface-card py-1 text-xs shadow-sm ring-1 ring-black/5 dark:ring-white/10 focus:outline-none">
  <ListboxOption
  value=""
  className={({ focus, selected }) => `relative cursor-default select-none py-2 pl-8 pr-4 transition-colors ${focus ? 'bg-primary-light/10 text-primary-light dark:text-primary-dark dark:text-primary-dark ' : 'text-theme-primary'} ${selected ? 'font-semibold' : 'font-normal'}`}
@@ -747,7 +747,7 @@ export default function SearchFilters({
  ======================================== */}
  {isMobile && (
  <div className="sticky bottom-0 p-4 surface-paper border-t border-primary-light/20 dark:border-primary-dark/20 ">
- <button onClick={onClose} className="w-full px-4 py-3.5 bg-primary-light dark:bg-primary-dark text-white font-bold rounded-full hover:bg-primary-light-hover dark:hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2">
+ <button onClick={onClose} className="w-full px-4 py-3.5 bg-primary-light dark:bg-primary-dark text-white font-bold rounded-full hover:bg-primary-light-hover dark:hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2">
  Show Results
  {activeFilterCount > 0 && (
  <span className="ml-2 px-1.5 py-0.5 surface-card rounded-full text-xs">

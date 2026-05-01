@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -19,7 +19,7 @@ interface MockPaymentSimulatorProps {
  amount: number
  currency: string
  onSuccess: () => void
- onCancel: () => void
+ isOpen: boolean; onClose: () => void
 }
 
 export default function MockPaymentSimulator({ 
@@ -27,7 +27,7 @@ export default function MockPaymentSimulator({
  amount, 
  currency, 
  onSuccess, 
- onCancel 
+ onClose 
 }: MockPaymentSimulatorProps) {
  const [isProcessing, setIsProcessing] = useState(false)
  const [processStep, setProcessStep] = useState(0) // 0: Idle, 1: Validating, 2: Authorizing, 3: Success
@@ -165,7 +165,7 @@ export default function MockPaymentSimulator({
  try {
  await failMockPayment(sessionId)
  toast.error('Payment Declined as requested.')
- onCancel()
+ onClose()
  } catch (err: any) {
  toast.error('Could not simulate decline')
  setIsProcessing(false)
@@ -318,7 +318,7 @@ export default function MockPaymentSimulator({
  </button>
  <div className="w-1 h-1 surface-section rounded-full" />
  <button 
- onClick={onCancel}
+ onClick={onClose}
  className="text-[10px] font-black text-theme-muted uppercase tracking-widest hover:underline"
  >
  Cancel Order

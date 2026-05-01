@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // BOOKING CARD - PRICING & AVAILABILITY WIDGET
 // ============================================================================
 // LOCATION: /frontend/src/components/tour-detail/BookingCard.tsx
@@ -352,7 +352,7 @@ export default function BookingCard({
  // ========================================
 
  return (
- <div className="surface-section border border-primary-light/10 dark:border-primary-dark/10 rounded-xl shadow-2xl overflow-hidden sticky top-24">
+ <div className="surface-section border border-primary-light/10 dark:border-primary-dark/10 rounded-xl overflow-hidden sticky top-24">
  {/* ========================================
  HEADER - PRICE & AVAILABILITY
  ======================================== */}
@@ -384,15 +384,15 @@ export default function BookingCard({
  const count = upcomingDates.find(d => d.date === selectedDate)?.waitlistCount || 0;
  return count > 0 || !isAvailable;
  })() && (
- <div className="px-6 pb-4">
+ <div className="pb-4">
  <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg text-sm">
  <Hourglass className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
- <span className="text-amber-700 dark:text-amber-300">
+ <span className="text-amber-700 dark:text-amber-300 text-xs">
  {(() => {
  const count = upcomingDates.find(d => d.date === selectedDate)?.waitlistCount || 0;
  return count > 0 
  ? `${count} ${count === 1 ? 'person' : 'people'} on waitlist`
- : 'Tour is full. Join waitlist';
+ : 'Tour is full — join waitlist';
  })()}
  </span>
  </div>
@@ -430,7 +430,7 @@ export default function BookingCard({
 
  {/* Date picker dropdown */}
  {isDatePickerOpen && (
- <div className="absolute top-full left-0 right-0 mt-1 surface-card border border-primary-light/10 dark:border-primary-dark/10 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto">
+ <div className="absolute top-full left-0 right-0 mt-1 surface-card border border-primary-light/10 dark:border-primary-dark/10 rounded-lg shadow-md z-50 max-h-64 overflow-y-auto">
  {upcomingDates.map((date) => {
  const dateObj = new Date(date.date)
  const formatted = dateObj.toLocaleDateString('en-US', {
@@ -689,7 +689,7 @@ export default function BookingCard({
  <div className="space-y-3">
  <button
  onClick={() => router.push(`/bookings/confirmation?id=${activeBookingId}`)}
- className="w-full px-6 py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold rounded-lg hover:shadow-indigo-500/20 transition-all shadow-xl active:scale-[0.98] flex items-center justify-center gap-2"
+ className="w-full px-6 py-4 bg-primary-light hover:bg-primary-light-hover text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
  >
  <CreditCard className="w-5 h-5" />
  Pay Now
@@ -706,7 +706,7 @@ export default function BookingCard({
  <button
  onClick={handleBooking}
  disabled={!selectedDate || isLoading}
- className="w-full px-6 py-4 bg-gradient-to-r from-red-600 to-rose-600 dark:from-red-700 dark:to-rose-700 text-white font-bold rounded-lg hover:from-red-700 hover:to-rose-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl hover:shadow-red-500/20 active:scale-[0.98]"
+ className="w-full px-6 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
  >
  {isLoading ? 'Cancelling...' : 'Cancel Request'}
  </button>
@@ -715,7 +715,7 @@ export default function BookingCard({
  <button
  onClick={handleBooking}
  disabled={!selectedDate || isLoading}
- className="w-full px-6 py-4 bg-gradient-to-r from-primary-light to-indigo-600 dark:from-primary-dark dark:to-indigo-700 text-white font-bold rounded-lg hover:shadow-primary-light/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl active:scale-[0.98]"
+ className="w-full px-6 py-4 bg-primary-light hover:bg-primary-light-hover text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
  >
  {isLoading ? 'Updating...' : 'Update Booking'}
  </button>
@@ -732,7 +732,7 @@ export default function BookingCard({
  <button
  onClick={handleBooking}
  disabled={!selectedDate || isLoading}
- className="w-full px-6 py-4 bg-gradient-to-r from-primary-light to-indigo-600 dark:from-primary-dark dark:to-indigo-700 text-white font-bold rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl active:scale-[0.98]"
+ className="w-full px-6 py-4 bg-primary-light hover:bg-primary-light-hover text-white font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
  >
  {bookingMode === BookingMode.INSTANT || !isRequestMode
  ? (isLoading ? 'Processing...' : 'Book Now')
@@ -767,7 +767,7 @@ export default function BookingCard({
  px-6 py-4
  ${isWaitlisted 
  ? 'surface-card border border-danger-red dark:border-danger-red/50 text-red-600 dark:text-red-400 font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 shadow-sm'
- : 'bg-amber-600 dark:bg-amber-700 text-white font-semibold hover:bg-amber-700 dark:hover:bg-amber-800 shadow-lg hover:shadow-xl'
+ : 'bg-amber-600 dark:bg-amber-700 text-white font-semibold hover:bg-amber-700 dark:hover:bg-amber-800 shadow-lg hover:shadow-md'
  }
  rounded-lg
  transition-all

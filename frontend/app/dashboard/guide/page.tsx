@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -37,68 +37,55 @@ type VerificationStatus = 'pending' | 'approved' | 'rejected' | 'not_submitted' 
 // ============================================================================
 
 function GlassCard({ children, className ="" }: { children: React.ReactNode, className?: string }) {
- return (
- <div className={`surface-card  border border-theme rounded-3xl shadow-xl shadow-primary-light/5 ${className}`}>
- {children}
- </div>
- )
+  return (
+    <div className={`surface-card border border-theme rounded-xl ${className}`}>
+      {children}
+    </div>
+  )
 }
 
 function StatCard({ icon: Icon, label, value, color }: { icon: any, label: string, value: string | number, color: 'blue' | 'amber' | 'emerald' | 'purple' }) {
- const colors: Record<string, string> = {
- blue: 'bg-primary-light dark:bg-primary-dark shadow-primary-light/20',
- amber: 'bg-accent-light dark:bg-accent-dark shadow-accent-light/20',
- emerald: 'bg-success-green shadow-success-green/20',
- purple: 'bg-primary-light shadow-primary-light/20'
- }
+  const iconColors: Record<string, string> = {
+    blue: 'bg-primary-light/10 text-primary-light dark:text-primary-dark',
+    amber: 'bg-accent-light/10 text-accent-light dark:text-accent-dark',
+    emerald: 'bg-success-green/10 text-success-green',
+    purple: 'bg-primary-light/10 text-primary-light dark:text-primary-dark'
+  }
 
- return (
- <motion.div
- whileHover={{ y: -5 }}
- transition={{ type:"spring", stiffness: 400, damping: 10 }}
- className="relative"
- >
- <GlassCard className="p-6 h-full flex flex-col justify-between overflow-hidden group">
- <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${colors[color]} opacity-5 blur-2xl group-hover:opacity-10 transition-opacity`} />
- 
- <div className="flex items-center justify-between mb-4 relative z-10">
- <div className={`p-3 rounded-2xl bg-gradient-to-br ${colors[color]} text-white shadow-lg`}>
- <Icon className="w-5 h-5" />
- </div>
- </div>
- 
- <div className="relative z-10">
- <div className="text-3xl font-black text-theme-primary tracking-tight mb-1">
- {value}
- </div>
- <div className="text-sm font-semibold text-theme-muted uppercase tracking-wider">
- {label}
- </div>
- </div>
- </GlassCard>
- </motion.div>
- )
+  return (
+    <GlassCard className="p-6">
+      <div className={`p-2.5 rounded-lg ${iconColors[color]} w-fit mb-4`}>
+        <Icon className="w-5 h-5" />
+      </div>
+      <div className="text-3xl font-bold text-theme-primary mb-1">
+        {value}
+      </div>
+      <div className="text-xs text-theme-muted">
+        {label}
+      </div>
+    </GlassCard>
+  )
 }
 
 function VerificationBadge({ status }: { status: string }) {
- const normalizedStatus = (status?.toLowerCase() || 'not_submitted') as VerificationStatus
- 
- const config = {
- pending: { bg: 'bg-accent-light/10 dark:bg-accent-dark/10', text: 'text-accent-light dark:text-accent-dark', icon: Clock, label: 'Pending' },
- approved: { bg: 'bg-success-green/10', text: 'text-success-green', icon: CheckCircle, label: 'Verified' },
- verified: { bg: 'bg-success-green/10', text: 'text-success-green', icon: CheckCircle, label: 'Verified' },
- rejected: { bg: 'bg-danger-red/10', text: 'text-danger-red', icon: AlertCircle, label: 'Failed' },
- not_submitted: { bg: 'surface-section', text: 'text-theme-secondary', icon: Shield, label: 'Not Verified' }
- }
+  const normalizedStatus = (status?.toLowerCase() || 'not_submitted') as VerificationStatus
+  
+  const config = {
+    pending: { bg: 'bg-accent-light/10 dark:bg-accent-dark/10', text: 'text-accent-light dark:text-accent-dark', icon: Clock, label: 'Pending' },
+    approved: { bg: 'bg-success-green/10', text: 'text-success-green', icon: CheckCircle, label: 'Verified' },
+    verified: { bg: 'bg-success-green/10', text: 'text-success-green', icon: CheckCircle, label: 'Verified' },
+    rejected: { bg: 'bg-danger-red/10', text: 'text-danger-red', icon: AlertCircle, label: 'Failed' },
+    not_submitted: { bg: 'surface-section', text: 'text-theme-secondary', icon: Shield, label: 'Not Verified' }
+  }
 
- const { bg, text, icon: Icon, label } = config[normalizedStatus] || config.not_submitted
+  const { bg, text, icon: Icon, label } = config[normalizedStatus] || config.not_submitted
 
- return (
- <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${bg} ${text} text-[10px] font-black uppercase tracking-widest border border-current/10`}>
- <Icon className="w-3 h-3" />
- {label}
- </div>
- )
+  return (
+    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${bg} ${text} text-xs font-medium border border-current/10`}>
+      <Icon className="w-3 h-3" />
+      {label}
+    </div>
+  )
 }
 
 // ============================================================================
@@ -156,18 +143,6 @@ export default function GuideDashboardPage() {
  .sort((a, b) => new Date(a.startTimeUtc).getTime() - new Date(b.startTimeUtc).getTime())
  .slice(0, 3)
 
- const recentActivities = bookings
- .sort((a, b) => new Date(b.createdAtUtc).getTime() - new Date(a.createdAtUtc).getTime())
- .slice(0, 5)
- .map(b => ({
- id: b.id.toString(),
- title: b.status === BookingStatus.PendingGuide ? 'New Booking Request' : 'Booking Confirmed',
- description: `${b.traveler?.fullName || 'Traveler'} booked ${b.tourTitle}`,
- timestamp: new Date(b.createdAtUtc).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }),
- icon: b.status === BookingStatus.PendingGuide ? AlertCircle : CheckCircle,
- color: b.status === BookingStatus.PendingGuide ? 'amber' : 'emerald' as const
- }))
-
  const totalEarnings = bookings
  .filter(b => b.status === BookingStatus.Completed || b.status === BookingStatus.Confirmed)
  .reduce((acc, b) => acc + Number(b.netEarnings || b.finalPrice), 0)
@@ -180,23 +155,11 @@ export default function GuideDashboardPage() {
  total: tours.length
  }
 
- const pendingRequests = bookings.filter(b => b.status === BookingStatus.PendingGuide).length
- 
- const totalTravelers = bookings
- .filter(b => b.status === BookingStatus.Completed || b.status === BookingStatus.Confirmed)
- .reduce((acc, b) => acc + b.peopleCount, 0)
-
  const activeTours = tours.filter(t => t.status === 'PUBLISHED').length
 
  return (
  <div className="min-h-[calc(100vh-4rem)]">
- {/* Background Decorative Elements */}
- <div className="fixed inset-0 pointer-events-none overflow-hidden">
- <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary-light/10 rounded-full blur-[120px]" />
- <div className="absolute bottom-[-10%] left-[-10%] w-[30%] h-[30%] bg-success-green/10 rounded-full blur-[100px]" />
- </div>
-
- <div className="relative pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+ <div className="relative pt-12 pb-12 px-4 sm:px-6 lg:px-8">
  <div className="max-w-7xl mx-auto">
  
  <OnboardingBannerWrapper 
@@ -212,14 +175,14 @@ export default function GuideDashboardPage() {
  >
  <div>
  <div className="flex items-center gap-3 mb-4">
- <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark dark:text-primary-dark rounded-full text-xs font-bold uppercase tracking-widest">
+ <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-xs font-bold uppercase tracking-widest">
  <Sparkles className="w-3 h-3" />
  {getGreeting()}
  </div>
  <VerificationBadge status={profile?.verificationStatus || 'not_submitted'} />
  </div>
- <h1 className="text-4xl sm:text-5xl font-black text-theme-primary tracking-tight leading-tight">
- Hi, {profile?.fullName.split(' ')[0] || 'Guide'}! <span className="text-primary-light dark:text-primary-dark">Growth</span> awaits.
+ <h1 className="text-4xl font-black text-theme-primary tracking-tight leading-tight">
+ Hi, {profile?.fullName.split(' ')[0] || 'Guide'}!
  </h1>
  </div>
 
@@ -228,13 +191,13 @@ export default function GuideDashboardPage() {
  <div className="relative group">
  <button
  disabled
- className="px-6 py-4 surface-section text-theme-muted rounded-3xl font-bold transition-all flex items-center gap-3 cursor-not-allowed border border-theme-strong"
+ className="px-6 py-3 surface-section text-theme-muted rounded-lg font-semibold flex items-center gap-2 cursor-not-allowed border border-theme"
  >
- <PlusCircle className="w-5 h-5" />
+ <PlusCircle className="w-4 h-4" />
  Create New Tour
  <Shield className="w-4 h-4 text-accent-light dark:text-accent-dark" />
  </button>
- <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-64 p-4 surface-base text-white text-xs rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-2xl z-50 border border-theme-strong">
+ <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-64 p-4 surface-base text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-2xl z-50 border border-theme">
  <p className="font-bold mb-1 text-amber-400 flex items-center gap-1">
  <AlertCircle className="w-3 h-3" /> Verification Required
  </p>
@@ -246,29 +209,22 @@ export default function GuideDashboardPage() {
  {profile?.verificationStatus !== 'approved' && <li>Get ID approved</li>}
  </ul>
  </div>
- <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-gray-900" />
  </div>
  </div>
  ) : (
  <Link
  href="/dashboard/guide/tours/new"
- className="px-6 py-4 bg-primary-light hover:bg-primary-light-hover text-white rounded-3xl font-bold shadow-xl shadow-primary-light/30 transition-all flex items-center gap-3 group"
+ className="px-6 py-3 bg-primary-light hover:bg-primary-light-hover text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
  >
- <PlusCircle className="w-5 h-5" />
+ <PlusCircle className="w-4 h-4" />
  Create New Tour
- <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
  </Link>
  )}
  </div>
  </motion.div>
  </div>
 
- <motion.div 
- initial={{ opacity: 0, scale: 0.95 }}
- animate={{ opacity: 1, scale: 1 }}
- transition={{ delay: 0.1 }}
- className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"
- >
+ <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
  <StatCard 
  icon={Calendar} 
  label="Total Tours" 
@@ -287,33 +243,30 @@ export default function GuideDashboardPage() {
  value={activeTours} 
  color="emerald" 
  />
- </motion.div>
+ </div>
 
  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
  {/* MAIN CONTENT AREA */}
  <div className="lg:col-span-2 space-y-8">
  
- {/* IMPACT SCORE DETAIL */}
- <GlassCard className="p-8 overflow-hidden relative group">
- <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-full blur-3xl -mr-32 -mt-32 group-hover:scale-110 transition-transform duration-1000" />
- 
- <div className="relative z-10">
- <div className="flex items-center justify-between mb-8">
- <div>
- <h2 className="text-2xl font-black text-theme-primary tracking-tight">Tour Inventory</h2>
- <p className="text-sm text-theme-muted font-medium">Status of your tour templates</p>
- </div>
- <div className="p-3 bg-primary-light/10 rounded-2xl">
- <LayoutDashboard className="w-6 h-6 text-primary-light dark:text-primary-dark" />
- </div>
- </div>
+ {/* TOUR INVENTORY */}
+ <GlassCard className="p-6 overflow-hidden relative">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-theme-primary">Tour Inventory</h2>
+            <p className="text-sm text-theme-muted">Status of your tour templates</p>
+          </div>
+          <div className="p-2.5 bg-primary-light/10 rounded-lg">
+            <LayoutDashboard className="w-5 h-5 text-primary-light dark:text-primary-dark" />
+          </div>
+        </div>
 
- <div className="space-y-6">
- <div className="space-y-2">
- <div className="flex justify-between text-xs font-black uppercase tracking-wider text-theme-muted">
- <span>Portfolio Balance</span>
- <span className="text-primary-light dark:text-primary-dark">{tourStats.total} Total</span>
- </div>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs font-semibold text-theme-muted">
+              <span>Portfolio Balance</span>
+              <span className="text-primary-light dark:text-primary-dark">{tourStats.total} Total</span>
+            </div>
  <div className="flex gap-1 h-2 surface-section rounded-full overflow-hidden">
  <div style={{ width: `${(tourStats.published / (tourStats.total || 1)) * 100}%` }} className="h-full bg-success-green" />
  <div style={{ width: `${(tourStats.pending / (tourStats.total || 1)) * 100}%` }} className="h-full bg-accent-light/10 dark:bg-accent-dark" />
@@ -335,16 +288,15 @@ export default function GuideDashboardPage() {
  </div>
  </div>
  </div>
- </div>
  </GlassCard>
 
  {/* UPCOMING SCHEDULE */}
- <GlassCard className="p-8">
- <div className="flex items-center justify-between mb-8">
- <div>
- <h2 className="text-2xl font-black text-theme-primary tracking-tight">Upcoming Schedule</h2>
- <p className="text-sm text-theme-muted font-medium">Manage your booked tour occurrences</p>
- </div>
+ <GlassCard className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-theme-primary">Upcoming Schedule</h2>
+            <p className="text-sm text-theme-muted">Manage your booked tour occurrences</p>
+          </div>
  <Link href="/dashboard/guide/tours" className="text-sm font-bold text-primary-light dark:text-primary-dark hover:text-blue-700 flex items-center gap-1 group">
  View All
  <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -357,7 +309,7 @@ export default function GuideDashboardPage() {
  <div 
  key={b.id} 
  onClick={() => router.push(`/dashboard/guide/bookings/${b.id}`)}
- className="p-6 surface-section border border-theme rounded-[2rem] hover:border-primary-light/50 hover:surface-card dark:hover:surface-card transition-all group mb-4 cursor-pointer"
+ className="p-4 surface-section border border-theme rounded-xl hover:border-primary-light/30 hover:surface-card transition-all cursor-pointer mb-3"
  >
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-4">
@@ -365,7 +317,7 @@ export default function GuideDashboardPage() {
  <Calendar className="w-6 h-6" />
  </div>
  <div>
- <h4 className="font-black text-theme-primary tracking-tight group-hover:text-primary-light dark:text-primary-dark transition-colors">
+ <h4 className="font-semibold text-theme-primary">
  {b.tourTitle}
  </h4>
  <div className="flex items-center gap-3 mt-1">
@@ -381,14 +333,6 @@ export default function GuideDashboardPage() {
  </div>
  </div>
  <div className="flex items-center gap-3">
- <Link 
- href={`/dashboard/guide/messages?tourId=${b.tourId}&bookingId=${b.id}`}
- onClick={(e) => e.stopPropagation()}
- className="p-2 bg-primary-light/10 text-primary-light dark:text-primary-dark dark:text-primary-dark rounded-xl hover:bg-primary-light/20 transition-all active:scale-95"
- title="Message Guest"
- >
- <MessageSquare className="w-4 h-4" />
- </Link>
  <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
  b.status === BookingStatus.Confirmed 
  ? 'bg-success-green/10 text-success-green' 
@@ -402,21 +346,19 @@ export default function GuideDashboardPage() {
  ))}
  </div>
  ) : (
- <div className="surface-section rounded-3xl p-12 text-center border-2 border-dashed border-theme">
- <div className="w-16 h-16 bg-primary-light/20 dark:bg-primary-dark/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
- <Calendar className="w-8 h-8 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
- </div>
- <h3 className="text-xl font-bold text-theme-primary mb-2">No booked tours yet</h3>
- <p className="text-theme-muted max-w-xs mx-auto mb-6 font-medium">
- You haven't received any bookings for the upcoming week. Promote your tours on social media!
- </p>
- <Link 
- href="/dashboard/guide/tours/new" 
- className="inline-flex items-center gap-2 px-6 py-3 surface-card border border-theme rounded-2xl text-sm font-black hover:surface-section dark:hover:surface-card transition-colors"
- >
- Manage Templates
- </Link>
- </div>
+          <div className="surface-section rounded-xl p-10 text-center border-2 border-dashed border-theme">
+            <Calendar className="w-8 h-8 text-theme-muted mx-auto mb-3" />
+            <h3 className="font-semibold text-theme-primary mb-2">No booked tours yet</h3>
+            <p className="text-sm text-theme-muted max-w-xs mx-auto mb-4">
+              You haven't received any bookings for the upcoming week.
+            </p>
+            <Link
+              href="/dashboard/guide/tours"
+              className="inline-flex items-center gap-2 px-4 py-2 surface-card border border-theme rounded-lg text-sm font-medium hover:surface-section transition-colors"
+            >
+              Manage Tours
+            </Link>
+          </div>
  )}
  </GlassCard>
  </div>
