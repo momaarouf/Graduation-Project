@@ -1,4 +1,4 @@
-﻿/*
+/*
  GLOBAL STYLES — ELECTRIC BLUE + ORANGE DESIGN SYSTEM
  ============================================================================
  PURPOSE:
@@ -171,8 +171,8 @@
  }
 
  .text-theme-muted {
- color: #7a96c0;
- .dark & { color: #2d5a96; }
+ color: #64748b;
+ .dark & { color: #94a3b8; }
  }
 
  /* ── BORDERS ──────────────────────────────────────────────────────────── */

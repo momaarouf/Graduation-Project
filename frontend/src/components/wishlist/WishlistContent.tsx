@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // WISHLIST CONTENT COMPONENT
 // ============================================================================
 // LOCATION: /frontend/src/components/wishlist/WishlistContent.tsx
@@ -77,7 +77,7 @@ const WishlistCard = ({ tour, onRemove, index }: { tour: PublicTourCardResponse;
  />
  {!isHovered && (
  <div className="absolute inset-0 flex items-center justify-center bg-black/10">
- <div className="p-3 surface-card  rounded-full">
+ <div className="p-3 bg-white/20 backdrop-blur-md rounded-full border border-white/30">
  <Play className="w-5 h-5 text-white fill-white" />
  </div>
  </div>
@@ -193,10 +193,10 @@ const WishlistCard = ({ tour, onRemove, index }: { tour: PublicTourCardResponse;
  <div className="flex items-center gap-3 mt-6">
  <Link
  href={`/tours/${tour.id}`}
- className="flex-1 flex items-center justify-center gap-2 px-6 py-3 surface-base text-white text-sm font-bold rounded-xl hover:bg-primary-light dark:hover:bg-primary-light dark:hover:text-white transition-all shadow-xl shadow-gray-200 dark:shadow-none active:scale-95"
+ className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-primary-light text-white text-sm font-bold rounded-xl hover:bg-primary-light-hover transition-all shadow-xl shadow-blue-500/10 active:scale-95"
  >
  Learn More
- <ChevronRight className="w-4 h-4" />
+ <ArrowRight className="w-4 h-4" />
  </Link>
  <button
  onClick={() => {
@@ -360,7 +360,7 @@ export default function WishlistContent() {
  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
  
  <div className="inline-flex items-center justify-center w-32 h-32 mb-8 surface-section rounded-[2.5rem] relative group">
- <Heart className="w-12 h-12 text-gray-200 transition-colors group-hover:text-red-400" />
+ <Heart className="w-12 h-12 text-theme-muted transition-colors group-hover:text-red-400" />
  <div className="absolute inset-0 bg-primary-light/5 rounded-full animate-ping pointer-events-none" />
  </div>
  
@@ -373,7 +373,7 @@ export default function WishlistContent() {
  
  <Link
  href="/tours"
- className="inline-flex items-center gap-3 px-10 py-5 surface-base text-white text-lg font-black rounded-2xl hover:bg-primary-light dark:hover:bg-primary-light dark:hover:text-white transition-all shadow-2xl shadow-gray-200 dark:shadow-none active:scale-95 group"
+ className="inline-flex items-center gap-3 px-10 py-5 bg-primary-light text-white text-lg font-black rounded-2xl hover:bg-primary-light-hover transition-all shadow-2xl shadow-blue-500/20 active:scale-95 group"
  >
  Explore Tours
  <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />

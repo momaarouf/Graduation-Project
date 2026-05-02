@@ -645,7 +645,7 @@ export default function SearchFilters({
  onChange={() => toggleBooleanFilter('hasAvailableSpots')}
  className="peer absolute opacity-0 w-5 h-5 cursor-pointer"
  />
- <div className={`w-5 h-5 border-[1.5px] rounded-md transition-all duration-200 flex items-center justify-center ${filters.hasAvailableSpots ? 'surface-base border-primary-light/20 dark:border-primary-dark/20-strong dark:border-primary-light/20 dark:border-primary-dark/20' : 'surface-card border-primary-light/20 dark:border-primary-dark/20-strong group-hover:border-primary-light/20 dark:border-primary-dark/20-strong dark:group-hover:border-primary-light/20 dark:border-primary-dark/20-strong'}`}>
+ <div className={`w-5 h-5 border-[1.5px] rounded-md transition-all duration-200 flex items-center justify-center ${filters.hasAvailableSpots ? 'bg-primary-light border-primary-light' : 'surface-card border-primary-light/20'}`}>
  {filters.hasAvailableSpots && (
  <Check className="w-3.5 h-3.5 text-white stroke-[3]" />
  )}
@@ -708,9 +708,9 @@ export default function SearchFilters({
  onChange={() => handleFilterChange({ minRating: option.id as MinRating })}
  className="peer absolute opacity-0 w-5 h-5 cursor-pointer"
  />
- <div className={`w-5 h-5 rounded-full border-[1.5px] flex items-center justify-center transition-all ${filters.minRating === option.id ? 'border-primary-light/20 dark:border-primary-dark/20-strong dark:border-primary-light/20 dark:border-primary-dark/20' : 'border-primary-light/20 dark:border-primary-dark/20-strong group-hover:border-primary-light/20 dark:border-primary-dark/20-strong dark:group-hover:border-primary-light/20 dark:border-primary-dark/20-strong'}`}>
+ <div className={`w-5 h-5 rounded-full border-[1.5px] flex items-center justify-center transition-all ${filters.minRating === option.id ? 'border-primary-light' : 'border-primary-light/20'}`}>
  {filters.minRating === option.id && (
- <div className="w-2.5 h-2.5 rounded-full surface-base " />
+ <div className="w-2.5 h-2.5 rounded-full bg-primary-light" />
  )}
  </div>
  </div>

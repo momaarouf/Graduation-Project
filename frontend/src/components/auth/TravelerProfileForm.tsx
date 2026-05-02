@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -230,8 +230,8 @@ export default function TravelerProfileForm({ onSubmit, initialData }: TravelerP
  FORM HEADER
  ======================================== */}
  <div className="text-center mb-8">
- <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-blue-100 ">
- <Heart className="w-8 h-8 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
+ <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-blue-100 dark:bg-blue-900/30">
+ <Heart className="w-8 h-8 text-primary-light dark:text-primary-dark" />
  </div>
  <h2 className="text-2xl font-bold text-theme-primary mb-2">
  Complete Your Profile
@@ -495,8 +495,8 @@ export default function TravelerProfileForm({ onSubmit, initialData }: TravelerP
  transition-all duration-200
  text-left
  ${isSelected
- ? 'border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark bg-primary-light/10 '
- : 'border-theme hover:border-primary-light dark:border-primary-dark dark:hover:border-primary-light dark:border-primary-dark'
+ ? 'border-primary-light dark:border-primary-dark bg-primary-light/10 '
+ : 'border-theme hover:border-primary-light dark:hover:border-primary-dark'
  }
  `}
  >
@@ -524,7 +524,7 @@ export default function TravelerProfileForm({ onSubmit, initialData }: TravelerP
  </p>
  </div>
  {isSelected && (
- <CheckCircle className="absolute top-2 right-2 w-3 h-3 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
+ <CheckCircle className="absolute top-2 right-2 w-3 h-3 text-primary-light dark:text-primary-dark" />
  )}
  </button>
  );

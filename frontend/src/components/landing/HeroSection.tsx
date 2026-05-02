@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // HERO SECTION - DUAL THEME COMPONENT
 // ============================================================================
 // LOCATION: /frontend/src/components/landing/HeroSection.tsx
@@ -122,7 +122,7 @@ export default function HeroSection() {
  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-theme-primary mb-4 sm:mb-6 px-2 leading-tight">
  Discover{' '}
  {/* Highlight 1 - Dual colors */}
- <span className="text-primary-light dark:text-primary-dark dark:text-primary-dark block sm:inline">
+ <span className="text-primary-light dark:text-primary-dark block sm:inline">
  Authentic Experiences
  </span>{' '}
  with{' '}
@@ -240,7 +240,7 @@ export default function HeroSection() {
  className="flex flex-col items-center gap-1.5 sm:gap-2 p-3 sm:p-4 rounded-lg sm:rounded-xl surface-card  border border-theme"
  >
  {/* Icon with dual colors */}
- <stat.icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
+ <stat.icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-primary-light dark:text-primary-dark" />
 
  {/* Value with dual colors */}
  <span className="text-lg sm:text-xl md:text-2xl font-bold text-theme-primary">

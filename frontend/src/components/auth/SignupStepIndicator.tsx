@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // SIGNUP STEP INDICATOR
 // ============================================================================
 // LOCATION: /frontend/src/components/auth/SignupStepIndicator.tsx
@@ -136,13 +136,13 @@ export default function SignupStepIndicator({
  w-8 h-8 rounded-full flex items-center justify-center
  border transition-all duration-300
  ${isCompleted || isCurrent
- ? 'border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark shadow-sm'
+ ? 'border-primary-light dark:border-primary-dark shadow-sm'
  : 'border-theme'
  }
  ${isCompleted
- ? 'bg-primary-light dark:bg-primary-light'
+ ? 'bg-primary-light dark:bg-primary-dark'
  : isCurrent
- ? 'bg-primary-light/10 '
+ ? 'bg-primary-light/10'
  : 'surface-card'
  }
  `}
@@ -154,8 +154,8 @@ export default function SignupStepIndicator({
  className={`
  text-[10px] font-black
  ${isCurrent
- ? 'text-primary-light dark:text-primary-dark dark:text-primary-dark '
- : 'text-theme-muted '
+ ? 'text-primary-light dark:text-primary-dark'
+ : 'text-theme-muted'
  }
  `}
  >
@@ -170,10 +170,10 @@ export default function SignupStepIndicator({
  className={`
  text-[10px] font-black uppercase tracking-widest
  ${isCurrent
- ? 'text-primary-light dark:text-primary-dark dark:text-primary-dark '
+ ? 'text-primary-light dark:text-primary-dark'
  : isCompleted
  ? 'text-theme-primary'
- : 'text-theme-muted '
+ : 'text-theme-muted'
  }
  `}
  >
@@ -193,13 +193,13 @@ export default function SignupStepIndicator({
  <p className="text-sm text-theme-secondary ">
  Step {steps.findIndex(s => s.step === currentStep) + 1} of {steps.length}
  </p>
- <p className="text-sm font-medium text-primary-light dark:text-primary-dark dark:text-primary-dark ">
+ <p className="text-sm font-medium text-primary-light dark:text-primary-dark ">
  {steps.find(s => s.step === currentStep)?.label}
  </p>
  </div>
  <div className="w-full h-1 surface-section rounded-full overflow-hidden">
  <div
- className="h-full bg-primary-light dark:bg-primary-light transition-all duration-500"
+ className="h-full bg-primary-light dark:bg-primary-dark transition-all duration-500"
  style={{
  width: `${
  ((steps.findIndex(s => s.step === currentStep) + 1) /

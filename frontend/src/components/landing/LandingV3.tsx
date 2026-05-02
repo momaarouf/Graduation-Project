@@ -80,7 +80,7 @@ function HeroV3() {
  Tourist Trail.
  </span>
  </h1>
- <p className="text-lg sm:text-xl text-theme-muted/50 font-medium tracking-wide mb-14 max-w-2xl mx-auto lg:mx-0">
+ <p className="text-lg sm:text-xl text-theme-muted font-medium tracking-wide mb-14 max-w-2xl mx-auto lg:mx-0">
  Connect with local experts who know the soul of every destination.
  </p>
 
@@ -137,10 +137,10 @@ function HeroV3() {
  style={{ opacity }}
  animate={{ y: [0, 10, 0] }} 
  transition={{ repeat: Infinity, duration: 2 }}
- className="absolute bottom-6 left-1/2 -translate-x-1/2 text-theme-muted/20 flex flex-col items-center gap-3 z-20"
+ className="absolute bottom-6 left-1/2 -translate-x-1/2 text-theme-muted/40 flex flex-col items-center gap-3 z-20"
  >
  <span className="text-[10px] uppercase tracking-[0.4em] font-black">Explore</span>
- <div className="w-px h-12 bg-gradient-to-b from-gray-300 to-transparent dark:from-white/10 dark:to-transparent" />
+ <div className="w-px h-12 bg-gradient-to-b from-gray-400 to-transparent dark:from-white/20 dark:to-transparent" />
  </motion.div>
  </section>
  )
@@ -190,10 +190,10 @@ function PremiumShowcase() {
  className="max-w-2xl"
  >
  <h2 className="text-4xl sm:text-6xl font-black text-theme-primary mb-6 tracking-tight leading-[0.9]">Local's Choice.</h2>
- <p className="text-lg text-theme-muted/40 leading-relaxed font-medium">Handpicked experiences from verified guides across the globe. No tourist traps, just the authentic pulse of every region.</p>
+ <p className="text-lg text-theme-muted leading-relaxed font-medium">Handpicked experiences from verified guides across the globe. No tourist traps, just the authentic pulse of every region.</p>
  </motion.div>
- <Link href="/tours" className="group flex items-center gap-3 text-primary-light dark:text-primary-dark dark:text-orange-500 font-black uppercase tracking-[0.2em] text-sm hover:gap-5 transition-all">
- Explore All Stories <ArrowRight className="w-5 h-5 text-primary-light dark:text-primary-dark dark:text-orange-500" />
+ <Link href="/tours" className="group flex items-center gap-3 text-primary-light dark:text-primary-dark hover:gap-5 transition-all font-black uppercase tracking-[0.2em] text-sm">
+ Explore All Stories <ArrowRight className="w-5 h-5 text-primary-light dark:text-primary-dark" />
  </Link>
  </div>
 
@@ -226,7 +226,7 @@ function PremiumShowcase() {
  <div className="relative">
  <div className="w-5 h-5 surface-card rounded-full animate-ping absolute inset-0 opacity-75" />
  <div className="w-5 h-5 surface-card rounded-full relative border-2 border-orange-500" />
- <div className="absolute left-7 top-1/2 -translate-y-1/2 px-5 py-2.5 surface-base  border border-theme rounded-2xl text-white text-xs font-black whitespace-nowrap opacity-0 group-hover/spot:opacity-100 transition-all pointer-events-none translate-x-4 group-hover/spot:translate-x-0">
+ <div className="absolute left-7 top-1/2 -translate-y-1/2 px-5 py-2.5 bg-slate-900 border border-slate-700 rounded-2xl text-white text-xs font-black whitespace-nowrap opacity-0 group-hover/spot:opacity-100 transition-all pointer-events-none translate-x-4 group-hover/spot:translate-x-0">
  {spot.label}
  </div>
  </div>
@@ -235,7 +235,7 @@ function PremiumShowcase() {
 
  <div className="absolute inset-x-12 bottom-12">
  <div className="flex items-center gap-4 mb-6">
- <span className="px-5 py-2 rounded-full surface-card  border border-theme text-white text-[10px] font-black uppercase tracking-widest">{tour.type}</span>
+ <span className="px-5 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-widest">{tour.type}</span>
  <span className="text-orange-400 font-black text-3xl">{tour.price}</span>
  </div>
  <h3 className="text-5xl font-black text-white mb-4 tracking-tight group-hover:text-orange-400 transition-colors">{tour.title}</h3>
@@ -328,12 +328,12 @@ function ProfessionalJourney() {
   <div className={`p-3 rounded-2xl surface-section bg-primary-light/15 dark:bg-primary-dark/15 text-primary-light dark:text-primary-dark transition-transform group-hover:scale-110`}>
   <Icon className="w-6 h-6" fill="currentColor" fillOpacity={0.15} />
  </div>
- <span className="px-3 py-1 rounded-full bg-primary-light/10 text-primary-light dark:text-primary-dark dark:text-primary-dark text-[9px] font-black uppercase tracking-widest border border-primary-light dark:border-primary-dark/20">
+ <span className="px-3 py-1 rounded-full bg-primary-light/10 text-primary-light dark:text-primary-dark text-[9px] font-black uppercase tracking-widest border border-primary-light/20 dark:border-primary-dark/20">
  {step.badge}
  </span>
  </div>
  <h3 className="text-2xl font-black text-theme-primary mb-3 tracking-tight">{step.title}</h3>
- <p className="text-theme-muted/50 text-lg leading-relaxed">{step.desc}</p>
+ <p className="text-theme-muted text-lg leading-relaxed">{step.desc}</p>
  </div>
  </motion.div>
 
@@ -388,7 +388,7 @@ function TrustPillars() {
     <Icon className="w-8 h-8" fill="currentColor" fillOpacity={0.15} />
  </div>
  <h4 className="text-2xl font-black text-theme-primary mb-3 tracking-tight">{p.title}</h4>
- <p className="text-theme-muted/40 text-[13px] leading-relaxed font-medium">{p.desc}</p>
+ <p className="text-theme-muted text-[13px] leading-relaxed font-medium">{p.desc}</p>
  </motion.div>
  )
  })}
@@ -448,7 +448,7 @@ export function LandingV3() {
  <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black text-theme-primary mb-6 leading-[0.9] tracking-tighter uppercase">
  Beyond the <br className="hidden sm:block" /> Tourist Trail.
  </h2>
- <p className="text-theme-muted/40 text-lg sm:text-xl max-w-3xl mx-auto font-medium leading-relaxed">
+ <p className="text-theme-muted text-lg sm:text-xl max-w-3xl mx-auto font-medium leading-relaxed">
  Experience the authentic soul of global destinations through the eyes of verified local experts. Trust is our foundation; adventure is our language.
  </p>
  </motion.div>
@@ -488,8 +488,8 @@ export function LandingV3() {
  >
   <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-orange-500/20 transition-all duration-700" />
  <div>
- <h3 className="text-4xl font-black text-theme-primary mb-4 tracking-tighter">Become a Local Expert</h3>
- <p className="text-theme-muted mb-10 text-xl leading-relaxed">Share your culture, build your reputation, and earn more with Whish payouts.</p>
+ <h3 className="text-4xl font-black text-white mb-4 tracking-tighter">Become a Local Expert</h3>
+ <p className="text-white/70 mb-10 text-xl leading-relaxed">Share your culture, build your reputation, and earn more with Whish payouts.</p>
  </div>
   <button className="inline-flex w-full justify-center py-5 bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600 rounded-xl font-black text-xl transition-all shadow-xl active:scale-95">Apply to Guide</button>
  </motion.div>

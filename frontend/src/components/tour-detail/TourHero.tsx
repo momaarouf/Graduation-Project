@@ -205,7 +205,7 @@ export default function TourHero({
  whileHover={{ scale: 1.1 }}
  whileTap={{ scale: 0.9 }}
  onClick={(e) => { e.stopPropagation(); handlePrev() }}
- className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 surface-card  rounded-lg flex items-center justify-center text-theme-primary hover:surface-card dark:hover:surface-base transition-all shadow-lg opacity-0 lg:opacity-100 group-hover:opacity-100 z-10"
+ className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-lg flex items-center justify-center text-white transition-all shadow-lg opacity-0 lg:opacity-100 group-hover:opacity-100 z-10"
  aria-label="Previous media"
  >
  <ChevronLeft className="w-5 h-5" />
@@ -215,7 +215,7 @@ export default function TourHero({
  whileHover={{ scale: 1.1 }}
  whileTap={{ scale: 0.9 }}
  onClick={(e) => { e.stopPropagation(); handleNext() }}
- className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 surface-card  rounded-lg flex items-center justify-center text-theme-primary hover:surface-card dark:hover:surface-base transition-all shadow-lg opacity-0 lg:opacity-100 group-hover:opacity-100 z-10"
+ className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-lg flex items-center justify-center text-white transition-all shadow-lg opacity-0 lg:opacity-100 group-hover:opacity-100 z-10"
  aria-label="Next media"
  >
  <ChevronRight className="w-5 h-5" />
@@ -535,7 +535,7 @@ export default function TourHero({
  <div className="flex items-center gap-3">
  <button
  onClick={() => setIsGalleryModalOpen(false)}
- className="w-12 h-12 rounded-lg surface-card hover:surface-card text-white flex items-center justify-center transition-colors  border border-theme-strong"
+ className="w-12 h-12 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors border border-white/20 backdrop-blur-md"
  >
  <X className="w-6 h-6" />
  </button>
@@ -546,7 +546,7 @@ export default function TourHero({
  {zoomScale === 1 && (
  <button
  onClick={(e) => { e.stopPropagation(); handlePrev(); setZoomScale(1) }}
- className="absolute left-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-lg surface-card hover:surface-card text-white flex items-center justify-center transition-all  border border-theme-strong z-[110]"
+ className="absolute left-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all border border-white/20 backdrop-blur-md z-[110]"
  >
  <ChevronLeft className="w-8 h-8" />
  </button>
@@ -623,7 +623,7 @@ export default function TourHero({
  <div className="flex items-center gap-1 border-r border-primary-light/10 dark:border-primary-dark/10-strong pr-3">
  <button 
  onClick={(e) => { e.stopPropagation(); handleZoomOut() }}
- className="p-2 hover:surface-card rounded-lg text-white/70 hover:text-white transition-colors"
+ className="p-2 hover:bg-white/10 rounded-lg text-white/70 hover:text-white transition-colors"
  title="Zoom Out"
  >
  <Minus className="w-5 h-5" />
@@ -633,7 +633,7 @@ export default function TourHero({
  </span>
  <button 
  onClick={(e) => { e.stopPropagation(); handleZoomIn() }}
- className="p-2 hover:surface-card rounded-lg text-white/70 hover:text-white transition-colors"
+ className="p-2 hover:bg-white/10 rounded-lg text-white/70 hover:text-white transition-colors"
  title="Zoom In"
  >
  <Plus className="w-5 h-5" />
@@ -641,7 +641,7 @@ export default function TourHero({
  </div>
  <button 
  onClick={(e) => { e.stopPropagation(); handleResetZoom() }}
- className="px-3 py-1.5 hover:surface-card rounded-xl text-xs font-black text-white/70 hover:text-white transition-colors flex items-center gap-1.5"
+ className="px-3 py-1.5 hover:bg-white/10 rounded-xl text-xs font-black text-white/70 hover:text-white transition-colors flex items-center gap-1.5"
  title="Reset Zoom"
  >
  <RotateCcw className="w-3.5 h-3.5" />
@@ -654,7 +654,7 @@ export default function TourHero({
  {zoomScale === 1 && (
  <button
  onClick={(e) => { e.stopPropagation(); handleNext(); setZoomScale(1) }}
- className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-lg surface-card hover:surface-card text-white flex items-center justify-center transition-all  border border-theme-strong z-[110]"
+ className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all border border-white/20 backdrop-blur-md z-[110]"
  >
  <ChevronRight className="w-8 h-8" />
  </button>

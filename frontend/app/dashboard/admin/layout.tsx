@@ -110,83 +110,84 @@ const NAV_ITEMS = [
 // ============================================================================
 
 interface NavItemProps {
- item: typeof NAV_ITEMS[0] & { badge?: number }
- isActive: boolean
- isCollapsed: boolean
- onClick?: () => void
+	item: typeof NAV_ITEMS[0] & { badge?: number }
+	isActive: boolean
+	isCollapsed: boolean
+	onClick?: () => void
 }
 
 const NavItem = ({ item, isActive, isCollapsed, onClick }: NavItemProps) => {
- const Icon = item.icon
- 
- const colorClasses = {
- blue: isActive 
- ? 'bg-primary-light text-white' 
- : 'text-theme-secondary hover:bg-primary-light/10 dark:hover:surface-base hover:text-primary-light dark:text-primary-dark dark:hover:text-primary-dark ',
- amber: isActive 
- ? 'bg-accent-light text-white' 
- : 'text-theme-secondary hover:bg-accent-light/10 dark:bg-accent-dark/10 dark:hover:bg-amber-950/30 hover:text-accent-light dark:text-accent-dark dark:hover:text-amber-400',
- red: isActive 
- ? 'bg-danger-red text-white' 
- : 'text-theme-secondary hover:bg-danger-red/10 dark:hover:bg-red-950/30 hover:text-danger-red dark:hover:text-red-400',
- purple: isActive 
- ? 'bg-primary-light text-white' 
- : 'text-theme-secondary hover:bg-primary-light/10 dark:hover:bg-purple-950/30 hover:text-primary-light dark:hover:text-purple-400',
- emerald: isActive 
- ? 'bg-success-green text-white' 
- : 'text-theme-secondary hover:bg-success-green/10 dark:hover:bg-emerald-950/30 hover:text-success-green dark:hover:text-emerald-400',
- indigo: isActive 
- ? 'bg-primary-light text-white' 
- : 'text-theme-secondary hover:bg-primary-light/10 dark:hover:bg-indigo-950/30 hover:text-primary-light dark:hover:text-indigo-400',
- gray: isActive 
- ? 'surface-section text-white' 
- : 'text-theme-secondary hover:surface-section dark:hover:surface-card hover:text-theme-primary dark:hover:text-gray-200'
- }
+	const Icon = item.icon
+	
+	const colorClasses = {
+		blue: isActive 
+			? 'bg-primary-light text-white shadow-lg shadow-blue-500/20' 
+			: 'text-theme-secondary hover:bg-primary-light/10 dark:hover:bg-blue-900/30 hover:text-primary-light dark:text-primary-dark',
+		amber: isActive 
+			? 'bg-amber-600 text-white shadow-lg shadow-amber-500/20' 
+			: 'text-theme-secondary hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-amber-600 dark:text-amber-400',
+		red: isActive 
+			? 'bg-danger-red text-white shadow-lg shadow-red-500/20' 
+			: 'text-theme-secondary hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-danger-red dark:text-red-400',
+		purple: isActive 
+			? 'bg-purple-600 text-white shadow-lg shadow-purple-500/20' 
+			: 'text-theme-secondary hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:text-purple-600 dark:text-purple-400',
+		emerald: isActive 
+			? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' 
+			: 'text-theme-secondary hover:bg-emerald-50 dark:hover:bg-emerald-950/30 hover:text-emerald-600 dark:text-emerald-400',
+		indigo: isActive 
+			? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' 
+			: 'text-theme-secondary hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:text-indigo-400',
+		gray: isActive 
+			? 'bg-slate-900 dark:bg-slate-800 text-white shadow-lg' 
+			: 'text-theme-secondary hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-theme-primary dark:text-theme-secondary dark:hover:text-white'
+	}
 
- return (
- <Link
- href={item.href}
- onClick={onClick}
- className={`
- relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
- ${colorClasses[item.color as keyof typeof colorClasses]}
- ${isCollapsed ? 'justify-center' : 'justify-start'}
- group
- `}
- >
- <Icon className="w-5 h-5 flex-shrink-0" />
- 
- {!isCollapsed && (
- <>
- <span className="text-sm font-medium flex-1">{item.name}</span>
- {item.badge && item.badge > 0 && (
- <span className="px-1.5 py-0.5 bg-danger-red text-white text-[10px] font-bold rounded-full min-w-[18px] text-center">
- {item.badge}
- </span>
- )}
- </>
- )}
+	return (
+		<Link
+			href={item.href}
+			onClick={onClick}
+			className={`
+				relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 active:scale-95
+				${colorClasses[item.color as keyof typeof colorClasses]}
+				${isCollapsed ? 'justify-center' : 'justify-start'}
+				group
+			`}
+		>
+			<Icon className="w-5 h-5 flex-shrink-0" />
+			
+			{!isCollapsed && (
+				<>
+					<span className="text-sm font-medium flex-1">{item.name}</span>
+					{item.badge && item.badge > 0 && (
+						<span className="px-1.5 py-0.5 bg-danger-red text-white text-[10px] font-bold rounded-full min-w-[18px] text-center">
+							{item.badge}
+						</span>
+					)}
+				</>
+			)}
 
- {isCollapsed && item.badge && item.badge > 0 && (
- <span className="absolute -top-1 -right-1 w-4 h-4 bg-danger-red text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-theme ">
- {item.badge}
- </span>
- )}
+			{isCollapsed && item.badge && item.badge > 0 && (
+				<span className="absolute -top-1 -right-1 w-4 h-4 bg-danger-red text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-theme ">
+					{item.badge}
+				</span>
+			)}
 
- {/* Tooltip for collapsed mode */}
- {isCollapsed && (
- <div className="absolute left-full ml-2 px-2 py-1 surface-base text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
- {item.name}
- {item.badge && item.badge > 0 && ` (${item.badge})`}
- </div>
- )}
- </Link>
- )
+			{/* Tooltip for collapsed mode */}
+			{isCollapsed && (
+				<div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 border border-slate-700 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl">
+					{item.name}
+					{item.badge && item.badge > 0 && ` (${item.badge})`}
+				</div>
+			)}
+		</Link>
+	)
 }
 
 // ============================================================================
 // MAIN LAYOUT
 // ============================================================================
+
 
 import Navigation from '@/src/components/layout/Navigation'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
@@ -380,7 +381,7 @@ export default function AdminLayout({
  {isMobileOpen && (
  <div className="lg:hidden fixed inset-0 z-50 flex">
  <div
- className="fixed inset-0 bg-black/50  transition-opacity"
+						className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"
  onClick={() => setIsMobileOpen(false)}
  />
  <div className="relative w-64 surface-card h-full overflow-y-auto shadow-2xl">

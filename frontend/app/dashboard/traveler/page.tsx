@@ -291,7 +291,7 @@ export default function TravelerDashboardPage() {
  className="flex flex-col md:flex-row md:items-end justify-between gap-6"
  >
  <div>
- <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark dark:text-primary-dark rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+ <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-xs font-bold uppercase tracking-widest mb-4">
  <Sparkles className="w-3 h-3" />
  {getGreeting()}
  </div>
@@ -441,7 +441,7 @@ export default function TravelerDashboardPage() {
  {/* RECENT ACTIVITY */}
  <GlassCard className="p-6">
  <div className="flex items-center gap-3 mb-4">
- <div className="p-2 bg-primary-light/20 dark:bg-primary-dark/20 text-primary-light dark:text-primary-dark dark:text-primary-dark rounded-xl">
+ <div className="p-2 bg-primary-light/20 dark:bg-primary-dark/20 text-primary-light dark:text-primary-dark rounded-xl">
  <Clock className="w-5 h-5" />
  </div>
  <h3 className="font-bold text-theme-primary">Recent Activity</h3>

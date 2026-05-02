@@ -46,10 +46,10 @@ function GlassCard({ children, className ="" }: { children: React.ReactNode, cla
 
 function StatCard({ icon: Icon, label, value, color }: { icon: any, label: string, value: string | number, color: 'blue' | 'amber' | 'emerald' | 'purple' }) {
   const iconColors: Record<string, string> = {
-    blue: 'bg-primary-light/10 text-primary-light dark:text-primary-dark',
-    amber: 'bg-accent-light/10 text-accent-light dark:text-accent-dark',
-    emerald: 'bg-success-green/10 text-success-green',
-    purple: 'bg-primary-light/10 text-primary-light dark:text-primary-dark'
+    blue: 'bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark',
+    amber: 'bg-accent-light/10 dark:bg-accent-dark/10 text-accent-light dark:text-accent-dark',
+    emerald: 'bg-success-green/10 dark:bg-emerald-500/10 text-success-green dark:text-emerald-400',
+    purple: 'bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark'
   }
 
   return (
@@ -72,9 +72,9 @@ function VerificationBadge({ status }: { status: string }) {
   
   const config = {
     pending: { bg: 'bg-accent-light/10 dark:bg-accent-dark/10', text: 'text-accent-light dark:text-accent-dark', icon: Clock, label: 'Pending' },
-    approved: { bg: 'bg-success-green/10', text: 'text-success-green', icon: CheckCircle, label: 'Verified' },
-    verified: { bg: 'bg-success-green/10', text: 'text-success-green', icon: CheckCircle, label: 'Verified' },
-    rejected: { bg: 'bg-danger-red/10', text: 'text-danger-red', icon: AlertCircle, label: 'Failed' },
+    approved: { bg: 'bg-success-green/10 dark:bg-emerald-500/10', text: 'text-success-green dark:text-emerald-400', icon: CheckCircle, label: 'Verified' },
+    verified: { bg: 'bg-success-green/10 dark:bg-emerald-500/10', text: 'text-success-green dark:text-emerald-400', icon: CheckCircle, label: 'Verified' },
+    rejected: { bg: 'bg-danger-red/10 dark:bg-red-500/10', text: 'text-danger-red dark:text-red-400', icon: AlertCircle, label: 'Failed' },
     not_submitted: { bg: 'surface-section', text: 'text-theme-secondary', icon: Shield, label: 'Not Verified' }
   }
 
@@ -174,7 +174,7 @@ export default function GuideDashboardPage() {
  className="flex flex-col md:flex-row md:items-end justify-between gap-6"
  >
  <div>
- <div className="flex items-center gap-3 mb-4">
+ <div className="flex items-center gap-3">
  <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-xs font-bold uppercase tracking-widest">
  <Sparkles className="w-3 h-3" />
  {getGreeting()}
@@ -197,7 +197,7 @@ export default function GuideDashboardPage() {
  Create New Tour
  <Shield className="w-4 h-4 text-accent-light dark:text-accent-dark" />
  </button>
- <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-64 p-4 surface-base text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-2xl z-50 border border-theme">
+ <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-64 p-4 bg-slate-900 dark:bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-2xl z-50 border border-slate-700">
  <p className="font-bold mb-1 text-amber-400 flex items-center gap-1">
  <AlertCircle className="w-3 h-3" /> Verification Required
  </p>

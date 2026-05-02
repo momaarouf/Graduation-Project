@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // SIGNUP PAGE - LOADING SKELETON
 // ============================================================================
 // LOCATION: /frontend/src/app/auth/signup/loading.tsx
@@ -87,11 +87,11 @@ export default function SignupLoading() {
  </div>
  </div>
 
- {/* Guide Card Skeleton */}
- <div className="bg-gradient-to-br surface-section border-2 border-blue-200 dark:border-blue-800 rounded-2xl overflow-hidden animate-pulse">
- <div className="p-6 sm:p-8 space-y-6">
- {/*"POPULAR" BADGE */}
- <div className="w-16 h-5 surface-section rounded-full" />
+        {/* Guide Card Skeleton */}
+        <div className="surface-card border border-theme rounded-2xl overflow-hidden animate-pulse">
+          <div className="p-6 sm:p-8 space-y-6">
+            {/* "POPULAR" BADGE */}
+            <div className="w-16 h-5 surface-section rounded-full" />
 
  {/* Icon */}
  <div className="w-14 h-14 surface-section rounded-xl" />

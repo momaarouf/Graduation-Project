@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // GUIDE PROFILE FORM - STEP 3 (GUIDE)
 // ============================================================================
 // LOCATION: /frontend/src/components/auth/GuideProfileForm.tsx
@@ -157,7 +157,7 @@ function LanguageSelector({ onAdd, existingLanguages }: LanguageSelectorProps) {
  rounded-xl
  text-sm font-medium
  text-theme-secondary hover:border-primary-light dark:hover:border-primary-dark hover:text-primary-light dark:text-primary-dark
- dark:hover:border-primary-light dark:hover:border-primary-dark dark:hover:text-primary-dark transition-all
+ transition-all
 "
  >
  <Plus className="w-4 h-4" />
@@ -187,7 +187,7 @@ function LanguageSelector({ onAdd, existingLanguages }: LanguageSelectorProps) {
  rounded-lg
  text-sm text-left
  text-theme-primary
- hover:border-primary-light dark:hover:border-primary-dark dark:hover:border-primary-light dark:hover:border-primary-dark
+ hover:border-primary-light dark:hover:border-primary-dark
  focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark/20
  transition-all
 ">
@@ -224,7 +224,7 @@ function LanguageSelector({ onAdd, existingLanguages }: LanguageSelectorProps) {
  >
  {({ selected }) => (
  <div className="flex items-center justify-between">
- <span className={selected ? 'text-primary-light dark:text-primary-dark dark:text-primary-dark ' : 'text-theme-primary'}>
+ <span className={selected ? 'text-primary-light dark:text-primary-dark' : 'text-theme-primary'}>
  {lang.name}
  </span>
  <span className="text-xs text-theme-muted ">
@@ -256,7 +256,7 @@ function LanguageSelector({ onAdd, existingLanguages }: LanguageSelectorProps) {
  rounded-lg
  text-sm text-left
  text-theme-primary
- hover:border-primary-light dark:hover:border-primary-dark dark:hover:border-primary-light dark:hover:border-primary-dark
+ hover:border-primary-light dark:hover:border-primary-dark
  focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark/20
  transition-all
 ">
@@ -293,11 +293,11 @@ function LanguageSelector({ onAdd, existingLanguages }: LanguageSelectorProps) {
  {({ selected }) => (
  <div>
  <div className="flex items-center justify-between">
- <span className={selected ? 'text-primary-light dark:text-primary-dark dark:text-primary-dark ' : 'text-theme-primary'}>
+ <span className={selected ? 'text-primary-light dark:text-primary-dark' : 'text-theme-primary'}>
  {level.label}
  </span>
  {selected && (
- <CheckCircle className="w-4 h-4 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
+ <CheckCircle className="w-4 h-4 text-primary-light dark:text-primary-dark" />
  )}
  </div>
  <p className="text-xs text-theme-muted mt-0.5">
@@ -559,7 +559,7 @@ if (isValid) {
 "
  >
  <div className="flex items-center gap-3">
- <Globe className="w-4 h-4 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
+ <Globe className="w-4 h-4 text-primary-light dark:text-primary-dark" />
  <div>
  <span className="text-sm font-medium text-theme-primary">
  {lang.language}
@@ -619,7 +619,7 @@ if (isValid) {
  className="
  inline-flex items-center gap-1.5
  px-3 py-1.5
- bg-blue-100 
+ bg-primary-light/10
  text-blue-700 dark:text-blue-300
  text-sm
  rounded-full
@@ -750,7 +750,7 @@ if (isValid) {
  p-4
  bg-gradient-to-br from-blue-50 to-indigo-50
  dark:from-blue-950/30 dark:to-indigo-950/30
- border border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark
+ border border-primary-light dark:border-primary-dark
  rounded-xl
 ">
  <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">

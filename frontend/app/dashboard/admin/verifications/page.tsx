@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
@@ -192,8 +192,8 @@ export default function AdminVerificationQueuePage() {
  <button
  onClick={() => setActiveTab('pending')}
  className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
- activeTab === 'pending'
- ? 'surface-card text-primary-light dark:text-primary-dark dark:text-primary-dark shadow-sm'
+  activeTab === 'pending'
+  ? 'surface-card text-primary-light dark:text-primary-dark shadow-sm'
  : 'text-theme-muted hover:text-theme-secondary dark:hover:text-gray-300'
  }`}
  >
@@ -231,11 +231,11 @@ export default function AdminVerificationQueuePage() {
  setZoom(100)
  setSelectedDocType('front')
  }}
- className={`p-4 rounded-2xl border transition-all cursor-pointer group ${
- selectedVerification?.id === v.id
- ? 'bg-primary-light/10 border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark shadow-md scale-[1.02]'
- : 'surface-card border-theme hover:border-primary-light dark:border-primary-dark dark:hover:border-primary-light dark:border-primary-dark hover:shadow-sm'
- }`}
+                className={`p-4 rounded-2xl border transition-all cursor-pointer group ${
+                  selectedVerification?.id === v.id
+                  ? 'bg-primary-light/10 border-primary-light dark:border-primary-dark shadow-md scale-[1.02]'
+                  : 'surface-card border-theme hover:border-primary-light dark:hover:border-primary-dark hover:shadow-sm'
+                }`}
  >
  <div className="flex items-center gap-4">
  <div className="w-12 h-12 rounded-xl surface-section flex items-center justify-center text-theme-muted overflow-hidden border border-theme">
@@ -365,7 +365,7 @@ export default function AdminVerificationQueuePage() {
  {selectedVerification.user?.email}
  </span>
  <span className="w-1 h-1 rounded-full surface-section" />
- <span className="flex items-center gap-1.5 text-xs text-theme-muted font-bold text-primary-light dark:text-primary-dark dark:text-primary-dark ">
+ <span className="flex items-center gap-1.5 text-xs text-theme-muted font-bold text-primary-light dark:text-primary-dark">
  <FileText className="w-3.5 h-3.5" />
  {selectedVerification.idDocumentType || 'ID Document'}
  </span>
@@ -408,9 +408,9 @@ export default function AdminVerificationQueuePage() {
  </motion.div>
  ) : (
  <div className="h-full flex flex-col items-center justify-center text-center p-8 surface-section rounded-3xl border-2 border-dashed border-theme">
- <div className="w-20 h-20 surface-card rounded-full flex items-center justify-center shadow-lg border border-theme mb-4 text-blue-100 dark:text-blue-900">
- <Eye className="w-10 h-10 text-primary-light dark:text-primary-dark" />
- </div>
+  <div className="w-20 h-20 surface-card rounded-full flex items-center justify-center shadow-lg border border-theme mb-4">
+  <Eye className="w-10 h-10 text-primary-light dark:text-primary-dark" />
+  </div>
  <h3 className="text-lg font-bold text-theme-primary mb-2">Select a request to review</h3>
  <p className="text-sm text-theme-muted max-w-xs">
  Choose a guide from the sidebar to view their identity documents and verification status.

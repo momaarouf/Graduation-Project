@@ -379,11 +379,11 @@ Thank you for choosing TravelMarket!
  <div className="text-center mb-8">
  <div className={`inline-flex items-center justify-center w-20 h-20 mb-4 rounded-full ${
  booking.status === BookingStatus.PendingPayment 
- ? 'bg-indigo-100 dark:bg-indigo-900/30 ring-8 ring-indigo-50 dark:ring-indigo-950/20' 
+ ? 'bg-primary-light/10 dark:bg-primary-dark/10 ring-8 ring-primary-light/5 dark:ring-primary-dark/5' 
  : 'bg-emerald-100 dark:bg-emerald-900/30'
  }`}>
  {booking.status === BookingStatus.PendingPayment ? (
- <Clock className="w-10 h-10 text-indigo-600 dark:text-indigo-400 animate-pulse" />
+ <Clock className="w-10 h-10 text-primary-light dark:text-primary-dark animate-pulse" />
  ) : (
  <CheckCircle className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
  )}
@@ -403,7 +403,7 @@ Thank you for choosing TravelMarket!
 
  {booking.status === BookingStatus.PendingPayment && (
  <div className="mt-8 max-w-xl mx-auto text-left">
- <div className="surface-card border border-indigo-100 dark:border-indigo-900 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl shadow-indigo-500/10">
+ <div className="surface-card border border-primary-light/20 dark:border-primary-dark/20 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl shadow-blue-500/10">
  <div className="flex items-center justify-between mb-6">
  <div>
  <h3 className="text-lg font-black text-theme-primary uppercase tracking-tight">Checkout</h3>
@@ -415,7 +415,7 @@ Thank you for choosing TravelMarket!
  ? 'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 animate-pulse'
  : countdown.urgency === 'warning'
  ? 'bg-orange-50 dark:bg-orange-950/50 border-orange-200 dark:border-orange-800 text-orange-600 dark:text-orange-400 animate-pulse'
- : 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-100 dark:border-indigo-900 text-indigo-600 dark:text-indigo-400'
+ : 'bg-primary-light/10 dark:bg-primary-dark/10 border-primary-light/20 dark:border-primary-dark/20 text-primary-light dark:text-primary-dark'
  }`}>
  Reserved for {countdown.displayString}
  </div>
@@ -534,7 +534,7 @@ Thank you for choosing TravelMarket!
  </div>
  <span className={`px-3 py-1 text-xs font-black uppercase tracking-widest rounded-full border ${
  booking.status === BookingStatus.PendingPayment
- ? 'bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 border-indigo-100 dark:border-indigo-900'
+ ? 'bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark border-primary-light/20 dark:border-primary-dark/20'
  : isPending
  ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
  : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
@@ -577,7 +577,7 @@ Thank you for choosing TravelMarket!
  </div>
 
  <div className="flex items-start gap-3">
- <DollarSign className="w-5 h-5 text-indigo-500 mt-0.5" />
+ <DollarSign className="w-5 h-5 text-primary-light dark:text-primary-dark mt-0.5" />
  <div>
  <p className="text-xs text-theme-muted ">{booking.status === BookingStatus.PendingPayment ? 'Amount Due' : 'Total Paid'}</p>
  <p className="font-bold text-theme-primary">
@@ -656,11 +656,11 @@ Thank you for choosing TravelMarket!
  </div>
 
  {/* Next Steps */}
- <div className="bg-primary-light/10 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
- <h3 className="font-bold text-blue-900 dark:text-blue-100 mb-3">
+ <div className="bg-primary-light/10 border border-primary-light/20 dark:border-primary-dark/20 rounded-xl p-6">
+ <h3 className="font-bold text-primary-light dark:text-primary-dark mb-3">
  What&apos;s Next?
  </h3>
- <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
+ <ul className="space-y-2 text-sm text-theme-secondary dark:text-theme-muted">
  <li className="flex items-start gap-2">
  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
  <span>

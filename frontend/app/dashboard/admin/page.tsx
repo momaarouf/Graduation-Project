@@ -43,20 +43,18 @@ interface StatCardProps {
 }
 
 const StatCard = ({ title, value, direction, trend, icon: Icon, color, isLoading }: StatCardProps) => {
- const colorClasses = {
- blue: 'bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark border-primary-light/20 dark:border-primary-dark/20',
- amber: 'bg-accent-light/10 dark:bg-accent-dark/10 text-accent-light dark:text-accent-dark border-accent-light/20 dark:border-accent-dark/20',
- emerald: 'bg-success-green/10 text-success-green border-success-green/20',
- purple: 'bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark border-primary-light/20 dark:border-primary-dark/20'
- }
-
- 
+  const colorClasses = {
+    blue: 'bg-blue-50 dark:bg-primary-dark/10 text-blue-700 dark:text-primary-dark border-blue-200 dark:border-primary-dark/20',
+    amber: 'bg-amber-50 dark:bg-accent-dark/10 text-amber-700 dark:text-accent-dark border-amber-200 dark:border-accent-dark/20',
+    emerald: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20',
+    purple: 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800'
+  }
 
  const iconClasses = {
- blue: 'bg-primary-light/20 dark:bg-primary-dark/20 dark:bg-primary-light-hover/30 text-primary-light dark:text-primary-dark',
- amber: 'bg-accent-light/20 dark:bg-accent-dark/20 dark:bg-amber-800/30 text-accent-light dark:text-accent-dark',
- emerald: 'bg-success-green/20 dark:bg-emerald-800/30 text-success-green',
- purple: 'bg-purple-100 dark:bg-purple-800/30 text-purple-600'
+  blue: 'bg-primary-light/20 dark:bg-primary-dark/20 text-primary-light dark:text-primary-dark',
+  amber: 'bg-accent-light/20 dark:bg-accent-dark/20 text-accent-light dark:text-accent-dark',
+  emerald: 'bg-success-green/20 dark:bg-emerald-800/30 text-success-green dark:text-emerald-400',
+  purple: 'bg-indigo-200 dark:bg-indigo-800/50 text-indigo-700 dark:text-indigo-300'
  }
 
  return (
@@ -139,7 +137,7 @@ export default function AdminDashboardPage() {
  {/* Header Section */}
  <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
  <div>
- <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark dark:text-primary-dark rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+ <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-xs font-bold uppercase tracking-widest mb-4">
  <Sparkles className="w-3 h-3" />
  {getGreeting()}
  </div>
@@ -188,7 +186,7 @@ export default function AdminDashboardPage() {
  <History className="w-4 h-4 text-theme-muted" />
  Recent System Activity
  </h2>
- <Link href="/dashboard/admin/audit" className="text-xs text-primary-light dark:text-primary-dark dark:text-primary-dark hover:underline flex items-center font-medium">
+ <Link href="/dashboard/admin/audit" className="text-xs text-primary-light dark:text-primary-dark hover:underline flex items-center font-medium">
  View All <ArrowRight className="w-3 h-3 ml-1" />
  </Link>
  </div>
@@ -209,7 +207,7 @@ export default function AdminDashboardPage() {
  <div key={event.id} className="p-4 flex items-start gap-4 hover:surface-section dark:hover:surface-card transition-colors">
  <div className={`p-2 rounded-xl flex-shrink-0 ${
  event.action.includes('BAN') || event.action.includes('SUSPEND') 
- ? 'bg-danger-red/10 text-danger-red dark:bg-red-900/10' 
+ ? 'bg-danger-red/10 text-danger-red dark:text-red-400' 
  : 'surface-section text-theme-secondary'
  }`}>
  <AlertCircle className="w-5 h-5" />
@@ -256,7 +254,7 @@ export default function AdminDashboardPage() {
  Pending Review
  </h2>
  {stats.pendingVerifications > 0 && (
- <span className="bg-accent-light/20 dark:bg-accent-dark/20 dark:bg-amber-900/30 text-accent-light dark:text-accent-dark dark:text-amber-400 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+ <span className="bg-accent-light/20 dark:bg-accent-dark/20 text-accent-light dark:text-accent-dark text-[10px] font-bold px-1.5 py-0.5 rounded-full">
  {stats.pendingVerifications}
  </span>
  )}
@@ -277,7 +275,7 @@ export default function AdminDashboardPage() {
  pendingVerifs.map((verif) => (
  <div key={verif.id} className="flex items-center justify-between group">
  <div className="flex items-center gap-3">
- <div className="w-9 h-9 rounded-full bg-primary-light/20 dark:bg-primary-dark/20 text-primary-light dark:text-primary-dark dark:text-primary-dark flex items-center justify-center font-bold text-xs">
+ <div className="w-9 h-9 rounded-full bg-primary-light/20 dark:bg-primary-dark/20 text-primary-light dark:text-primary-dark flex items-center justify-center font-bold text-xs">
  {verif.user.fullName?.[0] || 'G'}
  </div>
  <div className="min-w-0">

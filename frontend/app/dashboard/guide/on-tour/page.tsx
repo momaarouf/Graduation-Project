@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // GUIDE ON-TOUR TOOLKIT — WIRED TO REAL BACKEND
 // ============================================================================
 // LOCATION: /frontend/app/dashboard/guide/on-tour/page.tsx
@@ -15,7 +15,7 @@
 
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
@@ -42,7 +42,8 @@ import {
  Loader2,
  Info,
  Sparkles,
- ExternalLink
+  ExternalLink,
+  AlertCircle
 } from 'lucide-react'
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from '@headlessui/react'
 
@@ -223,240 +224,213 @@ function TourStatusBadge({ status }: TourStatusBadgeProps) {
 // QR SCANNER MODAL
 // ============================================================================
 
+import { Html5Qrcode } from 'html5-qrcode'
+
 interface QRScannerModalProps {
- isOpen: boolean
- onClose: () => void
- onScan: (qrData: string) => void
+  isOpen: boolean
+  onClose: () => void
+  onScan: (qrData: string) => void
 }
 
 function QRScannerModal({ isOpen, onClose, onScan }: QRScannerModalProps) {
- const [scanning, setScanning] = useState(false)
- const [scannedData, setScannedData] = useState('')
- // Manual input fallback — guide can type the UUID if camera fails
- const [manualInput, setManualInput] = useState('')
+  const [scanning, setScanning] = useState(false)
+  const [scannedData, setScannedData] = useState('')
+  const [manualInput, setManualInput] = useState('')
+  const [cameraError, setCameraError] = useState<string | null>(null)
+  const scannerRef = useRef<Html5Qrcode | null>(null)
+  const regionId ="reader"
 
- if (!isOpen) return null
+  useEffect(() => {
+    if (isOpen && !scannerRef.current) {
+      // Check if browser supports camera access
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setCameraError("Your browser doesn't support camera access or you are not using HTTPS.")
+        return
+      }
 
- // Simulate a QR scan. In production, this would use a real scanner library.
- // For this project, we provide a"Scan from Clipboard" button to make 
- // it easy to test with the traveler's token.
- const handleSimulateScan = () => {
- setScanning(true)
- setTimeout(() => {
- if (manualInput.trim()) {
- setScannedData(manualInput.trim())
- }
- setScanning(false)
- }, 1200)
- }
+      const html5QrCode = new Html5Qrcode(regionId)
+      scannerRef.current = html5QrCode
 
- const handlePasteFromClipboard = async () => {
- try {
- const text = await navigator.clipboard.readText()
- if (text.length > 10) { // Basic UUID check length
- setManualInput(text)
- toast.success('Token pasted from clipboard!')
- } else {
- toast.error('Clipboard does not contain a valid token')
- }
- } catch (err) {
- toast.error('Could not access clipboard')
- }
- }
+      const startScanner = async () => {
+        try {
+          setScanning(true)
+          setCameraError(null)
+          
+          // Request camera permission and start
+          await html5QrCode.start(
+            { facingMode: "environment" },
+            {
+              fps: 10,
+              qrbox: { width: 250, height: 250 },
+            },
+            (decodedText) => {
+              setScannedData(decodedText)
+              if (decodedText.length > 20) {
+                onScan(decodedText)
+                onClose()
+              }
+              html5QrCode.stop().catch(console.error)
+              setScanning(false)
+            },
+            () => {}
+          )
+        } catch (err: any) {
+          console.error("Camera error:", err)
+          // Specific message for insecure context
+          if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+            setCameraError("Camera requires HTTPS on mobile. Use localhost or an HTTPS tunnel (like ngrok).")
+          } else {
+            setCameraError("Camera access denied or unavailable.")
+          }
+          setScanning(false)
+        }
+      }
 
- const handleConfirm = () => {
- const token = scannedData || manualInput.trim()
- if (token) {
- onScan(token)
- setScannedData('')
- setManualInput('')
- onClose()
- }
- }
+      // Small delay to ensure the DOM element is fully painted
+      const timer = setTimeout(startScanner, 300)
+      return () => clearTimeout(timer)
+    }
 
- return (
- <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 shadow-2xl ">
- <div className="
- w-full max-w-md
- surface-card
- rounded-3xl
- shadow-2xl
- overflow-hidden
- border border-theme
-">
- {/* Header */}
- <div className="p-6 bg-primary-light">
- <div className="flex items-center justify-between">
- <div className="flex items-center gap-3">
- <QrCode className="w-6 h-6 text-white" />
- <h3 className="text-xl font-bold text-white">
- Ticket Scanner
- </h3>
- </div>
- <button
- onClick={onClose}
- className="p-1 hover:surface-card rounded-lg text-white transition-colors"
- >
- <XCircle className="w-6 h-6" />
- </button>
- </div>
- </div>
+    return () => {
+      if (scannerRef.current && scannerRef.current.isScanning) {
+        scannerRef.current.stop().catch(console.error)
+      }
+      scannerRef.current = null
+    }
+  }, [isOpen, onScan, onClose])
 
- {/* Scanner Content */}
- <div className="p-8">
- {/* Scanner Rect */}
- <div className="
- aspect-square
- surface-base
- rounded-3xl
- flex items-center justify-center
- relative
- overflow-hidden
- border-2 border-theme
-">
- {scanning ? (
- <div className="text-center">
- <Loader2 className="w-12 h-12 text-primary-light dark:text-primary-dark animate-spin mx-auto mb-4" />
- <p className="text-white font-medium">Analyzing...</p>
- </div>
- ) : scannedData ? (
- <div className="text-center text-white px-6">
- <div className="w-16 h-16 bg-success-green rounded-full flex items-center justify-center mx-auto mb-4">
- <Check className="w-10 h-10 text-white" />
- </div>
- <p className="text-lg font-bold">Successfully Scanned!</p>
- <p className="text-xs text-emerald-400 mt-2 break-all opacity-80">{scannedData}</p>
- </div>
- ) : (
- <div className="text-center text-white p-8">
- <Camera className="w-16 h-16 mx-auto mb-4 text-theme-secondary" />
- <p className="text-sm text-theme-muted">Scan traveler&apos;s digital ticket</p>
- {/* Overlay scan lines */}
- <div className="absolute inset-x-8 top-1/2 -translate-y-1/2 h-0.5 bg-primary-light/30 blur-[1px] animate-[pulse_1s_infinite]" />
- </div>
- )}
+  if (!isOpen) return null
 
- {/* Animated Scanning Frame */}
- {scanning && (
- <div className="absolute inset-10 border-2 border-primary-light dark:border-primary-dark rounded-xl">
- <div className="absolute top-0 left-0 w-full h-0.5 bg-blue-400 shadow-[0_0_15px_rgba(96,165,250,0.8)] animate-[scan_2s_linear_infinite]" />
- <style jsx>{`
- @keyframes scan {
- 0% { top: 0%; }
- 50% { top: 100%; }
- 100% { top: 0%; }
- }
- `}</style>
- </div>
- )}
- </div>
+  const handleConfirmManual = () => {
+    const token = manualInput.trim()
+    if (token) {
+      onScan(token)
+      setManualInput('')
+      onClose()
+    }
+  }
 
- <div className="mt-8 space-y-4">
- <div className="relative">
- <input
- type="text"
- value={manualInput}
- onChange={(e) => setManualInput(e.target.value)}
- placeholder="Paste or type Token UUID..."
- className="
- w-full px-4 py-4
- surface-section
- border border-theme
- rounded-2xl text-sm
- text-theme-primary
- placeholder-gray-400
- focus:outline-none focus:ring-4 focus:ring-primary-light dark:ring-primary-dark/10
-"
- />
- <button
- onClick={handlePasteFromClipboard}
- title="Paste from clipboard"
- className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-theme-muted hover:text-primary-light dark:text-primary-dark transition-colors"
- >
- <Smartphone className="w-5 h-5" />
- </button>
- </div>
+  const handlePasteFromClipboard = async () => {
+    try {
+      const text = await navigator.clipboard.readText()
+      if (text.length > 10) {
+        setManualInput(text)
+        toast.success('Token pasted from clipboard!')
+      } else {
+        toast.error('Clipboard does not contain a valid token')
+      }
+    } catch (err) {
+      toast.error('Could not access clipboard')
+    }
+  }
 
- <div className="grid grid-cols-2 gap-3">
- <button
- onClick={handleSimulateScan}
- disabled={scanning || scannedData !== ''}
- className="
- flex items-center justify-center gap-2
- px-4 py-4
- bg-primary-light hover:bg-primary-light-hover
- text-white font-bold
- rounded-2xl
- transition-all
- disabled:opacity-50
- shadow-lg shadow-primary-light/20
-"
- >
- <Camera className="w-5 h-5" />
- {manualInput ? 'Apply' : 'Scan'}
- </button>
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div className="w-full max-w-md surface-card rounded-3xl shadow-2xl overflow-hidden border border-theme">
+        {/* Header */}
+        <div className="p-6 bg-primary-light">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 text-white">
+              <QrCode className="w-6 h-6" />
+              <h3 className="text-xl font-bold">Ticket Scanner</h3>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-1 hover:bg-white/10 rounded-lg text-white transition-colors"
+            >
+              <XCircle className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
 
- <button
- onClick={handleConfirm}
- disabled={!scannedData && !manualInput.trim()}
- className="
- flex-1
- px-4 py-4
- bg-emerald-600 hover:bg-emerald-700
- text-white font-bold
- rounded-2xl
- transition-all
- disabled:opacity-50
- shadow-lg shadow-success-green/20
-"
- >
- Confirm
- </button>
- </div>
- </div>
+        {/* Scanner Content */}
+        <div className="p-6">
+          <div className="relative aspect-square surface-base rounded-2xl overflow-hidden border-2 border-theme bg-black">
+            {/* The actual scanner viewport */}
+            <div id={regionId} className="w-full h-full" />
+            
+            {/* Overlay when not scanning/error */}
+            {!scanning && !scannedData && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-black/40">
+                {cameraError ? (
+                  <>
+                    <AlertCircle className="w-12 h-12 text-danger-red mb-3" />
+                    <p className="text-sm text-white font-medium">{cameraError}</p>
+                  </>
+                ) : (
+                  <>
+                    <Loader2 className="w-12 h-12 text-primary-light animate-spin mb-3" />
+                    <p className="text-sm text-white font-medium">Starting camera...</p>
+                  </>
+                )}
+              </div>
+            )}
 
- {scannedData && (
- <div className="mt-4 flex gap-2">
- <button
- onClick={handleConfirm}
- className="
- flex-1
- px-4 py-2
- bg-emerald-600 hover:bg-emerald-700
- text-white
- rounded-lg
- transition-colors
-"
- >
- Confirm Check-in
- </button>
- <button
- onClick={() => setScannedData('')}
- className="
- flex-1
- px-4 py-2
- surface-section
- text-theme-secondary
- rounded-lg
- hover:surface-section dark:hover:surface-section
- transition-colors
-"
- >
- Scan Again
- </button>
- </div>
- )}
- </div>
+            {/* Scan success indicator */}
+            {scannedData && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-success-green/90 text-white p-6 animate-in fade-in zoom-in duration-300">
+                <CheckCircle className="w-16 h-16 mb-4" />
+                <p className="text-lg font-bold">Scanned Successfully!</p>
+                <p className="text-xs mt-2 opacity-80 break-all">{scannedData}</p>
+              </div>
+            )}
 
- {/* Footer */}
- <div className="p-4 surface-section text-center">
- <p className="text-xs text-theme-muted ">
- Position the QR code within the frame to scan
- </p>
- </div>
- </div>
- </div>
- )
+            {/* Animated scan line */}
+            {scanning && !scannedData && (
+              <div className="absolute inset-x-0 top-0 h-1 bg-primary-light shadow-[0_0_15px_rgba(59,130,246,0.8)] animate-[scan_3s_linear_infinite]" />
+            )}
+          </div>
+
+          <div className="mt-6 space-y-4">
+            <div className="text-center">
+              <p className="text-xs text-theme-muted mb-4">
+                Align the traveler&apos;s QR code within the frame
+              </p>
+            </div>
+
+            <div className="relative">
+              <input
+                type="text"
+                value={manualInput}
+                onChange={(e) => setManualInput(e.target.value)}
+                placeholder="Or enter token manually..."
+                className="w-full px-4 py-3 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light"
+              />
+              <button
+                onClick={handlePasteFromClipboard}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-theme-muted hover:text-primary-light transition-colors"
+                title="Paste"
+              >
+                <Smartphone className="w-4 h-4" />
+              </button>
+            </div>
+
+            <button
+              onClick={handleConfirmManual}
+              disabled={!manualInput.trim()}
+              className="w-full py-3 bg-primary-light hover:bg-primary-light-hover text-white font-bold rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-primary-light/20"
+            >
+              Verify Ticket
+            </button>
+          </div>
+        </div>
+
+        <style jsx>{`
+          @keyframes scan {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+          }
+          :global(#reader video) {
+            object-fit: cover !important;
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 1rem;
+          }
+        `}</style>
+      </div>
+    </div>
+  )
 }
 
 // ============================================================================

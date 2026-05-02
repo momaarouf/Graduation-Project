@@ -10,6 +10,7 @@ import { NotificationBell } from '@/src/components/NotificationBell'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTheme } from 'next-themes'
+import MobileTestQR from '@/src/components/dev/MobileTestQR'
 import {
  Menu,
  X,
@@ -134,6 +135,7 @@ export default function Navigation() {
  ))}
  </div>
 
+  <MobileTestQR />
  {/* Theme Toggle - Always visible */}
  <button
  onClick={toggleTheme}

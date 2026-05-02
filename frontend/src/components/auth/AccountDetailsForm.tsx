@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // ACCOUNT DETAILS FORM - STEP 2 - FIXED NAVIGATION
 // ============================================================================
 // LOCATION: /frontend/src/components/auth/AccountDetailsForm.tsx
@@ -282,7 +282,7 @@ export default function AccountDetailsForm({ onNext, onBack }: AccountDetailsFor
  Email Address
  </label>
  <div className="relative group">
- <div className="absolute left-4 top-1/2 -translate-y-1/2 text-theme-muted group-focus-within:text-primary-light dark:text-primary-dark transition-colors">
+ <div className="absolute left-4 top-1/2 -translate-y-1/2 text-theme-muted group-focus-within:text-primary-light dark:group-focus-within:text-primary-dark transition-colors">
  <Mail size={18} strokeWidth={1.5} />
  </div>
  <input
@@ -311,7 +311,7 @@ export default function AccountDetailsForm({ onNext, onBack }: AccountDetailsFor
  `}
  />
  {data.email && validateEmail(data.email) && touched.email && (
- <CheckCircle className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
+ <CheckCircle className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-success-green dark:text-emerald-400" />
  )}
  </div>
  </div>

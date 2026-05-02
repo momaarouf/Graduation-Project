@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // SAFETY PILLAR BAR COMPONENT - DUAL THEME
 // ============================================================================
 // LOCATION: /frontend/src/components/landing/SafetyPillarBar.tsx
@@ -43,11 +43,11 @@ const SAFETY_PILLARS = [
  title: 'Verified Guides',
  description: 'Every guide manually verified with government ID',
  lightColor: 'text-primary-light dark:text-primary-dark',
- darkColor: 'dark:text-primary-dark ',
+ darkColor: 'dark:text-primary-dark',
  bgLight: 'bg-primary-light/10',
  bgDark: '',
  borderLight: 'border-primary-light dark:border-primary-dark',
- borderDark: 'dark:border-primary-light dark:border-primary-dark',
+ borderDark: 'dark:border-primary-dark',
  },
  {
  icon: Lock,
@@ -119,7 +119,7 @@ export default function SafetyPillarBar() {
  SECTION HEADER (Optional)
  ======================================== */}
  <div className="text-center mb-6 sm:mb-8">
- <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary-light/10 border border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark rounded-full text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-300">
+ <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary-light/10 border border-primary-light dark:border-primary-dark rounded-full text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-300">
  <Shield className="w-3.5 h-3.5" />
  Your Safety Is Our Priority
  </span>

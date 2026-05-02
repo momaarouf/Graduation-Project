@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -87,7 +87,7 @@ export default function TravelerCompleteProfilePage() {
  </div>
 
  {/* Info banner */}
- <div className="mb-6 p-4 bg-accent-light/10 dark:bg-accent-dark/10 dark:bg-amber-950/20 border border-accent-light dark:border-accent-dark dark:border-accent-light dark:border-accent-dark rounded-xl text-sm text-amber-800 dark:text-amber-300">
+ <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/50 rounded-xl text-sm text-orange-800 dark:text-orange-200">
  <strong>Required to make bookings.</strong> You can skip for now, but you won't be able to book tours until your profile is complete and email is verified.
  </div>
 

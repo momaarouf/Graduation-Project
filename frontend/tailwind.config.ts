@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // TAILWIND CONFIG — ELECTRIC BLUE + ORANGE DESIGN SYSTEM
 // ============================================================================
 import type { Config } from 'tailwindcss'
@@ -27,6 +27,7 @@ const config: Config = {
  'accent-dark-hover': '#f97316',
 
  // ── SEMANTIC DANGER (red — errors, bans, cancelled) ────────────────
+ 'danger-red': '#ef4444',
  'danger-light': '#ef4444',
  'danger-light-hover': '#dc2626',
  'danger-dark': '#f87171',
@@ -46,23 +47,23 @@ const config: Config = {
 
  // ── BACKGROUND ELEVATION ───────────────────────────────────────────
  // Light: blueish-white palette / Dark: deep navy palette
- 'bg-base-light': '#f0f5ff', // page bg
- 'bg-base-dark': '#040d1e',
- 'bg-section-light': '#e4ecff', // alternating sections
- 'bg-section-dark': '#071428',
- 'bg-card-light': '#ffffff', // cards, panels, sidebars
- 'bg-card-dark': '#0c1f3d',
- 'bg-paper-light': '#ffffff', // modals, drawers, tickets
- 'bg-paper-dark': '#122850',
- 'bg-hover-dark': '#1a3566', // interactive hover (dark only)
+ 'base-light': '#f0f5ff', // page bg
+ 'base-dark': '#040d1e',
+ 'section-light': '#e4ecff', // alternating sections
+ 'section-dark': '#071428',
+ 'card-light': '#ffffff', // cards, panels, sidebars
+ 'card-dark': '#0c1f3d',
+ 'paper-light': '#ffffff', // modals, drawers, tickets
+ 'paper-dark': '#122850',
+ 'hover-dark': '#1a3566', // interactive hover (dark only)
 
  // ── TEXT ───────────────────────────────────────────────────────────
- 'text-primary-light': '#0a1628',
- 'text-primary-dark': '#dbeafe',
- 'text-secondary-light': '#3d5a8a',
- 'text-secondary-dark': '#6ea6e8',
- 'text-muted-light': '#7a96c0',
- 'text-muted-dark': '#2d5a96',
+ 'theme-primary-light': '#0a1628',
+ 'theme-primary-dark': '#dbeafe',
+ 'theme-secondary-light': '#3d5a8a',
+ 'theme-secondary-dark': '#6ea6e8',
+ 'theme-muted-light': '#7a96c0',
+ 'theme-muted-dark': '#2d5a96',
 
  // ── BORDERS ────────────────────────────────────────────────────────
  'border-default-light': '#c8d8f8',

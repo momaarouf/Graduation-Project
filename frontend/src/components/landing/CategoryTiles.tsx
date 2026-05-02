@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // CURATED CATEGORIES TILES COMPONENT - DUAL THEME
 // ============================================================================
 // LOCATION: /frontend/src/components/landing/CategoryTiles.tsx
@@ -311,7 +311,7 @@ export default function CategoryTiles() {
  ======================================== */}
  <div className="text-center mb-8 sm:mb-12">
  {/* Pre-header badge */}
- <span className="inline-block px-3 py-1 mb-4 text-xs sm:text-sm font-medium text-primary-light dark:text-primary-dark dark:text-primary-dark bg-primary-light/10 border border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark rounded-full">
+ <span className="inline-block px-3 py-1 mb-4 text-xs sm:text-sm font-medium text-primary-light dark:text-primary-dark bg-primary-light/10 border border-primary-light dark:border-primary-dark rounded-full">
  Discover Experiences
  </span>
 
@@ -349,7 +349,7 @@ export default function CategoryTiles() {
  BROWSE ALL LINK
  ======================================== */}
  <div className="flex justify-center mt-10 sm:mt-12">
- <Link href="/tours" className="group inline-flex items-center gap-2 px-6 py-3 surface-base text-white rounded-full font-medium text-sm sm:text-base hover:surface-card dark:hover:surface-section transition-colors duration-300 shadow-md hover:shadow-lg">
+ <Link href="/tours" className="group inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-full font-medium text-sm sm:text-base hover:bg-slate-800 transition-colors duration-300 shadow-md hover:shadow-lg">
  Browse All Tours
  <span className="group-hover:translate-x-1 transition-transform duration-300">
  →

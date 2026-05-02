@@ -1,11 +1,19 @@
-﻿import axios from 'axios';
+import axios from 'axios';
+
+const getApiUrl = () => {
+  let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
+  if (typeof window !== 'undefined' && url.includes('localhost') && window.location.hostname !== 'localhost') {
+    url = url.replace('localhost', window.location.hostname);
+  }
+  return url;
+};
 
 const apiClient = axios.create({
- baseURL: process.env.NEXT_PUBLIC_API_URL,
- withCredentials: true, // required for refresh cookie
- paramsSerializer: {
- indexes: null // serialize arrays as ?key=val1&key=val2
- }
+  baseURL: getApiUrl(),
+  withCredentials: true, // required for refresh cookie
+  paramsSerializer: {
+    indexes: null // serialize arrays as ?key=val1&key=val2
+  }
 });
 
 let isRefreshing = false;
@@ -86,7 +94,7 @@ apiClient.interceptors.response.use(
 
  try {
  const { data } = await axios.post(
- `${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`,
+ `${getApiUrl()}/api/auth/refresh`,
  {},
  { withCredentials: true }
  );
