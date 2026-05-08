@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { Mail, User, Shield, X, ChevronRight } from 'lucide-react'
@@ -92,7 +92,7 @@ export default function OnboardingBanner({ profileCompleted, emailVerified, veri
  <div className="flex items-center gap-2">
  <p className="text-sm font-semibold text-theme-primary">{step.label}</p>
  {step.statusLabel && (
- <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[8px] font-black uppercase tracking-tighter rounded-md border border-accent-light dark:border-accent-dark/20">
+ <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[8px] font-bold uppercase tracking-tighter rounded-md border border-accent-light dark:border-accent-dark/20">
  {step.statusLabel}
  </span>
  )}
@@ -104,7 +104,7 @@ export default function OnboardingBanner({ profileCompleted, emailVerified, veri
  </Link>
  )}
  {step.done && step.statusLabel === 'Reviewing' && (
- <Link href={step.href} className="inline-flex items-center gap-1 mt-2 px-3 py-1.5 text-xs font-black text-amber-600 hover:text-amber-700 transition uppercase tracking-widest">
+ <Link href={step.href} className="inline-flex items-center gap-1 mt-2 px-3 py-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 transition uppercase tracking-widest">
  View Status <ChevronRight className="w-3 h-3" />
  </Link>
  )}

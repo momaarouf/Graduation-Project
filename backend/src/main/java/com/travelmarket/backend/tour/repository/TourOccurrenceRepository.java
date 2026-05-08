@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -172,4 +173,39 @@ public interface TourOccurrenceRepository extends JpaRepository<TourOccurrence, 
   Optional<TourOccurrence> findByTemplateIdAndStartTimeUtc(Long templateId, Instant startTimeUtc);
 
   List<TourOccurrence> findAllByTemplateIdAndStartTimeUtcGreaterThanEqual(Long templateId, Instant now);
+
+  // ── Batch query for listing cards (eliminates N+1) ──────────────────────────
+
+  /**
+   * Fetches the earliest future SCHEDULED or FULL occurrence for EACH of the
+   * supplied template IDs in a single query.
+   *
+   * Returns ALL matching occurrences across all template IDs; the service layer
+   * picks the first one per template using a grouping map.
+   * Used by listTours / getToursInBoundingBox / getNearbyTours to avoid
+   * the previous N+1 pattern of one query per tour.
+   */
+  @Query("""
+      SELECT o FROM TourOccurrence o
+      WHERE o.template.id IN :templateIds
+        AND o.template.lastPublishedAtUtc IS NOT NULL
+        AND o.template.deletedAtUtc IS NULL
+        AND o.deletedAtUtc IS NULL
+        AND o.startTimeUtc > :now
+        AND o.status IN ('SCHEDULED', 'FULL')
+      ORDER BY o.template.id ASC, o.startTimeUtc ASC
+  """)
+  List<TourOccurrence> findPublicFutureByTemplateIds(
+      @Param("templateIds") Collection<Long> templateIds,
+      @Param("now") Instant now);
+
+  @Query("""
+      SELECT o FROM TourOccurrence o
+      WHERE o.template.id IN :templateIds
+        AND o.status = :status
+        AND o.deletedAtUtc IS NULL
+  """)
+  List<TourOccurrence> findAllByTemplateIdInAndStatus(
+      @Param("templateIds") Collection<Long> templateIds,
+      @Param("status")      com.travelmarket.backend.tour.enums.TourOccurrenceStatus status);
 }

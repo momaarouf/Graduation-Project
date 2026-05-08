@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // MOBILE FILTER DRAWER - BOTTOM SHEET
 // ============================================================================
 // LOCATION: /frontend/src/components/search/filters/MobileFilterDrawer.tsx
@@ -100,7 +100,7 @@ export default function MobileFilterDrawer({
  */}
  <Dialog
  as="div"
- className="relative z-50"
+ className="relative z-[60]"
  onClose={onClose}
  >
  {/* 
@@ -155,7 +155,7 @@ export default function MobileFilterDrawer({
  leaveFrom="opacity-100 translate-y-0"
  leaveTo="opacity-0 translate-y-full"
  >
- <Dialog.Panel className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto surface-paper rounded-t-2xl shadow-xl">
+ <Dialog.Panel className="relative w-full h-[100dvh] flex flex-col md:max-h-[90vh] md:h-auto overflow-hidden surface-paper rounded-t-2xl shadow-xl">
  {/* 
  ========================================
  DRAWER HEADER
@@ -202,7 +202,7 @@ export default function MobileFilterDrawer({
  Reuse the same SearchFilters component
  Pass isMobile=true for mobile-optimized layout
  */}
- <div className="p-4">
+ <div className="flex-1 overflow-y-auto p-4 pb-32">
  <SearchFilters
  isMobile={true}
  onClose={onClose}
@@ -218,8 +218,8 @@ export default function MobileFilterDrawer({
  Sticky at bottom of drawer
  Always visible, even when scrolling
  */}
- <div className="sticky bottom-0 p-4 surface-paper border-t border-primary-light/20 dark:border-primary-dark/20">
- <button onClick={onClose} className="w-full px-4 py-3 bg-primary-light dark:bg-primary-dark text-white font-semibold rounded-lg hover:bg-primary-light-hover dark:hover:bg-primary-light-hover transition-colors focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+ <div className="absolute bottom-0 left-0 right-0 p-4 pb-8 surface-paper border-t border-primary-light/20 dark:border-primary-dark/20 z-20">
+ <button onClick={onClose} className="w-full px-4 py-3 bg-primary-light dark:bg-primary-dark text-white font-semibold rounded-lg hover:bg-primary-light-hover dark:hover:bg-primary-light-hover transition-colors shadow-lg active:scale-95">
  Show Results
  </button>
  </div>

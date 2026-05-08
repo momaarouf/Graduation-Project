@@ -589,7 +589,7 @@ function ConversationItem({ conversation, isActive, onClick }: ConversationItemP
  onClick={onClick}
  className={`
  w-full
- p-4
+ p-3 sm:p-4
  text-left
  border-b border-theme
  hover:surface-section dark:hover:surface-card
@@ -740,7 +740,7 @@ function MessageBubble({
  <div 
  onClick={onToggle}
  className={`
- relative p-3 rounded-2xl text-sm transition-all cursor-pointer
+ relative p-2.5 sm:p-3 rounded-2xl text-[13px] sm:text-sm transition-all cursor-pointer
  ${isOwn 
  ? 'bg-primary-light text-white rounded-tr-none shadow-md hover:bg-primary-light-hover' 
  : 'surface-section text-theme-primary rounded-tl-none hover:surface-section dark:hover:surface-section'}
@@ -1041,7 +1041,8 @@ function EmptyChatState() {
 // MAIN MESSAGING PAGE - FULLY FIXED LAYOUT
 // ============================================================================
 
-export default function GuideMessagingPage() {
+// ── Inner component (owns useSearchParams) ────────────────────────────────────
+function GuideMessagingContent() {
  const searchParams = useSearchParams()
  const initialConvoId = searchParams.get('id')
  const initialTourId = searchParams.get('tourId')
@@ -1399,26 +1400,17 @@ export default function GuideMessagingPage() {
  }
 
  return (
- <div className="h-[calc(100vh-4rem)] surface-base overflow-hidden relative">
+ <div className="h-[100dvh] md:h-[calc(100vh-4rem)] surface-base overflow-hidden relative">
  <div className="h-full flex flex-col overflow-hidden">
- <div className="flex-none surface-base border-b border-theme px-4 sm:px-6 py-3">
+ <div className="flex-none surface-base border-b border-theme px-4 sm:px-6 py-2.5 sm:py-3">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
- <button 
- onClick={() => {
- // Custom event to tell layout to open sidebar
- window.dispatchEvent(new CustomEvent('toggle-sidebar'))
- }}
- className="lg:hidden p-1 text-theme-muted hover:text-theme-secondary "
- >
- <Menu className="w-6 h-6" />
- </button>
  <MessageSquare className="w-5 h-5 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
  <h1 className="text-lg font-bold text-theme-primary">
  Messages
  </h1>
- <span className="px-2 py-0.5 bg-primary-light/20 dark:bg-primary-dark/20 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-full">
- {mappedConvs.reduce((acc, c) => acc + c.unreadCount, 0)} unread
+ <span className="px-2 py-0.5 bg-primary-light/10 text-primary-light dark:text-primary-dark text-[10px] font-bold uppercase tracking-wider rounded-full border border-primary-light/20">
+ {mappedConvs.reduce((acc, c) => acc + c.unreadCount, 0)}
  </span>
  <button
  onClick={() => setIsNewChatModalOpen(true)}
@@ -1496,20 +1488,20 @@ export default function GuideMessagingPage() {
  </div>
  </div>
  </div>
- <div className="relative mt-3">
- <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
+                <div className="relative mt-2 px-4 sm:px-6 pb-2 border-b border-theme dark:border-primary-dark/10">
+ <Search className="absolute left-7 sm:left-9 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-theme-muted" />
  <input
  type="text"
  value={searchTerm}
  onChange={(e) => setSearchTerm(e.target.value)}
  placeholder="Search conversations..."
- className="w-full pl-9 pr-4 py-2 surface-section border border-theme rounded-lg text-sm text-theme-primary placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark/20"
+ className="w-full pl-8 sm:pl-9 pr-4 py-2 surface-section border border-theme rounded-xl text-xs sm:text-sm text-theme-primary placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-light/20 transition-all"
  />
  </div>
  </div>
 
   <div className="flex-1 flex min-h-0 overflow-hidden surface-base">
- <div className={`w-full sm:w-80 border-r border-theme flex flex-col overflow-hidden ${showSidebar ? 'block' : 'hidden'}`}>
+ <div className={`w-full sm:w-80 border-r border-theme dark:border-primary-dark/10 flex flex-col min-h-0 overflow-hidden ${showSidebar ? 'block' : 'hidden'}`}>
  <div className="flex-1 overflow-y-auto chat-scrollbar">
  {isLoadingConvs ? (
  Array.from({ length: 5 }).map((_, i) => (
@@ -1546,10 +1538,10 @@ export default function GuideMessagingPage() {
  </div>
  </div>
 
-  <div className={`flex-1 flex flex-col overflow-hidden ${!showSidebar ? 'block' : 'hidden sm:block'}`}>
+ <div className={`flex-1 flex flex-col min-h-0 overflow-hidden ${!showSidebar ? 'relative surface-base' : 'hidden sm:flex'}`}>
   {currentConversation ? (
   <>
-  <div className="flex-none h-16 px-4 sm:px-6 border-b border-theme flex items-center justify-between surface-base sticky top-0 z-20">
+  <div className="flex-none h-14 sm:h-16 px-4 sm:px-6 border-b border-theme dark:border-primary-dark/10 flex items-center justify-between surface-base sticky top-0 z-20 shadow-sm">
  <div className="flex items-center gap-3">
  <button 
  onClick={() => {
@@ -1630,7 +1622,7 @@ export default function GuideMessagingPage() {
  <div ref={messagesEndRef} />
  </div>
 
- <div className="flex-none p-4 border-t border-theme">
+ <div className="flex-none p-4 border-t border-theme dark:border-primary-dark/10">
  <form onSubmit={handleSendMessage} className="flex gap-2">
  <QuickReplyTemplates onSelect={handleQuickReply} />
  <button
@@ -1668,13 +1660,21 @@ export default function GuideMessagingPage() {
  </div>
  </div>
 
- <NewChatModal
- isOpen={isNewChatModalOpen}
- onClose={() => setIsNewChatModalOpen(false)}
- role="GUIDE"
- existingBookingIds={realConvs.map(c => c.bookingId).filter(Boolean) as number[]}
- onConversationInitiated={(id: number) => handleConversationInitiated(id)}
- />
- </div>
- )
+  <NewChatModal
+  isOpen={isNewChatModalOpen}
+  onClose={() => setIsNewChatModalOpen(false)}
+  role="GUIDE"
+  existingBookingIds={realConvs.map(c => c.bookingId).filter(Boolean) as number[]}
+  onConversationInitiated={(id: number) => handleConversationInitiated(id)}
+  />
+  </div>
+  )
+}
+
+export default function GuideMessagesPage() {
+  return (
+    <React.Suspense fallback={<div className="h-screen surface-base flex items-center justify-center"><div className="w-8 h-8 border-4 border-primary-light border-t-transparent rounded-full animate-spin" /></div>}>
+      <GuideMessagingContent />
+    </React.Suspense>
+  )
 }

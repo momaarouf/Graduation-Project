@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // ============================================================================
 // LOGIN PAGE - COMPLETE (WITH BACK BUTTON)
@@ -42,17 +42,17 @@ import LoginLoading from './loading'
 
 export default function LoginPage() {
  return (
- <AuthLayout hideBackButton={false}>
+ <>
  {/* Background Decorative Elements */}
  <div className="fixed inset-0 pointer-events-none overflow-hidden">
  <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary-light/10 rounded-full blur-[120px]" />
  <div className="absolute bottom-[-10%] left-[-10%] w-[30%] h-[30%] bg-indigo-500/10 rounded-full blur-[100px]" />
  </div>
 
- <div className="container-safe mx-auto max-w-xl relative z-10 min-h-[90vh] flex flex-col justify-center py-12 px-4">
+ <div className="container-safe mx-auto max-w-xl relative z-10 flex flex-col justify-center pt-2 pb-8 sm:py-12 px-4 md:px-0">
  
  {/* Back Button */}
- <div className="mb-8">
+ <div className="mb-6 sm:mb-8">
  <Link
  href="/"
  className="inline-flex items-center gap-2 text-sm font-bold text-theme-muted hover:text-primary-light dark:text-primary-dark transition-colors group"
@@ -63,19 +63,19 @@ export default function LoginPage() {
  </div>
 
  {/* Minimal Header */}
- <div className="text-center mb-10">
+ <div className="text-center mb-8 sm:mb-10">
  <motion.div
  initial={{ opacity: 0, scale: 0.9 }}
  animate={{ opacity: 1, scale: 1 }}
- className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark dark:text-primary-dark rounded-full text-[10px] font-black uppercase tracking-widest mb-4"
+ className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-[10px] font-bold uppercase tracking-widest mb-4"
  >
  <Sparkles className="w-3 h-3" />
  Welcome back
  </motion.div>
- <h1 className="text-4xl font-black text-theme-primary tracking-tight mb-3">
+ <h1 className="text-3xl sm:text-4xl font-bold text-theme-primary tracking-tight mb-2 sm:mb-3">
  Sign In to <span className="text-primary-light dark:text-primary-dark">SafariHub</span>
  </h1>
- <p className="text-theme-muted font-medium">
+ <p className="text-sm sm:text-base text-theme-muted font-medium">
  Enter your details to access your travel dashboard
  </p>
  </div>
@@ -90,13 +90,13 @@ export default function LoginPage() {
  Don't have an account?{' '}
  <Link 
  href="/auth/signup" 
- className="text-primary-light dark:text-primary-dark font-black hover:underline"
+ className="text-primary-light dark:text-primary-dark font-bold hover:underline"
  >
  Create one now
  </Link>
  </p>
 
- <div className="mt-12 flex justify-center gap-6 text-[10px] font-black uppercase tracking-widest text-theme-muted">
+ <div className="mt-10 sm:mt-12 flex justify-center gap-6 text-[10px] font-bold uppercase tracking-widest text-theme-muted">
  <Link href="/terms" className="hover:text-theme-secondary dark:hover:text-gray-200 transition-colors">Terms</Link>
  <Link href="/privacy" className="hover:text-theme-secondary dark:hover:text-gray-200 transition-colors">Privacy</Link>
  <Link href="/contact" className="hover:text-theme-secondary dark:hover:text-gray-200 transition-colors">Support</Link>
@@ -125,6 +125,6 @@ export default function LoginPage() {
  })
  }}
  />
- </AuthLayout>
+ </>
  )
 }

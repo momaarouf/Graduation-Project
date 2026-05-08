@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 /**
  * PaymentCountdownBanner
@@ -92,10 +92,10 @@ export default function PaymentCountdownBanner({
  : 'font-bold text-amber-800 dark:text-amber-200 text-sm'
 
  const timerClass = isCritical
- ? 'text-2xl font-black tracking-widest text-red-600 dark:text-red-400 tabular-nums animate-pulse'
+ ? 'text-2xl font-bold tracking-widest text-red-600 dark:text-red-400 tabular-nums animate-pulse'
  : isWarning
- ? 'text-2xl font-black tracking-widest text-orange-600 dark:text-orange-400 tabular-nums animate-pulse'
- : 'text-2xl font-black tracking-widest text-amber-700 dark:text-amber-300 tabular-nums'
+ ? 'text-2xl font-bold tracking-widest text-orange-600 dark:text-orange-400 tabular-nums animate-pulse'
+ : 'text-2xl font-bold tracking-widest text-amber-700 dark:text-amber-300 tabular-nums'
 
  const subClass = isCritical
  ? 'text-xs text-red-600 dark:text-red-400'

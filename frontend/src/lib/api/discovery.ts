@@ -1,4 +1,4 @@
-﻿// src/lib/api/discovery.ts
+// src/lib/api/discovery.ts
 
 import apiClient from './client';
 
@@ -33,6 +33,18 @@ export const getPublicStats = async (): Promise<PublicStatsResponse> => {
 export const getDiscoveryCategories = async (): Promise<CategoryDiscoveryResponse[]> => {
  const response = await apiClient.get('/api/public/discovery/categories');
  return response.data;
+};
+
+export interface UnifiedDiscoveryResponse {
+  stats: PublicStatsResponse;
+  categories: CategoryDiscoveryResponse[];
+  locations: LocationDiscoveryResponse[];
+}
+
+/** Fetch all discovery data in one call (optimized for high latency) */
+export const getUnifiedDiscovery = async (): Promise<UnifiedDiscoveryResponse> => {
+  const response = await apiClient.get('/api/public/discovery/unified');
+  return response.data;
 };
 
 /** Fetch locations with tour counts */

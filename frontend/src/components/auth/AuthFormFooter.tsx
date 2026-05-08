@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // ============================================================================
 // AUTH FORM FOOTER - Login Link & Terms Agreement

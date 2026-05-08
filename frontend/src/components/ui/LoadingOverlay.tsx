@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { Compass } from 'lucide-react';
@@ -54,7 +54,7 @@ export default function LoadingOverlay({ isVisible, message = 'Loading...' }: Lo
  <div className="w-10 h-10 bg-primary-light rounded-xl flex items-center justify-center shadow-lg shadow-primary-light/20">
  <Compass className="w-6 h-6 text-white" />
  </div>
- <span className="text-2xl font-black text-theme-primary tracking-tighter">
+ <span className="text-2xl font-bold text-theme-primary tracking-tighter">
  Safari<span className="text-primary-light dark:text-primary-dark">Hub</span>
  </span>
  </motion.div>
@@ -101,7 +101,7 @@ export default function LoadingOverlay({ isVisible, message = 'Loading...' }: Lo
  <motion.p 
  initial={{ opacity: 0 }}
  animate={{ opacity: 1 }}
- className="text-3xl font-black text-theme-primary tracking-tight text-center"
+ className="text-3xl font-bold text-theme-primary tracking-tight text-center"
  >
  {message}
  </motion.p>
@@ -136,7 +136,7 @@ export default function LoadingOverlay({ isVisible, message = 'Loading...' }: Lo
  initial={{ opacity: 0 }}
  animate={{ opacity: 1 }}
  transition={{ delay: 0.8 }}
- className="mt-12 text-[10px] font-black uppercase tracking-[0.3em] text-theme-muted "
+ className="mt-12 text-[10px] font-bold uppercase tracking-[0.3em] text-theme-muted "
  >
  Verified Secure Session
  </motion.p>

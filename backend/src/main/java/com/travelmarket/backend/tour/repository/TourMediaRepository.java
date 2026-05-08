@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,4 +68,19 @@ public interface TourMediaRepository extends JpaRepository<TourMedia, Long> {
           AND m.deletedAtUtc IS NULL
     """)
     long countByTemplateId(@Param("templateId") Long templateId);
+
+    /**
+     * Fetches the lowest-displayOrder media item for EACH of the supplied
+     * template IDs in a single query — eliminates the N+1 cover-image lookup
+     * in listing endpoints.
+     *
+     * Returns ALL cover candidates; the service picks the first one per template.
+     */
+    @Query("""
+        SELECT m FROM TourMedia m
+        WHERE m.template.id IN :templateIds
+          AND m.deletedAtUtc IS NULL
+        ORDER BY m.template.id ASC, m.displayOrder ASC
+    """)
+    List<TourMedia> findCoversByTemplateIds(@Param("templateIds") Collection<Long> templateIds);
 }

@@ -16,7 +16,7 @@
 
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, use, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
@@ -117,7 +117,8 @@ interface BookingDetailPageProps {
  params: Promise<{ id: string }>
 }
 
-export default function BookingDetailPage({ params }: BookingDetailPageProps) {
+// ── Inner component (owns useSearchParams) ────────────────────────────────────
+function BookingDetailContent({ params }: BookingDetailPageProps) {
  const { id: bookingId } = use(params)
  const router = useRouter()
  const searchParams = useSearchParams()
@@ -798,5 +799,18 @@ Thank you for choosing TravelMarket!
  </div>
  )}
  </PageLayout>
- )
+  )
+}
+
+// ── Default export: wraps in Suspense (required for useSearchParams in Next 15+) ──
+export default function BookingDetailPage({ params }: BookingDetailPageProps) {
+  return (
+    <Suspense fallback={
+      <div className="pt-24 min-h-screen surface-section flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary-light" />
+      </div>
+    }>
+      <BookingDetailContent params={params} />
+    </Suspense>
+  )
 }

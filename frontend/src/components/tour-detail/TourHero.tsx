@@ -77,6 +77,8 @@ export default function TourHero({
  const [isShareOpen, setIsShareOpen] = useState(false)
  const [mediaFilter, setMediaFilter] = useState<'all' | 'image' | 'video'>('all')
  const [zoomScale, setZoomScale] = useState(1)
+ const [touchStart, setTouchStart] = useState(0)
+ const [touchEnd, setTouchEnd] = useState(0)
 
  // Unify main image into the gallery for seamless switching and deduplicate by URL
  // Ensure we preserve the caption if the mainImage matches an item in the gallery
@@ -141,6 +143,17 @@ export default function TourHero({
  const handleZoomOut = () => setZoomScale(prev => Math.max(prev - 0.5, 1))
  const handleResetZoom = () => setZoomScale(1)
 
+ const handleTouchStart = (e: React.TouchEvent) => setTouchStart(e.targetTouches[0].clientX)
+ const handleTouchMove = (e: React.TouchEvent) => setTouchEnd(e.targetTouches[0].clientX)
+ const handleTouchEnd = () => {
+   if (!touchStart || !touchEnd) return
+   const distance = touchStart - touchEnd
+   if (distance > 50) handleNext()
+   if (distance < -50) handlePrev()
+   setTouchStart(0)
+   setTouchEnd(0)
+ }
+
  const handleWheel = (e: React.WheelEvent) => {
  if (activeMedia.type !== 'image') return
  e.stopPropagation()
@@ -158,7 +171,11 @@ export default function TourHero({
  ======================================== */}
  <div className="relative rounded-xl overflow-hidden surface-section group shadow-inner">
  {/* Main content area */}
- <div className="relative aspect-[16/9] w-full overflow-hidden">
+ <div className="relative aspect-square sm:aspect-[16/9] w-full overflow-hidden"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+ >
  {activeMedia?.type === 'video' ? (
  <VideoPlayer 
  url={activeMedia.url} 
@@ -364,9 +381,19 @@ export default function TourHero({
  )}
  </div>
 
+ {/* Mobile Pagination Dots */}
+ <div className="sm:hidden absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
+   {fullGallery.map((_, idx) => (
+     <div 
+       key={idx}
+       className={`w-1.5 h-1.5 rounded-full transition-all ${idx === activeMediaIndex ? 'bg-white w-3' : 'bg-white/50'}`}
+     />
+   ))}
+ </div>
+
  {/* Thumbnail strip */}
  <div className="
- flex gap-2 p-2
+ hidden sm:flex gap-2 p-2
  overflow-x-auto
  scrollbar-hide
  surface-section
@@ -474,7 +501,7 @@ export default function TourHero({
  {/* Status Badge (Special states) */}
  {status && status !== TourStatus.SCHEDULED && status !== TourStatus.CONFIRMED && (
  <span 
- className="px-4 h-11 flex items-center justify-center bg-amber-500 text-white rounded-lg text-[10px] font-black uppercase tracking-[0.1em] shadow-lg"
+ className="px-4 h-11 flex items-center justify-center bg-amber-500 text-white rounded-lg text-[10px] font-bold uppercase tracking-[0.1em] shadow-lg"
  >
  {status.replace('_', ' ')}
  </span>
@@ -482,7 +509,7 @@ export default function TourHero({
  </div>
  <h1 className="
  text-2xl sm:text-3xl lg:text-4xl
- font-black tracking-tight
+ font-bold tracking-tight
  text-theme-primary
  leading-tight
 ">
@@ -513,6 +540,16 @@ export default function TourHero({
  </Link>
  </div>
  </div>
+  {/* Mobile Booking CTA */}
+  <div className="lg:hidden w-full pt-4">
+  <button
+  onClick={() => document.getElementById('booking-card')?.scrollIntoView({ behavior: 'smooth' })}
+  className="w-full py-4 bg-primary-light hover:bg-primary-light-hover text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95"
+  >
+  <TicketCheck className="w-5 h-5" />
+  BOOK THIS TOUR
+  </button>
+  </div>
 
  {/* Unified Gallery Modal - Advanced Immersive Mode */}
  <AnimatePresence>
@@ -628,7 +665,7 @@ export default function TourHero({
  >
  <Minus className="w-5 h-5" />
  </button>
- <span className="w-16 text-center text-sm font-black text-white/90 tabular-nums">
+ <span className="w-16 text-center text-sm font-bold text-white/90 tabular-nums">
  {Math.round(zoomScale * 100)}%
  </span>
  <button 
@@ -641,7 +678,7 @@ export default function TourHero({
  </div>
  <button 
  onClick={(e) => { e.stopPropagation(); handleResetZoom() }}
- className="px-3 py-1.5 hover:bg-white/10 rounded-xl text-xs font-black text-white/70 hover:text-white transition-colors flex items-center gap-1.5"
+ className="px-3 py-1.5 hover:bg-white/10 rounded-xl text-xs font-bold text-white/70 hover:text-white transition-colors flex items-center gap-1.5"
  title="Reset Zoom"
  >
  <RotateCcw className="w-3.5 h-3.5" />

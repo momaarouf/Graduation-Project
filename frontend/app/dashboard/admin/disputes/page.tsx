@@ -35,6 +35,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { toast } from 'react-hot-toast'
 import { getAllDisputesAdmin, resolveDisputeAdmin, rejectDisputeAdmin, markUnderReviewAdmin, DisputeResponse } from '@/src/lib/api/disputes'
 import {
  Scale,
@@ -576,7 +577,7 @@ const DisputeTypeBadge = ({ type }: { type: DisputeType }) => {
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] rounded border ${styles[type]}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded border ${styles[type]}`}>
       {type.includes('no_show') ? <Clock className="w-3 h-3" /> : 
       type === 'quality' ? <Star className="w-3 h-3" /> :
       type === 'payment' ? <DollarSign className="w-3 h-3" /> :
@@ -613,7 +614,7 @@ const DisputeStatusBadge = ({ status }: { status: DisputeStatus }) => {
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] rounded border ${styles[status]}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded border ${styles[status]}`}>
       {status.includes('resolved') ? <CheckCircle className="w-3 h-3" /> :
       status === 'escalated' ? <AlertTriangle className="w-3 h-3" /> :
       status === 'under_review' ? <Eye className="w-3 h-3" /> :
@@ -644,7 +645,7 @@ const PriorityBadge = ({ priority }: { priority: DisputePriority }) => {
   const Icon = icons[priority]
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] rounded border ${styles[priority]}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded border ${styles[priority]}`}>
       <Icon className="w-3 h-3" />
       {priority}
     </span>
@@ -663,7 +664,7 @@ const TimeRemainingBadge = ({ hours }: { hours: number }) => {
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] rounded border ${getColor()}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded border ${getColor()}`}>
       <Clock className="w-3 h-3" />
       {hours}h left
     </span>
@@ -675,265 +676,203 @@ const TimeRemainingBadge = ({ hours }: { hours: number }) => {
 // ============================================================================
 
 const DisputeDetailsModal = ({ isOpen, onClose, dispute, onResolve }: any) => {
- const [resolution, setResolution] = useState<'refund' | 'payment' | 'partial' | 'dismiss'>('refund')
- const [resolutionAmount, setResolutionAmount] = useState(dispute?.amount || 0)
- const [resolutionNotes, setResolutionNotes] = useState('')
- const [showResolutionForm, setShowResolutionForm] = useState(false)
+  const [resolution, setResolution] = useState<'refund' | 'payment' | 'partial' | 'dismiss'>('refund')
+  const [resolutionAmount, setResolutionAmount] = useState(dispute?.amount || 0)
+  const [resolutionNotes, setResolutionNotes] = useState('')
+  const [showResolutionForm, setShowResolutionForm] = useState(false)
 
- if (!isOpen || !dispute) return null
+  if (!isOpen || !dispute) return null
 
- const handleResolve = () => {
- if (!resolutionNotes.trim()) {
- alert('Please add resolution notes')
- return
- }
- onResolve(dispute.id, resolution, resolutionAmount, resolutionNotes)
- onClose()
- }
+  const handleResolve = () => {
+    if (!resolutionNotes.trim()) {
+      toast.error('Please add resolution notes')
+      return
+    }
+    onResolve(dispute.id, resolution, resolutionAmount, resolutionNotes)
+    onClose()
+  }
 
- return (
- <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 ">
- <div className="w-full max-w-5xl surface-card rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden border border-theme">
- {/* Header */}
- <div className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-800 px-6 py-4">
- <div className="flex justify-between items-center">
- <div className="flex items-center gap-3">
- <Scale className="w-5 h-5 text-white" />
- <h3 className="text-lg font-bold text-white">Dispute #{dispute.disputeId}</h3>
- <DisputeStatusBadge status={dispute.status} />
- <PriorityBadge priority={dispute.priority} />
- </div>
- <button onClick={onClose} className="p-2 hover:surface-card rounded-lg transition-colors">
- <X className="w-5 h-5 text-white" />
- </button>
- </div>
- </div>
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm">
+      <div className="w-full max-w-5xl surface-card rounded-t-3xl sm:rounded-2xl shadow-2xl h-[90vh] sm:h-auto sm:max-h-[90vh] flex flex-col overflow-hidden border-t sm:border border-theme animate-in slide-in-from-bottom duration-300">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-800 px-5 py-4 sm:px-6">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                <Scale className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h3 className="text-sm sm:text-lg font-bold text-white">Dispute #{dispute.id}</h3>
+                <div className="flex gap-2 mt-0.5">
+                  <DisputeStatusBadge status={dispute.status} />
+                </div>
+              </div>
+            </div>
+            <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+              <X className="w-5 h-5 text-white" />
+            </button>
+          </div>
+        </div>
 
- {/* Content */}
- <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)] space-y-6">
- {/* Tour Info */}
- <div className="flex items-start gap-4 p-4 surface-section rounded-xl border border-theme">
- <div className="w-16 h-16 rounded-lg surface-section overflow-hidden">
- <Image src={dispute.tourImage} alt={dispute.tourTitle} width={64} height={64} className="object-cover" />
- </div>
- <div className="flex-1">
- <h4 className="text-lg font-bold text-theme-primary mb-1">{dispute.tourTitle}</h4>
- <div className="flex flex-wrap gap-4 text-sm text-theme-secondary ">
- <span className="flex items-center gap-1">
- <Calendar className="w-4 h-4" />
- {new Date(dispute.tourDate).toLocaleString()}
- </span>
- <span className="flex items-center gap-1">
- <MapPin className="w-4 h-4" />
- {dispute.tourLocation}
- </span>
- <span className="flex items-center gap-1">
- <DollarSign className="w-4 h-4" />
- ${dispute.amount} {dispute.currency}
- </span>
- </div>
- </div>
- <TimeRemainingBadge hours={dispute.timeRemaining} />
- </div>
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+          {/* Quick Info */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 surface-section rounded-xl border border-theme flex flex-col justify-center">
+              <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-1">Status & Priority</span>
+              <div className="flex items-center gap-2">
+                <PriorityBadge priority={dispute.priority} />
+                <TimeRemainingBadge hours={dispute.timeRemaining} />
+              </div>
+            </div>
+            <div className="md:col-span-2 p-4 surface-section rounded-xl border border-theme flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-white/10 overflow-hidden flex-shrink-0">
+                <Image src={dispute.tourImage} alt={dispute.tourTitle} width={48} height={48} className="object-cover w-full h-full" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-sm font-bold text-theme-primary truncate">{dispute.tourTitle}</h4>
+                <p className="text-xs text-theme-muted truncate">{dispute.tourLocation}</p>
+              </div>
+              <div className="ml-auto text-right">
+                <span className="text-lg font-black text-primary-light dark:text-primary-dark">${dispute.amount}</span>
+                <p className="text-[10px] text-theme-muted uppercase font-bold tracking-widest">{dispute.currency}</p>
+              </div>
+            </div>
+          </div>
 
- {/* Two Columns: Traveler vs Guide */}
- <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
- {/* Traveler Column */}
- <div className="space-y-4">
- <div className="p-4 bg-primary-light/10 dark:bg-primary-light/10 rounded-xl border border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark/50">
- <h5 className="text-sm font-medium text-blue-700 dark:text-primary-dark mb-3 flex items-center gap-2">
- <User className="w-4 h-4" />
- Traveler Claim
- </h5>
- <div className="flex items-center gap-3 mb-3">
- <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 p-0.5">
- <div className="w-full h-full rounded-full surface-card overflow-hidden">
- {dispute.traveler.avatar ? (
- <Image src={dispute.traveler.avatar} alt={dispute.traveler.name} width={40} height={40} className="object-cover" />
- ) : (
- <User className="w-4 h-4 m-3 text-theme-muted" />
- )}
- </div>
- </div>
- <div>
- <p className="font-medium text-theme-primary">{dispute.traveler.name}</p>
- <p className="text-xs text-theme-muted ">{dispute.traveler.totalTrips} trips</p>
- </div>
- </div>
- <p className="text-sm text-theme-secondary mb-3">{dispute.travelerClaim.description}</p>
- <div className="space-y-2">
- {dispute.travelerClaim.evidence.map((ev: any) => (
- <div key={ev.id} className="p-2 surface-card rounded-lg border border-theme">
- <div className="flex items-center gap-2 mb-1">
- {ev.type === 'message' && <MessageSquare className="w-3 h-3 text-primary-light dark:text-primary-dark" />}
- {ev.type === 'photo' && <Camera className="w-3 h-3 text-purple-600" />}
- {ev.type === 'receipt' && <FileText className="w-3 h-3 text-success-green" />}
- <span className="text-xs font-medium text-theme-secondary">{ev.type}</span>
- </div>
- <p className="text-xs text-theme-secondary ">{ev.content}</p>
- </div>
- ))}
- </div>
- </div>
- </div>
+          {/* Arbitration Columns */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Traveler Claim */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between px-1">
+                <h5 className="text-xs font-bold text-theme-primary uppercase tracking-widest flex items-center gap-2">
+                  <User className="w-4 h-4 text-primary-light" />
+                  Traveler Side
+                </h5>
+                <span className="text-[10px] text-theme-muted">{new Date(dispute.travelerClaim.submittedAt).toLocaleDateString()}</span>
+              </div>
+              <div className="p-4 bg-primary-light/5 border border-primary-light/20 rounded-2xl space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-surface-section border border-theme overflow-hidden">
+                    {dispute.traveler.avatar ? (
+                      <Image src={dispute.traveler.avatar} alt={dispute.traveler.name} width={40} height={40} className="object-cover" />
+                    ) : (
+                      <User className="w-5 h-5 m-2.5 text-theme-muted" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-theme-primary">{dispute.traveler.name}</p>
+                    <p className="text-[10px] text-theme-muted">UID: {dispute.traveler.id}</p>
+                  </div>
+                </div>
+                <p className="text-sm text-theme-secondary leading-relaxed bg-surface-card p-3 rounded-xl border border-theme">
+                  {dispute.travelerClaim.description}
+                </p>
+                {dispute.travelerClaim.evidence.length > 0 && (
+                  <div className="grid grid-cols-2 gap-2">
+                    {dispute.travelerClaim.evidence.map((ev: any) => (
+                      <div key={ev.id} className="p-2 surface-card rounded-lg border border-theme text-center">
+                        <span className="text-[10px] font-bold text-theme-muted uppercase">{ev.type}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
 
- {/* Guide Column */}
- <div className="space-y-4">
- <div className="p-4 bg-success-green/10 dark:bg-success-green/10 rounded-xl border border-success-green dark:border-success-green/50">
- <h5 className="text-sm font-medium text-emerald-700 dark:text-emerald-400 mb-3 flex items-center gap-2">
- <Award className="w-4 h-4" />
- Guide Response
- </h5>
- <div className="flex items-center gap-3 mb-3">
- <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 p-0.5">
- <div className="w-full h-full rounded-full surface-card overflow-hidden">
- {dispute.guide.avatar ? (
- <Image src={dispute.guide.avatar} alt={dispute.guide.name} width={40} height={40} className="object-cover" />
- ) : (
- <User className="w-4 h-4 m-3 text-theme-muted" />
- )}
- </div>
- </div>
- <div>
- <p className="font-medium text-theme-primary">{dispute.guide.name}</p>
- <p className="text-xs text-theme-muted ">Impact Score: {dispute.guide.impactScore}</p>
- </div>
- </div>
- {dispute.guideClaim ? (
- <>
- <p className="text-sm text-theme-secondary mb-3">{dispute.guideClaim.description}</p>
- <div className="space-y-2">
- {dispute.guideClaim.evidence.map((ev: any) => (
- <div key={ev.id} className="p-2 surface-card rounded-lg border border-theme">
- <div className="flex items-center gap-2 mb-1">
- {ev.type === 'message' && <MessageSquare className="w-3 h-3 text-success-green" />}
- {ev.type === 'photo' && <Camera className="w-3 h-3 text-purple-600" />}
- <span className="text-xs font-medium text-theme-secondary">{ev.type}</span>
- </div>
- <p className="text-xs text-theme-secondary ">{ev.content}</p>
- </div>
- ))}
- </div>
- </>
- ) : (
- <p className="text-sm text-theme-muted italic">No response yet</p>
- )}
- </div>
- </div>
- </div>
+            {/* Guide Response */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between px-1">
+                <h5 className="text-xs font-bold text-theme-primary uppercase tracking-widest flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-success-green" />
+                  Guide Side
+                </h5>
+                {dispute.guideClaim && <span className="text-[10px] text-theme-muted">{new Date(dispute.guideClaim.submittedAt).toLocaleDateString()}</span>}
+              </div>
+              <div className="p-4 bg-success-green/5 border border-success-green/20 rounded-2xl space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-surface-section border border-theme overflow-hidden">
+                    {dispute.guide.avatar ? (
+                      <Image src={dispute.guide.avatar} alt={dispute.guide.name} width={40} height={40} className="object-cover" />
+                    ) : (
+                      <User className="w-5 h-5 m-2.5 text-theme-muted" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-theme-primary">{dispute.guide.name}</p>
+                    <p className="text-[10px] text-theme-muted">UID: {dispute.guide.id}</p>
+                  </div>
+                </div>
+                {dispute.guideClaim ? (
+                  <p className="text-sm text-theme-secondary leading-relaxed bg-surface-card p-3 rounded-xl border border-theme">
+                    {dispute.guideClaim.description}
+                  </p>
+                ) : (
+                  <div className="py-6 text-center border-2 border-dashed border-theme rounded-xl">
+                    <p className="text-xs text-theme-muted font-medium italic">Waiting for guide response...</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
- {/* History Timeline */}
- <div className="p-4 surface-section rounded-xl border border-theme">
- <h5 className="text-sm font-medium text-theme-secondary mb-3 flex items-center gap-2">
- <Clock className="w-4 h-4 text-accent-light dark:text-accent-dark dark:text-amber-400" />
- History
- </h5>
- <div className="space-y-3">
- {dispute.history.map((item: any, idx: number) => (
- <div key={item.id} className="flex gap-3">
- <div className="relative">
- <div className="w-2 h-2 mt-2 rounded-full bg-accent-light/10 dark:bg-accent-dark" />
- {idx < dispute.history.length - 1 && (
- <div className="absolute top-4 left-1 w-0.5 h-full surface-section" />
- )}
- </div>
- <div className="flex-1 pb-3">
- <p className="text-sm text-theme-primary">{item.action}</p>
- {item.adminName && (
- <p className="text-xs text-theme-muted ">by {item.adminName}</p>
- )}
- {item.reason && (
- <p className="text-xs text-theme-secondary mt-1">{item.reason}</p>
- )}
- <p className="text-xs text-theme-muted mt-1">
- {new Date(item.timestamp).toLocaleString()}
- </p>
- </div>
- </div>
- ))}
- </div>
- </div>
-
- {/* Resolution Form */}
- {dispute.status !== 'resolved_refund' && 
- dispute.status !== 'resolved_payment' && 
- dispute.status !== 'resolved_partial' && 
- dispute.status !== 'dismissed' && (
- <div className="space-y-4">
- {showResolutionForm ? (
- <div className="p-4 bg-accent-light/10 dark:bg-accent-dark/10 dark:bg-accent-light/10 dark:bg-accent-dark/10 rounded-xl border border-accent-light dark:border-accent-dark dark:border-accent-light dark:border-accent-dark/50">
- <h5 className="text-sm font-medium text-accent-light dark:text-accent-dark dark:text-amber-400 mb-3">Resolution</h5>
- 
- <div className="space-y-3">
- <div>
- <label className="block text-xs text-theme-secondary mb-1">Decision</label>
- <select
- value={resolution}
- onChange={(e) => setResolution(e.target.value as any)}
- className="w-full px-3 py-2 surface-card border border-theme rounded-lg text-sm"
- >
- <option value="refund">Full Refund to Traveler</option>
- <option value="payment">Release Payment to Guide</option>
- <option value="partial">Partial Refund (50%)</option>
- <option value="dismiss">Dismiss Dispute</option>
- </select>
- </div>
-
- {(resolution === 'refund' || resolution === 'partial') && (
- <div>
- <label className="block text-xs text-theme-secondary mb-1">Refund Amount ($)</label>
- <input
- type="number"
- value={resolutionAmount}
- onChange={(e) => setResolutionAmount(Number(e.target.value))}
- max={dispute.amount}
- className="w-full px-3 py-2 surface-card border border-theme rounded-lg text-sm"
- />
- </div>
- )}
-
- <div>
- <label className="block text-xs text-theme-secondary mb-1">Resolution Notes</label>
- <textarea
- value={resolutionNotes}
- onChange={(e) => setResolutionNotes(e.target.value)}
- rows={3}
- placeholder="Explain your decision..."
- className="w-full px-3 py-2 surface-card border border-theme rounded-lg text-sm resize-none"
- />
- </div>
-
- <div className="flex gap-2 pt-2">
- <button
- onClick={handleResolve}
- className="flex-1 px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all"
- >
- Submit Decision
- </button>
- <button
- onClick={() => setShowResolutionForm(false)}
- className="flex-1 px-4 py-2 surface-section hover:surface-section dark:hover:surface-section text-theme-secondary font-medium rounded-lg transition-all"
- >
- Cancel
- </button>
- </div>
- </div>
- </div>
- ) : (
- <button
- onClick={() => setShowResolutionForm(true)}
- className="w-full px-4 py-3 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
- >
- <Scale className="w-5 h-5" />
- Resolve Dispute
- </button>
- )}
- </div>
- )}
- </div>
- </div>
- </div>
- )
+          {/* Resolution Footer */}
+          <div className="mt-8 pt-6 border-t border-theme">
+            {dispute.status === 'resolved_refund' || dispute.status === 'resolved_payment' ? (
+              <div className="p-4 bg-theme-muted/10 rounded-xl border border-theme">
+                <h6 className="text-sm font-bold text-theme-primary mb-2">Arbitration Completed</h6>
+                <p className="text-xs text-theme-secondary italic">"{dispute.resolutionNote || 'Resolved by administrator.'}"</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {!showResolutionForm ? (
+                  <button
+                    onClick={() => setShowResolutionForm(true)}
+                    className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black uppercase tracking-widest text-xs rounded-2xl shadow-xl shadow-orange-500/20 active:scale-95 transition-all flex items-center justify-center gap-3"
+                  >
+                    <Scale className="w-5 h-5" />
+                    Resolve Dispute Now
+                  </button>
+                ) : (
+                  <div className="surface-section p-4 rounded-2xl border border-theme space-y-4">
+                    <h6 className="text-sm font-bold text-theme-primary">Final Resolution</h6>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5">Decision</label>
+                        <select
+                          value={resolution}
+                          onChange={(e) => setResolution(e.target.value as any)}
+                          className="w-full px-4 py-2.5 surface-card border border-theme rounded-xl text-sm font-medium"
+                        >
+                          <option value="refund">Full Refund to Traveler</option>
+                          <option value="payment">Release to Guide</option>
+                          <option value="dismiss">Dismiss Case</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5">Resolution Notes</label>
+                        <textarea
+                          value={resolutionNotes}
+                          onChange={(e) => setResolutionNotes(e.target.value)}
+                          placeholder="Explain your arbitration decision..."
+                          className="w-full px-4 py-2.5 surface-card border border-theme rounded-xl text-sm min-h-[44px]"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                      <button onClick={handleResolve} className="flex-1 py-3 bg-emerald-600 text-white font-bold rounded-xl active:scale-95 transition-all">Submit</button>
+                      <button onClick={() => setShowResolutionForm(false)} className="flex-1 py-3 surface-card border border-theme text-theme-secondary font-bold rounded-xl active:scale-95 transition-all">Cancel</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 // ============================================================================
@@ -941,48 +880,39 @@ const DisputeDetailsModal = ({ isOpen, onClose, dispute, onResolve }: any) => {
 // ============================================================================
 
 const MobileCard = ({ dispute, onSelect }: any) => (
- <div className="p-4 surface-card border border-theme rounded-xl">
- <div className="flex items-start justify-between mb-3">
- <div>
- <div className="font-semibold text-theme-primary">{dispute.disputeId}</div>
- <div className="text-xs text-theme-muted ">{dispute.tourTitle}</div>
- </div>
- <DisputeStatusBadge status={dispute.status} />
- </div>
+  <div className="surface-card border border-theme rounded-2xl p-4 space-y-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
+    <div className="flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        <div className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-0.5">#{dispute.disputeId}</div>
+        <h4 className="font-bold text-theme-primary truncate leading-tight">{dispute.tourTitle}</h4>
+        <p className="text-[11px] text-theme-muted mt-1">{new Date(dispute.tourDate).toLocaleDateString()}</p>
+      </div>
+      <DisputeStatusBadge status={dispute.status} />
+    </div>
 
- <div className="flex items-center justify-between mb-3">
- <div className="flex items-center gap-2">
- <div className="w-6 h-6 rounded-full surface-section overflow-hidden">
- {dispute.traveler.avatar ? (
- <Image src={dispute.traveler.avatar} alt={dispute.traveler.name} width={24} height={24} className="object-cover" />
- ) : (
- <User className="w-3 h-3 m-1.5 text-theme-muted" />
- )}
- </div>
- <span className="text-xs text-theme-secondary ">vs</span>
- <div className="w-6 h-6 rounded-full surface-section overflow-hidden">
- {dispute.guide.avatar ? (
- <Image src={dispute.guide.avatar} alt={dispute.guide.name} width={24} height={24} className="object-cover" />
- ) : (
- <User className="w-3 h-3 m-1.5 text-theme-muted" />
- )}
- </div>
- </div>
- <PriorityBadge priority={dispute.priority} />
- </div>
+    <div className="flex items-center justify-between p-3 bg-surface-section rounded-xl border border-theme">
+      <div className="flex -space-x-3">
+        {[dispute.traveler, dispute.guide].map((u, i) => (
+          <div key={i} className="w-8 h-8 rounded-full border-2 border-surface-card bg-surface-base overflow-hidden">
+             {u.avatar ? <Image src={u.avatar} alt="" width={32} height={32} className="object-cover" /> : <User className="w-4 h-4 m-1.5 text-theme-muted" />}
+          </div>
+        ))}
+      </div>
+      <div className="text-right">
+        <span className="text-sm font-black text-primary-light dark:text-primary-dark">${dispute.amount}</span>
+        <div className="flex gap-1 mt-1">
+          <PriorityBadge priority={dispute.priority} />
+        </div>
+      </div>
+    </div>
 
- <div className="flex items-center justify-between mb-3 text-xs">
- <span className="text-theme-muted ">${dispute.amount}</span>
- <TimeRemainingBadge hours={dispute.timeRemaining} />
- </div>
-
- <button
- onClick={onSelect}
- className="w-full px-3 py-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white text-sm font-medium rounded-lg"
- >
- Review Dispute
- </button>
- </div>
+    <button
+      onClick={onSelect}
+      className="w-full py-3 bg-primary-light/10 text-primary-light hover:bg-primary-light hover:text-white text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all border border-primary-light/20"
+    >
+      Review Arbitration
+    </button>
+  </div>
 )
 
 // ============================================================================
@@ -1054,7 +984,7 @@ export default function AdminDisputeCourtPage() {
  } catch (e) {
  console.error('Failed to fetch disputes:', e)
  } finally {
- setLoading(false)
+  setLoading(false)
  }
  }
 
@@ -1062,10 +992,34 @@ export default function AdminDisputeCourtPage() {
  fetchDisputes()
  }, [])
 
+ const handleResolve = async (id: string, resolution: string, amount: number, notes: string) => {
+  try {
+  if (resolution === 'dismiss') {
+  await rejectDisputeAdmin(Number(id), notes)
+  } else {
+  await resolveDisputeAdmin(Number(id), { resolutionNote: notes, refundAmount: amount })
+  }
+  toast.success(`Dispute resolved as ${resolution}`)
+  fetchDisputes()
+  } catch (e) {
+  console.error('Failed to resolve dispute:', e)
+  toast.error('Error resolving dispute')
+  }
+  }
+
+  // Real-time stats calculation
+  const stats = useMemo(() => {
+    return {
+      total: realDisputes.length,
+      pending: realDisputes.filter(d => d.status === 'pending').length,
+      underReview: realDisputes.filter(d => d.status === 'under_review').length,
+      highPriority: realDisputes.filter(d => d.priority === 'high').length,
+    }
+  }, [realDisputes])
+
  // Filter disputes
  const filteredDisputes = useMemo(() => {
- const listToFilter = realDisputes.length > 0 || !loading ? realDisputes : MOCK_DISPUTES
- return listToFilter.filter(dispute => {
+ return realDisputes.filter(dispute => {
  if (filterType !== 'all' && dispute.type !== filterType) return false
  if (filterStatus !== 'all' && dispute.status !== filterStatus) return false
  if (filterPriority !== 'all' && dispute.priority !== filterPriority) return false
@@ -1080,7 +1034,7 @@ export default function AdminDisputeCourtPage() {
  }
  return true
  })
- }, [filterType, filterStatus, filterPriority, searchTerm])
+ }, [filterType, filterStatus, filterPriority, searchTerm, realDisputes])
 
  const totalPages = Math.ceil(filteredDisputes.length / itemsPerPage)
  const paginatedDisputes = filteredDisputes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
@@ -1093,82 +1047,61 @@ export default function AdminDisputeCourtPage() {
  setCurrentPage(1)
  }
 
- const handleResolve = async (id: string, resolution: string, amount: number, notes: string) => {
- try {
- if (resolution === 'dismiss') {
- await rejectDisputeAdmin(Number(id), notes)
- } else {
- await resolveDisputeAdmin(Number(id), { resolutionNote: notes, refundAmount: amount })
- }
- alert(`✅ Dispute resolved! Decision: ${resolution}, Amount: $${amount}`)
- fetchDisputes()
- } catch (e) {
- console.error('Failed to resolve dispute:', e)
- alert('Error resolving dispute')
- }
- }
-
  return (
     <>
-    <div className="pt-14 sm:pt-16 min-h-[calc(100vh-4rem)] surface-base">
- <div className="container-safe mx-auto max-w-7xl py-8 sm:py-10">
- 
-  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
-    <div>
-      <h1 className="text-3xl font-black text-theme-primary mb-2 tracking-tight">
-        Dispute Court
-      </h1>
-      <p className="text-sm text-theme-secondary leading-relaxed">
-        Neutral arbitration and conflict resolution center
-      </p>
-    </div>
-    <button
-      onClick={resetFilters}
-      className="px-6 py-2.5 bg-primary-light hover:bg-blue-500 text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2 self-start active:scale-95"
-    >
-      <RefreshCw className="w-4 h-4" />
-      Reset Court
-    </button>
-  </div>
+    <div className="min-h-screen surface-base">
+  <div className="container-safe mx-auto max-w-7xl py-6 sm:py-10 px-4 sm:px-6">
+  
+   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+     <div>
+       <h1 className="text-2xl sm:text-3xl font-bold text-theme-primary mb-1 tracking-tight">
+         Dispute Court
+       </h1>
+       <p className="text-xs sm:text-sm text-theme-secondary">
+         Neutral arbitration and conflict resolution center
+       </p>
+     </div>
+     <button
+       onClick={resetFilters}
+       className="px-5 py-2.5 bg-primary-light hover:bg-blue-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2 self-start active:scale-95"
+     >
+       <RefreshCw className="w-3.5 h-3.5" />
+       Reset Court
+     </button>
+   </div>
 
-  <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-12">
-    {[
-      { key: 'total', label: 'Total Cases', value: MOCK_DISPUTE_STATS.total, color: 'blue', action: () => setFilterStatus('all') },
-      { key: 'pending', label: 'Awaiting Review', value: MOCK_DISPUTE_STATS.pending, color: 'amber', action: () => setFilterStatus('pending') },
-      { key: 'underReview', label: 'In Arbitration', value: MOCK_DISPUTE_STATS.underReview, color: 'blue', action: () => setFilterStatus('under_review') },
-      { key: 'highPriority', label: 'Critical Priority', value: MOCK_DISPUTE_STATS.highPriority, color: 'red', action: () => setFilterPriority('high') }
-    ].map(stat => {
-      const isActive = (stat.key === 'highPriority' && filterPriority === 'high') ||
-                      (stat.key === 'underReview' && filterStatus === 'under_review') ||
-                      (stat.key === 'pending' && filterStatus === 'pending') ||
-                      (stat.key === 'total' && filterStatus === 'all');
-      
-      const colorMap: Record<string, string> = {
-        red: 'red',
-        amber: 'amber',
-        blue: 'blue'
-      };
-      const c = colorMap[stat.color] || 'blue';
+   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
+     {[
+       { key: 'total', label: 'Total Cases', value: stats.total, color: 'blue', action: () => setFilterStatus('all') },
+       { key: 'pending', label: 'Awaiting Review', value: stats.pending, color: 'amber', action: () => setFilterStatus('pending') },
+       { key: 'underReview', label: 'In Arbitration', value: stats.underReview, color: 'blue', action: () => setFilterStatus('under_review') },
+       { key: 'highPriority', label: 'Critical Priority', value: stats.highPriority, color: 'red', action: () => setFilterPriority('high') }
+     ].map(stat => {
+       const isActive = (stat.key === 'highPriority' && filterPriority === 'high') ||
+                       (stat.key === 'underReview' && filterStatus === 'under_review') ||
+                       (stat.key === 'pending' && filterStatus === 'pending') ||
+                       (stat.key === 'total' && filterStatus === 'all');
+       
+       const c = stat.color === 'red' ? 'red' : stat.color === 'amber' ? 'amber' : 'blue';
 
-      return (
-        <div
-          key={stat.key}
-          onClick={stat.action}
-          className={`group p-6 surface-card rounded-2xl cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1 border-2 relative overflow-hidden ${
-            isActive 
-            ? `border-${c}-500/50 shadow-lg shadow-${c}-500/10` 
-            : 'border-theme'
-          }`}
-        >
-          {isActive && <div className={`absolute top-0 right-0 w-16 h-16 bg-${c}-500/10 blur-2xl rounded-full -mr-8 -mt-8`} />}
-          <div className={`text-3xl font-black text-${c}-600 dark:text-${c}-400 mb-2`}>
-            {stat.value}
-          </div>
-          <div className="text-[10px] text-theme-muted font-black uppercase tracking-widest">{stat.label}</div>
-        </div>
-      );
-    })}
-  </div>
+       return (
+         <div
+           key={stat.key}
+           onClick={stat.action}
+           className={`group p-4 sm:p-6 surface-card rounded-2xl cursor-pointer transition-all hover:shadow-xl border-2 relative overflow-hidden ${
+             isActive 
+             ? `border-${c}-500/50 shadow-lg shadow-${c}-500/10` 
+             : 'border-theme'
+           }`}
+         >
+           <div className={`text-2xl sm:text-3xl font-bold text-${c}-600 dark:text-${c}-400 mb-1 sm:mb-2`}>
+             {stat.value}
+           </div>
+           <div className="text-[9px] sm:text-[10px] text-theme-muted font-bold uppercase tracking-widest leading-tight">{stat.label}</div>
+         </div>
+       );
+     })}
+   </div>
 
  {/* Filters */}
  <div className="flex flex-col sm:flex-row gap-4 mb-6">

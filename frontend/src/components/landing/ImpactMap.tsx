@@ -503,7 +503,7 @@ export default function ImpactMap() {
  LIVE PLATFORM DATA
  </div>
 
- <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-theme-primary mb-6 tracking-tight">
+ <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold text-theme-primary mb-6 tracking-tight">
  See the <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">Impact</span> We Make
  </h2>
 
@@ -550,13 +550,13 @@ export default function ImpactMap() {
  className="p-6 sm:p-8 surface-card  rounded-[2.5rem] border border-theme-strong group hover:border-primary-light dark:hover:border-primary-dark/30 transition-colors"
  >
  <Calendar className="w-6 h-6 text-primary-light dark:text-primary-dark mb-4" />
- <p className="text-xs sm:text-sm font-black text-theme-muted uppercase tracking-widest mb-1">
+ <p className="text-xs sm:text-sm font-bold text-theme-muted uppercase tracking-widest mb-1">
  Tours This Week
  </p>
- <div className="text-3xl sm:text-4xl font-black text-theme-primary mb-3">
+ <div className="text-3xl sm:text-4xl font-bold text-theme-primary mb-3">
  <AnimatedCounter end={stats.activeToursCount} duration={2500} />
  </div>
- <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-emerald-400">
+ <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
  <TrendingUp className="w-3 h-3" />
  +12% Growth
  </span>
@@ -570,13 +570,13 @@ export default function ImpactMap() {
  className="p-6 sm:p-8 surface-card  rounded-[2.5rem] border border-theme-strong group hover:border-success-green/30 transition-colors"
  >
  <Users className="w-6 h-6 text-emerald-400 mb-4" />
- <p className="text-xs sm:text-sm font-black text-theme-muted uppercase tracking-widest mb-1">
+ <p className="text-xs sm:text-sm font-bold text-theme-muted uppercase tracking-widest mb-1">
  Happy Travelers
  </p>
- <div className="text-3xl sm:text-4xl font-black text-theme-primary mb-3">
+ <div className="text-3xl sm:text-4xl font-bold text-theme-primary mb-3">
  <AnimatedCounter end={stats.totalTravelersCount} duration={2500} delay={200} />
  </div>
- <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-primary-light dark:text-primary-dark">
+ <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-primary-light dark:text-primary-dark">
  <Heart className="w-3 h-3 fill-current" />
  98% Joy
  </span>
@@ -590,13 +590,13 @@ export default function ImpactMap() {
  className="p-6 sm:p-8 surface-card  rounded-[2.5rem] border border-theme-strong group hover:border-orange-500/30 transition-colors"
  >
  <Award className="w-6 h-6 text-orange-400 mb-4" />
- <p className="text-xs sm:text-sm font-black text-theme-muted uppercase tracking-widest mb-1">
+ <p className="text-xs sm:text-sm font-bold text-theme-muted uppercase tracking-widest mb-1">
  Active Guides
  </p>
- <div className="text-3xl sm:text-4xl font-black text-theme-primary mb-3">
+ <div className="text-3xl sm:text-4xl font-bold text-theme-primary mb-3">
  <AnimatedCounter end={stats.verifiedGuidesCount} duration={2500} delay={400} />
  </div>
- <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-purple-400">
+ <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-purple-400">
  <Star className="w-3 h-3 fill-current" />
  {stats.averageRating}/5 Rating
  </span>
@@ -610,13 +610,13 @@ export default function ImpactMap() {
  className="p-6 sm:p-8 surface-card  rounded-[2.5rem] border border-theme-strong group hover:border-purple-500/30 transition-colors"
  >
  <MapPin className="w-6 h-6 text-purple-400 mb-4" />
- <p className="text-xs sm:text-sm font-black text-theme-muted uppercase tracking-widest mb-1">
+ <p className="text-xs sm:text-sm font-bold text-theme-muted uppercase tracking-widest mb-1">
  Coverage
  </p>
- <div className="text-3xl sm:text-4xl font-black text-theme-primary mb-1">
+ <div className="text-3xl sm:text-4xl font-bold text-theme-primary mb-1">
  2 <span className="text-lg font-normal text-theme-muted/50">nations</span>
  </div>
- <p className="text-[10px] font-black uppercase tracking-wider text-theme-muted">
+ <p className="text-[10px] font-bold uppercase tracking-wider text-theme-muted">
  24 cities & growing
  </p>
  </motion.div>
@@ -635,7 +635,7 @@ export default function ImpactMap() {
  >
  <div className="flex items-center gap-3 mb-6">
  <MessageCircle className="w-5 h-5 text-primary-light dark:text-primary-dark" />
- <h3 className="font-black text-theme-primary uppercase tracking-widest text-sm">
+ <h3 className="font-bold text-theme-primary uppercase tracking-widest text-sm">
  Explorer Pulse
  </h3>
  <span className="text-[10px] px-2 py-0.5 bg-primary-light/20 text-blue-300 rounded-full font-bold">

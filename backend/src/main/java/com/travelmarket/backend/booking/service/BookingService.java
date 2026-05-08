@@ -18,6 +18,8 @@ import com.travelmarket.backend.repository.TravelerProfileRepository;
 import com.travelmarket.backend.service.TimeService;
 import com.travelmarket.backend.tour.entity.TourOccurrence;
 import com.travelmarket.backend.tour.enums.TourOccurrenceStatus;
+import com.travelmarket.backend.tour.enums.TourMediaType;
+import com.travelmarket.backend.tour.entity.TourMedia;
 import com.travelmarket.backend.tour.repository.TourOccurrenceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -1030,7 +1033,12 @@ public class BookingService {
                 .occurrenceId(b.getOccurrence().getId())
                 .tourTitle(b.getOccurrence().getTemplate().getTitle())
                 .tourId(b.getOccurrence().getTemplate().getId())
-                .tourCoverImageUrl(null) // TODO: resolve from TourMedia in media card
+                .tourCoverImageUrl(b.getOccurrence().getTemplate().getMedia().stream()
+                        .filter(m -> m.getMediaType() == TourMediaType.IMAGE)
+                        .sorted(Comparator.comparingInt(TourMedia::getDisplayOrder))
+                        .findFirst()
+                        .map(TourMedia::getUrl)
+                        .orElse(null))
                 .startTimeUtc(b.getOccurrence().getStartTimeUtc())
                 .endTimeUtc(b.getOccurrence().getEndTimeUtc())
                 // Meeting point is private — only reveal once the booking is confirmed

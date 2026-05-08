@@ -69,154 +69,151 @@ const TIER_CONFIG: Record<LoyaltyTierType, {
 // ============================================================================
 
 function GlassCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
- return (
- <div className={`surface-card border border-theme rounded-xl ${className}`}>
- {children}
- </div>
- )
+  return (
+    <div className={`surface-card border border-theme rounded-3xl shadow-sm ${className}`}>
+      {children}
+    </div>
+  )
 }
 
 function StatCard({ icon: Icon, label, value, color }: {
- icon: React.ElementType
- label: string
- value: string | number
- color: 'blue' | 'amber' | 'emerald' | 'purple'
+  icon: React.ElementType
+  label: string
+  value: string | number
+  color: 'blue' | 'amber' | 'emerald' | 'purple'
 }) {
- const iconColors: Record<string, string> = {
- blue: 'bg-primary-light/10 text-primary-light dark:text-primary-dark',
- amber: 'bg-accent-light/10 text-accent-light dark:text-accent-dark',
- emerald: 'bg-success-green/10 text-success-green',
- purple: 'bg-primary-light/10 text-primary-light dark:text-primary-dark',
- }
- return (
- <GlassCard className="p-6">
- <div className={`p-2.5 rounded-lg ${iconColors[color]} w-fit mb-4`}>
- <Icon className="w-5 h-5" />
- </div>
- <div className="text-3xl font-bold text-theme-primary mb-1">{value}</div>
- <div className="text-xs text-theme-muted">{label}</div>
- </GlassCard>
- )
+  const iconColors: Record<string, string> = {
+    blue: 'bg-primary-light/10 text-primary-light dark:text-primary-dark border-primary-light/20',
+    amber: 'bg-accent-light/10 text-accent-light dark:text-accent-dark border-accent-light/20',
+    emerald: 'bg-success-green/10 text-success-green dark:text-emerald-400 border-success-green/20',
+    purple: 'bg-primary-light/10 text-primary-light dark:text-primary-dark border-primary-light/20'
+  }
+
+  return (
+    <GlassCard className="p-5 sm:p-6 hover:border-theme-strong transition-all group/stat shadow-sm hover:shadow-lg">
+      <div className={`p-2.5 rounded-xl ${iconColors[color]} w-fit mb-4 border transition-transform group-hover/stat:scale-110`}>
+        <Icon className="w-4 h-4 sm:w-5 h-5" />
+      </div>
+      <div className="text-2xl sm:text-3xl font-black text-theme-primary mb-1 tracking-tight leading-none">{value}</div>
+      <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] text-theme-muted opacity-80">{label}</div>
+    </GlassCard>
+  )
 }
 
 /** Loyalty tier stat card — replaces the plain"Profile Status" card */
 function LoyaltyStatCard({ loyalty }: { loyalty: LoyaltyStatusResponse | null }) {
- const tier = (loyalty?.loyaltyTier ?? 'BRONZE') as LoyaltyTierType
- const cfg = TIER_CONFIG[tier]
+  const tier = (loyalty?.loyaltyTier ?? 'BRONZE') as LoyaltyTierType
+  const cfg = TIER_CONFIG[tier]
 
- return (
- <GlassCard className={`p-6 border-l-4 ${cfg.ring.replace('ring-', 'border-l-').replace('/50', '')}`}>
- <div className="flex items-center justify-between mb-4">
- <div className={`p-2.5 rounded-lg ${cfg.badge} w-fit`}>
- <Trophy className="w-5 h-5" />
- </div>
- <span className={`text-xs font-medium px-2 py-1 rounded-full ${cfg.badge}`}>
- {cfg.icon} {cfg.label}
- </span>
- </div>
- <div>
- <div className={`text-3xl font-bold mb-1 ${cfg.text}`}>
- {loyalty ? `${loyalty.discountPct}% off` : '—'}
- </div>
- <div className="text-xs text-theme-muted">
- Loyalty Tier
- </div>
- {loyalty && loyalty.tripsToNextTier > 0 && (
- <p className="text-xs text-theme-muted mt-1">
- {loyalty.tripsToNextTier} trip{loyalty.tripsToNextTier !== 1 ? 's' : ''} to {loyalty.nextTier ? loyalty.nextTier.charAt(0) + loyalty.nextTier.slice(1).toLowerCase() : ''}
- </p>
- )}
- {loyalty && loyalty.tripsToNextTier === 0 && (
- <p className="text-xs text-yellow-500 mt-1 font-bold">✨ Top tier achieved!</p>
- )}
- </div>
- </GlassCard>
- )
+  return (
+    <GlassCard className={`p-5 sm:p-6 border-l-4 ${cfg.ring.replace('ring-', 'border-l-').replace('/50', '')} hover:border-theme-strong transition-all group/loyalty`}>
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className={`p-2 rounded-xl ${cfg.badge} w-fit group-hover/loyalty:scale-110 transition-transform`}>
+          <Trophy className="w-4 h-4 sm:w-5 h-5" />
+        </div>
+        <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-widest px-2 py-1 rounded-xl ${cfg.badge}`}>
+          {cfg.icon} {cfg.label}
+        </span>
+      </div>
+      <div>
+        <div className={`text-2xl sm:text-3xl font-black mb-0.5 sm:mb-1 tracking-tight ${cfg.text}`}>
+          {loyalty ? `${loyalty.discountPct}% off` : '—'}
+        </div>
+        <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-theme-muted">
+          Loyalty Tier
+        </div>
+        {loyalty && loyalty.tripsToNextTier > 0 && (
+          <p className="text-[10px] sm:text-xs text-theme-muted mt-1.5 font-bold uppercase tracking-tighter">
+            {loyalty.tripsToNextTier} more to {loyalty.nextTier ? loyalty.nextTier.charAt(0) + loyalty.nextTier.slice(1).toLowerCase() : ''}
+          </p>
+        )}
+        {loyalty && loyalty.tripsToNextTier === 0 && (
+          <p className="text-[10px] sm:text-xs text-yellow-500 mt-1.5 font-black uppercase tracking-widest">✨ Top Tier!</p>
+        )}
+      </div>
+    </GlassCard>
+  )
 }
 
-/** Sidebar loyalty progress card */
 function LoyaltyProgressCard({ loyalty }: { loyalty: LoyaltyStatusResponse | null }) {
- if (!loyalty) return null
+  if (!loyalty) return null
 
- const tier = loyalty.loyaltyTier as LoyaltyTierType
- const cfg = TIER_CONFIG[tier]
+  const tier = loyalty.loyaltyTier as LoyaltyTierType
+  const cfg = TIER_CONFIG[tier]
 
- // Compute clean progress percentage within the current tier range.
- // Backend gives us tripsToNextTier so we can derive the target.
- let cleanProgress = 0
- if (tier === 'BRONZE') {
- const target = loyalty.completedTrips + loyalty.tripsToNextTier // = silverMinTrips
- cleanProgress = target > 0 ? Math.min(100, (loyalty.completedTrips / target) * 100) : 0
- } else if (tier === 'SILVER') {
- // Between silverMin (5) and goldMin (silverMin + tripsToNextTier)
- const goldTotal = loyalty.completedTrips + loyalty.tripsToNextTier
- const silverMin = goldTotal - (loyalty.tripsToNextTier > 0 ? goldTotal - loyalty.completedTrips + loyalty.tripsToNextTier : 0)
- // Simplified: 0 tripsToNextTier = 100%, otherwise scale from 5
- cleanProgress = loyalty.tripsToNextTier === 0
- ? 100
- : Math.max(0, Math.min(100, ((loyalty.completedTrips - 5) / (goldTotal - 5)) * 100))
- } else {
- cleanProgress = 100
- }
+  // Compute clean progress percentage
+  let cleanProgress = 0
+  if (tier === 'BRONZE') {
+    const target = loyalty.completedTrips + loyalty.tripsToNextTier
+    cleanProgress = target > 0 ? Math.min(100, (loyalty.completedTrips / target) * 100) : 0
+  } else if (tier === 'SILVER') {
+    const goldTotal = loyalty.completedTrips + loyalty.tripsToNextTier
+    cleanProgress = loyalty.tripsToNextTier === 0 ? 100 : Math.max(0, Math.min(100, ((loyalty.completedTrips - 5) / (goldTotal - 5)) * 100))
+  } else {
+    cleanProgress = 100
+  }
 
- return (
- <GlassCard className="p-6">
- <div className="flex items-center gap-3 mb-5">
- <div className={`p-2 rounded-lg ${cfg.badge} w-fit`}>
- <Star className="w-4 h-4" />
- </div>
- <div>
- <h3 className="font-semibold text-theme-primary text-sm">Loyalty Status</h3>
- <p className="text-xs text-theme-muted">{cfg.icon} {cfg.label} Member</p>
- </div>
- </div>
+  return (
+    <GlassCard className="p-5 sm:p-6 overflow-hidden relative">
+      <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+        <Trophy className="w-24 h-24 rotate-12" />
+      </div>
 
- {/* Progress bar to next tier */}
- {loyalty.tripsToNextTier > 0 && loyalty.nextTier && (
- <div className="mb-4">
- <div className="flex justify-between items-center mb-2">
- <span className="text-xs font-semibold text-theme-muted">{cfg.label}</span>
- <span className={`text-xs font-bold uppercase ${TIER_CONFIG[loyalty.nextTier].text}`}>
- {loyalty.nextTier.charAt(0) + loyalty.nextTier.slice(1).toLowerCase()}
- </span>
- </div>
- <div className="w-full h-2 surface-section rounded-full overflow-hidden">
- <motion.div
- className={`h-full rounded-full bg-gradient-to-r ${cfg.gradient}`}
- initial={{ width: 0 }}
- animate={{ width: `${Math.round(cleanProgress)}%` }}
- transition={{ duration: 1, ease: 'easeOut', delay: 0.3 }}
- />
- </div>
- <p className="text-xs text-theme-muted mt-2 text-center">
- {loyalty.tripsToNextTier} more trip{loyalty.tripsToNextTier !== 1 ? 's' : ''} to unlock{' '}
- <span className={`font-bold ${TIER_CONFIG[loyalty.nextTier].text}`}>
- {loyalty.nextTierDiscountPct}% discount
- </span>
- </p>
- </div>
- )}
+      <div className="flex items-center gap-4 mb-6">
+        <div className={`p-2.5 rounded-xl ${cfg.badge} w-fit shadow-inner`}>
+          <Star className="w-5 h-5 fill-current" />
+        </div>
+        <div>
+          <h3 className="font-bold text-theme-primary uppercase tracking-wider text-sm">Loyalty Journey</h3>
+          <p className="text-xs text-theme-muted font-bold mt-0.5">{cfg.icon} {cfg.label} Elite</p>
+        </div>
+      </div>
 
- {loyalty.tripsToNextTier === 0 && (
- <div className="text-center p-3 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200/50 dark:border-yellow-800/30 mb-4">
- <p className="text-yellow-600 dark:text-yellow-400 font-semibold text-sm">✨ Max Tier Achieved!</p>
- <p className="text-xs text-yellow-500 mt-1">You earn {loyalty.discountPct}% off every booking.</p>
- </div>
- )}
+      {/* Progress bar to next tier */}
+      {loyalty.tripsToNextTier > 0 && loyalty.nextTier && (
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-2.5">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-theme-muted">{cfg.label}</span>
+            <span className={`text-[10px] font-black uppercase tracking-widest ${TIER_CONFIG[loyalty.nextTier].text}`}>
+              {loyalty.nextTier}
+            </span>
+          </div>
+          <div className="w-full h-3 surface-section rounded-full overflow-hidden p-0.5 border border-theme">
+            <motion.div
+              className={`h-full rounded-full bg-gradient-to-r ${cfg.gradient} shadow-lg`}
+              initial={{ width: 0 }}
+              animate={{ width: `${Math.round(cleanProgress)}%` }}
+              transition={{ duration: 1.2, ease: 'circOut', delay: 0.2 }}
+            />
+          </div>
+          <div className="mt-3 p-3 bg-primary-light/5 dark:bg-primary-dark/5 rounded-xl border border-primary-light/10">
+            <p className="text-[10px] text-center text-theme-muted font-medium leading-relaxed">
+              Just <span className={`font-black ${cfg.text}`}>{loyalty.tripsToNextTier} more</span> trips to unlock your next tier and its rewards.
+            </p>
+          </div>
+        </div>
+      )}
 
- {/* Stats row */}
- <div className="grid grid-cols-2 gap-3">
- <div className="text-center p-3 surface-section rounded-xl">
- <div className="text-2xl font-bold text-theme-primary">{loyalty.completedTrips}</div>
- <div className="text-xs text-theme-muted mt-0.5">Trips Done</div>
- </div>
- <div className="text-center p-3 surface-section rounded-xl">
- <div className={`text-2xl font-bold ${cfg.text}`}>{loyalty.discountPct}%</div>
- <div className="text-xs text-theme-muted mt-0.5">Your Discount</div>
- </div>
- </div>
- </GlassCard>
- )
+      {loyalty.tripsToNextTier === 0 && (
+        <div className="text-center p-4 rounded-2xl bg-gradient-to-br from-yellow-400/20 to-amber-500/10 border border-yellow-400/20 mb-6">
+          <p className="text-yellow-600 dark:text-yellow-400 font-black text-xs uppercase tracking-widest italic">✨ Legendary Status ✨</p>
+          <p className="text-[10px] text-yellow-600/80 dark:text-yellow-400/80 mt-1 font-medium">You have reached the peak of our loyalty program.</p>
+        </div>
+      )}
+
+      {/* Stats row */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="text-center p-4 surface-section rounded-2xl border border-theme shadow-sm group hover:border-theme-strong transition-colors">
+          <div className="text-2xl font-black text-theme-primary">{loyalty.completedTrips}</div>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-theme-muted mt-1">Trips</div>
+        </div>
+        <div className="text-center p-4 surface-section rounded-2xl border border-theme shadow-sm group hover:border-theme-strong transition-colors">
+          <div className={`text-2xl font-black ${cfg.text}`}>{loyalty.discountPct}%</div>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-theme-muted mt-1">Discount</div>
+        </div>
+      </div>
+    </GlassCard>
+  )
 }
 
 // ============================================================================
@@ -278,7 +275,7 @@ export default function TravelerDashboardPage() {
  <div className="absolute bottom-[-10%] left-[-10%] w-[30%] h-[30%] bg-purple-500/10 rounded-full blur-[100px]" />
  </div>
 
- <div className="relative pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+ <div className="relative pt-20 sm:pt-24 pb-32 sm:pb-12 px-4 sm:px-6 lg:px-8">
  <div className="max-w-7xl mx-auto">
 
  <OnboardingBannerWrapper />
@@ -295,17 +292,18 @@ export default function TravelerDashboardPage() {
  <Sparkles className="w-3 h-3" />
  {getGreeting()}
  </div>
- <h1 className="text-4xl sm:text-5xl font-black text-theme-primary tracking-tight leading-tight">
- Hi, {user?.fullName?.split(' ')[0] || 'Traveler'}! <span className="text-primary-light dark:text-primary-dark">Explore</span> more.
- </h1>
- <p className="mt-2 text-lg text-theme-secondary font-medium">
- Ready for your next trip to {profile?.country || 'Lebanon'}?
- </p>
+  <h1 className="text-3xl sm:text-5xl font-black text-theme-primary tracking-tight leading-[1.1] sm:leading-tight">
+  Hi, {user?.fullName?.split(' ')[0] || 'Traveler'}! <br className="sm:hidden" />
+  <span className="text-primary-light dark:text-primary-dark">Explore</span> more.
+  </h1>
+  <p className="mt-3 text-base sm:text-lg text-theme-secondary font-medium">
+  Ready for your next trip to {profile?.country || 'Lebanon'}?
+  </p>
  </div>
- <div className="flex">
+ <div className="flex justify-center md:justify-end">
  <Link
  href="/tours"
- className="px-6 py-3 bg-primary-light hover:bg-primary-light-hover text-white rounded-lg font-semibold transition-colors flex items-center gap-2"
+ className="w-full sm:w-auto px-8 py-3.5 bg-primary-light hover:bg-primary-light-hover text-white rounded-xl font-bold transition-all shadow-lg shadow-primary-light/20 flex items-center justify-center gap-2 text-sm uppercase tracking-widest"
  >
  <Search className="w-4 h-4" />
  Find Tours
@@ -319,7 +317,7 @@ export default function TravelerDashboardPage() {
  initial={{ opacity: 0, scale: 0.95 }}
  animate={{ opacity: 1, scale: 1 }}
  transition={{ delay: 0.1 }}
- className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"
+ className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-10 sm:mb-12"
  >
  <StatCard icon={Compass} label="Completed Trips" value={profile?.completedTrips || 0} color="blue" />
  <StatCard icon={MapPin} label="Base Location" value={profile?.country || 'Lebanon'} color="amber" />
@@ -331,142 +329,160 @@ export default function TravelerDashboardPage() {
  {/* MAIN CONTENT */}
  <div className="lg:col-span-2 space-y-8">
 
- {/* PAYMENT ALERT */}
- {bookings.some((b) => b.status === 'PendingPayment') && (
- <div className="p-5 bg-indigo-600 rounded-xl text-white flex flex-col md:flex-row items-center justify-between gap-4">
- <div className="flex items-center gap-4">
- <CreditCard className="w-6 h-6 flex-shrink-0" />
- <div>
- <h3 className="font-semibold mb-0.5">Payment Required</h3>
- <p className="text-indigo-100 text-sm">You have an unpaid booking. Complete payment to secure your spot.</p>
- </div>
- </div>
- <Link
- href="/dashboard/traveler/bookings"
- className="px-5 py-2 bg-white text-indigo-600 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition-colors flex-shrink-0"
- >
- Pay Now
- </Link>
- </div>
- )}
+          {/* PAYMENT ALERT */}
+          {bookings.some((b) => b.status === 'PendingPayment') && (
+            <div className="p-5 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl text-white shadow-xl shadow-indigo-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 border border-white/10">
+              <div className="flex items-center gap-4 text-center sm:text-left">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <CreditCard className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold mb-0.5 uppercase tracking-wider text-sm">Payment Required</h3>
+                  <p className="text-indigo-100 text-xs font-medium">Complete your unpaid booking to secure your spot.</p>
+                </div>
+              </div>
+              <Link
+                href="/dashboard/traveler/bookings"
+                className="w-full sm:w-auto px-6 py-2.5 bg-white text-indigo-600 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-lg flex-shrink-0 text-center"
+              >
+                Pay Now
+              </Link>
+            </div>
+          )}
 
- {/* LOYALTY SAVINGS BANNER — only if a confirmed booking has a tier discount */}
- {discountedBooking && (
- <div className="p-4 bg-amber-500 rounded-xl text-white flex items-center gap-4">
- <Zap className="w-5 h-5 flex-shrink-0" />
- <div>
- <p className="font-semibold text-sm">
- 🎉 Loyalty discount applied — you saved ${discountedBooking.tierDiscountAmount?.toFixed(2)} on &ldquo;{discountedBooking.tourTitle}&rdquo;
- </p>
- <p className="text-amber-100 text-xs mt-0.5">
- {loyalty?.loyaltyTier} tier earns you {loyalty?.discountPct}% off every trip.
- </p>
- </div>
- </div>
- )}
+          {/* LOYALTY SAVINGS BANNER */}
+          {discountedBooking && (
+            <div className="p-4 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl text-white shadow-lg shadow-amber-500/20 flex items-center gap-4 border border-white/10">
+              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Zap className="w-5 h-5 fill-current" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-bold text-xs sm:text-sm uppercase tracking-tight truncate pr-2">
+                  🎉 Saved ${discountedBooking.tierDiscountAmount?.toFixed(2)} with {loyalty?.loyaltyTier} status!
+                </p>
+                <p className="text-amber-100 text-[10px] sm:text-xs font-medium mt-0.5">
+                  Exclusive {loyalty?.discountPct}% discount applied to &ldquo;{discountedBooking.tourTitle}&rdquo;
+                </p>
+              </div>
+            </div>
+          )}
 
- {/* UPCOMING TRIPS */}
- <GlassCard className="p-6">
- <div className="flex items-center justify-between mb-6">
- <div>
- <h2 className="text-xl font-bold text-theme-primary">Upcoming Trips</h2>
- <p className="text-sm text-theme-muted">Your confirmed and pending bookings</p>
- </div>
- <Link href="/dashboard/traveler/bookings" className="text-sm font-bold text-primary-light dark:text-primary-dark hover:text-blue-700 flex items-center gap-1 group">
- View All
- <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
- </Link>
- </div>
+          {/* UPCOMING TRIPS */}
+          <GlassCard className="p-5 sm:p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-theme-primary uppercase tracking-wider">Upcoming Trips</h2>
+                <p className="text-xs sm:text-sm text-theme-muted font-medium mt-0.5">Your next adventures await</p>
+              </div>
+              <Link
+                href="/dashboard/traveler/bookings"
+                className="text-[10px] sm:text-xs font-bold text-primary-light dark:text-primary-dark hover:opacity-80 flex items-center gap-1 group uppercase tracking-widest"
+              >
+                View All
+                <ChevronRight className="w-3 h-3 sm:w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
 
- {bookings.filter((b) =>
- ['Confirmed', 'PendingGuide', 'InProgress', 'PendingPayment'].includes(b.status as string)
- ).length > 0 ? (
- <div className="space-y-3">
- {bookings
- .filter((b) => ['Confirmed', 'PendingGuide', 'InProgress', 'PendingPayment'].includes(b.status as string))
- .slice(0, 3)
- .map((booking) => (
- <div
- key={booking.id}
- className="p-4 surface-section border border-theme rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3"
- >
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 bg-primary-light/10 rounded-lg flex items-center justify-center">
- <Calendar className="w-5 h-5 text-primary-light dark:text-primary-dark" />
- </div>
- <div>
- <h4 className="font-bold text-theme-primary">{booking.tourTitle}</h4>
- <div className="flex items-center gap-2 text-sm text-theme-muted font-medium">
- <Clock className="w-4 h-4" />
- {new Date(booking.startTimeUtc).toLocaleDateString()}
- </div>
- </div>
- </div>
- <div className="flex items-center gap-2">
- <span className={`px-2 py-1 rounded-full text-xs font-medium ${
- booking.status === 'Confirmed'
- ? 'bg-success-green/15 text-success-green'
- : booking.status === 'InProgress'
- ? 'bg-primary-light/15 text-primary-light dark:text-primary-dark'
- : booking.status === 'PendingPayment'
- ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
- : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
- }`}>
- {booking.status === 'PendingPayment' ? 'Unpaid' : booking.status}
- </span>
- <Link href="/dashboard/traveler/bookings" className="p-1.5 surface-section rounded-lg hover:surface-card transition-colors">
- <ChevronRight className="w-4 h-4" />
- </Link>
- </div>
- </div>
- ))}
- </div>
- ) : (
- <div className="surface-section rounded-xl p-10 text-center border-2 border-dashed border-theme">
- <Calendar className="w-8 h-8 text-theme-muted mx-auto mb-3" />
- <h3 className="font-semibold text-theme-primary mb-2">No upcoming trips yet</h3>
- <p className="text-sm text-theme-muted max-w-xs mx-auto mb-4">
- Browse our curated tours and book your next escape!
- </p>
- <Link
- href="/tours"
- className="inline-flex items-center gap-2 px-4 py-2 surface-card border border-theme rounded-lg text-sm font-medium hover:surface-section transition-colors"
- >
- Explore Tours
- </Link>
- </div>
- )}
- </GlassCard>
+            {bookings.filter((b) => ['Confirmed', 'PendingGuide', 'InProgress', 'PendingPayment'].includes(b.status as string)).length > 0 ? (
+              <div className="space-y-4">
+                {bookings
+                  .filter((b) => ['Confirmed', 'PendingGuide', 'InProgress', 'PendingPayment'].includes(b.status as string))
+                  .slice(0, 3)
+                  .map((booking) => (
+                    <div
+                      key={booking.id}
+                      className="p-5 sm:p-6 surface-section border border-theme rounded-2xl hover:border-theme-strong hover:shadow-2xl transition-all group/card cursor-pointer"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+                        <div className="flex items-center gap-5 min-w-0">
+                          <div className="w-14 h-14 bg-primary-light/10 rounded-2xl flex items-center justify-center text-primary-light flex-shrink-0 group-hover/card:scale-110 transition-transform">
+                            <Calendar className="w-7 h-7" />
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="font-bold text-sm sm:text-lg text-theme-primary truncate group-hover/card:text-primary-light transition-colors tracking-tight">
+                              {booking.tourTitle}
+                            </h4>
+                            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-2">
+                              <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-theme-muted flex items-center gap-2">
+                                <Clock className="w-3.5 h-3.5 text-orange-500" />{' '}
+                                {new Date(booking.startTimeUtc).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between sm:justify-end gap-4 pt-4 sm:pt-0 border-t sm:border-0 border-theme">
+                          <div
+                            className={`px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] border ${
+                              booking.status === 'Confirmed'
+                                ? 'bg-success-green/10 text-success-green border-success-green/20'
+                                : booking.status === 'InProgress'
+                                ? 'bg-primary-light/10 text-primary-light dark:text-primary-dark border-primary-light/20'
+                                : booking.status === 'PendingPayment'
+                                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                : 'bg-accent-light/10 text-accent-light border-accent-light/20'
+                            }`}
+                          >
+                            {booking.status === 'PendingPayment' ? 'Unpaid' : booking.status}
+                          </div>
+                          <Link
+                            href={`/dashboard/traveler/bookings`}
+                            className="p-2 surface-card border border-theme rounded-xl hover:bg-primary-light hover:text-white transition-all group-hover/card:translate-x-1"
+                          >
+                            <ChevronRight className="w-5 h-5" />
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <div className="surface-section rounded-[2.5rem] p-8 sm:p-12 text-center border-2 border-dashed border-theme">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-theme-muted/5 rounded-[2rem] flex items-center justify-center mx-auto mb-4">
+                  <Compass className="w-6 h-6 sm:w-8 h-8 text-theme-muted" />
+                </div>
+                <h3 className="font-bold text-theme-primary mb-2 text-base sm:text-lg uppercase tracking-wider">No upcoming adventures</h3>
+                <p className="text-xs sm:text-sm text-theme-muted max-w-xs mx-auto mb-6 leading-relaxed font-medium">
+                  The world is waiting! Browse our top-rated tours and start planning your next escape.
+                </p>
+                <Link
+                  href="/tours"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary-light text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-primary-light-hover transition-all shadow-lg shadow-primary-light/20 active:scale-95"
+                >
+                  Start Exploring
+                </Link>
+              </div>
+            )}
+          </GlassCard>
 
- {/* RECENT ACTIVITY */}
- <GlassCard className="p-6">
- <div className="flex items-center gap-3 mb-4">
- <div className="p-2 bg-primary-light/20 dark:bg-primary-dark/20 text-primary-light dark:text-primary-dark rounded-xl">
- <Clock className="w-5 h-5" />
- </div>
- <h3 className="font-bold text-theme-primary">Recent Activity</h3>
- </div>
- <div className="space-y-4">
- {user?.profileCompleted && (
- <div className="flex items-center gap-3">
- <div className="w-2 h-2 rounded-full bg-success-green" />
- <p className="text-sm text-theme-secondary font-medium">Completed your profile setup</p>
- </div>
- )}
- {loyalty && loyalty.completedTrips > 0 && (
- <div className="flex items-center gap-3">
- <div className="w-2 h-2 rounded-full bg-accent-light/10 dark:bg-accent-dark" />
- <p className="text-sm text-theme-secondary font-medium">
- Reached {TIER_CONFIG[loyalty.loyaltyTier].icon} {TIER_CONFIG[loyalty.loyaltyTier].label} loyalty tier
- </p>
- </div>
- )}
- <div className="flex items-center gap-3">
- <div className="w-2 h-2 rounded-full bg-primary-light" />
- <p className="text-sm text-theme-secondary font-medium">Joined SafariHub</p>
- </div>
- </div>
- </GlassCard>
+  {/* RECENT ACTIVITY */}
+  <GlassCard className="p-5 sm:p-6">
+  <div className="flex items-center gap-3 mb-6">
+  <div className="p-2 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-xl">
+  <Clock className="w-4 h-4 sm:w-5 h-5" />
+  </div>
+  <h3 className="font-bold text-theme-primary uppercase tracking-wider text-sm sm:text-base">Recent Activity</h3>
+  </div>
+  <div className="space-y-4">
+  {user?.profileCompleted && (
+  <div className="flex items-start gap-4">
+  <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-success-green flex-shrink-0" />
+  <p className="text-xs sm:text-sm text-theme-secondary font-medium leading-relaxed">Account setup complete: your traveler profile is ready for adventure.</p>
+  </div>
+  )}
+  {loyalty && loyalty.completedTrips > 0 && (
+  <div className="flex items-start gap-4">
+  <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-accent-light dark:bg-accent-dark flex-shrink-0" />
+  <p className="text-xs sm:text-sm text-theme-secondary font-medium leading-relaxed">
+  Unlocked {TIER_CONFIG[loyalty.loyaltyTier].icon} {TIER_CONFIG[loyalty.loyaltyTier].label} status! Enjoy exclusive {loyalty.discountPct}% discounts.
+  </p>
+  </div>
+  )}
+  <div className="flex items-start gap-4">
+  <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary-light flex-shrink-0" />
+  <p className="text-xs sm:text-sm text-theme-secondary font-medium leading-relaxed">Welcome to SafariHub! Your journey to authentic local experiences begins here.</p>
+  </div>
+  </div>
+  </GlassCard>
  </div>
 
  {/* SIDEBAR */}

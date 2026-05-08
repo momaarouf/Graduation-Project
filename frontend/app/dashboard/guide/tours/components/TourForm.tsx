@@ -59,12 +59,12 @@ import {
 // Dynamically import Map components with SSR disabled for Leaflet support
 const MapPicker = dynamic(() => import('@/src/components/ui/MapPicker'), { 
  ssr: false,
- loading: () => <div className="h-[300px] surface-section rounded-xl animate-pulse flex items-center justify-center font-black text-theme-muted">LOADING MAP PICKER...</div>
+ loading: () => <div className="h-[300px] surface-section rounded-xl animate-pulse flex items-center justify-center font-bold text-theme-muted">LOADING MAP PICKER...</div>
 })
 
 const RouteBuilderMap = dynamic(() => import('@/src/components/ui/RouteBuilderMap'), { 
  ssr: false,
- loading: () => <div className="h-[400px] surface-section rounded-3xl animate-pulse flex items-center justify-center font-black text-theme-muted">PREPARING ROUTE BUILDER...</div>
+ loading: () => <div className="h-[400px] surface-section rounded-3xl animate-pulse flex items-center justify-center font-bold text-theme-muted">PREPARING ROUTE BUILDER...</div>
 })
 
 // ============================================================================
@@ -433,19 +433,19 @@ interface FormSectionProps {
 }
 
 function FormSection({ title, icon: Icon, children, defaultExpanded = true }: FormSectionProps) {
- const [isExpanded, setIsExpanded] = useState(defaultExpanded)
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
- return (
- <div className=" surface-card border border-theme rounded-[2rem] relative shadow-xl shadow-black/5">
- <button
- onClick={() => setIsExpanded(!isExpanded)}
- className=" w-full flex items-center justify-between p-6 surface-section hover:surface-card transition-all rounded-t-[2rem]"
- >
+  return (
+    <div className="surface-card border border-theme rounded-2xl sm:rounded-[2rem] relative shadow-xl shadow-black/5">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between p-4 sm:p-6 surface-section hover:surface-card transition-all rounded-t-2xl sm:rounded-t-[2rem]"
+      >
  <div className="flex items-center gap-3">
  <div className="p-2 bg-primary-light/10 rounded-lg">
  <Icon className="w-5 h-5 text-primary-light dark:text-primary-dark" />
  </div>
- <h3 className="font-black text-theme-primary uppercase tracking-tight">
+ <h3 className="font-bold text-theme-primary uppercase tracking-tight">
  {title}
  </h3>
  </div>
@@ -456,11 +456,11 @@ function FormSection({ title, icon: Icon, children, defaultExpanded = true }: Fo
  )}
  </button>
 
- {isExpanded && (
- <div className="p-6">
- {children}
- </div>
- )}
+      {isExpanded && (
+        <div className="p-4 sm:p-6">
+          {children}
+        </div>
+      )}
  </div>
  )
 }
@@ -517,7 +517,7 @@ function BasicInfoSection({ formData, onChange }: BasicInfoSectionProps) {
  return (
   <span 
   key={catValue} 
-  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-xs font-black uppercase tracking-widest border border-primary-light/20 transition-all"
+  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-xs font-bold uppercase tracking-widest border border-primary-light/20 transition-all"
   >
   {cat?.label || catValue}
   <button
@@ -640,7 +640,7 @@ function TourLocationSection({ formData, onChange, mapId }: { formData: TourForm
 
  {/* Interactive Map Picker - Meeting Point */}
  <div className="mt-6">
- <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-3 flex items-center gap-2">
+ <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-3 flex items-center gap-2">
  <Navigation className="w-3 h-3" />
  Pick on Map (Automatically fills name & address)
  </label>
@@ -908,7 +908,7 @@ function ScheduleSection({ formData, onChange }: ScheduleSectionProps) {
  <div className="mt-6 p-4 bg-primary-light/50 dark:bg-primary-dark/14 rounded-2xl border border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark/20">
  <div className="flex items-center gap-2 mb-4">
  <Calendar className="w-4 h-4 text-primary-light dark:text-primary-dark" />
-  <h4 className="text-xs font-black text-primary-light dark:text-primary-dark uppercase tracking-widest">
+  <h4 className="text-xs font-bold text-primary-light dark:text-primary-dark uppercase tracking-widest">
   Upcoming Departure Preview
   </h4>
  </div>
@@ -971,7 +971,7 @@ function ScheduleSection({ formData, onChange }: ScheduleSectionProps) {
  }
  }}
  />
- <p className="mt-3 text-[10px] font-bold text-primary-light dark:text-primary-dark/60 uppercase tracking-widest text-center italic">
+ <p className="mt-3 text-[10px] font-bold text-primary-light dark:text-primary-dark/60 uppercase tracking-widest text-center">
  Check the"Occurrences" page after saving for full schedule management
  </p>
  </div>
@@ -1543,7 +1543,7 @@ function LanguagesSection({ formData, onChange }: LanguagesSectionProps) {
  ))}
 
  {formData.availableLanguages.length === 0 && (
- <p className="text-sm text-theme-muted italic text-center py-4">
+ <p className="text-sm text-theme-muted text-center py-4">
  No languages added yet
  </p>
  )}
@@ -1644,9 +1644,9 @@ function ItinerarySection({ formData, onChange, mapId }: ItinerarySectionProps &
  <FormSection title="Itinerary" icon={CalendarRange}>
  <div className="space-y-6">
  {/* UNIFIED ROUTE BUILDER MAP */}
- <div className="mb-8">
- <label className="block text-[10px] font-black text-theme-muted uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
- <Sparkles className="w-3 h-3 text-primary-light dark:text-primary-dark" />
+ <div className="mb-6 sm:mb-8">
+ <label className="block text-[10px] sm:text-xs font-bold text-theme-muted uppercase tracking-[0.15em] mb-3 flex items-center gap-2">
+ <Sparkles className="w-3.5 h-3.5 text-primary-light dark:text-primary-dark" />
  Visual Route Builder (A → B → C)
  </label>
  <RouteBuilderMap 
@@ -1667,9 +1667,9 @@ function ItinerarySection({ formData, onChange, mapId }: ItinerarySectionProps &
  updateItineraryLocation(idx, name || '', lat, lng, address)
  }}
  onRemoveStop={removeItineraryItem}
- height="450px"
+ height={typeof window !== 'undefined' && window.innerWidth < 640 ? "350px" : "450px"}
  />
- <p className="mt-3 text-[10px] text-theme-muted italic text-center leading-relaxed">
+ <p className="mt-3 text-[10px] text-theme-muted text-center leading-relaxed">
  PRO TIP: Just click anywhere on the map to add stops in sequence. The trail will form automatically.
  </p>
  </div>
@@ -1768,7 +1768,7 @@ function ItinerarySection({ formData, onChange, mapId }: ItinerarySectionProps &
  items[index] = { ...items[index], showMap: !(items as any)[index].showMap }
  onChange('itinerary', items)
  }}
- className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-colors ${(item as any).showMap ? 'text-primary-light dark:text-primary-dark' : 'text-theme-muted hover:text-theme-secondary'}`}
+ className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider transition-colors ${(item as any).showMap ? 'text-primary-light dark:text-primary-dark' : 'text-theme-muted hover:text-theme-secondary'}`}
  >
  <MapPin className="w-3.5 h-3.5" />
  {(item as any).showMap ? 'Hide Map' : 'Pick stop on Map'}
@@ -2528,104 +2528,99 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
 
   {/* Status Banner for Pending Review */}
   {isEditing && formData.status === 'pending_review' && (
-  <div className="mb-8 p-6 bg-orange-500/5 border border-orange-500/20 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xl shadow-orange-500/5">
-  <div className="flex items-start gap-4">
-  <div className="p-2 bg-orange-500/20 rounded-xl">
-  <AlertCircle className="w-6 h-6 text-orange-500" />
-  </div>
-  <div>
-  <p className="text-lg font-black text-orange-500 uppercase tracking-tight">
-  Tour is Under Review
-  </p>
-  <p className="text-sm text-theme-muted mt-1 font-bold">
-  This tour is currently locked for editing while our team reviews it.
-  If you need to make changes, you can withdraw it back to draft mode.
-  </p>
-  </div>
-  </div>
-  <button
-  onClick={async () => {
-  try {
-  if (tourId) {
-  await withdrawTourFromReview(parseInt(tourId));
-  toast.success('Tour withdrawn to draft');
-  router.push('/dashboard/guide/tours');
-  }
-  } catch (err: any) {
-  toast.error(err.response?.data?.message || 'Failed to withdraw tour');
-  }
-  }}
-  className="flex items-center gap-2 px-6 py-2.5 bg-orange-500/10 text-orange-500 border border-orange-500/20 hover:bg-orange-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 shrink-0"
-  >
-  <Undo2 className="w-4 h-4" />
-  Withdraw to Edit
-  </button>
-  </div>
+    <div className="mb-8 p-4 sm:p-6 bg-orange-500/5 border border-orange-500/20 rounded-2xl sm:rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xl shadow-orange-500/5">
+      <div className="flex items-start gap-4">
+        <div className="p-2 bg-orange-500/20 rounded-xl shrink-0">
+          <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-base sm:text-lg font-bold text-orange-500 uppercase tracking-tight">
+            Tour is Under Review
+          </p>
+          <p className="text-xs sm:text-sm text-theme-muted mt-1 font-bold leading-relaxed">
+            Locked for editing while our team reviews it.
+            You can withdraw it back to draft mode.
+          </p>
+        </div>
+      </div>
+      <button
+        onClick={async () => {
+          try {
+            if (tourId) {
+              await withdrawTourFromReview(parseInt(tourId));
+              toast.success('Tour withdrawn to draft');
+              router.push('/dashboard/guide/tours');
+            }
+          } catch (err: any) {
+            toast.error(err.response?.data?.message || 'Failed to withdraw tour');
+          }
+        }}
+        className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-orange-500/10 text-orange-500 border border-orange-500/20 hover:bg-orange-500/20 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg active:scale-95 shrink-0"
+      >
+        <Undo2 className="w-4 h-4" />
+        Withdraw to Edit
+      </button>
+    </div>
   )}
 
- {/* Header */}
- <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
-  <div className="flex items-center gap-5">
-  <button
-  onClick={() => router.back()}
-  className=" p-3 surface-card border border-theme rounded-xl hover:surface-section dark:hover:surface-card transition-all text-theme-secondary shadow-lg hover:scale-105 active:scale-95"
-  title="Go Back"
-  >
-  <Undo2 className="w-5 h-5" />
-  </button>
-  <div>
-  <h1 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tight leading-none mb-2">
-  {isEditing ? 'Edit' : 'Create'} <span className="text-primary-light">Tour</span>.
-  </h1>
-  <p className="text-xs text-theme-muted font-black uppercase tracking-[0.2em]">
-  {isEditing ? 'Refine your masterpiece' : 'Craft a new legend for travelers'}
-  </p>
-  </div>
-  </div>
+  {/* Header */}
+  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+    <div className="flex items-center gap-4 sm:gap-5">
+      <button
+        onClick={() => router.back()}
+        className="p-2.5 sm:p-3 surface-card border border-theme rounded-xl hover:surface-section transition-all text-theme-secondary shadow-lg active:scale-95 shrink-0"
+        title="Go Back"
+      >
+        <Undo2 className="w-4 h-4 sm:w-5 sm:h-5" />
+      </button>
+      <div className="min-w-0">
+        <h1 className="text-2xl sm:text-4xl font-bold text-theme-primary tracking-tight leading-tight mb-1">
+          {isEditing ? 'Edit' : 'Create'} <span className="text-primary-light">Tour</span>.
+        </h1>
+        <p className="text-[10px] sm:text-xs text-theme-muted font-bold uppercase tracking-[0.15em] truncate">
+          {isEditing ? 'Refine your masterpiece' : 'Craft a new legend'}
+        </p>
+      </div>
+    </div>
 
-  <div className="flex items-center gap-3">
-  <button
-  onClick={handleSave}
-  disabled={isSaving}
-  className=" px-6 py-2.5 surface-card text-theme-secondary text-[10px] font-black uppercase tracking-widest rounded-xl border border-theme transition-all shadow-xl hover:scale-105 disabled:opacity-50"
-  >
-  Save Draft
-  </button>
-  <button
-  onClick={handleSendForReview}
-  disabled={isSaving || (isEditing && formData.status !== 'draft' && formData.status !== 'rejected')}
-  className=" flex items-center gap-2 px-6 py-2.5 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-xl shadow-primary-light/20 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
-  >
-  {isSaving ? (
-  <>
-  <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-  Sending...
-  </>
-  ) : (
-  <>
-  <CheckCircle className="w-4 h-4" />
-  Publish Tour
-  </>
-  )}
-  </button>
-  </div>
+    <div className="flex items-center gap-2 sm:gap-3">
+      <button
+        onClick={handleSave}
+        disabled={isSaving}
+        className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 surface-card text-theme-secondary text-[10px] font-bold uppercase tracking-widest rounded-xl border border-theme transition-all shadow-xl active:scale-95 disabled:opacity-50"
+      >
+        Save Draft
+      </button>
+      <button
+        onClick={handleSendForReview}
+        disabled={isSaving || (isEditing && formData.status !== 'draft' && formData.status !== 'rejected')}
+        className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all shadow-xl shadow-primary-light/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isSaving ? (
+          <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+        ) : (
+          <CheckCircle className="w-4 h-4" />
+        )}
+        <span className="truncate">{isSaving ? 'Sending...' : 'Publish'}</span>
+      </button>
+    </div>
  </div>
 
 
   {/* Edit/Preview Tabs */}
-  <div className="flex gap-3 mb-10">
-  <button
-  onClick={() => setActiveTab('edit')}
-  className={` px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg ${activeTab === 'edit' ? 'bg-primary-light text-white shadow-primary-light/20 scale-105' : 'surface-card border border-theme text-theme-secondary hover:surface-section'} `}
-  >
-  Configuration
-  </button>
-  <button
-  onClick={() => setActiveTab('preview')}
-  className={` px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg ${activeTab === 'preview' ? 'bg-primary-light text-white shadow-primary-light/20 scale-105' : 'surface-card border border-theme text-theme-secondary hover:surface-section'} `}
-  >
-  Live Preview
-  </button>
+  <div className="flex gap-2 sm:gap-3 mb-8 sm:mb-10">
+    <button
+      onClick={() => setActiveTab('edit')}
+      className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg ${activeTab === 'edit' ? 'bg-primary-light text-white shadow-primary-light/20 scale-105' : 'surface-card border border-theme text-theme-secondary hover:surface-section'} `}
+    >
+      Configuration
+    </button>
+    <button
+      onClick={() => setActiveTab('preview')}
+      className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg ${activeTab === 'preview' ? 'bg-primary-light text-white shadow-primary-light/20 scale-105' : 'surface-card border border-theme text-theme-secondary hover:surface-section'} `}
+    >
+      Live Preview
+    </button>
   </div>
 
  {/* Edit Form */}

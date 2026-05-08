@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useEffect, useMemo } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet'
@@ -74,19 +74,19 @@ function MapBoundsController({ center, waypoints }: { center?: [number, number],
 }
 
 interface TourMapProps {
- meetingPoint: {
- lat: number
- lng: number
- name: string
- address?: string
- }
+  meetingPoint?: {
+  lat: number
+  lng: number
+  name: string
+  address?: string
+  }
  route?: TourMapPointResponse[]
  height?: string
  className?: string
 }
 
 export default function TourMap({
- meetingPoint,
+ meetingPoint = {} as any,
  route = [],
  height = '300px',
  className = ''
@@ -96,7 +96,7 @@ export default function TourMap({
  const stopIcon = useMemo(() => createStopIcon('#4f46e5'), []) // Indigo-600
  
  // Robust Validation: Handle old tours with missing coordinates
- const isValidMeetingPoint = typeof meetingPoint.lat === 'number' && typeof meetingPoint.lng === 'number' && !isNaN(meetingPoint.lat) && !isNaN(meetingPoint.lng);
+ const isValidMeetingPoint = meetingPoint && typeof meetingPoint.lat === 'number' && typeof meetingPoint.lng === 'number' && !isNaN(meetingPoint.lat) && !isNaN(meetingPoint.lng);
  
  const validRoute = useMemo(() => 
  (route || []).filter(wp => typeof wp.latitude === 'number' && typeof wp.longitude === 'number' && !isNaN(wp.latitude) && !isNaN(wp.longitude)),
@@ -114,7 +114,7 @@ export default function TourMap({
  <MapPin className="w-6 h-6 animate-pulse" />
  </div>
  <div className="text-center">
- <p className="text-[10px] font-black text-theme-muted uppercase tracking-[0.2em] mb-1">
+ <p className="text-[10px] font-bold text-theme-muted uppercase tracking-[0.2em] mb-1">
  Map View Unavailable
  </p>
  <p className="text-[11px] font-medium text-theme-muted max-w-[200px] mx-auto leading-relaxed">
@@ -128,7 +128,7 @@ export default function TourMap({
  // Determine the map's master center (fallback to first route point if meeting point missing)
  const masterCenter: [number, number] = isValidMeetingPoint 
  ? [meetingPoint.lat, meetingPoint.lng] 
- : [validRoute[0].latitude, validRoute[0].longitude];
+ : (validRoute.length > 0 ? [validRoute[0].latitude, validRoute[0].longitude] : [0, 0]);
 
  // Polyline positions (trail)
  const trailPositions = validRoute.map(p => [p.latitude, p.longitude] as [number, number]);
@@ -169,7 +169,7 @@ export default function TourMap({
  <Marker key={wp.id} position={[wp.latitude, wp.longitude]} icon={stopIcon}>
  <Popup className="custom-popup">
  <div className="p-1">
- <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest block mb-0.5">
+ <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest block mb-0.5">
  Stop {idx + 1}
  </span>
  <p className="font-bold text-theme-primary m-0 leading-tight">
@@ -189,7 +189,7 @@ export default function TourMap({
  <Marker position={[meetingPoint.lat, meetingPoint.lng]} icon={pinIcon}>
  <Popup className="custom-popup">
  <div className="p-1 min-w-[150px]">
- <span className="text-[10px] font-black text-primary-light dark:text-primary-dark uppercase tracking-widest block mb-0.5">
+ <span className="text-[10px] font-bold text-primary-light dark:text-primary-dark uppercase tracking-widest block mb-0.5">
  Meeting Point
  </span>
  <p className="font-bold text-theme-primary m-0 leading-tight">
@@ -216,7 +216,7 @@ export default function TourMap({
  <Navigation className="w-4 h-4" />
  </div>
  <div>
- <p className="text-[10px] font-black text-theme-primary uppercase tracking-widest leading-none mb-1">
+ <p className="text-[10px] font-bold text-theme-primary uppercase tracking-widest leading-none mb-1">
  Live Trail View
  </p>
  <p className="text-[9px] text-theme-muted font-medium">

@@ -114,11 +114,12 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         // Allow localhost and any local network IP for mobile testing
         config.setAllowedOriginPatterns(List.of(
-            "http://localhost:3000", 
-            "http://127.0.0.1:3000", 
-            "http://192.168.*:3000", 
-            "http://172.*:3000", 
-            "http://10.*:3000"
+                "http://localhost:[*]",
+                "http://127.0.0.1:[*]",
+                "http://192.168.*:[*]",
+                "http://10.*:[*]",
+                "https://*.trycloudflare.com",
+                "https://*.loca.lt"
         ));
         config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

@@ -257,7 +257,7 @@ export default function TravelerProfileForm({ onSubmit, initialData }: TravelerP
  onBlur={() => handleBlur('fullName')}
  disabled={isSubmitting}
  className={`
- w-full px-4 py-2.5
+ w-full px-4 py-3 md:py-2.5
  surface-section
  border rounded-lg
  text-sm text-theme-primary
@@ -303,7 +303,7 @@ export default function TravelerProfileForm({ onSubmit, initialData }: TravelerP
  onBlur={() => handleBlur('country')}
  disabled={isSubmitting}
  className={`
- w-full pl-9 pr-8 py-2.5
+ w-full pl-9 pr-8 py-3 md:py-2.5
  surface-section
  border
  rounded-lg
@@ -344,7 +344,7 @@ export default function TravelerProfileForm({ onSubmit, initialData }: TravelerP
  disabled={isSubmitting}
  placeholder="e.g., Beirut"
  className={`
- w-full px-4 py-2.5
+ w-full px-4 py-3 md:py-2.5
  surface-section
  border rounded-lg
  text-sm text-theme-primary
@@ -379,7 +379,7 @@ export default function TravelerProfileForm({ onSubmit, initialData }: TravelerP
  onBlur={() => handleBlur('nationality')}
  disabled={isSubmitting}
  className="
- w-full pl-9 pr-8 py-2.5
+ w-full pl-9 pr-8 py-3 md:py-2.5
  surface-section
  border border-theme-strong
  rounded-lg
@@ -415,7 +415,7 @@ export default function TravelerProfileForm({ onSubmit, initialData }: TravelerP
  disabled={isSubmitting}
  max={new Date().toISOString().split('T')[0]}
  className={`
- w-full pl-9 pr-3 py-2.5
+ w-full pl-9 pr-3 py-3 md:py-2.5
  surface-section
  border rounded-lg
  text-sm text-theme-primary
@@ -447,7 +447,7 @@ export default function TravelerProfileForm({ onSubmit, initialData }: TravelerP
  onChange={handleChange}
  disabled={isSubmitting}
  placeholder="e.g. History buff and nature lover"
- className="w-full px-4 py-2.5 surface-section border border-theme-strong rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark/20 focus:border-primary-light dark:border-primary-dark"
+ className="w-full px-4 py-3 md:py-2.5 surface-section border border-theme-strong rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark/20 focus:border-primary-light dark:border-primary-dark"
  />
  </div>
 
@@ -464,7 +464,7 @@ export default function TravelerProfileForm({ onSubmit, initialData }: TravelerP
  disabled={isSubmitting}
  rows={4}
  placeholder="Tell guides a bit about your travel style..."
- className="w-full px-4 py-2.5 surface-section border border-theme-strong rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark/20 focus:border-primary-light dark:border-primary-dark resize-none"
+ className="w-full px-4 py-3 md:py-2.5 surface-section border border-theme-strong rounded-lg text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark/20 focus:border-primary-light dark:border-primary-dark resize-none"
  />
  </div>
 

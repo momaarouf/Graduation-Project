@@ -83,6 +83,7 @@ export default function BookingCard({
  const [isPricingOpen, setIsPricingOpen] = useState(false)
  const [isRequestMode, setIsRequestMode] = useState(bookingMode === 'request')
  const [waiverSigned, setWaiverSigned] = useState(false)
+  const [isMobileExpanded, setIsMobileExpanded] = useState(false)
 
  // ========================================
  // IDENTITY & CONTEXT
@@ -352,7 +353,7 @@ export default function BookingCard({
  // ========================================
 
  return (
- <div className="surface-section border border-primary-light/10 dark:border-primary-dark/10 rounded-xl overflow-hidden sticky top-24">
+ <div id="booking-card" className="surface-section border border-primary-light/10 dark:border-primary-dark/10 rounded-xl overflow-hidden sticky top-24">
  {/* ========================================
  HEADER - PRICE & AVAILABILITY
  ======================================== */}

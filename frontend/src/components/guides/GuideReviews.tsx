@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // ============================================================================
 // GUIDE REVIEWS COMPONENT — WIRED TO REAL BACKEND
@@ -180,7 +180,7 @@ export default function GuideReviews({ guideId }: { guideId: string }) {
  <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1">
  Guide Response
  </p>
- <p className="text-xs text-theme-secondary italic">
+ <p className="text-xs text-theme-secondary">
  {review.guideReply}
  </p>
  </div>

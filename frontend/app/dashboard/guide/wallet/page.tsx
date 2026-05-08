@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -27,6 +27,58 @@ import {
 } from '@/src/lib/api/guide-payouts'
 import { PaymentResponse } from '@/src/lib/types/tour.types'
 import toast from 'react-hot-toast'
+
+
+// ==================== MOBILE CARD ====================
+function PayoutCard({ p }: { p: PaymentResponse }) {
+  const isPaid = p.payoutStatus === 'Transferred';
+  const isPending = p.payoutStatus === 'Pending';
+  
+  return (
+    <div className="surface-card rounded-xl border border-theme p-4 space-y-3 shadow-sm">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-primary-light/10 flex items-center justify-center">
+            <History className="w-4 h-4 text-primary-light" />
+          </div>
+          <div>
+            <div className="text-sm font-bold text-theme-primary">Booking #{p.bookingId}</div>
+            <div className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Tour Settlement</div>
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="text-base font-bold text-theme-primary">
+            {p.currency} {p.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          </div>
+        </div>
+      </div>
+      
+      <div className="flex items-center justify-between pt-3 border-t border-theme">
+        <div className="flex flex-col">
+          <span className="text-[10px] font-bold text-theme-muted uppercase tracking-widest">Date</span>
+          <span className="text-xs font-bold text-theme-secondary">
+            {new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit' })}
+          </span>
+        </div>
+        <div>
+          {isPaid ? (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-success-green/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold rounded-md border border-success-green/20">
+              PAID
+            </span>
+          ) : isPending ? (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-light/10 text-blue-600 dark:text-primary-dark text-[10px] font-bold rounded-md border border-primary-light/20">
+              ESCROW
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-danger-red/10 text-red-600 dark:text-red-400 text-[10px] font-bold rounded-md border border-danger-red/20">
+              FAILED
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function GuideWalletPage() {
  const [summary, setSummary] = useState<GuideWalletResponse | null>(null)
@@ -77,21 +129,24 @@ export default function GuideWalletPage() {
  }
  }
 
- if (isLoading && !summary) {
- return (
- <div className="p-8 flex flex-col items-center justify-center min-h-[60vh]">
- <RefreshCw className="w-8 h-8 text-primary-light dark:text-primary-dark animate-spin mb-4" />
- <p className="text-theme-muted font-medium animate-pulse">Loading your wallet...</p>
- </div>
- )
- }
+  if (isLoading && !summary) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center surface-base">
+        <div className="flex flex-col items-center gap-4">
+          <RefreshCw className="w-10 h-10 text-primary-light animate-spin" />
+          <p className="text-sm font-bold text-theme-muted animate-pulse uppercase tracking-widest">Loading your wallet...</p>
+        </div>
+      </div>
+    )
+  }
 
- return (
- <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8">
+  return (
+    <div className="flex-1 overflow-y-auto chat-scrollbar">
+      <div className="max-w-7xl mx-auto p-4 sm:p-8 lg:p-12 space-y-8">
  {/* Header section */}
  <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
  <div>
- <h1 className="text-3xl font-black text-theme-primary tracking-tight">Wallet & Earnings</h1>
+ <h1 className="text-3xl font-bold text-theme-primary tracking-tight">Wallet & Earnings</h1>
  <p className="text-theme-muted mt-1 font-medium">Manage your payouts and track your performance.</p>
  </div>
  <button 
@@ -159,10 +214,10 @@ export default function GuideWalletPage() {
  </div>
 
  <div className="space-y-1">
- <div className="text-3xl font-black text-theme-primary">
+ <div className="text-3xl font-bold text-theme-primary">
  {summary?.currency || 'USD'} {card.value.toLocaleString(undefined, { minimumFractionDigits: 2 })}
  </div>
- <div className="text-[10px] font-black text-theme-muted uppercase tracking-widest">
+ <div className="text-[10px] font-bold text-theme-muted uppercase tracking-widest">
  {card.label}
  </div>
  </div>
@@ -190,7 +245,7 @@ export default function GuideWalletPage() {
  <h2 className="text-xl font-bold text-theme-primary">Payout Method</h2>
  <div className="flex items-center gap-2 mt-0.5">
  <div className={`w-2 h-2 rounded-full ${summary?.onboardingComplete ? 'bg-success-green' : 'bg-accent-light/10 dark:bg-accent-dark animate-pulse'}`} />
- <span className="text-xs font-black uppercase text-theme-muted tracking-wider">
+ <span className="text-xs font-bold uppercase text-theme-muted tracking-wider">
  {summary?.onboardingComplete ? 'Connected' : 'Action Required'}
  </span>
  </div>
@@ -205,7 +260,7 @@ export default function GuideWalletPage() {
  <CreditCard className="w-4 h-4 text-success-green" />
  </div>
  <div>
- <div className="text-[10px] font-black text-success-green uppercase tracking-widest">Connected Card</div>
+ <div className="text-[10px] font-bold text-success-green uppercase tracking-widest">Connected Card</div>
  <div className="text-sm font-bold text-theme-primary">
  {summary.payoutMethodBrand || 'Visa'} •••• {summary.payoutMethodLast4 || '4242'}
  </div>
@@ -216,7 +271,7 @@ export default function GuideWalletPage() {
  </div>
  </div>
  <div className="space-y-4 pt-4 border-t border-theme">
- <div className="flex items-center gap-2 text-[10px] font-black text-theme-muted uppercase tracking-widest">
+ <div className="flex items-center gap-2 text-[10px] font-bold text-theme-muted uppercase tracking-widest">
  <Info className="w-3 h-3" />
  Payout Security
  </div>
@@ -233,7 +288,7 @@ export default function GuideWalletPage() {
  >
  <div className="p-6 surface-section rounded-3xl border-2 border-dashed border-theme space-y-4">
  <div className="space-y-1">
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest ml-1">Mock Card/Account Last 4</label>
+ <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest ml-1">Mock Card/Account Last 4</label>
  <input 
  type="text" 
  maxLength={4}
@@ -245,7 +300,7 @@ export default function GuideWalletPage() {
  </div>
  <div className="grid grid-cols-2 gap-3">
  <div className="space-y-1">
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest ml-1">Brand</label>
+ <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest ml-1">Brand</label>
  <select 
  value={onboardingData.brand}
  onChange={(e) => setOnboardingData({...onboardingData, brand: e.target.value})}
@@ -260,7 +315,7 @@ export default function GuideWalletPage() {
  <div className="flex items-end">
  <button 
  onClick={handleOnboard}
- className="w-full py-3 bg-primary-light text-white rounded-xl font-black text-xs hover:bg-primary-light-hover transition-colors"
+ className="w-full py-3 bg-primary-light text-white rounded-xl font-bold text-xs hover:bg-primary-light-hover transition-colors"
  >
  Link
  </button>
@@ -268,7 +323,7 @@ export default function GuideWalletPage() {
  </div>
  <button 
  onClick={() => setIsLinking(false)}
- className="w-full text-[10px] font-black text-theme-muted uppercase tracking-widest hover:text-theme-secondary"
+ className="w-full text-[10px] font-bold text-theme-muted uppercase tracking-widest hover:text-theme-secondary"
  >
  Cancel
  </button>
@@ -289,11 +344,11 @@ export default function GuideWalletPage() {
  </div>
  <button 
  onClick={() => setIsLinking(true)}
- className="w-full py-5 bg-primary-light hover:bg-primary-light-hover text-white rounded-3xl font-black text-lg shadow-xl shadow-primary-light/20 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50 disabled:scale-100"
+ className="w-full py-5 bg-primary-light hover:bg-primary-light-hover text-white rounded-3xl font-bold text-lg shadow-xl shadow-primary-light/20 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50 disabled:scale-100"
  >
  Connect My Card <Plus className="w-6 h-6" />
  </button>
- <p className="text-[10px] text-center text-theme-muted font-black uppercase tracking-widest">
+ <p className="text-[10px] text-center text-theme-muted font-bold uppercase tracking-widest">
  Linked accounts are protected by bank-level encryption
  </p>
  </div>
@@ -313,74 +368,88 @@ export default function GuideWalletPage() {
  </p>
  <hr className="my-6 border-theme-strong" />
  <div className="flex justify-between items-center text-white/60">
- <span className="text-[10px] font-black uppercase tracking-widest">Success Factor</span>
- <span className="text-sm font-black text-emerald-400">EXCELLENT</span>
+ <span className="text-[10px] font-bold uppercase tracking-widest">Success Factor</span>
+ <span className="text-sm font-bold text-emerald-400">EXCELLENT</span>
  </div>
  </motion.div>
  </div>
 
  {/* Payout History Table */}
- <div className="lg:col-span-2 space-y-6">
- <div className="surface-card border border-theme rounded-[2.5rem] shadow-sm overflow-hidden min-h-[500px] flex flex-col">
- <div className="p-8 border-b border-theme flex items-center justify-between">
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 surface-section rounded-xl flex items-center justify-center">
- <History className="w-5 h-5 text-theme-muted" />
- </div>
- <h2 className="text-xl font-black text-theme-primary tracking-tight">Earnings History</h2>
- </div>
- </div>
+  <div className="lg:col-span-2 space-y-6">
+  <div className="surface-card border-x-0 sm:border border-theme rounded-none sm:rounded-[2.5rem] shadow-none sm:shadow-sm overflow-hidden min-h-[500px] flex flex-col">
+  <div className="p-6 sm:p-8 border-b border-theme flex items-center justify-between">
+  <div className="flex items-center gap-3">
+  <div className="w-10 h-10 surface-section rounded-xl flex items-center justify-center">
+  <History className="w-5 h-5 text-theme-muted" />
+  </div>
+  <h2 className="text-xl font-bold text-theme-primary tracking-tight">Earnings History</h2>
+  </div>
+  </div>
 
- <div className="flex-1 overflow-x-auto">
- {payouts.length > 0 ? (
- <table className="w-full text-left">
- <thead>
- <tr className="surface-section">
- <th className="px-8 py-4 text-[10px] font-black text-theme-muted uppercase tracking-widest">Date</th>
- <th className="px-8 py-4 text-[10px] font-black text-theme-muted uppercase tracking-widest">Origin Booking</th>
- <th className="px-8 py-4 text-[10px] font-black text-theme-muted uppercase tracking-widest">Amount (Net)</th>
- <th className="px-8 py-4 text-[10px] font-black text-theme-muted uppercase tracking-widest text-right">Status</th>
- </tr>
- </thead>
- <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
- {payouts.map((p, idx) => (
- <tr key={idx} className="group hover:surface-section dark:hover:surface-card transition-colors">
- <td className="px-8 py-6">
- <div className="text-sm font-bold text-theme-primary">
- {new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}
- </div>
- <div className="text-[10px] text-theme-muted font-medium">
- {new Date(p.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })} UTC
- </div>
- </td>
- <td className="px-8 py-6">
- <div className="text-sm font-bold text-theme-primary">#{p.bookingId}</div>
- <div className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Tour Settlement</div>
- </td>
- <td className="px-8 py-6">
- <div className="text-sm font-black text-theme-primary">
- {p.currency} {p.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
- </div>
- </td>
- <td className="px-8 py-6 text-right">
- {p.payoutStatus === 'Transferred' ? (
- <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-success-green/20 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-black rounded-lg">
- <CheckCircle2 className="w-3.5 h-3.5" /> Already Paid
- </span>
- ) : p.payoutStatus === 'Pending' ? (
- <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary-light/20 dark:bg-primary-dark/20 text-blue-700 dark:text-primary-dark text-xs font-black rounded-lg">
- <Clock className="w-3.5 h-3.5" /> In Escrow
- </span>
- ) : (
- <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-danger-red/20 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-black rounded-lg">
- <AlertCircle className="w-3.5 h-3.5" /> Failed
- </span>
- )}
- </td>
- </tr>
- ))}
- </tbody>
- </table>
+  <div className="flex-1">
+  {payouts.length > 0 ? (
+  <>
+  {/* Mobile View: Cards */}
+  <div className="md:hidden divide-y divide-theme">
+  {payouts.map((p, idx) => (
+  <div key={idx} className="p-4">
+  <PayoutCard p={p} />
+  </div>
+  ))}
+  </div>
+
+  {/* Desktop View: Table */}
+  <div className="hidden md:block overflow-x-auto">
+  <table className="w-full text-left">
+  <thead>
+  <tr className="surface-section">
+  <th className="px-8 py-4 text-[10px] font-bold text-theme-muted uppercase tracking-widest">Date</th>
+  <th className="px-8 py-4 text-[10px] font-bold text-theme-muted uppercase tracking-widest">Origin Booking</th>
+  <th className="px-8 py-4 text-[10px] font-bold text-theme-muted uppercase tracking-widest">Amount (Net)</th>
+  <th className="px-8 py-4 text-[10px] font-bold text-theme-muted uppercase tracking-widest text-right">Status</th>
+  </tr>
+  </thead>
+  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+  {payouts.map((p, idx) => (
+  <tr key={idx} className="group hover:surface-section dark:hover:surface-card transition-colors">
+  <td className="px-8 py-6">
+  <div className="text-sm font-bold text-theme-primary">
+  {new Date(p.createdAt).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" })}
+  </div>
+  <div className="text-[10px] text-theme-muted font-medium">
+  {new Date(p.createdAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })} UTC
+  </div>
+  </td>
+  <td className="px-8 py-6">
+  <div className="text-sm font-bold text-theme-primary">#{p.bookingId}</div>
+  <div className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Tour Settlement</div>
+  </td>
+  <td className="px-8 py-6">
+  <div className="text-sm font-bold text-theme-primary">
+  {p.currency} {p.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+  </div>
+  </td>
+  <td className="px-8 py-6 text-right">
+  {p.payoutStatus === "Transferred" ? (
+  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-success-green/20 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg">
+  <CheckCircle2 className="w-3.5 h-3.5" /> Already Paid
+  </span>
+  ) : p.payoutStatus === "Pending" ? (
+  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary-light/20 dark:bg-primary-dark/20 text-blue-700 dark:text-primary-dark text-xs font-bold rounded-lg">
+  <Clock className="w-3.5 h-3.5" /> In Escrow
+  </span>
+  ) : (
+  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-danger-red/20 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs font-bold rounded-lg">
+  <AlertCircle className="w-3.5 h-3.5" /> Failed
+  </span>
+  )}
+  </td>
+  </tr>
+  ))}
+  </tbody>
+  </table>
+  </div>
+  </>
  ) : (
  <div className="flex flex-col items-center justify-center p-20 text-center">
  <div className="w-20 h-20 surface-section rounded-full flex items-center justify-center mb-6">
@@ -397,5 +466,6 @@ export default function GuideWalletPage() {
  </div>
  </div>
  </div>
+  </div>
  )
 }

@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // ADMIN BLACKLIST MANAGEMENT - CARD 25
 // ============================================================================
 // LOCATION: /frontend/src/app/dashboard/admin/blacklist/page.tsx
@@ -29,39 +29,42 @@
 
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { adminGetUsers, AdminUserResponse, adminBanUser, adminSuspendUser, adminActivateUser } from '@/src/lib/api/admin'
+import { toast } from 'react-hot-toast'
 import {
- Shield,
- Ban,
- AlertTriangle,
- CheckCircle,
- XCircle,
- Clock,
- Calendar,
- Mail,
- Phone,
- User,
- Search,
- Filter,
- ChevronLeft,
- ChevronRight,
- RefreshCw,
- Eye,
- EyeOff,
- Flag,
- FileText,
- Plus,
- Trash2,
- Edit,
- MoreVertical,
- X,
- Info,
- Globe,
- Lock,
- Unlock,
- History
+  Shield,
+  Ban,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Calendar,
+  Mail,
+  Phone,
+  User,
+  Search,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+  Eye,
+  EyeOff,
+  Flag,
+  FileText,
+  Plus,
+  Trash2,
+  Edit,
+  MoreVertical,
+  X,
+  Info,
+  Globe,
+  Lock,
+  Unlock,
+  History,
+  UserX
 } from 'lucide-react'
 
 // ============================================================================
@@ -134,222 +137,6 @@ interface BlacklistStats {
  underReview: number
  appealed: number
 }
-
-// ============================================================================
-// MOCK DATA
-// ============================================================================
-
-const MOCK_BLACKLIST_STATS: BlacklistStats = {
- total: 45,
- active: 38,
- permanent: 12,
- temporary: 23,
- underReview: 3,
- appealed: 2
-}
-
-const MOCK_BLACKLISTED_GUIDES: BlacklistedGuide[] = [
- {
- id: 'bl1',
- guideId: 'g123',
- guideName: 'Mehmet Yilmaz',
- guideEmail: 'mehmet.yilmaz@example.com',
- guidePhone: '+90 555 123 4567',
- guideAvatar: '/images/guides/mehmet.jpg',
- banReason: 'fraud',
- banDuration: 'permanent',
- status: 'active',
- bannedAt: '2026-02-15T10:30:00Z',
- bannedBy: 'admin1',
- bannedByAdmin: 'Admin User',
- description: 'Charged travelers outside the platform for 5 separate bookings, then canceled.',
- evidence: [
- {
- id: 'e1',
- type: 'complaint',
- reference: 'CMP-2026-001',
- description: 'Traveler reported being asked to pay via bank transfer'
- },
- {
- id: 'e2',
- type: 'dispute',
- reference: 'DSP-2026-023',
- description: 'Payment dispute raised for unauthorized charges'
- }
- ],
- history: [
- {
- id: 'h1',
- action: 'banned',
- adminId: 'admin1',
- adminName: 'Admin User',
- reason: 'Multiple reports of fraud. Evidence confirmed.',
- timestamp: '2026-02-15T10:30:00Z'
- }
- ]
- },
- {
- id: 'bl2',
- guideId: 'g124',
- guideName: 'Layla Hassan',
- guideEmail: 'layla.hassan@example.com',
- guidePhone: '+961 70 123 456',
- guideAvatar: '/images/guides/layla.jpg',
- banReason: 'no_show',
- banDuration: 'temporary',
- status: 'active',
- bannedAt: '2026-03-01T14:20:00Z',
- bannedBy: 'admin2',
- bannedByAdmin: 'Moderator',
- expiresAt: '2026-06-01T14:20:00Z',
- description: 'Failed to show for 3 confirmed bookings within 30 days.',
- evidence: [
- {
- id: 'e3',
- type: 'complaint',
- reference: 'CMP-2026-045',
- description: 'Traveler waited 2 hours at meeting point'
- },
- {
- id: 'e4',
- type: 'complaint',
- reference: 'CMP-2026-052',
- description: 'Second no-show incident'
- }
- ],
- appeal: {
- filedAt: '2026-03-05T09:15:00Z',
- reason: 'Medical emergency, can provide doctor note',
- status: 'pending'
- },
- history: [
- {
- id: 'h2',
- action: 'banned',
- adminId: 'admin2',
- adminName: 'Moderator',
- reason: '3 no-shows in 30 days',
- timestamp: '2026-03-01T14:20:00Z'
- },
- {
- id: 'h3',
- action: 'appealed',
- reason: 'Medical emergency, can provide doctor note',
- timestamp: '2026-03-05T09:15:00Z'
- }
- ]
- },
- {
- id: 'bl3',
- guideId: 'g125',
- guideName: 'Ahmet Demir',
- guideEmail: 'ahmet.demir@example.com',
- guidePhone: '+90 555 987 6543',
- guideAvatar: '/images/guides/ahmet.jpg',
- banReason: 'harassment',
- banDuration: 'permanent',
- status: 'active',
- bannedAt: '2026-01-10T11:45:00Z',
- bannedBy: 'admin1',
- bannedByAdmin: 'Admin User',
- description: 'Multiple reports of inappropriate conduct and harassment during tours.',
- evidence: [
- {
- id: 'e5',
- type: 'complaint',
- reference: 'CMP-2026-012',
- description: 'Traveler reported uncomfortable comments'
- },
- {
- id: 'e6',
- type: 'complaint',
- reference: 'CMP-2026-018',
- description: 'Second traveler with similar complaint'
- }
- ],
- history: [
- {
- id: 'h4',
- action: 'banned',
- adminId: 'admin1',
- adminName: 'Admin User',
- reason: 'Multiple harassment complaints verified',
- timestamp: '2026-01-10T11:45:00Z'
- }
- ]
- },
- {
- id: 'bl4',
- guideId: 'g126',
- guideName: 'Fatima Yilmaz',
- guideEmail: 'fatima.y@example.com',
- guidePhone: '+90 555 456 7890',
- banReason: 'false_advertising',
- banDuration: 'temporary',
- status: 'active',
- bannedAt: '2026-02-20T09:30:00Z',
- bannedBy: 'admin2',
- bannedByAdmin: 'Moderator',
- expiresAt: '2026-05-20T09:30:00Z',
- description: 'Tour description misrepresented duration and inclusions repeatedly.',
- evidence: [
- {
- id: 'e7',
- type: 'complaint',
- reference: 'CMP-2026-034',
- description: 'Tour was 2 hours shorter than advertised'
- }
- ],
- history: [
- {
- id: 'h5',
- action: 'banned',
- adminId: 'admin2',
- adminName: 'Moderator',
- reason: 'Multiple complaints about false advertising',
- timestamp: '2026-02-20T09:30:00Z'
- }
- ]
- },
- {
- id: 'bl5',
- guideId: 'g127',
- guideName: 'Omar Kaya',
- guideEmail: 'omar.kaya@example.com',
- guidePhone: '+90 555 789 0123',
- banReason: 'payment_dispute',
- banDuration: 'under_review',
- status: 'under_review',
- bannedAt: '2026-03-12T16:10:00Z',
- bannedBy: 'admin3',
- bannedByAdmin: 'Support Agent',
- description: 'Multiple payment disputes from different travelers. Under investigation.',
- evidence: [
- {
- id: 'e8',
- type: 'dispute',
- reference: 'DSP-2026-045',
- description: 'Traveler disputed charge for cancelled tour'
- },
- {
- id: 'e9',
- type: 'dispute',
- reference: 'DSP-2026-046',
- description: 'Second payment dispute'
- }
- ],
- history: [
- {
- id: 'h6',
- action: 'banned',
- adminId: 'admin3',
- adminName: 'Support Agent',
- reason: 'Multiple payment disputes, pending investigation',
- timestamp: '2026-03-12T16:10:00Z'
- }
- ]
- }
-]
 
 // ============================================================================
 // BAN REASON BADGE
@@ -605,212 +392,231 @@ const AddToBlacklistModal = ({ isOpen, onClose, onAdd }: any) => {
 // ============================================================================
 
 const BlacklistDetailsModal = ({ isOpen, onClose, entry, onRemove, onUpdate }: any) => {
- const [showRemoveConfirm, setShowRemoveConfirm] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editData, setEditData] = useState({
+    description: entry?.description || '',
+    banDuration: entry?.banDuration || 'permanent',
+    expiresAt: entry?.expiresAt || ''
+  })
 
- if (!isOpen || !entry) return null
+  if (!isOpen || !entry) return null
 
- const handleRemove = () => {
- if (window.confirm(`Remove ${entry.guideName} from blacklist?`)) {
- onRemove(entry.id)
- onClose()
- }
- }
+  const handleSave = () => {
+    onUpdate(entry.id, editData)
+    setIsEditing(false)
+  }
 
- return (
- <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 ">
- <div className="w-full max-w-3xl surface-card rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden border border-theme">
- {/* Header */}
- <div className="bg-gradient-to-r from-red-600 to-red-700 dark:from-red-700 dark:to-red-800 px-6 py-4">
- <div className="flex justify-between items-center">
- <h3 className="text-lg font-bold text-white flex items-center gap-2">
- <Ban className="w-5 h-5" />
- Blacklist Details
- </h3>
- <button onClick={onClose} className="p-2 hover:surface-card rounded-lg transition-colors">
- <X className="w-5 h-5 text-white" />
- </button>
- </div>
- </div>
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <div className="w-full max-w-3xl surface-card rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden border border-theme flex flex-col">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-red-600 to-red-700 dark:from-red-700 dark:to-red-800 px-6 py-4 flex-shrink-0">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <Ban className="w-5 h-5" />
+              Blacklist Details
+            </h3>
+            <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+              <X className="w-5 h-5 text-white" />
+            </button>
+          </div>
+        </div>
 
- {/* Content */}
- <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)] space-y-6">
- {/* Guide Profile */}
- <div className="flex items-center gap-4 p-4 surface-section rounded-xl border border-theme">
- <div className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-600 p-0.5">
- <div className="w-full h-full rounded-full surface-card overflow-hidden">
- {entry.guideAvatar ? (
- <Image src={entry.guideAvatar} alt={entry.guideName} width={64} height={64} className="object-cover" />
- ) : (
- <User className="w-8 h-8 m-4 text-theme-muted" />
- )}
- </div>
- </div>
- <div className="flex-1">
- <h4 className="text-xl font-bold text-theme-primary">{entry.guideName}</h4>
- <p className="text-sm text-theme-muted ">ID: {entry.guideId}</p>
- </div>
- <div className="flex gap-2">
- <StatusBadge status={entry.status} />
- <BanDurationBadge duration={entry.banDuration} status={entry.status} />
- </div>
- </div>
+        {/* Content */}
+        <div className="p-6 overflow-y-auto flex-1 space-y-6">
+          {/* Guide Profile */}
+          <div className="flex items-center gap-4 p-4 surface-section rounded-xl border border-theme">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-600 p-0.5">
+              <div className="w-full h-full rounded-full surface-card overflow-hidden flex items-center justify-center">
+                {entry.guideAvatar ? (
+                  <Image src={entry.guideAvatar} alt={entry.guideName} width={64} height={64} className="object-cover" />
+                ) : (
+                  <UserX className="w-8 h-8 text-danger-red" />
+                )}
+              </div>
+            </div>
+            <div className="flex-1">
+              <h4 className="text-xl font-bold text-theme-primary">{entry.guideName}</h4>
+              <p className="text-sm text-theme-muted ">ID: {entry.guideId}</p>
+            </div>
+            <div className="flex flex-col items-end gap-2">
+              <StatusBadge status={entry.status} />
+              <BanDurationBadge duration={entry.banDuration} status={entry.status} />
+            </div>
+          </div>
 
- {/* Contact Info */}
- <div className="grid grid-cols-2 gap-4">
- <div className="p-4 surface-section rounded-xl border border-theme">
- <h5 className="text-sm font-medium text-theme-secondary mb-2 flex items-center gap-2">
- <Mail className="w-4 h-4 text-danger-red dark:text-red-400" />
- Email
- </h5>
- <a href={`mailto:${entry.guideEmail}`} className="text-danger-red dark:text-red-400 hover:underline break-all">
- {entry.guideEmail}
- </a>
- </div>
- <div className="p-4 surface-section rounded-xl border border-theme">
- <h5 className="text-sm font-medium text-theme-secondary mb-2 flex items-center gap-2">
- <Phone className="w-4 h-4 text-danger-red dark:text-red-400" />
- Phone
- </h5>
- <a href={`tel:${entry.guidePhone}`} className="text-danger-red dark:text-red-400 hover:underline">
- {entry.guidePhone}
- </a>
- </div>
- </div>
+          {/* Contact Info */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="p-4 surface-section rounded-xl border border-theme">
+              <h5 className="text-sm font-medium text-theme-secondary mb-2 flex items-center gap-2">
+                <Mail className="w-4 h-4 text-danger-red" />
+                Email
+              </h5>
+              <a href={`mailto:${entry.guideEmail}`} className="text-danger-red hover:underline break-all text-sm">
+                {entry.guideEmail}
+              </a>
+            </div>
+            <div className="p-4 surface-section rounded-xl border border-theme">
+              <h5 className="text-sm font-medium text-theme-secondary mb-2 flex items-center gap-2">
+                <Phone className="w-4 h-4 text-danger-red" />
+                Phone
+              </h5>
+              <a href={`tel:${entry.guidePhone}`} className="text-danger-red hover:underline text-sm">
+                {entry.guidePhone}
+              </a>
+            </div>
+          </div>
 
- {/* Ban Details */}
- <div className="grid grid-cols-2 gap-4">
- <div className="p-4 surface-section rounded-xl border border-theme">
- <h5 className="text-sm font-medium text-theme-secondary mb-2 flex items-center gap-2">
- <Calendar className="w-4 h-4 text-danger-red dark:text-red-400" />
- Banned At
- </h5>
- <p className="text-theme-primary">{new Date(entry.bannedAt).toLocaleString()}</p>
- <p className="text-xs text-theme-muted mt-1">by {entry.bannedByAdmin}</p>
- </div>
- {entry.expiresAt && (
- <div className="p-4 surface-section rounded-xl border border-theme">
- <h5 className="text-sm font-medium text-theme-secondary mb-2 flex items-center gap-2">
- <Clock className="w-4 h-4 text-accent-light dark:text-accent-dark dark:text-amber-400" />
- Expires At
- </h5>
- <p className="text-theme-primary">{new Date(entry.expiresAt).toLocaleString()}</p>
- </div>
- )}
- </div>
+          {/* Ban Details / Edit Form */}
+          <div className="p-5 surface-section rounded-2xl border-2 border-danger-red/10 space-y-4">
+            <div className="flex items-center justify-between mb-2">
+              <h5 className="text-sm font-black text-theme-secondary uppercase tracking-widest flex items-center gap-2">
+                <Shield className="w-4 h-4 text-danger-red" />
+                Enforcement Record
+              </h5>
+              {!isEditing && (
+                <button 
+                  onClick={() => setIsEditing(true)}
+                  className="text-xs text-primary-light hover:underline font-bold uppercase tracking-widest"
+                >
+                  Edit Record
+                </button>
+              )}
+            </div>
 
- {/* Description */}
- <div className="p-4 surface-section rounded-xl border border-theme">
- <h5 className="text-sm font-medium text-theme-secondary mb-2 flex items-center gap-2">
- <FileText className="w-4 h-4 text-danger-red dark:text-red-400" />
- Description
- </h5>
- <p className="text-theme-primary">{entry.description}</p>
- </div>
+            {isEditing ? (
+              <div className="space-y-4 pt-2">
+                <div>
+                  <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5">
+                    Ban Reason & Details
+                  </label>
+                  <textarea
+                    value={editData.description}
+                    onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                    className="w-full p-3 surface-card border border-theme rounded-xl text-sm focus:ring-2 focus:ring-danger-red outline-none min-h-[100px] resize-none"
+                    placeholder="Provide detailed reason for enforcement..."
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5">
+                      Duration Type
+                    </label>
+                    <select
+                      value={editData.banDuration}
+                      onChange={(e) => setEditData({ ...editData, banDuration: e.target.value as any })}
+                      className="w-full p-2.5 surface-card border border-theme rounded-xl text-sm focus:ring-2 focus:ring-danger-red outline-none"
+                    >
+                      <option value="permanent">Permanent</option>
+                      <option value="temporary">Temporary</option>
+                    </select>
+                  </div>
+                  {editData.banDuration === 'temporary' && (
+                    <div>
+                      <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5">
+                        Expires At
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={editData.expiresAt ? new Date(editData.expiresAt).toISOString().slice(0, 16) : ''}
+                        onChange={(e) => setEditData({ ...editData, expiresAt: e.target.value })}
+                        className="w-full p-2 surface-card border border-theme rounded-xl text-sm focus:ring-2 focus:ring-danger-red outline-none"
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <button
+                    onClick={handleSave}
+                    className="flex-1 py-3 bg-danger-red text-white text-[11px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-danger-red/20 active:scale-95 transition-all"
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="flex-1 py-3 surface-card text-theme-secondary text-[11px] font-black uppercase tracking-widest rounded-xl border border-theme"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1">Status</p>
+                    <p className="text-sm font-bold text-theme-primary">{entry.status.toUpperCase()}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1">Banned At</p>
+                    <p className="text-sm font-bold text-theme-primary">{new Date(entry.bannedAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1">Primary Reason</p>
+                  <p className="text-sm text-theme-secondary leading-relaxed">{entry.description}</p>
+                </div>
+                {entry.expiresAt && (
+                  <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+                    <p className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                      <Clock className="w-3 h-3" />
+                      Timed Enforcement
+                    </p>
+                    <p className="text-xs font-bold text-theme-primary">Expires: {new Date(entry.expiresAt).toLocaleString()}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
- {/* Evidence */}
- {entry.evidence && entry.evidence.length > 0 && (
- <div className="p-4 surface-section rounded-xl border border-theme">
- <h5 className="text-sm font-medium text-theme-secondary mb-3 flex items-center gap-2">
- <Flag className="w-4 h-4 text-danger-red dark:text-red-400" />
- Evidence
- </h5>
- <div className="space-y-2">
- {entry.evidence.map((ev: any) => (
- <div key={ev.id} className="p-3 surface-card rounded-lg border border-theme">
- <div className="flex items-center justify-between mb-1">
- <span className="text-xs font-medium text-theme-muted uppercase">{ev.type}</span>
- <span className="text-xs text-theme-muted ">{ev.reference}</span>
- </div>
- <p className="text-sm text-theme-secondary">{ev.description}</p>
- </div>
- ))}
- </div>
- </div>
- )}
+          {/* History Timeline */}
+          <div className="p-4 surface-section rounded-xl border border-theme">
+            <h5 className="text-[10px] font-black text-theme-secondary uppercase tracking-widest mb-4 flex items-center gap-2">
+              <History className="w-4 h-4 text-danger-red" />
+              Audit History
+            </h5>
+            <div className="space-y-4">
+              {entry.history.map((item: any, idx: number) => (
+                <div key={item.id} className="flex gap-4">
+                  <div className="flex flex-col items-center">
+                    <div className={`w-2.5 h-2.5 rounded-full mt-1.5 ${
+                      item.action === 'banned' ? 'bg-danger-red' : 'bg-primary-light'
+                    }`} />
+                    {idx < entry.history.length - 1 && (
+                      <div className="w-px flex-1 bg-theme-border my-1" />
+                    )}
+                  </div>
+                  <div className="flex-1 pb-4 border-b border-theme last:border-0 last:pb-0">
+                    <div className="flex justify-between items-start mb-1">
+                      <p className="text-xs font-bold text-theme-primary uppercase">{item.action}</p>
+                      <span className="text-[10px] text-theme-muted">{new Date(item.timestamp).toLocaleString()}</span>
+                    </div>
+                    <p className="text-xs text-theme-muted">by {item.adminName || 'System'}</p>
+                    {item.reason && <p className="text-xs text-theme-secondary mt-2 italic">"{item.reason}"</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
- {/* Appeal */}
- {entry.appeal && (
- <div className="p-4 bg-accent-light/10 dark:bg-accent-dark/10 dark:bg-accent-light/10 dark:bg-accent-dark/10 rounded-xl border border-accent-light dark:border-accent-dark dark:border-accent-light dark:border-accent-dark/50">
- <h5 className="text-sm font-medium text-accent-light dark:text-accent-dark dark:text-amber-400 mb-3 flex items-center gap-2">
- <Eye className="w-4 h-4" />
- Appeal Filed
- </h5>
- <p className="text-sm text-accent-light dark:text-accent-dark dark:text-accent-light dark:text-accent-dark mb-2">{entry.appeal.reason}</p>
- <div className="flex items-center justify-between">
- <span className="text-xs text-theme-muted ">
- Filed: {new Date(entry.appeal.filedAt).toLocaleString()}
- </span>
- <span className={`px-2 py-1 text-xs font-medium rounded-full ${
- entry.appeal.status === 'pending' ? 'bg-accent-light/20 dark:bg-accent-dark/20 text-accent-light dark:text-accent-dark' :
- entry.appeal.status === 'approved' ? 'bg-success-green/20 text-emerald-700' :
- 'bg-danger-red/20 text-red-700'
- }`}>
- {entry.appeal.status}
- </span>
- </div>
- </div>
- )}
-
- {/* History Timeline */}
- <div className="p-4 surface-section rounded-xl border border-theme">
- <h5 className="text-sm font-medium text-theme-secondary mb-3 flex items-center gap-2">
- <History className="w-4 h-4 text-danger-red dark:text-red-400" />
- History
- </h5>
- <div className="space-y-3">
- {entry.history.map((item: any, idx: number) => (
- <div key={item.id} className="flex gap-3">
- <div className="relative">
- <div className={`w-2 h-2 mt-2 rounded-full ${
- item.action === 'banned' ? 'bg-danger-red' :
- item.action === 'unbanned' ? 'bg-success-green' :
- item.action === 'appealed' ? 'bg-accent-light/10 dark:bg-accent-dark' :
- item.action === 'overturned' ? 'bg-primary-light' : 'surface-section'
- }`} />
- {idx < entry.history.length - 1 && (
- <div className="absolute top-4 left-1 w-0.5 h-full surface-section" />
- )}
- </div>
- <div className="flex-1 pb-3">
- <p className="text-sm font-medium text-theme-primary capitalize">{item.action.replace('_', ' ')}</p>
- {item.adminName && (
- <p className="text-xs text-theme-muted ">by {item.adminName}</p>
- )}
- {item.reason && (
- <p className="text-xs text-theme-secondary mt-1">{item.reason}</p>
- )}
- <p className="text-xs text-theme-muted mt-1">
- {new Date(item.timestamp).toLocaleString()}
- </p>
- </div>
- </div>
- ))}
- </div>
- </div>
-
- {/* Actions */}
- {entry.status === 'active' && (
- <div className="flex gap-3">
- <button
- onClick={() => setShowRemoveConfirm(true)}
- className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
- >
- <Unlock className="w-5 h-5" />
- Remove from Blacklist
- </button>
- <button
- onClick={() => alert('Edit feature coming in Phase 6')}
- className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
- >
- <Edit className="w-5 h-5" />
- Edit Entry
- </button>
- </div>
- )}
- </div>
- </div>
- </div>
- )
+        {/* Footer Actions */}
+        <div className="p-6 surface-section border-t border-theme flex-shrink-0">
+          {!isEditing && (
+            <div className="flex gap-3">
+              <button
+                onClick={() => onRemove(entry.id)}
+                className="flex-1 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-[11px] font-black uppercase tracking-widest rounded-xl shadow-lg hover:shadow-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+              >
+                <Unlock className="w-4 h-4" />
+                Revoke Enforcement
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 // ============================================================================
@@ -818,326 +624,469 @@ const BlacklistDetailsModal = ({ isOpen, onClose, entry, onRemove, onUpdate }: a
 // ============================================================================
 
 export default function AdminBlacklistPage() {
- const [filterReason, setFilterReason] = useState<BanReason | 'all'>('all')
- const [filterDuration, setFilterDuration] = useState<BanDuration | 'all'>('all')
- const [filterStatus, setFilterStatus] = useState<BanStatus | 'all'>('active')
- const [searchTerm, setSearchTerm] = useState('')
- const [currentPage, setCurrentPage] = useState(1)
- const [selectedEntry, setSelectedEntry] = useState<BlacklistedGuide | null>(null)
- const [showDetailsModal, setShowDetailsModal] = useState(false)
- const [showAddModal, setShowAddModal] = useState(false)
- const itemsPerPage = 5
+  const [filterReason, setFilterReason] = useState<BanReason | 'all'>('all')
+  const [filterDuration, setFilterDuration] = useState<BanDuration | 'all'>('all')
+  const [filterStatus, setFilterStatus] = useState<BanStatus | 'all'>('active')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [selectedEntry, setSelectedEntry] = useState<BlacklistedGuide | null>(null)
+  const [showDetailsModal, setShowDetailsModal] = useState(false)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const itemsPerPage = 5
 
- // Filter entries
- const filteredEntries = useMemo(() => {
- return MOCK_BLACKLISTED_GUIDES.filter(entry => {
- if (filterReason !== 'all' && entry.banReason !== filterReason) return false
- if (filterDuration !== 'all' && entry.banDuration !== filterDuration) return false
- if (filterStatus !== 'all' && entry.status !== filterStatus) return false
- if (searchTerm) {
- const term = searchTerm.toLowerCase()
- return (
- entry.guideName.toLowerCase().includes(term) ||
- entry.guideEmail.toLowerCase().includes(term) ||
- entry.guideId.toLowerCase().includes(term)
- )
- }
- return true
- })
- }, [filterReason, filterDuration, filterStatus, searchTerm])
+  const [realUsers, setRealUsers] = useState<BlacklistedGuide[]>([])
+  const [loading, setLoading] = useState(true)
 
- const totalPages = Math.ceil(filteredEntries.length / itemsPerPage)
- const paginatedEntries = filteredEntries.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  const fetchBlacklistedUsers = async () => {
+    setLoading(true)
+    try {
+      const res = await adminGetUsers()
+      // Filter for BANNED or SUSPENDED users
+      const bannedUsers = res.users.filter(u => u.accountStatus === 'BANNED' || u.accountStatus === 'SUSPENDED')
+      
+      const mapped: BlacklistedGuide[] = bannedUsers.map(u => ({
+        id: u.id.toString(),
+        guideId: `USR-${u.id}`,
+        guideName: u.fullName,
+        guideEmail: u.email,
+        guidePhone: u.phoneE164 || 'Not provided',
+        guideAvatar: undefined, 
+        banReason: (u.statusReason?.toLowerCase().includes('fraud') ? 'fraud' : 
+                   u.statusReason?.toLowerCase().includes('harass') ? 'harassment' :
+                   u.statusReason?.toLowerCase().includes('show') ? 'no_show' : 'other') as BanReason,
+        banDuration: u.accountStatus === 'BANNED' ? 'permanent' : 'temporary',
+        status: u.accountStatus === 'BANNED' ? 'active' : 'under_review',
+        bannedAt: u.createdAtUtc, 
+        bannedBy: 'admin',
+        bannedByAdmin: 'System Admin',
+        expiresAt: u.suspendedUntilUtc || undefined,
+        description: u.statusReason || 'No reason provided',
+        history: [
+          {
+            id: 'h1',
+            action: u.accountStatus === 'BANNED' ? 'banned' : 'appealed',
+            adminName: 'System Admin',
+            reason: u.statusReason || 'Account status updated',
+            timestamp: u.createdAtUtc
+          }
+        ]
+      }))
+      setRealUsers(mapped)
+    } catch (error) {
+      console.error('Failed to fetch blacklisted users:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
- const resetFilters = () => {
- setFilterReason('all')
- setFilterDuration('all')
- setFilterStatus('active')
- setSearchTerm('')
- setCurrentPage(1)
- }
+  useEffect(() => {
+    fetchBlacklistedUsers()
+  }, [])
 
- const handleAddToBlacklist = (data: any) => {
- alert(`✅ Guide added to blacklist!`)
- console.log('Add to blacklist:', data)
- setShowAddModal(false)
- }
+  // Stats calculation from real data
+  const stats = useMemo(() => {
+    return {
+      total: realUsers.length,
+      active: realUsers.filter(u => u.status === 'active').length,
+      permanent: realUsers.filter(u => u.banDuration === 'permanent').length,
+      temporary: realUsers.filter(u => u.banDuration === 'temporary').length,
+      appealed: realUsers.filter(u => u.status === 'appealed').length,
+    }
+  }, [realUsers])
 
- const handleRemoveFromBlacklist = (id: string) => {
- alert(`✅ Guide removed from blacklist!`)
- console.log('Remove from blacklist:', id)
- }
+  // Filter entries
+  const filteredEntries = useMemo(() => {
+    return realUsers.filter(entry => {
+      if (filterReason !== 'all' && entry.banReason !== filterReason) return false
+      if (filterDuration !== 'all' && entry.banDuration !== filterDuration) return false
+      if (filterStatus !== 'all' && entry.status !== filterStatus) return false
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase()
+        return (
+          entry.guideName.toLowerCase().includes(term) ||
+          entry.guideEmail.toLowerCase().includes(term) ||
+          entry.guideId.toLowerCase().includes(term)
+        )
+      }
+      return true
+    })
+  }, [filterReason, filterDuration, filterStatus, searchTerm, realUsers])
 
- const handleUpdateEntry = (id: string, data: any) => {
- alert(`✅ Blacklist entry updated!`)
- console.log('Update blacklist:', id, data)
- }
+  const totalPages = Math.ceil(filteredEntries.length / itemsPerPage)
+  const paginatedEntries = filteredEntries.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
- return (
- <>
- <div className="pt-14 sm:pt-16 min-h-[calc(100vh-4rem)]">
- <div className="container-safe mx-auto max-w-7xl py-8 sm:py-10">
- 
- {/* Header */}
- <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
- <div>
- <h1 className="text-2xl sm:text-3xl font-bold text-theme-primary mb-1">
- Blacklist Management
- </h1>
- <p className="text-sm text-theme-secondary ">
- Manage revoked guides and maintain public blacklist
- </p>
- </div>
- <div className="flex gap-2">
- <button
- onClick={resetFilters}
- className="px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 self-start"
- >
- <RefreshCw className="w-4 h-4" />
- Reset Filters
- </button>
- <button
- onClick={() => setShowAddModal(true)}
- className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 self-start"
- >
- <Ban className="w-4 h-4" />
- Add to Blacklist
- </button>
- </div>
- </div>
+  const resetFilters = () => {
+    setFilterReason('all')
+    setFilterDuration('all')
+    setFilterStatus('active')
+    setSearchTerm('')
+    setCurrentPage(1)
+  }
 
- {/* Stats Cards */}
- <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
- {[
- { key: 'total', label: 'Total', value: MOCK_BLACKLIST_STATS.total, color: 'gray', action: () => setFilterStatus('all') },
- { key: 'active', label: 'Active', value: MOCK_BLACKLIST_STATS.active, color: 'red', action: () => setFilterStatus('active') },
- { key: 'permanent', label: 'Permanent', value: MOCK_BLACKLIST_STATS.permanent, color: 'purple', action: () => setFilterDuration('permanent') },
- { key: 'temporary', label: 'Temporary', value: MOCK_BLACKLIST_STATS.temporary, color: 'amber', action: () => setFilterDuration('temporary') },
- { key: 'appealed', label: 'Appealed', value: MOCK_BLACKLIST_STATS.appealed, color: 'blue', action: () => setFilterStatus('appealed') }
- ].map(stat => (
- <div
- key={stat.key}
- onClick={stat.action}
- className={`group p-4 surface-card rounded-xl cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 border-2 ${
- (stat.key === 'permanent' && filterDuration === 'permanent') ||
- (stat.key === 'temporary' && filterDuration === 'temporary') ||
- (stat.key === 'active' && filterStatus === 'active') ||
- (stat.key === 'appealed' && filterStatus === 'appealed') ||
- (stat.key === 'total' && filterStatus === 'all')
- ? `border-${stat.color}-500 ring-2 ring-${stat.color}-200 dark:ring-${stat.color}-800`
- : 'border-theme hover:border-primary-light dark:border-primary-dark dark:hover:border-primary-light dark:border-primary-dark'
- }`}
- >
- <div className={`text-2xl font-bold text-${stat.color}-600 dark:text-${stat.color}-400 mb-1`}>
- {stat.value}
- </div>
- <div className="text-xs text-theme-muted ">{stat.label}</div>
- </div>
- ))}
- </div>
+  const handleAddToBlacklist = async (data: any) => {
+    try {
+      const userId = parseInt(data.guideId.replace('USR-', ''))
+      if (isNaN(userId)) throw new Error('Invalid User ID format')
 
- {/* Filters */}
- <div className="flex flex-col sm:flex-row gap-4 mb-6">
- <select
- value={filterReason}
- onChange={(e) => setFilterReason(e.target.value as BanReason | 'all')}
- className="px-4 py-2 surface-card border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-danger-red shadow-sm"
- >
- <option value="all">All Reasons</option>
- <option value="fraud">Fraud</option>
- <option value="harassment">Harassment</option>
- <option value="no_show">No Show</option>
- <option value="false_advertising">False Advertising</option>
- <option value="safety_violation">Safety Violation</option>
- <option value="payment_dispute">Payment Dispute</option>
- <option value="other">Other</option>
- </select>
- <select
- value={filterDuration}
- onChange={(e) => setFilterDuration(e.target.value as BanDuration | 'all')}
- className="px-4 py-2 surface-card border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-danger-red shadow-sm"
- >
- <option value="all">All Durations</option>
- <option value="permanent">Permanent</option>
- <option value="temporary">Temporary</option>
- <option value="under_review">Under Review</option>
- </select>
- <select
- value={filterStatus}
- onChange={(e) => setFilterStatus(e.target.value as BanStatus | 'all')}
- className="px-4 py-2 surface-card border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-danger-red shadow-sm"
- >
- <option value="all">All Status</option>
- <option value="active">Active</option>
- <option value="expired">Expired</option>
- <option value="appealed">Appealed</option>
- <option value="overturned">Overturned</option>
- </select>
- </div>
+      if (data.duration === 'permanent') {
+        await adminBanUser(userId, { reason: data.description })
+      } else {
+        // Default to 90 days if not specified
+        const until = new Date()
+        until.setDate(until.getDate() + 90)
+        await adminSuspendUser(userId, { 
+          reason: data.description,
+          untilUtc: until.toISOString()
+        })
+      }
+      
+      toast.success(`✅ User ${userId} blacklisted successfully`)
+      fetchBlacklistedUsers()
+      setShowAddModal(false)
+    } catch (error: any) {
+      console.error('Failed to blacklist user:', error)
+      toast.error(error.response?.data?.message || 'Failed to blacklist user')
+    }
+  }
 
- {/* Search */}
- <div className="relative mb-6">
- <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
- <input
- type="text"
- value={searchTerm}
- onChange={(e) => setSearchTerm(e.target.value)}
- placeholder="Search by name, email, or guide ID..."
- className="w-full pl-11 pr-11 py-3 surface-card border border-theme rounded-xl text-sm text-theme-primary placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-danger-red shadow-sm"
- />
- {searchTerm && (
- <button onClick={() => setSearchTerm('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-secondary">
- <X className="w-4 h-4" />
- </button>
- )}
- </div>
+  const handleRemoveFromBlacklist = async (id: string) => {
+    try {
+      const userId = parseInt(id)
+      await adminActivateUser(userId)
+      toast.success(`✅ User ${userId} removed from blacklist`)
+      fetchBlacklistedUsers()
+    } catch (error: any) {
+      console.error('Failed to remove from blacklist:', error)
+      toast.error(error.response?.data?.message || 'Failed to remove from blacklist')
+    }
+  }
 
- {/* Results Count */}
- <div className="mb-4 text-sm text-theme-secondary ">
- Showing {paginatedEntries.length} of {filteredEntries.length} blacklisted guides
- </div>
+  const handleUpdateEntry = async (id: string, data: any) => {
+    // For now, update just calls ban/suspend again to overwrite reason/status
+    try {
+      const userId = parseInt(id)
+      if (data.banDuration === 'permanent') {
+        await adminBanUser(userId, { reason: data.description })
+      } else {
+        await adminSuspendUser(userId, { 
+          reason: data.description,
+          untilUtc: data.expiresAt 
+        })
+      }
+      toast.success(`✅ Blacklist entry updated`)
+      fetchBlacklistedUsers()
+    } catch (error: any) {
+      console.error('Failed to update entry:', error)
+      toast.error(error.response?.data?.message || 'Failed to update entry')
+    }
+  }
 
- {/* Desktop Table */}
- <div className="hidden lg:block surface-card border border-theme rounded-xl overflow-hidden shadow-sm">
- <table className="w-full">
- <thead className="surface-section border-b border-theme">
- <tr>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Guide</th>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Reason</th>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Duration</th>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Status</th>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Banned At</th>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Actions</th>
- </tr>
- </thead>
- <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
- {paginatedEntries.map((entry) => (
- <tr key={entry.id} className="hover:surface-section dark:hover:surface-card transition-colors">
- <td className="px-6 py-4">
- <div className="flex items-center gap-3">
- <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-red-600 p-0.5">
- <div className="w-full h-full rounded-full surface-card overflow-hidden">
- {entry.guideAvatar ? (
- <Image src={entry.guideAvatar} alt={entry.guideName} width={32} height={32} className="object-cover" />
- ) : (
- <User className="w-4 h-4 m-2 text-theme-muted" />
- )}
- </div>
- </div>
- <div>
- <div className="font-medium text-theme-primary">{entry.guideName}</div>
- <div className="text-xs text-theme-muted ">ID: {entry.guideId}</div>
- </div>
- </div>
- </td>
- <td className="px-6 py-4"><BanReasonBadge reason={entry.banReason} /></td>
- <td className="px-6 py-4"><BanDurationBadge duration={entry.banDuration} status={entry.status} /></td>
- <td className="px-6 py-4"><StatusBadge status={entry.status} /></td>
- <td className="px-6 py-4 text-sm text-theme-secondary ">{new Date(entry.bannedAt).toLocaleDateString()}</td>
- <td className="px-6 py-4">
- <button
- onClick={() => { setSelectedEntry(entry); setShowDetailsModal(true); }}
- className="px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-xs font-medium rounded-lg shadow-sm hover:shadow-md transition-all"
- >
- View
- </button>
- </td>
- </tr>
- ))}
- </tbody>
- </table>
- </div>
+  return (
+    <>
+      <div className="pt-14 sm:pt-16 min-h-[calc(100vh-4rem)]">
+        <div className="container-safe mx-auto max-w-7xl py-8 sm:py-10">
+          
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-theme-primary mb-1">
+                Blacklist Management
+              </h1>
+              <p className="text-sm text-theme-secondary ">
+                Manage revoked guides and maintain public blacklist
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={resetFilters}
+                className="px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 self-start"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Reset Filters
+              </button>
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 self-start"
+              >
+                <Ban className="w-4 h-4" />
+                Add to Blacklist
+              </button>
+            </div>
+          </div>
 
- {/* Mobile Cards */}
- <div className="lg:hidden space-y-4">
- {paginatedEntries.map((entry) => (
- <div key={entry.id} className="p-4 surface-card border border-theme rounded-xl">
- <div className="flex items-start gap-3 mb-3">
- <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 p-0.5">
- <div className="w-full h-full rounded-full surface-card overflow-hidden">
- {entry.guideAvatar ? (
- <Image src={entry.guideAvatar} alt={entry.guideName} width={48} height={48} className="object-cover" />
- ) : (
- <User className="w-5 h-5 m-3.5 text-theme-muted" />
- )}
- </div>
- </div>
- <div className="flex-1">
- <h3 className="font-semibold text-theme-primary">{entry.guideName}</h3>
- <p className="text-xs text-theme-muted ">ID: {entry.guideId}</p>
- </div>
- </div>
- <div className="flex flex-wrap gap-2 mb-3">
- <BanReasonBadge reason={entry.banReason} />
- <BanDurationBadge duration={entry.banDuration} status={entry.status} />
- <StatusBadge status={entry.status} />
- </div>
- <button
- onClick={() => { setSelectedEntry(entry); setShowDetailsModal(true); }}
- className="w-full px-3 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-sm font-medium rounded-lg"
- >
- View Details
- </button>
- </div>
- ))}
- </div>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 mb-8">
+            {[
+              { key: 'total', label: 'Total', value: stats.total, color: 'blue', action: () => setFilterStatus('all') },
+              { key: 'active', label: 'Banned', value: stats.active, color: 'red', action: () => setFilterStatus('active') },
+              { key: 'permanent', label: 'Permanent', value: stats.permanent, color: 'purple', action: () => setFilterDuration('permanent') },
+              { key: 'temporary', label: 'Timed', value: stats.temporary, color: 'amber', action: () => setFilterDuration('temporary') },
+              { key: 'appealed', label: 'Appeals', value: stats.appealed, color: 'indigo', action: () => setFilterStatus('appealed') }
+            ].map(stat => {
+              const isActive = (stat.key === 'permanent' && filterDuration === 'permanent') ||
+                              (stat.key === 'temporary' && filterDuration === 'temporary') ||
+                              (stat.key === 'active' && filterStatus === 'active') ||
+                              (stat.key === 'appealed' && filterStatus === 'appealed') ||
+                              (stat.key === 'total' && filterStatus === 'all');
+              
+              const colorClass = stat.color === 'blue' ? 'blue' : 
+                                stat.color === 'red' ? 'red' : 
+                                stat.color === 'purple' ? 'purple' : 
+                                stat.color === 'amber' ? 'amber' : 'indigo';
 
- {/* Empty State */}
- {filteredEntries.length === 0 && (
- <div className="text-center py-12">
- <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/20 dark:to-red-900/30 rounded-full flex items-center justify-center">
- <Ban className="w-8 h-8 text-danger-red dark:text-red-400" />
- </div>
- <h3 className="text-lg font-semibold text-theme-primary mb-2">No blacklisted guides found</h3>
- <p className="text-sm text-theme-muted mb-4">Try adjusting your filters or add a new entry.</p>
- <button onClick={resetFilters} className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl shadow-md hover:shadow-lg transition-all">
- Clear Filters
- </button>
- </div>
- )}
+              return (
+                <div
+                  key={stat.key}
+                  onClick={stat.action}
+                  className={`group p-4 surface-card rounded-2xl cursor-pointer transition-all hover:shadow-xl border-2 relative overflow-hidden ${
+                    isActive 
+                    ? `border-${colorClass}-500/50 shadow-lg shadow-${colorClass}-500/10` 
+                    : 'border-theme'
+                  }`}
+                >
+                  <div className={`text-2xl sm:text-3xl font-bold text-${colorClass}-600 dark:text-${colorClass}-400 mb-1`}>
+                    {stat.value}
+                  </div>
+                  <div className="text-[10px] font-black text-theme-muted uppercase tracking-widest leading-tight">{stat.label}</div>
+                  <div className={`absolute bottom-0 left-0 w-full h-1 bg-${colorClass}-500/20 opacity-0 group-hover:opacity-100 transition-opacity`} />
+                </div>
+              );
+            })}
+          </div>
 
- {/* Pagination */}
- {filteredEntries.length > 0 && (
- <div className="flex items-center justify-between mt-6">
- <p className="text-sm text-theme-muted ">Page {currentPage} of {totalPages}</p>
- <div className="flex gap-2">
- <button
- onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
- disabled={currentPage === 1}
- className="p-2 surface-card border border-theme rounded-xl text-theme-muted hover:text-theme-secondary dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md transition-all"
- >
- <ChevronLeft className="w-5 h-5" />
- </button>
- <button
- onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
- disabled={currentPage === totalPages}
- className="p-2 surface-card border border-theme rounded-xl text-theme-muted hover:text-theme-secondary dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md transition-all"
- >
- <ChevronRight className="w-5 h-5" />
- </button>
- </div>
- </div>
- )}
- </div>
- </div>
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <select
+              value={filterReason}
+              onChange={(e) => setFilterReason(e.target.value as BanReason | 'all')}
+              className="px-4 py-2 surface-card border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-danger-red shadow-sm"
+            >
+              <option value="all">All Reasons</option>
+              <option value="fraud">Fraud</option>
+              <option value="harassment">Harassment</option>
+              <option value="no_show">No Show</option>
+              <option value="false_advertising">False Advertising</option>
+              <option value="safety_violation">Safety Violation</option>
+              <option value="payment_dispute">Payment Dispute</option>
+              <option value="other">Other</option>
+            </select>
+            <select
+              value={filterDuration}
+              onChange={(e) => setFilterDuration(e.target.value as BanDuration | 'all')}
+              className="px-4 py-2 surface-card border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-danger-red shadow-sm"
+            >
+              <option value="all">All Durations</option>
+              <option value="permanent">Permanent</option>
+              <option value="temporary">Temporary</option>
+              <option value="under_review">Under Review</option>
+            </select>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value as BanStatus | 'all')}
+              className="px-4 py-2 surface-card border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-danger-red shadow-sm"
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="expired">Expired</option>
+              <option value="appealed">Appealed</option>
+              <option value="overturned">Overturned</option>
+            </select>
+          </div>
 
- {/* Add Modal */}
- <AddToBlacklistModal
- isOpen={showAddModal}
- onClose={() => setShowAddModal(false)}
- onAdd={handleAddToBlacklist}
- />
+          {/* Search */}
+          <div className="relative mb-6">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by name, email, or guide ID..."
+              className="w-full pl-11 pr-11 py-3 surface-card border border-theme rounded-xl text-sm text-theme-primary placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-danger-red shadow-sm"
+            />
+            {searchTerm && (
+              <button onClick={() => setSearchTerm('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-secondary">
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
 
- {/* Details Modal */}
- {selectedEntry && (
- <BlacklistDetailsModal
- isOpen={showDetailsModal}
- onClose={() => { setShowDetailsModal(false); setSelectedEntry(null); }}
- entry={selectedEntry}
- onRemove={handleRemoveFromBlacklist}
- onUpdate={handleUpdateEntry}
- />
- )}
- </>
- )
+          {/* Results Count */}
+          <div className="mb-4 text-sm text-theme-secondary ">
+            Showing {paginatedEntries.length} of {filteredEntries.length} blacklisted guides
+          </div>
+
+          {/* Desktop Table */}
+          <div className="hidden lg:block surface-card border border-theme rounded-xl overflow-hidden shadow-sm">
+            <table className="w-full">
+              <thead className="surface-section border-b border-theme">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Guide</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Reason</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Duration</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Banned At</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                {loading ? (
+                  [1, 2, 3, 4, 5].map(i => (
+                    <tr key={i} className="animate-pulse">
+                      <td colSpan={6} className="px-6 py-4">
+                        <div className="h-8 bg-theme-muted/10 rounded w-full" />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  paginatedEntries.map((entry) => (
+                    <tr key={entry.id} className="hover:surface-section dark:hover:surface-card transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-red-600 p-0.5">
+                            <div className="w-full h-full rounded-full surface-card overflow-hidden flex items-center justify-center">
+                              {entry.guideAvatar ? (
+                                <Image src={entry.guideAvatar} alt={entry.guideName} width={32} height={32} className="object-cover" />
+                              ) : (
+                                <UserX className="w-4 h-4 text-danger-red" />
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="font-medium text-theme-primary">{entry.guideName}</div>
+                            <div className="text-xs text-theme-muted ">ID: {entry.guideId}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4"><BanReasonBadge reason={entry.banReason} /></td>
+                      <td className="px-6 py-4"><BanDurationBadge duration={entry.banDuration} status={entry.status} /></td>
+                      <td className="px-6 py-4"><StatusBadge status={entry.status} /></td>
+                      <td className="px-6 py-4 text-sm text-theme-secondary ">{new Date(entry.bannedAt).toLocaleDateString()}</td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => { setSelectedEntry(entry); setShowDetailsModal(true); }}
+                          className="px-3 py-1.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white text-xs font-medium rounded-lg shadow-sm hover:shadow-md transition-all"
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="lg:hidden space-y-4">
+            {loading ? (
+              [1, 2, 3].map(i => (
+                <div key={i} className="p-4 surface-card border border-theme rounded-2xl animate-pulse">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-full bg-theme-muted/20" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-theme-muted/20 rounded w-1/2" />
+                      <div className="h-3 bg-theme-muted/10 rounded w-1/3" />
+                    </div>
+                  </div>
+                  <div className="h-10 bg-theme-muted/10 rounded-xl" />
+                </div>
+              ))
+            ) : (
+              paginatedEntries.map((entry) => (
+                <div key={entry.id} className="p-5 surface-card border border-theme rounded-2xl shadow-sm space-y-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 p-0.5 flex-shrink-0">
+                        <div className="w-full h-full rounded-full surface-card flex items-center justify-center overflow-hidden">
+                          {entry.guideAvatar ? (
+                            <Image src={entry.guideAvatar} alt={entry.guideName} width={48} height={48} className="object-cover" />
+                          ) : (
+                            <UserX className="w-6 h-6 text-danger-red" />
+                          )}
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-theme-primary truncate leading-tight">{entry.guideName}</h3>
+                        <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mt-1">{entry.guideId}</p>
+                      </div>
+                    </div>
+                    <StatusBadge status={entry.status} />
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <BanReasonBadge reason={entry.banReason} />
+                    <BanDurationBadge duration={entry.banDuration} status={entry.status} />
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      onClick={() => { setSelectedEntry(entry); setShowDetailsModal(true); }}
+                      className="w-full py-3.5 bg-danger-red/10 text-danger-red hover:bg-danger-red hover:text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-xl transition-all border border-danger-red/20 active:scale-95 shadow-sm"
+                    >
+                      Review Enforcement
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Empty State */}
+          {(filteredEntries.length === 0 && !loading) && (
+            <div className="text-center py-12">
+              <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/20 dark:to-red-900/30 rounded-full flex items-center justify-center">
+                <Ban className="w-8 h-8 text-danger-red dark:text-red-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-theme-primary mb-2">No blacklisted guides found</h3>
+              <p className="text-sm text-theme-muted mb-4">Try adjusting your filters or add a new entry.</p>
+              <button onClick={resetFilters} className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl shadow-md hover:shadow-lg transition-all">
+                Clear Filters
+              </button>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {filteredEntries.length > 0 && (
+            <div className="flex items-center justify-between mt-6">
+              <p className="text-sm text-theme-muted ">Page {currentPage} of {totalPages}</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="p-2 surface-card border border-theme rounded-xl text-theme-muted hover:text-theme-secondary dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md transition-all"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-2 surface-card border border-theme rounded-xl text-theme-muted hover:text-theme-secondary dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md transition-all"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Add Modal */}
+      <AddToBlacklistModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdd={handleAddToBlacklist}
+      />
+
+      {/* Details Modal */}
+      {selectedEntry && (
+        <BlacklistDetailsModal
+          isOpen={showDetailsModal}
+          onClose={() => { setShowDetailsModal(false); setSelectedEntry(null); }}
+          entry={selectedEntry}
+          onRemove={handleRemoveFromBlacklist}
+          onUpdate={handleUpdateEntry}
+        />
+      )}
+    </>
+  )
 }

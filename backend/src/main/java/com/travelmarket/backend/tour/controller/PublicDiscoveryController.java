@@ -63,6 +63,26 @@ public class PublicDiscoveryController {
         return list;
     }
 
+    @GetMapping("/discovery/unified")
+    public DiscoveryUnifiedResponse getUnifiedDiscovery() {
+        long start = System.currentTimeMillis();
+        DiscoveryUnifiedResponse res = DiscoveryUnifiedResponse.builder()
+                .stats(getStats())
+                .categories(getCategories())
+                .locations(getLocations())
+                .build();
+        System.out.println("⏱️ Unified Discovery took: " + (System.currentTimeMillis() - start) + "ms");
+        return res;
+    }
+
+    @lombok.Data
+    @lombok.Builder
+    public static class DiscoveryUnifiedResponse {
+        private PublicStatsResponse stats;
+        private List<CategoryDiscoveryResponse> categories;
+        private List<LocationDiscoveryResponse> locations;
+    }
+
     @GetMapping("/discovery/locations")
     public List<LocationDiscoveryResponse> getLocations() {
         List<Object[]> results = tourTemplateRepository.countByCities();

@@ -582,6 +582,9 @@ export interface PublicTourFilters {
  lat?: number
  lng?: number
  radiusKm?: number
+ // Pagination (optional - defaults to limit:20, offset:0)
+ limit?: number
+ offset?: number
 }
 
 

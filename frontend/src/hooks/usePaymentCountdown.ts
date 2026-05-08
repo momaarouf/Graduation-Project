@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 /**
  * usePaymentCountdown — tracks the remaining time until a PendingPayment deadline.

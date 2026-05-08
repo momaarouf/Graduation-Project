@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // ============================================================================
 // PRICE SLIDER COMPONENT - DUAL THUMB RANGE SLIDER

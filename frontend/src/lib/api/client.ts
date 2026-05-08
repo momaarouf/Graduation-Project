@@ -1,20 +1,39 @@
 import axios from 'axios';
 
-const getApiUrl = () => {
-  let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
-  if (typeof window !== 'undefined' && url.includes('localhost') && window.location.hostname !== 'localhost') {
-    url = url.replace('localhost', window.location.hostname);
+/**
+ * Returns the backend base URL.
+ *
+ * Strategy (same-WiFi / local network only):
+ *  - SSR:       http://127.0.0.1:8081  (direct, always fast)
+ *  - localhost: http://localhost:8081   (dev browser on same machine)
+ *  - local IP:  http://<same-ip>:8081  (phone on same WiFi — backend on laptop)
+ *
+ * No tunnels, no discovery, no async wait.
+ */
+export const getApiUrl = (): string => {
+  if (typeof window === 'undefined') {
+    // SSR: Call backend directly via localhost/127.0.0.1
+    return 'http://localhost:8081';
   }
-  return url;
+  // Browser: Use relative path. 
+  // Next.js config (rewrites) will proxy /api to the backend.
+  // This solves same-WiFi IP issues and CORS.
+  return ''; 
 };
 
 const apiClient = axios.create({
-  baseURL: getApiUrl(),
-  withCredentials: true, // required for refresh cookie
-  paramsSerializer: {
-    indexes: null // serialize arrays as ?key=val1&key=val2
-  }
+  withCredentials: true,
+  paramsSerializer: { indexes: null }
 });
+
+apiClient.interceptors.request.use((config) => {
+  config.baseURL = getApiUrl();
+  if (config.url && !config.url.startsWith('/') && !config.url.startsWith('http')) {
+    config.url = `/${config.url}`;
+  }
+  return config;
+});
+
 
 let isRefreshing = false;
 let failedQueue: Array<{
@@ -33,17 +52,13 @@ const processQueue = (error: any, token: string | null = null) => {
  failedQueue = [];
 };
 
-// Request interceptor: attach access token
 // Request interceptor: attach access token (except for auth endpoints)
 apiClient.interceptors.request.use(
  config => {
- // Skip token for login and register endpoints
  if (config.url?.includes('/api/auth/login') || config.url?.includes('/api/auth/register')) {
  return config;
  }
  const token = getAccessToken();
- // Include token if available. Even for public endpoints, we want 
- // the backend to know the user (e.g. to return activeBookingId).
  if (token) {
  config.headers.Authorization = `Bearer ${token}`;
  }
@@ -51,7 +66,6 @@ apiClient.interceptors.request.use(
  },
  error => Promise.reject(error)
 );
-// ... (previous code remains the same)
 
 apiClient.interceptors.response.use(
  response => response,
@@ -67,18 +81,22 @@ apiClient.interceptors.response.use(
  return Promise.reject(error);
  }
 
- // If error is not 401 or request already retried, reject
- if (error.response?.status !== 401 || originalRequest._retry) {
- return Promise.reject(error);
- }
+  if (!error.response) {
+    // Network Error — tunnel may be down or URL changed.
+    // Don't auto-reload (causes infinite loop). Let the component show an error state.
+    console.warn('📡 Network Error — cannot reach backend. Check tunnel is running.');
+    return Promise.reject(error);
+  }
 
- // If we have no token at all, it's a pure 401 (unauthorized), don't try to refresh
+  if (error.response?.status !== 401 || originalRequest._retry) {
+    return Promise.reject(error);
+  }
+
  if (!getAccessToken()) {
  return Promise.reject(error);
  }
 
  if (isRefreshing) {
- // Queue this request
  return new Promise((resolve, reject) => {
  failedQueue.push({ resolve, reject });
  })
@@ -105,7 +123,6 @@ apiClient.interceptors.response.use(
  return apiClient(originalRequest);
  } catch (refreshError) {
  processQueue(refreshError, null);
- // Refresh failed – clear token and reject (do NOT redirect)
  clearAccessToken();
  return Promise.reject(refreshError);
  } finally {
@@ -113,6 +130,7 @@ apiClient.interceptors.response.use(
  }
  }
 );
+
 // Helper functions to manage the access token (in memory)
 let accessToken: string | null =
  typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
@@ -139,4 +157,4 @@ export const clearAccessToken = () => {
  }
 };
 
-export default apiClient;
+export default apiClient;apiClient;

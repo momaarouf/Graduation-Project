@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // TERMS AGREEMENT FORM - STEP 5 (FINAL STEP)
 // ============================================================================
 // LOCATION: /frontend/src/components/auth/TermsAgreement.tsx
@@ -264,7 +264,7 @@ export default function TermsAgreement({
  </div>
 
  <div className="text-center mb-10">
- <h2 className="text-3xl font-black text-theme-primary tracking-tight mb-3">
+ <h2 className="text-3xl font-bold text-theme-primary tracking-tight mb-3">
  Almost There!
  </h2>
  <p className="text-theme-muted font-medium">
@@ -276,7 +276,7 @@ export default function TermsAgreement({
  <div className="w-full mb-10 p-6 bg-primary-light/5 border border-primary-light dark:border-primary-dark/10 rounded-2xl relative overflow-hidden group">
  <div className="absolute top-0 right-0 w-32 h-32 bg-primary-light/10 blur-3xl -mr-16 -mt-16 group-hover:bg-primary-light/20 transition-colors" />
  
- <h3 className="text-sm font-black uppercase tracking-widest text-primary-light dark:text-primary-dark dark:text-primary-dark mb-4 flex items-center gap-2">
+ <h3 className="text-sm font-bold uppercase tracking-widest text-primary-light dark:text-primary-dark dark:text-primary-dark mb-4 flex items-center gap-2">
  <Sparkles size={14} />
  Welcome, {data.firstName}!
  </h3>
@@ -300,7 +300,7 @@ export default function TermsAgreement({
  <div className="w-8 h-8 rounded-lg bg-primary-light/10 flex items-center justify-center text-primary-light dark:text-primary-dark">
  <Icon size={16} strokeWidth={2} />
  </div>
- <span className="text-xs font-black text-theme-secondary tracking-wide">{benefit.text}</span>
+ <span className="text-xs font-bold text-theme-secondary tracking-wide">{benefit.text}</span>
  </motion.div>
  )
  })}
@@ -310,7 +310,7 @@ export default function TermsAgreement({
  <form onSubmit={handleSubmit} className="w-full space-y-8">
  {/* Expandable Terms Summary */}
  <div className="space-y-3">
- <label className="block text-[10px] font-black uppercase tracking-widest text-theme-muted ml-1 mb-2">
+ <label className="block text-[10px] font-bold uppercase tracking-widest text-theme-muted ml-1 mb-2">
  Summary of Terms
  </label>
  <div className="grid gap-3">
@@ -390,7 +390,7 @@ export default function TermsAgreement({
 
  {/* Communication Opt-ins */}
  <div className="space-y-4 pt-4">
- <label className="block text-[10px] font-black uppercase tracking-widest text-theme-muted ml-1">
+ <label className="block text-[10px] font-bold uppercase tracking-widest text-theme-muted ml-1">
  Preferences (Optional)
  </label>
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -407,7 +407,7 @@ export default function TermsAgreement({
  `}>
  {data.newsletterOptIn && <Mail className="w-3 h-3 text-white" />}
  </div>
- <span className="text-[10px] font-black uppercase tracking-widest text-theme-secondary ">Newsletter</span>
+ <span className="text-[10px] font-bold uppercase tracking-widest text-theme-secondary ">Newsletter</span>
  </label>
 
  <label className="flex items-center gap-3 p-3 surface-card border border-theme rounded-xl cursor-pointer hover:surface-card transition-all duration-300">
@@ -423,7 +423,7 @@ export default function TermsAgreement({
  `}>
  {data.marketingOptIn && <Sparkles className="w-3 h-3 text-white" />}
  </div>
- <span className="text-[10px] font-black uppercase tracking-widest text-theme-secondary ">Marketing</span>
+ <span className="text-[10px] font-bold uppercase tracking-widest text-theme-secondary ">Marketing</span>
  </label>
  </div>
  </div>
@@ -448,7 +448,7 @@ export default function TermsAgreement({
  type="button"
  onClick={onBack}
  disabled={isSubmitting}
- className="flex-1 py-4 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest surface-card text-theme-secondary border border-theme hover:surface-section dark:hover:surface-section transition-all duration-300 disabled:opacity-50"
+ className="flex-1 py-4 px-6 rounded-2xl font-bold text-[10px] uppercase tracking-widest surface-card text-theme-secondary border border-theme hover:surface-section dark:hover:surface-section transition-all duration-300 disabled:opacity-50"
  >
  Back
  </button>
@@ -457,7 +457,7 @@ export default function TermsAgreement({
  type="submit"
  disabled={isSubmitting || !data.agreedToTerms || !data.agreedToPrivacy}
  className={`
- flex-[1.5] py-4 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 group
+ flex-[1.5] py-4 px-6 rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 group
  ${data.agreedToTerms && data.agreedToPrivacy
  ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-600/20 hover:bg-emerald-700' 
  : 'surface-section text-theme-muted cursor-not-allowed'
@@ -475,7 +475,7 @@ export default function TermsAgreement({
  </button>
  </div>
 
- <p className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-theme-muted flex items-center justify-center gap-2 opacity-50">
+ <p className="text-center text-[10px] font-bold uppercase tracking-[0.2em] text-theme-muted flex items-center justify-center gap-2 opacity-50">
  <Shield size={12} />
  Secured by SafariHub Trust™
  </p>

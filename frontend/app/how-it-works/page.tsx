@@ -245,7 +245,7 @@ export default function HowItWorksPage() {
  animate={{ opacity: 1, y: 0 }}
  transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
  >
- <h1 className="text-5xl sm:text-7xl md:text-8xl font-black text-theme-primary leading-[0.95] tracking-tight mb-8">
+ <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold text-theme-primary leading-[0.95] tracking-tight mb-8">
  How <br />
  <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-300">
  SafariHub
@@ -286,7 +286,7 @@ export default function HowItWorksPage() {
   className="container-safe mx-auto"
   >
   <div className="text-center mb-16 px-4">
-  <h2 className="text-3xl sm:text-5xl font-black text-theme-primary mb-6">Explore the Process.</h2>
+  <h2 className="text-3xl sm:text-5xl font-bold text-theme-primary mb-6">Explore the Process.</h2>
   <p className="text-theme-secondary max-w-xl mx-auto font-medium">
   Choose your role to see the journey. We've simplified the process so you can focus on the experience.
   </p>
@@ -307,7 +307,7 @@ export default function HowItWorksPage() {
   >
  <motion.h2 
  variants={itemFade}
- className="text-4xl sm:text-6xl font-black text-theme-primary mb-10 leading-tight tracking-tight"
+ className="text-4xl sm:text-6xl font-bold text-theme-primary mb-10 leading-tight tracking-tight"
  >
  Your Safety is Our <br />
  <span className="text-emerald-600 dark:text-emerald-400">Protocol.</span>
@@ -354,7 +354,7 @@ export default function HowItWorksPage() {
  className="surface-card p-10 rounded-[3.5rem] border dark:border-theme-strong shadow-2xl translate-y-12"
  >
  <Target className="w-12 h-12 text-primary-light dark:text-primary-dark mb-6" />
- <h4 className="font-black text-theme-primary text-xl">99.9% Reliable</h4>
+ <h4 className="font-bold text-theme-primary text-xl">99.9% Reliable</h4>
  <p className="text-theme-secondary text-sm mt-3 leading-relaxed">Uptime on all booking processes and payments.</p>
  </motion.div>
  <motion.div 
@@ -365,7 +365,7 @@ export default function HowItWorksPage() {
  className="surface-card p-10 rounded-[3.5rem] border dark:border-theme-strong shadow-2xl"
  >
  <TrendingUp className="w-12 h-12 text-orange-600 dark:text-orange-400 mb-6" />
- <h4 className="font-black text-theme-primary text-xl">Impact Score</h4>
+ <h4 className="font-bold text-theme-primary text-xl">Impact Score</h4>
  <p className="text-theme-secondary text-sm mt-3 leading-relaxed">Every vetted review builds the community trust.</p>
  </motion.div>
  </div>
@@ -385,7 +385,7 @@ export default function HowItWorksPage() {
   variants={itemFade}
   className="text-center mb-20"
   >
- <h2 className="text-4xl sm:text-6xl font-black text-theme-primary mb-6 tracking-tight">
+ <h2 className="text-4xl sm:text-6xl font-bold text-theme-primary mb-6 tracking-tight">
  Our <span className="text-emerald-600 dark:text-emerald-400">Halal-First</span> Values.
  </h2>
  <p className="text-theme-secondary font-bold max-w-xl mx-auto uppercase tracking-[0.2em] text-xs opacity-70">
@@ -414,7 +414,7 @@ export default function HowItWorksPage() {
  }`}>
  <v.icon className="w-8 h-8" />
  </div>
- <h3 className="text-2xl font-black text-theme-primary mb-4">{v.title}</h3>
+ <h3 className="text-2xl font-bold text-theme-primary mb-4">{v.title}</h3>
  <p className="text-theme-secondary leading-relaxed font-medium">
  {v.description}
  </p>
@@ -449,12 +449,12 @@ export default function HowItWorksPage() {
  whileHover={{ x: 15 }}
  className="flex gap-6 items-center surface-card p-8 rounded-[2.5rem] border border-theme dark:border-white/5 shadow-xl transition-all group"
  >
- <div className="text-4xl font-black text-theme-muted opacity-20 group-hover:opacity-40 transition-opacity">{s.step}</div>
+ <div className="text-4xl font-bold text-theme-muted opacity-20 group-hover:opacity-40 transition-opacity">{s.step}</div>
  <div className="w-14 h-14 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-2xl flex items-center justify-center shadow-inner">
  <s.icon className="w-7 h-7" />
  </div>
  <div>
- <h4 className="text-lg font-black text-theme-primary mb-1">{s.title}</h4>
+ <h4 className="text-lg font-bold text-theme-primary mb-1">{s.title}</h4>
  <p className="text-sm text-theme-secondary leading-snug">{s.description}</p>
  </div>
  </motion.div>
@@ -468,7 +468,7 @@ export default function HowItWorksPage() {
   transition={{ duration: 0.8 }}
   className="order-1 lg:order-2"
   >
- <h2 className="text-4xl sm:text-6xl font-black text-theme-primary mb-8 leading-tight tracking-tight">
+ <h2 className="text-4xl sm:text-6xl font-bold text-theme-primary mb-8 leading-tight tracking-tight">
  Vetted for your <br />
  <span className="text-primary-light dark:text-primary-dark">Peace of Mind.</span>
  </h2>
@@ -497,7 +497,7 @@ export default function HowItWorksPage() {
   variants={itemFade}
   className="text-center mb-20"
   >
- <h2 className="text-4xl sm:text-6xl font-black text-theme-primary mb-6">
+ <h2 className="text-4xl sm:text-6xl font-bold text-theme-primary mb-6">
  Technical <span className="text-primary-light dark:text-primary-dark">Ecosystem.</span>
  </h2>
  <p className="text-xl text-theme-secondary max-w-2xl mx-auto font-medium">
@@ -530,7 +530,7 @@ export default function HowItWorksPage() {
  }`}>
  <feature.icon className="w-8 h-8" />
  </div>
- <h3 className="text-2xl font-black text-theme-primary mb-4">{feature.title}</h3>
+ <h3 className="text-2xl font-bold text-theme-primary mb-4">{feature.title}</h3>
  <p className="text-theme-secondary leading-relaxed text-base font-medium">
  {feature.description}
  </p>
@@ -553,7 +553,7 @@ export default function HowItWorksPage() {
  <div className="w-20 h-20 surface-card border border-theme-strong rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl">
  <HelpCircle className="w-10 h-10 text-primary-light dark:text-primary-dark" />
  </div>
- <h2 className="text-3xl sm:text-5xl font-black text-theme-primary mb-4">Common Questions.</h2>
+ <h2 className="text-3xl sm:text-5xl font-bold text-theme-primary mb-4">Common Questions.</h2>
  <p className="text-theme-secondary font-bold uppercase tracking-widest text-xs opacity-60">Everything you need to know about the platform.</p>
  </motion.div>
 
@@ -605,7 +605,7 @@ export default function HowItWorksPage() {
   viewport={{ once: false, amount: 0.2 }}
   variants={itemFade}
   >
- <h2 className="text-5xl sm:text-8xl font-black text-white mb-10 tracking-tight leading-tight">
+ <h2 className="text-5xl sm:text-8xl font-bold text-white mb-10 tracking-tight leading-tight">
  Ready to <br />
  <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-500">Discover?</span>
  </h2>
@@ -617,14 +617,14 @@ export default function HowItWorksPage() {
  <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
  <Link 
  href="/tours"
- className="group relative px-16 py-6 bg-white text-blue-600 hover:scale-105 transition-all rounded-[2.5rem] font-black text-2xl flex items-center justify-center gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.3)]"
+ className="group relative px-16 py-6 bg-white text-blue-600 hover:scale-105 transition-all rounded-[2.5rem] font-bold text-2xl flex items-center justify-center gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.3)]"
  >
  Find a Tour
  <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
  </Link>
  <Link 
  href="/auth/signup"
- className="group px-16 py-6 border-4 border-white/20 text-white hover:bg-white/10 transition-all rounded-[2.5rem] font-black text-2xl flex items-center justify-center gap-4"
+ className="group px-16 py-6 border-4 border-white/20 text-white hover:bg-white/10 transition-all rounded-[2.5rem] font-bold text-2xl flex items-center justify-center gap-4"
  >
  Become a Guide
  </Link>

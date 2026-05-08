@@ -10,13 +10,16 @@ export async function GET() {
   let localIp = 'localhost';
 
   for (const name of Object.keys(nets)) {
-    const isVirtual = name.toLowerCase().includes('wsl') || name.toLowerCase().includes('vmware') || name.toLowerCase().includes('virtual') || name.toLowerCase().includes('veth');
+    const isVirtual = name.toLowerCase().includes('wsl') || 
+                      name.toLowerCase().includes('vmware') || 
+                      name.toLowerCase().includes('virtual') || 
+                      name.toLowerCase().includes('veth');
     if (isVirtual) continue;
 
-    const netInterfaces = nets[name];
-    if (!netInterfaces) continue;
+    const netInterface = nets[name];
+    if (!netInterface) continue;
 
-    for (const net of netInterfaces) {
+    for (const net of netInterface) {
       if (net.family === 'IPv4' && !net.internal) {
         localIp = net.address;
         break;

@@ -44,7 +44,7 @@ const createCustomIcon = (color: string, label?: string) => {
       html: renderToString(
         <div className="relative -top-6 -left-3 animate-bounce-slow">
           {label ? (
-            <div className="absolute -top-3 -right-3 w-5 h-5 bg-primary-light border-2 border-theme rounded-full flex items-center justify-center text-[8px] font-black text-white shadow-md z-[10]">
+            <div className="absolute -top-3 -right-3 w-5 h-5 bg-primary-light border-2 border-theme rounded-full flex items-center justify-center text-[8px] font-bold text-white shadow-md z-[10]">
               {label}
             </div>
           ) : null}
@@ -181,7 +181,7 @@ export default function MapPicker({
       {/* OVERLAYS */}
       <div className="absolute top-4 left-4 z-[1] flex items-center gap-2 surface-card px-3 py-1.5 rounded-full border border-theme shadow-sm">
         <div className={`w-2 h-2 rounded-full ${isGeocoding ? 'bg-orange-500 animate-pulse' : 'bg-primary-light'}`} />
-        <span className="text-[10px] font-black text-theme-primary uppercase tracking-widest leading-none">
+        <span className="text-[10px] font-bold text-theme-primary uppercase tracking-widest leading-none">
           {isGeocoding ? 'Fetching Address...' : (hasCoords ? 'Location Selected' : 'Click to Pick Location')}
         </span>
       </div>

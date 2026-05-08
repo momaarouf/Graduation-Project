@@ -152,7 +152,7 @@ export default function SignupStepIndicator({
  ) : (
  <span
  className={`
- text-[10px] font-black
+ text-[10px] font-bold
  ${isCurrent
  ? 'text-primary-light dark:text-primary-dark'
  : 'text-theme-muted'
@@ -168,7 +168,7 @@ export default function SignupStepIndicator({
  <div className="mt-3 text-center">
  <p
  className={`
- text-[10px] font-black uppercase tracking-widest
+ text-[10px] font-bold uppercase tracking-widest
  ${isCurrent
  ? 'text-primary-light dark:text-primary-dark'
  : isCompleted

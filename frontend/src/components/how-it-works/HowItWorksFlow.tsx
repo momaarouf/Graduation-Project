@@ -97,7 +97,7 @@ export default function HowItWorksFlow() {
  <div className="relative p-1.5 surface-section rounded-[2rem] border border-theme flex gap-2 shadow-2xl">
  <button
  onClick={() => setRole("traveler")}
- className={`relative px-10 py-4 rounded-[1.5rem] text-sm font-black tracking-widest transition-all duration-500 ${
+ className={`relative px-10 py-4 rounded-[1.5rem] text-sm font-bold tracking-widest transition-all duration-500 ${
  role === "traveler" ? "text-white" : "text-theme-secondary hover:text-theme-primary"
  }`}
  >
@@ -112,7 +112,7 @@ export default function HowItWorksFlow() {
  </button>
  <button
  onClick={() => setRole("guide")}
- className={`relative px-10 py-4 rounded-[1.5rem] text-sm font-black tracking-widest transition-all duration-500 ${
+ className={`relative px-10 py-4 rounded-[1.5rem] text-sm font-bold tracking-widest transition-all duration-500 ${
  role === "guide" ? "text-white" : "text-theme-secondary hover:text-theme-primary"
  }`}
  >
@@ -199,12 +199,12 @@ function StepCard({ step, index }: { step: Step; index: number }) {
  >
  <Icon className="w-8 h-8" />
  </motion.div>
- <span className="text-5xl font-black text-theme-muted opacity-10 group-hover:opacity-30 transition-opacity tabular-nums">
+ <span className="text-5xl font-bold text-theme-muted opacity-10 group-hover:opacity-30 transition-opacity tabular-nums">
  {index + 1}
  </span>
  </div>
 
- <h3 className="text-2xl font-black text-theme-primary mb-5 relative z-10">
+ <h3 className="text-2xl font-bold text-theme-primary mb-5 relative z-10">
  {step.title}
  </h3>
  

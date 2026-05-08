@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // TRAVELER NOTIFICATION SETTINGS
 // ============================================================================
 // LOCATION: /frontend/src/app/dashboard/traveler/settings/notifications/page.tsx
@@ -290,9 +290,8 @@ export default function TravelerNotificationSettingsPage() {
 
  return (
  <>
- <div className="pt-14 sm:pt-16 min-h-[calc(100vh-4rem)]">
- <div className="container-safe mx-auto max-w-3xl py-8 sm:py-10">
- 
+ <div className="space-y-6">
+  
  {/* Header */}
  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
  <div>
@@ -546,7 +545,6 @@ export default function TravelerNotificationSettingsPage() {
  We'll never share your contact information with third parties. 
  You can change these settings anytime.
  </p>
- </div>
  </div>
  </div>
  </div>

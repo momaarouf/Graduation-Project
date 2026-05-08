@@ -182,12 +182,12 @@ export default function MockPaymentSimulator({
  <div className="w-8 h-8 bg-primary-light rounded-lg flex items-center justify-center text-white">
  <Lock className="w-4 h-4" />
  </div>
- <div className="text-xs font-black uppercase tracking-widest text-theme-muted">
+ <div className="text-xs font-bold uppercase tracking-widest text-theme-muted">
  Secure Checkout
  </div>
  </div>
  <div className="text-right">
- <div className="text-lg font-black text-theme-primary">
+ <div className="text-lg font-bold text-theme-primary">
  {currency} {amount.toFixed(2)}
  </div>
  </div>
@@ -206,8 +206,8 @@ export default function MockPaymentSimulator({
  <div className="p-4 surface-base rounded-2xl text-white relative overflow-hidden shadow-lg">
  <div className="absolute top-0 right-0 w-24 h-24 bg-primary-light/10 rounded-full blur-2xl -mr-8 -mt-8" />
  <div className="flex justify-between items-center mb-4">
- <div className="text-[8px] uppercase font-black tracking-widest opacity-40">MOCK CARD PREVIEW</div>
- <div className={`text-[10px] font-black italic tracking-widest transition-opacity ${cardType === 'UNKNOWN' ? 'opacity-20' : 'opacity-100'}`}>
+ <div className="text-[8px] uppercase font-bold tracking-widest opacity-40">MOCK CARD PREVIEW</div>
+ <div className={`text-[10px] font-bold tracking-widest transition-opacity ${cardType === 'UNKNOWN' ? 'opacity-20' : 'opacity-100'}`}>
  {cardType !== 'UNKNOWN' ? cardType : 'CARD'}
  </div>
  </div>
@@ -222,7 +222,7 @@ export default function MockPaymentSimulator({
 
  {/* Composite Card Input Row — The 'Stripe Elements' approach */}
  <div className="space-y-2">
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest ml-1">Payment Details</label>
+ <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest ml-1">Payment Details</label>
  
  {/* Combined Row 1: Name */}
  <input 
@@ -303,7 +303,7 @@ export default function MockPaymentSimulator({
  {/* Pay Button */}
  <button
  onClick={handlePay}
- className="w-full py-4.5 surface-base text-white rounded-2xl font-black text-base transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-gray-200 dark:shadow-none"
+ className="w-full py-4.5 surface-base text-white rounded-2xl font-bold text-base transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-gray-200 dark:shadow-none"
  >
  Complete Payment
  </button>
@@ -312,14 +312,14 @@ export default function MockPaymentSimulator({
  <div className="flex items-center justify-center gap-4 py-2 opacity-60">
  <button 
  onClick={handleDecline} 
- className="text-[10px] font-black text-danger-red uppercase tracking-widest hover:underline"
+ className="text-[10px] font-bold text-danger-red uppercase tracking-widest hover:underline"
  >
  Simulate Decline
  </button>
  <div className="w-1 h-1 surface-section rounded-full" />
  <button 
  onClick={onClose}
- className="text-[10px] font-black text-theme-muted uppercase tracking-widest hover:underline"
+ className="text-[10px] font-bold text-theme-muted uppercase tracking-widest hover:underline"
  >
  Cancel Order
  </button>
@@ -352,7 +352,7 @@ export default function MockPaymentSimulator({
  )}
  </div>
 
- <h2 className="text-xl font-black text-theme-primary mb-2 tracking-tight">
+ <h2 className="text-xl font-bold text-theme-primary mb-2 tracking-tight">
  {processStep === 1 ? 'Validating...' : 
  processStep === 2 ? 'Authorizing...' : 
  processStep === 3 ? 'Completed!' : 'Simulating...'}
@@ -377,7 +377,7 @@ export default function MockPaymentSimulator({
 
  <div className="mt-4 flex items-center justify-center gap-2 opacity-20 scale-[0.8]">
  <ShieldCheck className="w-3 h-3" />
- <span className="text-[10px] font-black tracking-widest uppercase">SSL SECURE GATEWAY</span>
+ <span className="text-[10px] font-bold tracking-widest uppercase">SSL SECURE GATEWAY</span>
  </div>
  </div>
  )

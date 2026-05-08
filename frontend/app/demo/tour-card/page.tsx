@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from"react";
 import { TourCard } from"@/src/components/ui/tour-card";

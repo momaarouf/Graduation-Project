@@ -1,4 +1,4 @@
-﻿import apiClient from './client';
+import apiClient from './client';
 
 // ==================== ADMIN USER MANAGEMENT TYPES ====================
 // Matches AdminUserResponse.java record exactly.
@@ -193,4 +193,60 @@ export const adminGetAuditEventsByTarget = async (
  params: { type: targetType, id: targetId, page, size },
  });
  return response.data;
+};
+
+// ==================== PAYOUT & FINANCIAL ENDPOINTS ====================
+
+export interface AdminPayoutResponse {
+  id: number;
+  payoutId: string;
+  guideId: number;
+  guideName: string;
+  guideEmail: string;
+  guideAvatar?: string;
+  amount: number;
+  currency: string;
+  status: 'pending' | 'frozen' | 'processing' | 'completed' | 'failed' | 'cancelled';
+  method: 'whish' | 'bank' | 'paypal' | 'card' | 'stripe';
+  methodDetails: string;
+  tourId?: number;
+  tourTitle?: string;
+  bookingId?: number;
+  platformFee: number;
+  guideEarnings: number;
+  feeTier: string;
+  feeMultiplier: number;
+  requestedAt: string;
+  processedAt?: string;
+  completedAt?: string;
+  estimatedRelease?: string;
+}
+
+export interface AdminPayoutSummaryResponse {
+  totalPending: number;
+  totalFrozen: number;
+  totalProcessing: number;
+  totalCompleted: number;
+  totalFailed: number;
+  totalAmount: number;
+  totalFees: number;
+  averageProcessingTime: string;
+}
+
+export const adminGetPayouts = async (): Promise<AdminPayoutResponse[]> => {
+  const response = await apiClient.get('/api/admin/payouts');
+  return response.data;
+};
+
+export const adminGetPayoutSummary = async (): Promise<AdminPayoutSummaryResponse> => {
+  const response = await apiClient.get('/api/admin/payouts/summary');
+  return response.data;
+};
+
+export const adminUpdateGuideFeeMultiplier = async (
+  guideProfileId: number,
+  data: { multiplier: number; reason?: string }
+): Promise<any> => {
+  const response = await apiClient.patch(`/api/admin/guides/${guideProfileId}/fee-multiplier`, data);
+  return response.data;
 };

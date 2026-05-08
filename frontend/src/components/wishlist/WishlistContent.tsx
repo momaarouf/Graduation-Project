@@ -99,7 +99,7 @@ const WishlistCard = ({ tour, onRemove, index }: { tour: PublicTourCardResponse;
  {/* Floating Remove Button */}
  <button
  onClick={() => onRemove(tour.id)}
- className="absolute top-3 right-3 p-2 surface-card  text-danger-red rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 shadow-lg hover:bg-red-500 hover:text-white"
+ className="absolute top-3 right-3 z-20 p-2.5 surface-card text-danger-red rounded-xl shadow-lg hover:bg-danger-red hover:text-white transition-all active:scale-90 border border-theme opacity-100"
  title="Remove from favorites"
  >
  <Trash2 className="w-4 h-4" />
@@ -107,30 +107,30 @@ const WishlistCard = ({ tour, onRemove, index }: { tour: PublicTourCardResponse;
  </div>
 
  {/* Content Section */}
- <div className="flex-1 flex flex-col p-6">
+ <div className="flex-1 flex flex-col p-4 sm:p-6">
  <div className="flex justify-between items-start gap-4 mb-2">
  <div>
  <div className="flex items-center gap-2 mb-1">
- <div className="text-[10px] font-bold text-primary-light dark:text-primary-dark dark:text-primary-dark uppercase tracking-[0.2em]">
+ <div className="text-[9px] font-black text-primary-light dark:text-primary-dark uppercase tracking-[0.2em]">
  {tour.category || 'Experience'}
  </div>
  {tour.isPremium && (
- <div className="px-2 py-0.5 bg-amber-50 dark:bg-amber-950/30 border border-accent-light dark:border-accent-dark dark:border-accent-light dark:border-accent-dark/50 rounded-full text-[9px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1">
+ <div className="px-2 py-0.5 bg-amber-50 dark:bg-amber-950/30 border border-accent-light dark:border-accent-dark dark:border-accent-light dark:border-accent-dark/50 rounded-full text-[9px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1">
  <Star className="w-2.5 h-2.5 fill-current" />
  Premium
  </div>
  )}
  </div>
- <h3 className="text-xl font-bold text-theme-primary leading-tight group-hover:text-primary-light dark:text-primary-dark dark:group-hover:text-primary-light dark:text-primary-dark transition-colors">
+ <h3 className="text-lg sm:text-xl font-extrabold text-theme-primary leading-tight group-hover:text-primary-light transition-colors uppercase tracking-tight">
  {tour.title}
  </h3>
  </div>
  <div className="text-right">
- <div className="text-2xl font-black text-theme-primary">
- <span className="text-sm font-medium mr-1">{tour.currency}</span>
+ <div className="text-xl sm:text-2xl font-black text-theme-primary tracking-tight">
+ <span className="text-xs font-bold mr-0.5 opacity-50">{tour.currency}</span>
  {tour.basePrice}
  </div>
- <div className="text-[10px] text-theme-muted uppercase font-bold">per person</div>
+ <div className="text-[9px] text-theme-muted uppercase font-black tracking-widest opacity-60">per person</div>
  </div>
  </div>
 
@@ -193,7 +193,7 @@ const WishlistCard = ({ tour, onRemove, index }: { tour: PublicTourCardResponse;
  <div className="flex items-center gap-3 mt-6">
  <Link
  href={`/tours/${tour.id}`}
- className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-primary-light text-white text-sm font-bold rounded-xl hover:bg-primary-light-hover transition-all shadow-xl shadow-blue-500/10 active:scale-95"
+ className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-light text-white text-[11px] font-extrabold uppercase tracking-widest rounded-xl hover:bg-primary-light-hover transition-all shadow-2xl shadow-primary-light/30 active:scale-95"
  >
  Learn More
  <ArrowRight className="w-4 h-4" />
@@ -204,7 +204,7 @@ const WishlistCard = ({ tour, onRemove, index }: { tour: PublicTourCardResponse;
  navigator.clipboard.writeText(url)
  toast.success('Ready to share!')
  }}
- className="p-3 surface-section text-theme-secondary rounded-xl hover:surface-section dark:hover:surface-section transition-colors active:scale-95"
+ className="p-3.5 surface-base text-theme-secondary border border-theme rounded-xl hover:bg-surface-hover transition-all active:scale-95"
  >
  <Share2 className="w-5 h-5" />
  </button>
@@ -275,13 +275,13 @@ export default function WishlistContent() {
 
  return (
  <div className="w-full">
- <div className="container-safe mx-auto max-w-5xl py-8 sm:py-12">
+ <div className="container-safe mx-auto max-w-5xl py-4 sm:py-12">
  
  {/* Header Section */}
  <motion.div 
  initial={{ opacity: 0, x: -20 }}
  animate={{ opacity: 1, x: 0 }}
- className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 border-b border-theme pb-10"
+ className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8 sm:mb-12 border-b border-theme pb-8 sm:pb-10"
  >
  <div>
  <div className="flex items-center gap-3 mb-4">
@@ -290,10 +290,10 @@ export default function WishlistContent() {
  </div>
  <span className="text-sm font-bold text-theme-muted uppercase tracking-widest">Saved Experiences</span>
  </div>
- <h1 className="text-4xl sm:text-5xl font-black text-theme-primary mb-3 tracking-tight">
+ <h1 className="text-2xl sm:text-4xl font-extrabold text-theme-primary mb-1 tracking-tight uppercase">
  {title}
  </h1>
- <p className="text-lg text-theme-muted max-w-xl leading-relaxed">
+ <p className="text-sm sm:text-lg text-theme-secondary font-medium uppercase tracking-widest opacity-70">
  {subtitle}
  </p>
  </div>
@@ -364,16 +364,16 @@ export default function WishlistContent() {
  <div className="absolute inset-0 bg-primary-light/5 rounded-full animate-ping pointer-events-none" />
  </div>
  
- <h3 className="text-3xl font-black text-theme-primary mb-4">
+ <h3 className="text-xl sm:text-3xl font-extrabold text-theme-primary mb-3 uppercase tracking-tight">
  Start your collection
  </h3>
- <p className="text-xl text-theme-muted mb-10 max-w-md mx-auto leading-relaxed">
+ <p className="text-[10px] sm:text-xl text-theme-muted mb-8 max-w-xs sm:max-w-md mx-auto font-black uppercase tracking-widest opacity-70 leading-relaxed">
  Save the experiences that speak to you and we'll keep them here for your next perfect trip.
  </p>
  
  <Link
  href="/tours"
- className="inline-flex items-center gap-3 px-10 py-5 bg-primary-light text-white text-lg font-black rounded-2xl hover:bg-primary-light-hover transition-all shadow-2xl shadow-blue-500/20 active:scale-95 group"
+ className="inline-flex items-center gap-3 px-8 py-4 bg-primary-light text-white text-[11px] font-extrabold uppercase tracking-[0.2em] rounded-2xl hover:scale-105 transition-all shadow-2xl shadow-primary-light/30 active:scale-95 group"
  >
  Explore Tours
  <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />

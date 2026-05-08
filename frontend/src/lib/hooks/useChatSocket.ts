@@ -5,6 +5,7 @@ import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
 import { MessageResponse } from '../api/chat'
 import { getAccessToken } from '../api/client'
+import { getWebSocketUrl } from '../api/websocket-url'
 
 export const useChatSocket = (
  conversationId: number | null, 
@@ -18,7 +19,7 @@ export const useChatSocket = (
  if (!conversationId) return
 
  const client = new Client({
- webSocketFactory: () => new SockJS(`${process.env.NEXT_PUBLIC_API_URL}/ws-chat`),
+ webSocketFactory: () => new SockJS(`${getWebSocketUrl()}/ws-chat`),
  connectHeaders: {
  Authorization: `Bearer ${getAccessToken()}`
  },

@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // LOGIN FORM COMPONENT
 // ============================================================================
 // LOCATION: /frontend/src/components/auth/LoginForm.tsx
@@ -193,7 +193,7 @@ export default function LoginForm() {
  transition={{ duration: 0.5 }}
  className="w-full"
  >
- <div className="surface-card  rounded-[2.5rem] border border-theme shadow-2xl p-8 sm:p-12">
+ <div className="w-full sm:surface-card rounded-[2rem] sm:rounded-[2.5rem] sm:border border-theme sm:shadow-2xl px-0 py-4 sm:p-12">
  {/* ========================================
  GENERAL ERROR MESSAGE
  ======================================== */}
@@ -228,7 +228,7 @@ export default function LoginForm() {
  disabled={isLoading}
  placeholder="you@example.com"
  className={`
- w-full pl-9 pr-3 py-2.5
+ w-full pl-9 pr-3 py-3 md:py-2.5
  surface-section
  border rounded-lg
  text-sm text-theme-primary
@@ -275,7 +275,7 @@ export default function LoginForm() {
  disabled={isLoading}
  placeholder="••••••••"
  className={`
- w-full pl-9 pr-10 py-2.5
+ w-full pl-9 pr-10 py-3 md:py-2.5
  surface-section
  border rounded-lg
  text-sm text-theme-primary
@@ -378,11 +378,11 @@ export default function LoginForm() {
  {/* ========================================
  SOCIAL LOGIN DIVIDER
  ======================================== */}
- <div className="relative my-8">
+ <div className="relative my-6 sm:my-8">
  <div className="absolute inset-0 flex items-center">
  <div className="w-full border-t border-theme" />
  </div>
- <div className="relative flex justify-center text-[10px] tracking-widest uppercase font-black">
+ <div className="relative flex justify-center text-[10px] tracking-widest uppercase font-bold">
  <span className="px-4 bg-transparent text-theme-muted">
  Or connect with
  </span>

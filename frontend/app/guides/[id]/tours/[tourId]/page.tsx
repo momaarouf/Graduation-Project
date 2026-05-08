@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // PORTFOLIO TOUR DETAIL - PUBLIC SIGNATURE EXPERIENCE VIEW
 // ============================================================================
 // LOCATION: /frontend/app/guides/[id]/tours/[tourId]/page.tsx
@@ -128,7 +128,7 @@ export default function PortfolioDetailPage() {
  Back
  </button>
  <div className="flex items-center gap-2">
- <span className="text-[10px] font-black text-primary-light dark:text-primary-dark dark:text-primary-dark uppercase tracking-[0.2em] bg-primary-light/10 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-900/50">
+ <span className="text-[10px] font-bold text-primary-light dark:text-primary-dark dark:text-primary-dark uppercase tracking-[0.2em] bg-primary-light/10 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-900/50">
  Signature Experience
  </span>
  </div>
@@ -158,7 +158,7 @@ export default function PortfolioDetailPage() {
  
  {/* Status Overlay */}
  <div className="absolute top-4 left-4 flex gap-2">
- <div className="px-4 py-2 bg-black/60  rounded-2xl border border-white/20 text-white text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+ <div className="px-4 py-2 bg-black/60  rounded-2xl border border-white/20 text-white text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
  <CheckCircle className="w-4 h-4 text-emerald-400" />
  Verified Performance
  </div>
@@ -188,14 +188,14 @@ export default function PortfolioDetailPage() {
  <div className="flex flex-col justify-center">
  <div className="mb-8">
  <div className="flex items-center gap-2 mb-4">
- <div className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-black uppercase tracking-widest rounded-full">
+ <div className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-bold uppercase tracking-widest rounded-full">
  {tour.category || 'Experience'}
  </div>
- <div className="px-3 py-1 surface-section text-theme-secondary text-[10px] font-black uppercase tracking-widest rounded-full">
+ <div className="px-3 py-1 surface-section text-theme-secondary text-[10px] font-bold uppercase tracking-widest rounded-full">
  {tour.region}
  </div>
  </div>
- <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-theme-primary leading-[1.1] mb-6 tracking-tight">
+ <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-theme-primary leading-[1.1] mb-6 tracking-tight">
  {tour.title}
  </h1>
  <p className="text-xl text-theme-muted leading-relaxed font-bold">
@@ -208,23 +208,23 @@ export default function PortfolioDetailPage() {
  <div className="p-6 surface-card border border-theme rounded-[1.5rem] shadow-sm hover:shadow-xl hover:border-primary-light dark:hover:border-primary-dark/30 transition-all duration-300">
  <div className="flex items-center gap-2 mb-2">
  <Calendar className="w-4 h-4 text-primary-light dark:text-primary-dark" />
- <span className="text-[10px] font-black uppercase tracking-widest text-theme-muted">Total Runs</span>
+ <span className="text-[10px] font-bold uppercase tracking-widest text-theme-muted">Total Runs</span>
  </div>
- <div className="text-3xl font-black text-theme-primary leading-none tracking-tight">{tour.completedRunCount}</div>
+ <div className="text-3xl font-bold text-theme-primary leading-none tracking-tight">{tour.completedRunCount}</div>
  </div>
  <div className="p-6 surface-card border border-theme rounded-[1.5rem] shadow-sm hover:shadow-xl hover:border-success-green/30 transition-all duration-300">
  <div className="flex items-center gap-2 mb-2">
  <Users className="w-4 h-4 text-emerald-600" />
- <span className="text-[10px] font-black uppercase tracking-widest text-theme-muted">Travelers</span>
+ <span className="text-[10px] font-bold uppercase tracking-widest text-theme-muted">Travelers</span>
  </div>
- <div className="text-3xl font-black text-theme-primary leading-none tracking-tight">{tour.totalTravelersCount}</div>
+ <div className="text-3xl font-bold text-theme-primary leading-none tracking-tight">{tour.totalTravelersCount}</div>
  </div>
  <div className="p-6 surface-card border border-theme rounded-[1.5rem] shadow-sm hover:shadow-xl hover:border-accent-light dark:hover:border-accent-dark/30 transition-all duration-300">
  <div className="flex items-center gap-2 mb-2">
  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
- <span className="text-[10px] font-black uppercase tracking-widest text-theme-muted">Avg Rating</span>
+ <span className="text-[10px] font-bold uppercase tracking-widest text-theme-muted">Avg Rating</span>
  </div>
- <div className="text-3xl font-black text-theme-primary leading-none tracking-tight">{tour.averageRating || '4.9'}</div>
+ <div className="text-3xl font-bold text-theme-primary leading-none tracking-tight">{tour.averageRating || '4.9'}</div>
  </div>
  </div>
 
@@ -235,8 +235,8 @@ export default function PortfolioDetailPage() {
  <Image src={tour.guideAvatarUrl ||"/images/guides/default-avatar.jpg"} alt="guide" width={56} height={56} className="object-cover" />
  </div>
  <div>
- <p className="text-[9px] text-theme-muted font-black uppercase tracking-[0.2em] mb-1">Designed By</p>
- <p className="font-black text-lg text-theme-primary group-hover:text-primary-light dark:text-primary-dark transition-colors flex items-center gap-1.5 leading-none">
+ <p className="text-[9px] text-theme-muted font-bold uppercase tracking-[0.2em] mb-1">Designed By</p>
+ <p className="font-bold text-lg text-theme-primary group-hover:text-primary-light dark:text-primary-dark transition-colors flex items-center gap-1.5 leading-none">
  {tour.guideDisplayName}
  {tour.guideVerified && <Shield className="w-4 h-4 text-primary-light dark:text-primary-dark fill-current opacity-20" />}
  </p>
@@ -246,7 +246,7 @@ export default function PortfolioDetailPage() {
  {tour.currentlyAvailable && tour.relatedPublishedTourId && (
  <Link 
  href={`/tours/${tour.relatedPublishedTourId}`}
- className="w-full sm:w-auto px-10 py-4 bg-primary-light hover:bg-primary-light-hover text-white font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl shadow-blue-600/20 active:scale-95 flex items-center justify-center gap-2 group"
+ className="w-full sm:w-auto px-10 py-4 bg-primary-light hover:bg-primary-light-hover text-white font-bold text-[11px] uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl shadow-blue-600/20 active:scale-95 flex items-center justify-center gap-2 group"
  >
  Go to Active Tour
  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -264,7 +264,7 @@ export default function PortfolioDetailPage() {
  {/* Detailed Description */}
  <section className="surface-card rounded-[2.5rem] p-10 border border-theme shadow-sm relative overflow-hidden group hover:border-primary-light dark:hover:border-primary-dark/30 transition-all duration-500">
  <div className="absolute top-0 right-0 w-64 h-64 bg-primary-light/5 rounded-full -mr-32 -mt-32 blur-3xl opacity-50 group-hover:bg-primary-light/10 transition-colors" />
- <h2 className="text-2xl font-black text-theme-primary mb-8 flex items-center gap-3">
+ <h2 className="text-2xl font-bold text-theme-primary mb-8 flex items-center gap-3">
  <Award className="w-6 h-6 text-primary-light dark:text-primary-dark" />
  Experience Story
  </h2>
@@ -275,7 +275,7 @@ export default function PortfolioDetailPage() {
 
  {/* Experience Flow (Itinerary) */}
  <section className="space-y-10">
- <h2 className="text-2xl font-black text-theme-primary mb-2 flex items-center gap-3">
+ <h2 className="text-2xl font-bold text-theme-primary mb-2 flex items-center gap-3">
  <Sparkles className="w-6 h-6 text-emerald-500" />
  The Journey
  </h2>
@@ -285,13 +285,13 @@ export default function PortfolioDetailPage() {
  {itinerary.map((stop, idx) => (
  <div key={stop.id} className="relative pl-14 group">
  <div className="absolute left-0 top-0 w-10 h-10 surface-card border-2 border-theme rounded-xl flex items-center justify-center z-10 group-hover:border-success-green transition-colors">
- <span className="text-xs font-black text-theme-muted group-hover:text-emerald-500">{idx + 1}</span>
+ <span className="text-xs font-bold text-theme-muted group-hover:text-emerald-500">{idx + 1}</span>
  </div>
  <div className="p-6 surface-card border border-theme rounded-2xl shadow-sm group-hover:shadow-md transition-all">
  <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
- <h3 className="font-black text-theme-primary tracking-tight">{stop.title}</h3>
+ <h3 className="font-bold text-theme-primary tracking-tight">{stop.title}</h3>
  {stop.duration && (
- <div className="flex items-center gap-1.5 px-3 py-1 surface-section rounded-lg text-[10px] font-black text-theme-muted uppercase tracking-widest">
+ <div className="flex items-center gap-1.5 px-3 py-1 surface-section rounded-lg text-[10px] font-bold text-theme-muted uppercase tracking-widest">
  <Clock className="w-3 h-3" />
  {stop.duration}
  </div>
@@ -303,7 +303,7 @@ export default function PortfolioDetailPage() {
  ))}
  </div>
  ) : (
- <div className="p-10 surface-section rounded-3xl border border-dashed border-theme text-center text-theme-muted italic">
+ <div className="p-10 surface-section rounded-3xl border border-dashed border-theme text-center text-theme-muted">
  Tour itinerary follows standard experience parameters.
  </div>
  )}
@@ -313,7 +313,7 @@ export default function PortfolioDetailPage() {
  <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
  {/* Inclusions */}
  <div className="space-y-6">
- <h3 className="text-sm font-black text-theme-primary uppercase tracking-[0.2em] flex items-center gap-2">
+ <h3 className="text-sm font-bold text-theme-primary uppercase tracking-[0.2em] flex items-center gap-2">
  <CheckCircle className="w-4 h-4 text-emerald-500" />
  Inclusions
  </h3>
@@ -324,7 +324,7 @@ export default function PortfolioDetailPage() {
  <span className="text-sm font-bold text-theme-secondary">{item}</span>
  </div>
  )) : (
- <div className="p-4 surface-section border border-theme rounded-2xl text-sm italic text-theme-muted">
+ <div className="p-4 surface-section border border-theme rounded-2xl text-sm text-theme-muted">
  Check tour description for details.
  </div>
  )}
@@ -333,7 +333,7 @@ export default function PortfolioDetailPage() {
 
  {/* Exclusions */}
  <div className="space-y-6">
- <h3 className="text-sm font-black text-theme-primary uppercase tracking-[0.2em] flex items-center gap-2">
+ <h3 className="text-sm font-bold text-theme-primary uppercase tracking-[0.2em] flex items-center gap-2">
  <X className="w-4 h-4 text-red-500" />
  Exclusions
  </h3>
@@ -344,7 +344,7 @@ export default function PortfolioDetailPage() {
  <span className="text-sm font-bold text-theme-secondary">{item}</span>
  </div>
  )) : (
- <div className="p-4 surface-section border border-theme rounded-2xl text-sm italic text-theme-muted">
+ <div className="p-4 surface-section border border-theme rounded-2xl text-sm text-theme-muted">
  Standard exclusions apply.
  </div>
  )}
@@ -355,7 +355,7 @@ export default function PortfolioDetailPage() {
  {/* Performance History */}
  <section>
  <div className="flex items-center justify-between mb-8">
- <h2 className="text-2xl font-black text-theme-primary flex items-center gap-3">
+ <h2 className="text-2xl font-bold text-theme-primary flex items-center gap-3">
  <TrendingUp className="w-6 h-6 text-amber-500" />
  Performance History
  </h2>
@@ -365,26 +365,26 @@ export default function PortfolioDetailPage() {
  <table className="w-full text-left">
  <thead>
  <tr className="surface-section border-b border-theme">
- <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.25em] text-theme-muted ">Run Date</th>
- <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.25em] text-theme-muted ">Attendees</th>
- <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.25em] text-theme-muted ">Verified By</th>
+ <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-[0.25em] text-theme-muted ">Run Date</th>
+ <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-[0.25em] text-theme-muted ">Attendees</th>
+ <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-[0.25em] text-theme-muted ">Verified By</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 dark:divide-gray-800 surface-card">
  {tour.completedRuns && tour.completedRuns.length > 0 ? (
  tour.completedRuns.map((run) => (
  <tr key={run.occurrenceId} className="hover:surface-section dark:hover:surface-card transition-colors">
- <td className="px-8 py-6 text-sm font-black text-theme-primary">
+ <td className="px-8 py-6 text-sm font-bold text-theme-primary">
  {new Date(run.startTimeUtc).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
  </td>
  <td className="px-8 py-6">
- <span className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 rounded-lg text-xs font-black text-primary-light dark:text-primary-dark dark:text-primary-dark ">
+ <span className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 rounded-lg text-xs font-bold text-primary-light dark:text-primary-dark dark:text-primary-dark ">
  <Users className="w-3 h-3" />
  {run.attendeeCount} People
  </span>
  </td>
  <td className="px-8 py-6">
- <div className="flex items-center gap-2 text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+ <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
  <Shield className="w-3.5 h-3.5" />
  System Verified
  </div>
@@ -393,9 +393,9 @@ export default function PortfolioDetailPage() {
  ))
  ) : (
  <tr>
- <td colSpan={3} className="px-8 py-16 text-center text-sm font-bold text-theme-muted italic">
+ <td colSpan={3} className="px-8 py-16 text-center text-sm font-bold text-theme-muted">
  <div className="mb-2">No run history found in the digital vault.</div>
- <div className="text-[10px] uppercase font-black opacity-40">System Record Required</div>
+ <div className="text-[10px] uppercase font-bold opacity-40">System Record Required</div>
  </td>
  </tr>
  )}
@@ -422,7 +422,7 @@ export default function PortfolioDetailPage() {
  <Globe className="w-7 h-7 text-emerald-600" />
  </div>
  <div>
- <h4 className="font-black text-theme-primary text-sm uppercase tracking-wide">Halal Certified</h4>
+ <h4 className="font-bold text-theme-primary text-sm uppercase tracking-wide">Halal Certified</h4>
  <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 mt-1">SafarHub Quality Guaranteed</p>
  </div>
  </div>
@@ -432,31 +432,31 @@ export default function PortfolioDetailPage() {
  {/* Project Snapshot (Summary Box) */}
  <div className="p-8 surface-card border border-theme rounded-[2.5rem] shadow-sm space-y-8 relative overflow-hidden group hover:border-primary-light dark:hover:border-primary-dark/30 transition-all duration-300">
  <div className="absolute top-0 right-0 w-24 h-24 surface-section rounded-full -mr-12 -mt-12" />
- <h3 className="font-black text-theme-primary uppercase tracking-[0.2em] text-[10px] relative">Experience Highlights</h3>
+ <h3 className="font-bold text-theme-primary uppercase tracking-[0.2em] text-[10px] relative">Experience Highlights</h3>
  
  <div className="space-y-6 relative">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2 text-theme-muted">
  <MapPin className="w-4 h-4" />
- <span className="text-[10px] font-black uppercase tracking-widest">Pricing Range</span>
+ <span className="text-[10px] font-bold uppercase tracking-widest">Pricing Range</span>
  </div>
- <span className="font-black text-theme-primary text-sm">{tour.basePrice} {tour.currency}</span>
+ <span className="font-bold text-theme-primary text-sm">{tour.basePrice} {tour.currency}</span>
  </div>
  
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2 text-theme-muted">
  <Users className="w-4 h-4" />
- <span className="text-[10px] font-black uppercase tracking-widest">Capacity Track</span>
+ <span className="text-[10px] font-bold uppercase tracking-widest">Capacity Track</span>
  </div>
- <span className="font-black text-theme-primary text-sm">{tour.minCapacity}-{tour.maxCapacity} Seats</span>
+ <span className="font-bold text-theme-primary text-sm">{tour.minCapacity}-{tour.maxCapacity} Seats</span>
  </div>
 
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2 text-theme-muted">
  <Zap className="w-4 h-4" />
- <span className="text-[10px] font-black uppercase tracking-widest">Premiere Date</span>
+ <span className="text-[10px] font-bold uppercase tracking-widest">Premiere Date</span>
  </div>
- <span className="font-black text-theme-primary text-sm">
+ <span className="font-bold text-theme-primary text-sm">
  {tour.lastPublishedAtUtc ? new Date(tour.lastPublishedAtUtc).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '2024 Premiere'}
  </span>
  </div>
@@ -464,7 +464,7 @@ export default function PortfolioDetailPage() {
  <div className="pt-8 border-t border-theme">
  <button 
  onClick={() => toast.success("Recording interest... Experience inquiry sent.")}
- className="w-full py-5 surface-section hover:surface-card dark:hover:bg-primary-light dark:hover:text-white hover:shadow-xl text-theme-primary font-black text-[10px] uppercase tracking-[0.25em] rounded-2xl transition-all border border-transparent hover:border-theme dark:hover:border-white/5 active:scale-95 flex items-center justify-center gap-2"
+ className="w-full py-5 surface-section hover:surface-card dark:hover:bg-primary-light dark:hover:text-white hover:shadow-xl text-theme-primary font-bold text-[10px] uppercase tracking-[0.25em] rounded-2xl transition-all border border-transparent hover:border-theme dark:hover:border-white/5 active:scale-95 flex items-center justify-center gap-2"
  >
  <MessageSquare className="w-4 h-4" />
  Inquire Experience
@@ -475,16 +475,16 @@ export default function PortfolioDetailPage() {
 
  {/* Technical Blueprint (Tags) */}
  <div className="p-8 surface-card border border-theme rounded-[2.5rem] shadow-sm space-y-6">
- <h3 className="font-black text-theme-primary uppercase tracking-[0.2em] text-[10px]">Experience DNA</h3>
+ <h3 className="font-bold text-theme-primary uppercase tracking-[0.2em] text-[10px]">Experience DNA</h3>
  <div className="flex flex-wrap gap-2.5">
- <div className="px-4 py-2 bg-primary-light/10 dark:bg-primary-dark/14 text-primary-light dark:text-primary-dark dark:text-primary-dark text-[9px] font-black uppercase tracking-widest rounded-xl border border-blue-100 dark:border-blue-900/40">
+ <div className="px-4 py-2 bg-primary-light/10 dark:bg-primary-dark/14 text-primary-light dark:text-primary-dark dark:text-primary-dark text-[9px] font-bold uppercase tracking-widest rounded-xl border border-blue-100 dark:border-blue-900/40">
  {tour.category}
  </div>
- <div className="px-4 py-2 bg-emerald-50 dark:bg-emerald-900/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-black uppercase tracking-widest rounded-xl border border-emerald-100 dark:border-emerald-900/40">
+ <div className="px-4 py-2 bg-emerald-50 dark:bg-emerald-900/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-bold uppercase tracking-widest rounded-xl border border-emerald-100 dark:border-emerald-900/40">
  High Conversion
  </div>
  {tour.instantBook && (
- <div className="px-4 py-2 bg-amber-50 dark:bg-amber-900/10 text-amber-600 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest rounded-xl border border-amber-100 dark:border-amber-900/40">
+ <div className="px-4 py-2 bg-amber-50 dark:bg-amber-900/10 text-amber-600 dark:text-amber-400 text-[9px] font-bold uppercase tracking-widest rounded-xl border border-amber-100 dark:border-amber-900/40">
  Standardized
  </div>
  )}

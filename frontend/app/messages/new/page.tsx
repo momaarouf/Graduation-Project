@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // START NEW MESSAGE
 // ============================================================================
 // LOCATION: /frontend/src/app/messages/new/page.tsx
@@ -16,7 +16,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -96,7 +96,8 @@ const MOCK_TOURS: Record<string, { id: string; title: string }> = {
 // MAIN PAGE
 // ============================================================================
 
-export default function NewMessagePage() {
+// ── Inner component (owns useSearchParams) ────────────────────────────────────
+function NewMessageContent() {
  const router = useRouter()
  const searchParams = useSearchParams()
  
@@ -148,7 +149,7 @@ export default function NewMessagePage() {
  if (!recipient) {
  return (
  <PageLayout>
- <div className="pt-14 sm:pt-16 min-h-screen surface-section">
+ <div className="min-h-screen surface-section">
  <div className="container-safe mx-auto max-w-2xl py-8 sm:py-10">
  <div className="surface-card border border-theme rounded-xl p-8 text-center">
  <User className="w-12 h-12 mx-auto mb-4 text-gray-300 " />
@@ -174,8 +175,8 @@ export default function NewMessagePage() {
 
  return (
  <PageLayout>
- <div className="pt-14 sm:pt-16 min-h-screen surface-section">
- <div className="container-safe mx-auto max-w-3xl py-8 sm:py-10">
+ <div className="min-h-screen surface-section">
+ <div className="mx-auto max-w-3xl py-8 sm:py-10">
  
  {/* Header */}
  <div className="flex items-center gap-4 mb-6">
@@ -377,5 +378,18 @@ export default function NewMessagePage() {
  </div>
  </div>
  </PageLayout>
- )
+  )
+}
+
+// ── Default export: wraps in Suspense (required for useSearchParams in Next 15+) ──
+export default function NewMessagePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen surface-section flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary-light border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <NewMessageContent />
+    </Suspense>
+  )
 }

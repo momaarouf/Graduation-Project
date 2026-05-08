@@ -527,7 +527,7 @@ function CancellationModal({ booking, isOpen, onClose, onConfirm, isLoading = fa
  {booking.currency} {refundAmount.toFixed(2)}
  </span>
  </div>
- <p className="text-xs text-theme-muted mt-2 italic">
+ <p className="text-xs text-theme-muted mt-2">
  {refundMessage}
  </p>
  </div>

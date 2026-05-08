@@ -207,7 +207,7 @@ export default function AccountDetailsForm({ onNext, onBack }: AccountDetailsFor
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
  {/* First Name */}
  <div className="space-y-2">
- <label htmlFor="firstName" className="block text-[10px] font-black uppercase tracking-widest text-theme-muted ml-1">
+ <label htmlFor="firstName" className="block text-[10px] font-bold uppercase tracking-widest text-theme-muted ml-1">
  First Name
  </label>
  <div className="relative group">
@@ -242,7 +242,7 @@ export default function AccountDetailsForm({ onNext, onBack }: AccountDetailsFor
 
  {/* Last Name */}
  <div className="space-y-2">
- <label htmlFor="lastName" className="block text-[10px] font-black uppercase tracking-widest text-theme-muted ml-1">
+ <label htmlFor="lastName" className="block text-[10px] font-bold uppercase tracking-widest text-theme-muted ml-1">
  Last Name
  </label>
  <div className="relative group">
@@ -278,7 +278,7 @@ export default function AccountDetailsForm({ onNext, onBack }: AccountDetailsFor
 
  {/* Email Field */}
  <div className="space-y-2">
- <label htmlFor="email" className="block text-[10px] font-black uppercase tracking-widest text-theme-muted ml-1">
+ <label htmlFor="email" className="block text-[10px] font-bold uppercase tracking-widest text-theme-muted ml-1">
  Email Address
  </label>
  <div className="relative group">
@@ -318,7 +318,7 @@ export default function AccountDetailsForm({ onNext, onBack }: AccountDetailsFor
 
  {/* Password Field */}
  <div className="space-y-2">
- <label htmlFor="password" className="block text-[10px] font-black uppercase tracking-widest text-theme-muted ml-1">
+ <label htmlFor="password" className="block text-[10px] font-bold uppercase tracking-widest text-theme-muted ml-1">
  Password
  </label>
  <div className="relative group">
@@ -361,10 +361,10 @@ export default function AccountDetailsForm({ onNext, onBack }: AccountDetailsFor
  {data.password && (
  <div className="px-1 py-1">
  <div className="flex items-center justify-between mb-1.5">
- <span className={`text-[10px] font-black uppercase tracking-widest ${passwordStrength.color.replace('bg-', 'text-')}`}>
+ <span className={`text-[10px] font-bold uppercase tracking-widest ${passwordStrength.color.replace('bg-', 'text-')}`}>
  {passwordStrength.label} Strength
  </span>
- <span className="text-[10px] font-black text-theme-muted">{passwordStrength.score}%</span>
+ <span className="text-[10px] font-bold text-theme-muted">{passwordStrength.score}%</span>
  </div>
  <div className="h-1 w-full surface-section rounded-full overflow-hidden">
  <motion.div
@@ -379,7 +379,7 @@ export default function AccountDetailsForm({ onNext, onBack }: AccountDetailsFor
 
  {/* Confirm Password */}
  <div className="space-y-2">
- <label htmlFor="confirmPassword" className="block text-[10px] font-black uppercase tracking-widest text-theme-muted ml-1">
+ <label htmlFor="confirmPassword" className="block text-[10px] font-bold uppercase tracking-widest text-theme-muted ml-1">
  Confirm Password
  </label>
  <div className="relative group">
@@ -454,7 +454,7 @@ export default function AccountDetailsForm({ onNext, onBack }: AccountDetailsFor
  <button
  type="button"
  onClick={onBack}
- className="flex-1 py-4 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest surface-card text-theme-secondary border border-theme hover:surface-section dark:hover:surface-section transition-all duration-300"
+ className="flex-1 py-4 px-6 rounded-2xl font-bold text-[10px] uppercase tracking-widest surface-card text-theme-secondary border border-theme hover:surface-section dark:hover:surface-section transition-all duration-300"
  >
  Back
  </button>
@@ -463,7 +463,7 @@ export default function AccountDetailsForm({ onNext, onBack }: AccountDetailsFor
  type="submit"
  disabled={isLoading}
  className={`
- flex-1 py-4 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 group
+ flex-1 py-4 px-6 rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 group
  ${isFormValid() 
  ? 'bg-primary-light text-white shadow-xl shadow-blue-600/20 hover:bg-primary-light-hover' 
  : 'surface-section text-theme-muted cursor-not-allowed'

@@ -41,7 +41,7 @@ const createNumberedIcon = (number: number, color: string = '#2563eb') => {
     return L.divIcon({
       html: renderToString(
         <div className="relative -top-6 -left-3 transition-transform hover:scale-110 active:scale-95 duration-200">
-          <div className="absolute -top-3 -right-3 w-7 h-7 bg-primary-light border-2 border-theme rounded-full flex items-center justify-center text-[11px] font-black text-white shadow-2xl z-[10] ring-4 ring-primary-light dark:ring-primary-dark/20">
+          <div className="absolute -top-3 -right-3 w-7 h-7 bg-primary-light border-2 border-theme rounded-full flex items-center justify-center text-[11px] font-bold text-white shadow-2xl z-[10] ring-4 ring-primary-light dark:ring-primary-dark/20">
             {number}
           </div>
           <MapPin className="w-8 h-8 drop-shadow-lg" style={{ color }} fill="white" />
@@ -212,13 +212,13 @@ export default function RouteBuilderMap({
               }}
             >
               <Popup>
-                <div className="p-2 min-w-[140px]">
-                  <p className="font-black text-[10px] text-primary-light dark:text-primary-dark uppercase tracking-widest mb-1">STOP {idx + 1}</p>
-                  <p className="font-bold text-theme-primary m-0 leading-tight">{stop.title || 'Untitled Stop'}</p>
-                  <p className="text-[10px] text-theme-muted mt-1 line-clamp-2">{stop.location?.name}</p>
+                <div className="p-2.5 min-w-[150px]">
+                  <p className="font-bold text-[10px] text-primary-light dark:text-primary-dark uppercase tracking-[0.1em] mb-1.5">STOP {idx + 1}</p>
+                  <p className="font-semibold text-theme-primary m-0 leading-tight">{stop.title || 'Untitled Stop'}</p>
+                  <p className="text-[10px] text-theme-muted mt-1.5 line-clamp-2 leading-relaxed">{stop.location?.name}</p>
                   <button 
                     onClick={() => onRemoveStop(idx)}
-                    className="mt-3 w-full py-1.5 bg-red-50 hover:bg-red-100 text-[10px] font-black text-red-600 rounded-lg transition-colors flex items-center justify-center gap-1"
+                    className="mt-4 w-full py-2 bg-red-50 hover:bg-red-100 text-[10px] font-bold text-red-600 rounded-lg transition-colors flex items-center justify-center gap-1.5 border border-red-100"
                   >
                     <Trash2 className="w-3.5 h-3.5" /> REMOVE STOP
                   </button>
@@ -236,20 +236,20 @@ export default function RouteBuilderMap({
             <div className="flex items-center gap-3">
               <div className={`w-2.5 h-2.5 rounded-full ${isGeocoding ? 'bg-amber-500 animate-pulse' : 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]'}`} />
               <div className="flex flex-col">
-                <span className="text-[11px] font-black text-theme-primary uppercase tracking-[0.2em] leading-none mb-1">
+                <span className="text-[11px] font-bold text-theme-primary uppercase tracking-wider leading-none mb-1">
                   {isGeocoding ? 'Capturing Point...' : 'Route Builder Active'}
                 </span>
                 <span className="text-[10px] text-theme-muted font-medium">
-                  {path.length} stops mapped • Click map to add A to B to C
+                  {path.length} stops mapped • Click map to build trail
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-primary-light text-white px-4 py-2 rounded-xl shadow-xl border border-primary-light dark:border-primary-dark/50 flex items-center gap-2 pointer-events-auto translate-y-1">
-          <Navigation className="w-4 h-4" />
-          <span className="text-xs font-black uppercase tracking-widest italic">Live Trail</span>
+        <div className="bg-primary-light text-white px-3 py-1.5 rounded-xl shadow-xl border border-primary-light dark:border-primary-dark/50 flex items-center gap-2 pointer-events-auto translate-y-1">
+          <Navigation className="w-3.5 h-3.5" />
+          <span className="text-[10px] font-bold uppercase tracking-wider">Live Trail</span>
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -82,8 +82,8 @@ export default function GuideVerificationSubmitPage() {
 
 
  return (
- <div className="pt-14 sm:pt-16 min-h-[calc(100vh-4rem)] py-10">
- <div className="container-safe mx-auto max-w-2xl px-4">
+ <div className="flex-1 overflow-y-auto chat-scrollbar">
+ <div className="max-w-2xl mx-auto py-8 sm:py-10 px-4 sm:px-6">
  
  {/* Header */}
  <div className="mb-8">

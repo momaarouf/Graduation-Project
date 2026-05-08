@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // ============================================================================
 // TRAVELER BENEFITS PREVIEW - ENHANCED TO MATCH GUIDE WIDTH
@@ -481,7 +481,7 @@ export default function TravelerBenefitsPreview({
  <div className="relative">
  <div className="absolute -top-2 -left-2 text-6xl text-gray-200 font-serif">"</div>
  <div className="relative pl-6">
- <p className="text-sm italic text-theme-secondary mb-3">
+ <p className="text-sm text-theme-secondary mb-3">
  I've saved over $50 on my trips just by reaching Gold tier. The group discount
  stacked on top made our family tour incredibly affordable!
  </p>
@@ -512,7 +512,7 @@ export default function TravelerBenefitsPreview({
  </span>
  </div>
  <button className="
- px-5 py-2.5
+ px-5 py-3 md:py-2.5
  surface-card hover:surface-card
  text-white text-sm font-semibold
  rounded-lg

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -83,12 +83,12 @@ export default function GuideDirectoryPage() {
  >
  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100/50 border border-blue-200 dark:border-blue-800/50 mb-6 font-sans">
  <Globe className="w-4 h-4 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
- <span className="text-[10px] font-black tracking-widest text-blue-700 dark:text-blue-300 uppercase">
+ <span className="text-[10px] font-bold tracking-widest text-blue-700 dark:text-blue-300 uppercase">
  Our Experts
  </span>
  </div>
  
- <h1 className="text-5xl md:text-8xl font-black text-theme-primary mb-6 leading-[0.95] tracking-tight">
+ <h1 className="text-5xl md:text-8xl font-bold text-theme-primary mb-6 leading-[0.95] tracking-tight">
  Meet the People <br /> 
  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-500 to-orange-500 dark:from-blue-400 dark:via-indigo-300 dark:to-orange-400">
  Behind the Stories.
@@ -167,7 +167,7 @@ export default function GuideDirectoryPage() {
  ) : (
  <div className="text-center py-40">
  <Users className="w-16 h-16 text-gray-200 mx-auto mb-6" />
- <h3 className="text-2xl font-black text-theme-primary mb-2">No experts found</h3>
+ <h3 className="text-2xl font-bold text-theme-primary mb-2">No experts found</h3>
  <p className="text-theme-muted ">Try adjusting your filters or search query.</p>
  </div>
  )}
@@ -181,7 +181,7 @@ export default function GuideDirectoryPage() {
  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-transparent to-purple-500/20" />
  <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
  <div className="lg:max-w-xl text-center lg:text-left">
- <h2 className="text-4xl md:text-6xl font-black mb-6 leading-tight">Got local secrets to share?</h2>
+ <h2 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">Got local secrets to share?</h2>
  <p className="text-white/80 mb-10 text-lg leading-relaxed">
  Join our network of elite local guides and start creating authentic experiences for travelers from around the world.
  </p>
@@ -204,7 +204,7 @@ export default function GuideDirectoryPage() {
  <div className="relative lg:w-1/3 flex justify-center">
  <div className="p-4 rounded-3xl surface-card  border border-white/20 shadow-2xl rotate-3">
  <ShieldCheck className="w-24 h-24 text-blue-200 mb-4" />
- <div className="text-xs font-black tracking-widest uppercase opacity-60 mb-2">SafariHub Certified</div>
+ <div className="text-xs font-bold tracking-widest uppercase opacity-60 mb-2">SafariHub Certified</div>
  <div className="text-xl font-bold">Verification Engine</div>
  </div>
  </div>

@@ -62,13 +62,15 @@ public interface TourTemplateRepository extends JpaRepository<TourTemplate, Long
 
     @Query("""
         SELECT t FROM TourTemplate t
+        JOIN FETCH t.guide g
+        JOIN FETCH g.user u
         WHERE t.status = :status
           AND t.deletedAtUtc IS NULL
           AND (:regions IS NULL OR LOWER(t.region) IN :regions)
           AND (:countryCodes IS NULL OR UPPER(t.countryCode) IN :countryCodes)
           AND (:category IS NULL OR LOWER(t.category) = :category)
           AND (:cities IS NULL OR LOWER(t.city) IN :cities)
-          AND (:query IS NULL OR (LOWER(t.title) LIKE :query OR LOWER(t.description) LIKE :query OR LOWER(t.guide.user.fullName) LIKE :query))
+          AND (:query IS NULL OR (LOWER(t.title) LIKE :query OR LOWER(t.description) LIKE :query OR LOWER(u.fullName) LIKE :query))
           AND (:halalFriendly IS NULL OR COALESCE(t.halalFriendly, false) = :halalFriendly)
           AND (:instantBook IS NULL OR COALESCE(t.instantBook, false) = :instantBook)
           AND (:minPrice IS NULL OR t.basePrice >= :minPrice)
@@ -108,13 +110,15 @@ public interface TourTemplateRepository extends JpaRepository<TourTemplate, Long
 
     @Query("""
         SELECT t FROM TourTemplate t
+        JOIN FETCH t.guide g
+        JOIN FETCH g.user u
         WHERE t.status = :status
           AND t.deletedAtUtc IS NULL
           AND (:regions IS NULL OR LOWER(t.region) IN :regions)
           AND (:countryCodes IS NULL OR UPPER(t.countryCode) IN :countryCodes)
           AND (:category IS NULL OR LOWER(t.category) = :category)
           AND (:cities IS NULL OR LOWER(t.city) IN :cities)
-          AND (:query IS NULL OR (LOWER(t.title) LIKE :query OR LOWER(t.description) LIKE :query OR LOWER(t.guide.user.fullName) LIKE :query))
+          AND (:query IS NULL OR (LOWER(t.title) LIKE :query OR LOWER(t.description) LIKE :query OR LOWER(u.fullName) LIKE :query))
           AND (:halalFriendly IS NULL OR COALESCE(t.halalFriendly, false) = :halalFriendly)
           AND (:instantBook IS NULL OR COALESCE(t.instantBook, false) = :instantBook)
           AND (:minPrice IS NULL OR t.basePrice >= :minPrice)
@@ -154,13 +158,15 @@ public interface TourTemplateRepository extends JpaRepository<TourTemplate, Long
 
     @Query("""
         SELECT t FROM TourTemplate t
+        JOIN FETCH t.guide g
+        JOIN FETCH g.user u
         WHERE t.status = :status
           AND t.deletedAtUtc IS NULL
           AND (:regions IS NULL OR LOWER(t.region) IN :regions)
           AND (:countryCodes IS NULL OR UPPER(t.countryCode) IN :countryCodes)
           AND (:category IS NULL OR LOWER(t.category) = :category)
           AND (:cities IS NULL OR LOWER(t.city) IN :cities)
-          AND (:query IS NULL OR (LOWER(t.title) LIKE :query OR LOWER(t.description) LIKE :query OR LOWER(t.guide.user.fullName) LIKE :query))
+          AND (:query IS NULL OR (LOWER(t.title) LIKE :query OR LOWER(t.description) LIKE :query OR LOWER(u.fullName) LIKE :query))
           AND (:halalFriendly IS NULL OR COALESCE(t.halalFriendly, false) = :halalFriendly)
           AND (:instantBook IS NULL OR COALESCE(t.instantBook, false) = :instantBook)
           AND (:minPrice IS NULL OR t.basePrice >= :minPrice)
@@ -243,10 +249,13 @@ public interface TourTemplateRepository extends JpaRepository<TourTemplate, Long
 
     @Query("""
         SELECT t FROM TourTemplate t
+        JOIN FETCH t.guide g
+        JOIN FETCH g.user
         WHERE t.id = :id
           AND t.deletedAtUtc IS NULL
     """)
     Optional<TourTemplate> findByIdNotDeleted(@Param("id") Long id);
+
 
     // ── 1. Bounding Box Search ────────────────────────────────────────────────
     //
@@ -264,6 +273,8 @@ public interface TourTemplateRepository extends JpaRepository<TourTemplate, Long
     // makes this a near-instant range scan rather than a full table scan.
     @Query("""
         SELECT t FROM TourTemplate t
+        JOIN FETCH t.guide g
+        JOIN FETCH g.user u
         WHERE t.status            = 'PUBLISHED'
           AND t.deletedAtUtc      IS NULL
           AND t.meetingLatitude   IS NOT NULL

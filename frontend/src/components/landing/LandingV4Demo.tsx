@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, FormEvent, useEffect, useRef } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring, useMotionTemplate } from 'framer-motion'
@@ -52,7 +52,7 @@ function HeroV4() {
  transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
  className="flex-1 text-center lg:text-left"
  >
- <h1 className="text-5xl sm:text-7xl md:text-8xl font-black text-theme-primary leading-[0.95] tracking-tight mb-8">
+ <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold text-theme-primary leading-[0.95] tracking-tight mb-8">
  Beyond the <br />
  <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 via-amber-500 to-blue-600 dark:from-orange-400 dark:via-amber-200 dark:to-blue-400">
  Tourist Trail.
@@ -81,7 +81,7 @@ function HeroV4() {
  </div>
  <button 
  type="submit" 
- className="bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all text-white px-8 py-4 rounded-[1.8rem] font-black text-lg shadow-xl shadow-orange-600/20"
+ className="bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all text-white px-8 py-4 rounded-[1.8rem] font-bold text-lg shadow-xl shadow-orange-600/20"
  >
  Explore
  </button>
@@ -130,14 +130,14 @@ function PremiumShowcase() {
  ]
  return (
  <section className="py-24 px-4 max-w-7xl mx-auto">
- <h2 className="text-4xl sm:text-6xl font-black text-theme-primary mb-16 tracking-tight">Local's Choice.</h2>
+ <h2 className="text-4xl sm:text-6xl font-bold text-theme-primary mb-16 tracking-tight">Local's Choice.</h2>
  <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
  {tours.map((t) => (
  <div key={t.id} className="relative h-[500px] rounded-[3rem] overflow-hidden border dark:border-theme-strong shadow-xl">
  <Image src={t.image} alt={t.title} fill className="object-cover" />
  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-10 flex flex-col justify-end">
  <span className="text-orange-400 font-bold mb-2 uppercase text-xs tracking-widest">{t.type}</span>
- <h3 className="text-3xl font-black text-white mb-2">{t.title}</h3>
+ <h3 className="text-3xl font-bold text-white mb-2">{t.title}</h3>
  <p className="text-white/60 text-sm">{t.location} • <span className="text-white">{t.price}</span></p>
  </div>
  </div>
@@ -161,7 +161,7 @@ function ProfessionalJourney() {
  <div className="mb-6 p-4 bg-primary-light/10 rounded-2xl text-primary-light dark:text-primary-dark dark:text-orange-400">
  <s.icon className="w-8 h-8" />
  </div>
- <h3 className="text-xl font-black text-theme-primary mb-4">{s.title}</h3>
+ <h3 className="text-xl font-bold text-theme-primary mb-4">{s.title}</h3>
  <p className="text-theme-muted/40 leading-relaxed">{s.desc}</p>
  </div>
  ))}

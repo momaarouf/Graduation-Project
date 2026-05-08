@@ -250,6 +250,13 @@ public class TourTemplate {
     @Column(name = "auto_cancel_if_min_not_met", nullable = false)
     private Boolean autoCancelIfMinNotMet = true;
 
+    @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<TourMedia> media = new java.util.ArrayList<>();
+
+    public java.util.List<TourMedia> getMedia() {
+        return media;
+    }
+
     // ── Timestamps ─────────────────────────────────────────────────────────────
 
     @Column(name = "created_at_utc", nullable = false, updatable = false)

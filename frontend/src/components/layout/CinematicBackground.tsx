@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { ReactNode, useEffect } from 'react'
 import { motion, useMotionValue, useSpring, useMotionTemplate } from 'framer-motion'

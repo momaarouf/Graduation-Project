@@ -1,263 +1,271 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
- Shield,
- Clock,
- CheckCircle,
- XCircle,
- AlertCircle,
- FileText,
- ChevronRight,
- RefreshCw,
- Home,
- Loader2
+  Shield,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  ChevronRight,
+  RefreshCw,
+  Home,
+  Sparkles,
+  Lock,
+  Target,
+  FileText
 } from 'lucide-react'
 import { guideGetVerificationStatus, GuideVerificationStatusResponse } from '@/src/lib/api/auth'
 import toast from 'react-hot-toast'
+import { motion, AnimatePresence } from 'framer-motion'
 
-// ==================== STATUS CARD COMPONENT ====================
+// ============================================================================
+// STATUS CARD
+// ============================================================================
 
-interface StatusCardProps {
- status: 'pending' | 'approved' | 'rejected' | 'not_submitted'
- submittedAt?: string
- verifiedAt?: string
+function StatusCard({ status, submittedAt, verifiedAt }: { status: any, submittedAt?: string, verifiedAt?: string }) {
+  const config: any = {
+    pending: { 
+      icon: Clock, 
+      color: 'text-amber-500', 
+      bg: 'bg-amber-500/10', 
+      border: 'border-amber-500/20', 
+      title: 'Verification Pending', 
+      msg: 'We are currently reviewing your documents. This usually takes 24-48 hours.',
+      action: 'Awaiting Audit' 
+    },
+    approved: { 
+      icon: CheckCircle, 
+      color: 'text-emerald-500', 
+      bg: 'bg-emerald-500/10', 
+      border: 'border-emerald-500/20', 
+      title: 'Identity Verified', 
+      msg: 'Congratulations! Your identity has been verified. You can now create and manage tours.',
+      action: 'Verified' 
+    },
+    rejected: { 
+      icon: XCircle, 
+      color: 'text-red-500', 
+      bg: 'bg-red-500/10', 
+      border: 'border-red-500/20', 
+      title: 'Verification Rejected', 
+      msg: 'Your verification request was rejected. Please review the reason below and resubmit.',
+      action: 'Action Required' 
+    },
+    not_submitted: { 
+      icon: AlertCircle, 
+      color: 'text-blue-500', 
+      bg: 'bg-blue-500/10', 
+      border: 'border-blue-500/20', 
+      title: 'Not Verified', 
+      msg: 'You haven\'t submitted your identity documents yet. Verification is required to host tours.',
+      action: 'Start Now' 
+    }
+  }
+
+  const cfg = config[status] || config.not_submitted
+  const date = status === 'approved' ? verifiedAt : submittedAt
+  const Icon = cfg.icon
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }} 
+      animate={{ opacity: 1, y: 0 }}
+      className={`p-6 sm:p-10 rounded-3xl border-2 shadow-2xl bg-white dark:bg-slate-900/40 backdrop-blur-xl ${cfg.border}`}
+    >
+      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
+        <div className={`p-5 rounded-2xl ${cfg.bg} ${cfg.color} flex-shrink-0 shadow-lg`}>
+          <Icon className="w-10 h-10" />
+        </div>
+        <div className="flex-1 text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
+            <h2 className="text-2xl sm:text-4xl font-bold text-theme-primary tracking-tight">{cfg.title}</h2>
+            <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest ${cfg.bg} ${cfg.color} border-2 ${cfg.border} w-fit mx-auto sm:mx-0 shadow-sm`}>
+              {cfg.action}
+            </span>
+          </div>
+          <p className="text-lg text-theme-secondary leading-relaxed mb-6 font-medium max-w-2xl">{cfg.msg}</p>
+          {date && (
+            <div className="flex items-center justify-center sm:justify-start gap-2.5 text-xs font-bold uppercase tracking-[0.2em] text-theme-muted bg-surface-section w-fit px-4 py-2 rounded-xl border border-theme">
+              <Clock className="w-4 h-4 text-primary-light" />
+              Updated {new Date(date).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })}
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  )
 }
 
-function StatusCard({ status, submittedAt, verifiedAt }: StatusCardProps) {
- const statusConfig = {
- pending: {
- icon: Clock,
- color: 'text-accent-light dark:text-accent-dark dark:text-amber-400',
- bgColor: 'bg-accent-light/10 dark:bg-accent-dark/10 dark:bg-amber-950/30',
- borderColor: 'border-accent-light dark:border-accent-dark dark:border-accent-light dark:border-accent-dark',
- title: 'Verification Pending',
- message: 'Your documents are being reviewed by our team.',
- action: 'Typically takes 24-48 hours'
- },
- approved: {
- icon: CheckCircle,
- color: 'text-success-green dark:text-emerald-400',
- bgColor: 'bg-success-green/10 dark:bg-emerald-950/30',
- borderColor: 'border-success-green dark:border-success-green',
- title: 'Verification Approved',
- message: 'Your identity has been verified successfully!',
- action: 'You can now create tours'
- },
- rejected: {
- icon: XCircle,
- color: 'text-danger-red dark:text-red-400',
- bgColor: 'bg-danger-red/10 dark:bg-red-950/30',
- borderColor: 'border-danger-red dark:border-danger-red',
- title: 'Verification Failed',
- message: 'We couldn\'t verify your documents.',
- action: 'Please resubmit with clear images'
- },
- not_submitted: {
- icon: AlertCircle,
- color: 'text-theme-secondary ',
- bgColor: 'surface-section',
- borderColor: 'border-theme',
- title: 'Not Submitted',
- message: 'You haven\'t submitted your identity documents yet.',
- action: 'Start verification to unlock all features'
- }
- }
-
- const config = statusConfig[status]
- const Icon = config.icon
- 
- // Use verifiedAt if approved, else submittedAt
- const displayDate = status === 'approved' ? verifiedAt : submittedAt
-
- return (
- <div className={`p-6 rounded-xl border ${config.bgColor} ${config.borderColor}`}>
- <div className="flex items-start gap-4">
- <div className={`p-3 rounded-full ${config.bgColor} ${config.color}`}>
- <Icon className="w-6 h-6" />
- </div>
- <div className="flex-1">
- <h2 className={`text-xl font-bold ${config.color} mb-1`}>
- {config.title}
- </h2>
- <p className="text-theme-secondary mb-2">
- {config.message}
- </p>
- {displayDate && (
- <div className="flex items-center gap-2 text-sm text-theme-muted ">
- <Clock className="w-4 h-4" />
- <span>{status === 'approved' ? 'Verified' : 'Submitted'}: {new Date(displayDate).toLocaleDateString()}</span>
- </div>
- )}
- </div>
- </div>
- </div>
- )
-}
-
-// ==================== MAIN PAGE ====================
+// ============================================================================
+// MAIN PAGE
+// ============================================================================
 
 export default function GuideVerificationPage() {
- const router = useRouter()
- const [status, setStatus] = useState<GuideVerificationStatusResponse | null>(null)
- const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
+  const [status, setStatus] = useState<GuideVerificationStatusResponse | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
- const fetchStatus = useCallback(async () => {
- try {
- setIsLoading(true)
- const data = await guideGetVerificationStatus()
- setStatus(data)
- } catch (err) {
- toast.error('Failed to load verification status')
- } finally {
- setIsLoading(false)
- }
- }, [])
+  const fetchStatus = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const data = await guideGetVerificationStatus()
+      setStatus(data)
+    } catch (err) {
+      console.error('Sync error:', err)
+      toast.error('Failed to sync status')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
- useEffect(() => {
- fetchStatus()
- }, [fetchStatus])
+  useEffect(() => { fetchStatus() }, [fetchStatus])
 
- if (isLoading) {
- return (
- <div className="pt-14 sm:pt-16 min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center gap-4">
- <Loader2 className="w-10 h-10 text-primary-light dark:text-primary-dark animate-spin" />
- <p className="text-theme-muted font-medium">Loading status...</p>
- </div>
- )
- }
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center surface-base">
+        <div className="flex flex-col items-center gap-6">
+          <div className="w-16 h-16 border-4 border-primary-light border-t-transparent rounded-full animate-spin shadow-xl" />
+          <p className="text-xs font-black uppercase tracking-[0.3em] text-theme-muted animate-pulse">Synchronizing Identity Status</p>
+        </div>
+      </div>
+    )
+  }
 
- if (!status) return null
+  if (!status) return null
 
- return (
- <div className="pt-14 sm:pt-16 min-h-[calc(100vh-4rem)]">
- <div className="container-safe mx-auto max-w-4xl py-8 sm:py-10 px-4">
- 
- {/* Header */}
- <div className="mb-8">
- <Link
- href="/dashboard/guide"
- className="inline-flex items-center gap-1.5 text-sm text-theme-secondary hover:text-primary-light dark:text-primary-dark dark:hover:text-primary-dark transition-colors mb-4 group"
- >
- <ChevronRight className="w-4 h-4 rotate-180 group-hover:-translate-x-0.5 transition-transform" />
- <span>Back to Dashboard</span>
- </Link>
+  return (
+    <div className="flex-1 overflow-y-auto overflow-x-hidden chat-scrollbar surface-base">
+      <div className="max-w-5xl mx-auto py-10 sm:py-20 px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-16">
+        
+        {/* Header */}
+        <div className="space-y-6">
+          <Link 
+            href="/dashboard/guide" 
+            className="inline-flex items-center gap-2.5 text-theme-muted hover:text-primary-light transition-all group px-4 py-2 surface-section rounded-xl border border-theme shadow-sm"
+          >
+            <ChevronRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" /> 
+            <span className="text-xs font-bold uppercase tracking-widest">Guide Dashboard</span>
+          </Link>
+          <div className="space-y-2">
+            <h1 className="text-4xl sm:text-6xl font-black text-theme-primary tracking-tighter uppercase">
+              Trust & <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">Identity</span>
+            </h1>
+            <p className="text-base sm:text-xl text-theme-secondary font-medium max-w-2xl leading-relaxed">
+              We maintain the highest standards of safety. Your verified status unlocks full access to the marketplace and builds traveler confidence.
+            </p>
+          </div>
+        </div>
 
- <h1 className="text-2xl sm:text-3xl font-bold text-theme-primary mb-2">
- Identity Verification
- </h1>
- <p className="text-theme-secondary ">
- Help us verify your identity to build trust with travelers
- </p>
- </div>
+        <StatusCard status={status.status} submittedAt={status.submittedAt} verifiedAt={status.verifiedAt} />
 
- {/* Status Card */}
- <div className="mb-8">
- <StatusCard
- status={status.status}
- submittedAt={status.submittedAt}
- verifiedAt={status.verifiedAt}
- />
- </div>
+        <AnimatePresence>
+          {status.status === 'rejected' && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              className="p-8 sm:p-12 bg-red-500/5 border-2 border-red-500/20 rounded-[2.5rem] space-y-8 relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/10 blur-[100px] -translate-y-1/2 translate-x-1/2" />
+              <div className="flex items-start gap-6 relative z-10">
+                <div className="p-4 bg-red-500/10 text-red-600 dark:text-red-400 rounded-2xl shadow-inner">
+                  <AlertCircle className="w-8 h-8" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-black text-red-600 dark:text-red-400 uppercase tracking-widest">Rejection Audit Note</h3>
+                  <p className="text-xl text-theme-primary leading-relaxed font-bold italic">
+                    &ldquo;{status.rejectionReason}&rdquo;
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => router.push('/dashboard/guide/verification/submit')} 
+                className="w-full sm:w-auto px-10 py-5 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-[0.2em] rounded-2xl transition-all flex items-center justify-center gap-3 shadow-2xl shadow-red-600/30 active:scale-95 relative z-10"
+              >
+                <RefreshCw className="w-5 h-5" /> Resubmit My Credentials
+              </button>
+            </motion.div>
+          )}
 
- {/* Rejection Message */}
- {status.status === 'rejected' && status.rejectionReason && (
- <div className="mb-8 p-6 bg-danger-red/10 dark:bg-red-950/30 border border-danger-red dark:border-danger-red rounded-xl">
- <div className="flex items-start gap-3">
- <AlertCircle className="w-5 h-5 text-danger-red dark:text-red-400 flex-shrink-0 mt-0.5" />
- <div>
- <h3 className="font-semibold text-red-800 dark:text-red-300 mb-1">
- Rejection Reason
- </h3>
- <p className="text-red-700 dark:text-red-400 mb-4">
- {status.rejectionReason}
- </p>
- <Link
- href="/dashboard/guide/verification/submit"
- className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
- >
- <RefreshCw className="w-4 h-4" />
- Resubmit Documents
- </Link>
- </div>
- </div>
- </div>
- )}
+          {status.status === 'not_submitted' && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              className="p-10 sm:p-20 surface-card border-2 border-primary-light/20 rounded-[3rem] shadow-2xl text-center space-y-10 relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-primary-light/[0.03] to-transparent" />
+              <div className="w-24 h-24 bg-primary-light/10 text-primary-light rounded-[2rem] flex items-center justify-center mx-auto border-2 border-primary-light/10 shadow-inner relative z-10">
+                <Shield className="w-12 h-12" />
+              </div>
+              <div className="space-y-4 relative z-10">
+                <h3 className="text-3xl sm:text-5xl font-black text-theme-primary tracking-tighter uppercase">Join the Verified Network</h3>
+                <p className="text-lg sm:text-xl text-theme-secondary max-w-xl mx-auto leading-relaxed font-medium">
+                  Submit your credentials to unlock professional hosting features and start accepting bookings today.
+                </p>
+              </div>
+              <Link 
+                href="/dashboard/guide/verification/submit" 
+                className="inline-flex items-center gap-3 px-12 py-5 bg-primary-light hover:bg-primary-light-hover text-white font-black uppercase tracking-[0.25em] rounded-2xl transition-all shadow-2xl shadow-primary-light/30 active:scale-95 relative z-10"
+              >
+                Launch Verification Flow <ChevronRight className="w-5 h-5" />
+              </Link>
+            </motion.div>
+          )}
 
- {/* Not Submitted Case */}
- {status.status === 'not_submitted' && (
- <div className="mb-8 p-8 surface-card border border-theme rounded-2xl shadow-sm text-center">
- <Shield className="w-16 h-16 text-blue-100 dark:text-blue-900/40 mx-auto mb-4" />
- <h3 className="text-xl font-bold text-theme-primary mb-2">Unlock Your Potential</h3>
- <p className="text-theme-secondary mb-6 max-w-md mx-auto">
- Verifying your identity is the first step to becoming a trusted guide on our platform. 
- It allows you to create tours, accept bookings, and earn payouts.
- </p>
- <Link
- href="/dashboard/guide/verification/submit"
- className="inline-flex items-center gap-2 px-8 py-3 bg-primary-light hover:bg-primary-light-hover text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl"
- >
- Start Verification
- <ChevronRight className="w-5 h-5" />
- </Link>
- </div>
- )}
+          {status.status !== 'approved' && status.status !== 'not_submitted' && (
+            <div className="p-8 sm:p-12 surface-section border-2 border-theme rounded-[2.5rem] space-y-10 shadow-inner">
+              <h3 className="text-lg font-black text-theme-primary uppercase tracking-[0.3em] flex items-center gap-4">
+                <div className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                Audit Lifecycle
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                {[
+                  { label: 'Document Integrity', msg: 'Our compliance team validates your ID against real-time records.', icon: Target, color: 'text-blue-500' },
+                  { label: 'Security Handshake', msg: 'Encryption protocols ensure your data never leaves our vault.', icon: Lock, color: 'text-indigo-500' },
+                  { label: 'Marketplace Access', msg: 'Once verified, you gain the "Verified Expert" badge on all tours.', icon: Sparkles, color: 'text-amber-500' }
+                ].map((step, idx) => (
+                  <div key={idx} className="space-y-4 group">
+                    <div className={`p-4 bg-surface-base border border-theme rounded-2xl w-fit ${step.color} shadow-sm group-hover:scale-110 transition-transform`}>
+                      <step.icon className="w-6 h-6" />
+                    </div>
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-black text-theme-primary uppercase tracking-widest">{step.label}</h4>
+                      <p className="text-sm text-theme-muted leading-relaxed font-medium">{step.msg}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </AnimatePresence>
 
- {/* What Happens Next */}
- {status.status !== 'approved' && status.status !== 'not_submitted' && (
- <div className="mb-8 p-6 bg-primary-light/10 border border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark rounded-xl">
- <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
- <Clock className="w-5 h-5" />
- What happens next?
- </h3>
- <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
- <li className="flex items-start gap-2">
- <CheckCircle className="w-4 h-4 text-success-green dark:text-emerald-400 flex-shrink-0 mt-0.5" />
- <span>Our team manually reviews your documents (24-48 hours)</span>
- </li>
- <li className="flex items-start gap-2">
- <CheckCircle className="w-4 h-4 text-success-green dark:text-emerald-400 flex-shrink-0 mt-0.5" />
- <span>You'll receive an email notification once verified</span>
- </li>
- <li className="flex items-start gap-2">
- <CheckCircle className="w-4 h-4 text-success-green dark:text-emerald-400 flex-shrink-0 mt-0.5" />
- <span>Once verified, you can create tours and start earning</span>
- </li>
- </ul>
- </div>
- )}
+        {/* Footer Actions */}
+        <div className="flex flex-col sm:flex-row gap-6 pt-6">
+          <button 
+            onClick={() => router.push('/dashboard/guide')} 
+            className={`flex-1 px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-xl ${
+              status.status === 'approved' 
+                ? 'bg-primary-light text-white shadow-primary-light/20 hover:bg-primary-light-hover' 
+                : 'surface-section border-2 border-theme text-theme-secondary hover:text-theme-primary hover:border-primary-light/50'
+            }`}
+          >
+            {status.status === 'approved' ? <Home className="w-5 h-5" /> : <ChevronRight className="w-5 h-5 rotate-180" />}
+            {status.status === 'approved' ? 'Enter Dashboard' : 'Return Home'}
+          </button>
+        </div>
 
- {/* Action Buttons */}
- <div className="flex flex-col sm:flex-row gap-3">
- {status.status === 'approved' ? (
- <button
- onClick={() => router.push('/dashboard/guide')}
- className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
- >
- <Home className="w-5 h-5" />
- Go to Dashboard
- </button>
- ) : (
- <button
- onClick={() => router.push('/dashboard/guide')}
- className="flex-1 px-6 py-3 surface-section text-theme-secondary font-semibold rounded-xl hover:surface-section dark:hover:surface-section transition-colors"
- >
- Back to Dashboard
- </button>
- )}
- </div>
-
- {/* Privacy Note */}
- <div className="mt-8 p-4 surface-section rounded-lg text-center">
- <p className="text-xs text-theme-secondary flex items-center justify-center gap-2">
- <Shield className="w-3 h-3" />
- Your documents are encrypted and only used for verification. 
- Never shared with travelers or third parties.
- </p>
- </div>
- </div>
- </div>
- )
-}
+        {/* Compliance Footer */}
+        <div className="pt-10 text-center border-t border-theme border-dashed">
+          <div className="inline-flex items-center gap-3 px-6 py-2 surface-section rounded-full border border-theme opacity-60">
+            <Shield className="w-4 h-4 text-primary-light" />
+            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-theme-muted">
+              Secure 256-bit AES Encryption Protocol Active
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

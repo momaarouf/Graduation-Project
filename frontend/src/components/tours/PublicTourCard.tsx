@@ -1,4 +1,6 @@
-﻿'use client'
+'use client'
+
+import React from 'react'
 
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -15,6 +17,8 @@ export default function PublicTourCard({ tour, showHint = false }: PublicTourCar
  const router = useRouter()
  const { isFavorited, toggleFavorite } = useWishlist()
  const isLiked = isFavorited(tour.id)
+ const [mounted, setMounted] = React.useState(false)
+ React.useEffect(() => { setMounted(true) }, [])
 
  // Format Logic
  const formatPrice = (amount: number, currency: string) => {
@@ -23,9 +27,11 @@ export default function PublicTourCard({ tour, showHint = false }: PublicTourCar
  return `${amount} ${currency}`
  }
 
- const nextDateFormatted = tour.nextOccurrenceStartUtc 
+ const nextDateFormatted = !mounted 
+ ? "..." 
+ : tour.nextOccurrenceStartUtc 
  ? new Date(tour.nextOccurrenceStartUtc).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
- :"TBA"
+ : "TBA"
 
  const handleBookNow = () => {
  router.push(`/tours/${tour.id}`)

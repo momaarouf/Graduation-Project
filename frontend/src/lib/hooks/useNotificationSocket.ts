@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
 import { getAccessToken } from '../api/client'
+import { getWebSocketUrl } from '../api/websocket-url'
 import { useAuth } from '../contexts/AuthContext'
 import { NotificationResponse } from '../api/notifications'
 
@@ -23,7 +24,7 @@ export const useNotificationSocket = (onNotificationReceived: (notification: Not
 
  const client = new Client({
  // We are reusing the existing /ws-chat endpoint which configures the websocket broker
- webSocketFactory: () => new SockJS(`${process.env.NEXT_PUBLIC_API_URL}/ws-chat`),
+ webSocketFactory: () => new SockJS(`${getWebSocketUrl()}/ws-chat`),
  connectHeaders: {
  Authorization: `Bearer ${getAccessToken()}`
  },

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React from 'react'
 import { motion } from 'framer-motion'
@@ -57,7 +57,7 @@ export default function GuideCard({ guide }: GuideCardProps) {
  {guide.verified && (
  <div className="absolute top-6 right-6 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-light text-white shadow-lg  border border-theme">
  <ShieldCheck className="w-3.5 h-3.5" />
- <span className="text-[10px] font-black uppercase tracking-widest">Verified</span>
+ <span className="text-[10px] font-bold uppercase tracking-widest">Verified</span>
  </div>
  )}
 
@@ -86,13 +86,13 @@ export default function GuideCard({ guide }: GuideCardProps) {
 
  {/* Content */}
  <div className="mb-6 mt-2">
- <h3 className="text-2xl font-black text-theme-primary leading-tight mb-1 group-hover:text-primary-light dark:text-primary-dark dark:group-hover:text-primary-light dark:text-primary-dark transition-colors">
+ <h3 className="text-2xl font-bold text-theme-primary leading-tight mb-1 group-hover:text-primary-light dark:text-primary-dark dark:group-hover:text-primary-light dark:text-primary-dark transition-colors">
  {guide.name}
  </h3>
  <p className="text-xs text-theme-muted font-medium uppercase tracking-[0.1em] mb-3">
  Local Heritage Expert
  </p>
- <p className="text-sm text-theme-secondary line-clamp-2 leading-relaxed italic">
+ <p className="text-sm text-theme-secondary line-clamp-2 leading-relaxed">
 "{guide.tagline || `Sharing the authentic secrets of ${guide.city || 'the region'} with fellow explorers.`}"
  </p>
  </div>
@@ -113,7 +113,7 @@ export default function GuideCard({ guide }: GuideCardProps) {
  <div className="mt-auto pt-6 border-t border-theme dark:border-theme flex items-center justify-between">
  <div className="flex items-center gap-4">
  <div className="text-center">
- <div className="text-lg font-black text-theme-primary leading-none mb-1">
+ <div className="text-lg font-bold text-theme-primary leading-none mb-1">
  {guide.tourCount || 0}
  </div>
  <div className="text-[10px] uppercase font-bold text-theme-muted tracking-tighter">
@@ -122,7 +122,7 @@ export default function GuideCard({ guide }: GuideCardProps) {
  </div>
  <div className="w-px h-6 surface-section " />
  <div className="text-center">
- <div className="text-lg font-black text-theme-primary leading-none mb-1">
+ <div className="text-lg font-bold text-theme-primary leading-none mb-1">
  {guide.totalGuidedTrips || 0}
  </div>
  <div className="text-[10px] uppercase font-bold text-theme-muted tracking-tighter">

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useCallback, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -130,7 +130,7 @@ function ToursPageContent() {
 
  return (
  <PageLayout>      
- <div className="flex flex-row w-full pt-14 sm:pt-16 min-h-screen overflow-visible">
+  <div className="flex flex-row w-full pt-4 sm:pt-8 min-h-screen overflow-visible">
  <DesktopSidebar />
 
  <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-4 sm:py-6">

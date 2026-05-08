@@ -303,7 +303,7 @@ function StepCard({ step, index }: StepCardProps) {
  {step.description}
  </p>
  
- <p className="text-sm text-theme-muted italic">
+ <p className="text-sm text-theme-muted">
  {step.details}
  </p>
  </div>

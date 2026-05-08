@@ -241,6 +241,10 @@ export const rejectBooking = (id: number, data?: { reason: string }) =>
 export const noShowBooking = (id: number, data?: { reason: string }) =>
  apiClient.post<GuideBookingResponse>(`/api/guide/bookings/${id}/no-show`, data).then(r => r.data)
 
+/** Manual check-in by guide */
+export const checkInBooking = (id: number) =>
+ apiClient.post<GuideBookingResponse>(`/api/guide/bookings/${id}/check-in`).then(r => r.data)
+
 /** Scanner flow: check-in via QR token */
 export const checkInByQrToken = (qrToken: string) =>
  apiClient.post<GuideBookingResponse>(`/api/guide/bookings/checkin-by-qr/${qrToken}`).then(r => r.data)

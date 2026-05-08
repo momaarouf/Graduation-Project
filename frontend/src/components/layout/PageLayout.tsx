@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // PAGE LAYOUT COMPONENT - FIXED DOUBLE FOOTER ISSUE
 // ============================================================================
 // LOCATION: /frontend/src/components/layout/PageLayout.tsx
@@ -12,6 +12,7 @@
 'use client'
 
 import { ReactNode } from 'react'
+import { usePathname } from 'next/navigation'
 import Navigation from './Navigation'
 
 interface PageLayoutProps {
@@ -19,19 +20,23 @@ interface PageLayoutProps {
 }
 
 export default function PageLayout({ children }: PageLayoutProps) {
- return (
- <div className="min-h-screen w-full flex flex-col surface-base ">
- {/* Navigation - fixed position, always visible */}
- <Navigation />
+  const pathname = usePathname()
+  const isAuthOrAdmin = pathname?.startsWith('/auth') || pathname?.startsWith('/dashboard/admin')
 
- {/* Main content area - pages add their own padding */}
- <main className="flex-1 w-full">
- {children}
- </main>
+  return (
+    <div className="min-h-screen w-full flex flex-col surface-base">
+      {/* Navigation - fixed position, always visible */}
+      <Navigation />
 
- {/* Footer is rendered globally by the root layout to avoid duplicates */}
- </div>
- )
+      {/* Main content area - Added pt-16 to clear sticky nav on mobile */}
+      {/* Added pb-24 conditionally to make room for MobileBottomNav on mobile */}
+      <main className={`flex-1 w-full pt-16 md:pt-0 ${!isAuthOrAdmin ? 'pb-24 md:pb-0' : ''}`}>
+        {children}
+      </main>
+
+      {/* Footer is rendered globally by the root layout to avoid duplicates */}
+    </div>
+  )
 }
 
 // ============================================================================

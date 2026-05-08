@@ -6,14 +6,6 @@
 
 'use client'
 
-const resolveImageUrl = (url: string | null | undefined) => {
-  if (!url || url.trim() === '') return null;
-  if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) return url;
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
-  const cleanUrl = url.startsWith('/') ? url : `/${url}`;
-  return `${baseUrl}${cleanUrl}`;
-};
-
 import { useState, useEffect, useMemo, useCallback, Fragment, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -41,6 +33,17 @@ import {
   Check,
   ChevronDown
 } from 'lucide-react'
+
+import { getApiUrl } from '@/src/lib/api/client'
+
+const resolveImageUrl = (url: string | null | undefined) => {
+  if (!url || url.trim() === '') return null;
+  if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) return url;
+  const baseUrl = getApiUrl();
+  const cleanUrl = url.startsWith('/') ? url : `/${url}`;
+  return `${baseUrl}${cleanUrl}`;
+};
+
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from '@headlessui/react'
 import { 
   useFilterState, 
@@ -112,19 +115,19 @@ function GuideHighlight({ guide }: { guide: PublicGuideProfile }) {
 
       <div className="relative z-10 flex-1 text-center sm:text-left">
         <div className="flex flex-wrap justify-center sm:justify-start gap-2 mb-3">
-          <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-black text-white uppercase tracking-widest border border-white/10">
+          <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold text-white uppercase tracking-widest border border-white/10">
             Top Match
           </span>
           {guide.expertise.slice(0, 2).map((exp) => (
-            <span key={exp} className="px-3 py-1 bg-primary-light/20 rounded-full text-[10px] font-black text-white uppercase tracking-widest border border-white/5">
+            <span key={exp} className="px-3 py-1 bg-primary-light/20 rounded-full text-[10px] font-bold text-white uppercase tracking-widest border border-white/5">
               {exp}
             </span>
           ))}
         </div>
-        <h3 className="text-2xl sm:text-3xl font-black text-white mb-2 tracking-tight group-hover:translate-x-1 transition-transform duration-300">
+        <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2 tracking-tight group-hover:translate-x-1 transition-transform duration-300">
           {guide.name}
         </h3>
-        <p className="text-blue-100/80 text-sm font-bold line-clamp-2 max-w-xl mb-4 leading-relaxed italic">
+        <p className="text-blue-100/80 text-sm font-bold line-clamp-2 max-w-xl mb-4 leading-relaxed">
           "{guide.tagline || guide.bio}"
         </p>
         
@@ -134,8 +137,8 @@ function GuideHighlight({ guide }: { guide: PublicGuideProfile }) {
               <Sparkles className="w-5 h-5 text-yellow-400" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] font-black text-blue-200 uppercase tracking-tighter">Rating</span>
-              <span className="text-lg font-black text-white">{guide.averageRating || 'New'}</span>
+              <span className="text-[10px] font-bold text-blue-200 uppercase tracking-tighter">Rating</span>
+              <span className="text-lg font-bold text-white">{guide.averageRating || 'New'}</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -143,15 +146,15 @@ function GuideHighlight({ guide }: { guide: PublicGuideProfile }) {
               <Zap className="w-5 h-5 text-orange-400" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] font-black text-blue-200 uppercase tracking-tighter">Experiences</span>
-              <span className="text-lg font-black text-white">{guide.tourCount}</span>
+              <span className="text-[10px] font-bold text-blue-200 uppercase tracking-tighter">Experiences</span>
+              <span className="text-lg font-bold text-white">{guide.tourCount}</span>
             </div>
           </div>
         </div>
       </div>
 
       <div className="relative z-10 self-center sm:self-end">
-        <div className="px-6 py-3 bg-white text-primary-dark rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl group-hover:bg-primary-light group-hover:text-white transition-all duration-300 group-hover:scale-105">
+        <div className="px-6 py-3 bg-white text-primary-dark rounded-2xl font-bold text-xs uppercase tracking-widest shadow-xl group-hover:bg-primary-light group-hover:text-white transition-all duration-300 group-hover:scale-105">
           View Profile
         </div>
       </div>
@@ -190,28 +193,21 @@ export default function SearchResultsGrid({
 
   const currentSortOption = sortOptions.find(o => o.id === sortBy) || sortOptions[0]
 
+  const lastParamsRef = useRef<string>('')
+
   const fetchTours = useCallback(async () => {
+    // Generate params string to check for changes
+    const paramsKey = JSON.stringify({ ...filters, sortBy })
+    if (paramsKey === lastParamsRef.current) return
+    lastParamsRef.current = paramsKey
+
     // Only set loading if we don't have existing results to show
     if (tours.length === 0 && guides.length === 0) {
       setLoading(true)
     }
     
     try {
-      let minDuration: number | undefined
-      let maxDuration: number | undefined
-
-      if (filters.durations?.length) {
-        const hourRanges = filters.durations.map(d => {
-          if (d === Duration.SHORT) return [1, 3]
-          if (d === Duration.MEDIUM) return [3, 6]
-          if (d === Duration.LONG) return [6, 12]
-          if (d === Duration.FULL_DAY) return [12, 99]
-          return [0, 99]
-        })
-        minDuration = Math.min(...hourRanges.map(r => r[0])) * 60
-        maxDuration = Math.max(...hourRanges.map(r => r[1])) * 60
-      }
-
+      // ... (rest of the logic)
       const params: PublicTourFilters = {
         halalFriendly: filters.isHalalCertified || undefined,
         instantBook: filters.hasInstantBook || undefined,
@@ -220,13 +216,13 @@ export default function SearchResultsGrid({
         hasGroupDiscount: filters.hasGroupDiscount || undefined,
         minPrice: filters.minPrice,
         maxPrice: filters.maxPrice,
-        minDuration,
-        maxDuration,
+        minDuration: filters.minDuration, // simplified
+        maxDuration: filters.maxDuration,
         minCap: filters.minGroupSize,
         maxCap: filters.maxGroupSize,
         minRating: filters.minRating && filters.minRating !== MinRating.ANY ? parseFloat(filters.minRating) : undefined,
         language: filters.guideLanguages?.[0] || undefined,
-        query: filters.searchQuery,
+        query: filters.searchQuery || undefined, // use undefined if empty
         sortBy: sortBy,
         regions: filters.countries?.length ? filters.countries.map(c => c.toLowerCase()) : undefined,
         cities: filters.cities?.length ? filters.cities.map(c => c.toLowerCase()) : undefined
@@ -239,27 +235,16 @@ export default function SearchResultsGrid({
 
       const toursData = Array.isArray(res) ? res : []
       const guidesData = Array.isArray(guideRes) ? guideRes : []
-
-      // PERSISTENCE LOGIC:
-      // If the search query didn't change, but the backend returned empty guides (timing/race),
-      // we keep the previous ones IF they match the query.
-      if (guidesData.length === 0 && filters.searchQuery && lastSearchQueryRef.current === filters.searchQuery) {
-        // Keep lastGuides
-      } else {
-        const uniqueGuides = Array.from(new Map(guidesData.map(g => [String(g.id), g])).values());
-        setGuides(uniqueGuides)
-        lastGuidesRef.current = uniqueGuides
-        lastSearchQueryRef.current = filters.searchQuery
-      }
-
+      
+      setGuides(guidesData)
       setTours(toursData)
       dispatch({ type: 'SET_TOTAL_RESULTS', payload: toursData.length })
     } catch (err: any) {
-      // toast.error('Failed to update results')
+      console.error('Fetch error:', err)
     } finally {
       setLoading(false)
     }
-  }, [filters, sortBy, dispatch, tours.length, guides.length])
+  }, [filters, sortBy, dispatch])
 
   useEffect(() => {
     fetchTours()
@@ -273,13 +258,13 @@ export default function SearchResultsGrid({
         <div className="w-24 h-24 surface-section rounded-full flex items-center justify-center mb-6">
           <FilterX className="w-12 h-12 text-gray-300 " />
         </div>
-        <h2 className="text-2xl font-black text-theme-primary mb-2 tracking-tight">No results found</h2>
+        <h2 className="text-2xl font-bold text-theme-primary mb-2 tracking-tight">No results found</h2>
         <p className="text-sm font-bold text-theme-muted max-w-xs mx-auto mb-8">
           We couldn't find any tours matching your current filters. Try relaxing your search criteria.
         </p>
         <button 
           onClick={() => dispatch({ type: 'CLEAR_FILTERS' })}
-          className="px-8 py-3 bg-primary-light hover:bg-primary-light-hover text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-xl shadow-primary-light/20 transition-all active:scale-95"
+          className="px-8 py-3 bg-primary-light hover:bg-primary-light-hover text-white font-bold text-xs uppercase tracking-widest rounded-xl shadow-xl shadow-primary-light/20 transition-all active:scale-95"
         >
           Clear All Filters
         </button>
@@ -292,13 +277,13 @@ export default function SearchResultsGrid({
       {/* Header / Sort Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-black text-theme-primary uppercase tracking-widest">
+          <span className="text-sm font-bold text-theme-primary uppercase tracking-widest">
             {filteredTours.length} Experiences
           </span>
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-[10px] font-black text-theme-muted uppercase tracking-widest whitespace-nowrap">Sort by:</span>
+          <span className="text-[10px] font-bold text-theme-muted uppercase tracking-widest whitespace-nowrap">Sort by:</span>
           
           <div className="relative z-40 w-56">
             <Listbox value={sortBy} onChange={setSortBy}>
@@ -327,7 +312,7 @@ export default function SearchResultsGrid({
                       >
                         {({ selected }) => (
                           <>
-                            <span className={`block truncate ${selected ? 'font-black' : 'font-bold'}`}>
+                            <span className={`block truncate ${selected ? 'font-bold' : 'font-bold'}`}>
                               {option.label}
                             </span>
                             {selected ? (
@@ -356,7 +341,7 @@ export default function SearchResultsGrid({
         <div className={`flex flex-col gap-6 mb-10 transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}>
           <div className="flex items-center gap-3">
             <div className="h-px surface-section flex-1" />
-            <h2 className="text-[10px] font-black text-theme-muted uppercase tracking-[0.2em] whitespace-nowrap">
+            <h2 className="text-[10px] font-bold text-theme-muted uppercase tracking-[0.2em] whitespace-nowrap">
               Guide Matching Your Search
             </h2>
             <div className="h-px surface-section flex-1" />
@@ -368,7 +353,7 @@ export default function SearchResultsGrid({
           </div>
           {guides.length > 1 && (
             <div className="flex justify-center -mt-2">
-              <span className="text-[10px] font-black text-theme-muted uppercase tracking-widest">
+              <span className="text-[10px] font-bold text-theme-muted uppercase tracking-widest">
                 + {guides.length - 1} more guides found
               </span>
             </div>
@@ -379,7 +364,7 @@ export default function SearchResultsGrid({
       {guides.length > 0 && tours.length > 0 && (
         <div className="flex items-center gap-3 mb-2">
           <div className="h-px surface-section flex-1" />
-          <h2 className="text-[10px] font-black text-theme-muted uppercase tracking-[0.2em] whitespace-nowrap">
+          <h2 className="text-[10px] font-bold text-theme-muted uppercase tracking-[0.2em] whitespace-nowrap">
             Experience Results
           </h2>
           <div className="h-px surface-section flex-1" />

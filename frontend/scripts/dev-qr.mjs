@@ -22,8 +22,11 @@ console.log(`\n📱 Scan to open on phone:\n`)
 qrcode.generate(url, { small: true })
 console.log(`\n🔗 ${url}\n`)
 
-// Automatically route backend API calls to the laptop's IP instead of 'localhost'
-process.env.NEXT_PUBLIC_API_URL = `http://${localIp}:8081`;
+// We don't need to inject NEXT_PUBLIC_API_URL anymore.
+// client.ts automatically uses the same IP for the backend, just on port 8081.
+
+// Expose the local IP to the frontend so the navbar QR code can render instantly
+process.env.NEXT_PUBLIC_LOCAL_IP = localIp;
 
 execSync('next dev --hostname 0.0.0.0', { 
   stdio: 'inherit',

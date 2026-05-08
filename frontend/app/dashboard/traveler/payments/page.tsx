@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -145,23 +145,23 @@ export default function TravelerPaymentsPage() {
 
  return (
  <div className="p-4 sm:p-8 max-w-5xl mx-auto space-y-8">
- <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
- <div>
- <h1 className="text-3xl font-black text-theme-primary tracking-tight">Payment Methods</h1>
- <p className="text-theme-muted mt-1 font-medium">Manage your saved cards for faster checkouts.</p>
- </div>
- <button 
- onClick={() => setIsAdding(true)}
- className="flex items-center gap-2 px-6 py-3 bg-primary-light text-white rounded-2xl text-sm font-black hover:bg-primary-light-hover transition-all shadow-lg shadow-primary-light/20 active:scale-95"
- >
- <Plus className="w-5 h-5" />
- Add New Card
- </button>
- </div>
+  <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+  <div className="space-y-1">
+  <h1 className="text-2xl sm:text-4xl font-extrabold text-theme-primary tracking-tight uppercase">Payment <span className="text-primary-light">Methods</span></h1>
+  <p className="text-xs sm:text-sm text-theme-secondary font-medium uppercase tracking-widest opacity-70">Manage your saved cards for faster checkouts.</p>
+  </div>
+  <button 
+  onClick={() => setIsAdding(true)}
+  className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-primary-light text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-primary-light-hover transition-all shadow-2xl shadow-primary-light/30 active:scale-95"
+  >
+  <Plus className="w-5 h-5" />
+  Add New Card
+  </button>
+  </div>
 
- <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
- <div className="lg:col-span-1">
- <div className="bg-gradient-to-br from-gray-900 to-blue-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden">
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+  <div className="lg:col-span-1">
+  <div className="bg-gradient-to-br from-gray-900 to-blue-950 rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden">
  <div className="absolute top-0 right-0 w-32 h-32 bg-primary-light/10 rounded-full blur-3xl -mr-16 -mt-16" />
  <ShieldCheck className="w-10 h-10 text-primary-light dark:text-primary-dark mb-6" />
  <h3 className="text-xl font-bold mb-4">Safe & Secure</h3>
@@ -174,7 +174,7 @@ export default function TravelerPaymentsPage() {
  { icon: RefreshCw, text: 'One-click Checkouts' },
  { icon: History, text: 'Manage Anytime' }
  ].map((item, i) => (
- <li key={i} className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-blue-300">
+ <li key={i} className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-blue-300">
  <item.icon className="w-4 h-4" />
  {item.text}
  </li>
@@ -186,15 +186,15 @@ export default function TravelerPaymentsPage() {
  <div className="lg:col-span-2 space-y-6">
  <AnimatePresence mode="wait">
  {isAdding ? (
- <motion.div
- key="add-form"
- initial={{ opacity: 0, y: 10 }}
- animate={{ opacity: 1, y: 0 }}
- exit={{ opacity: 0, y: -10 }}
- className="surface-card border border-theme rounded-[2.5rem] p-8 shadow-sm"
- >
+  <motion.div
+  key="add-form"
+  initial={{ opacity: 0, y: 10 }}
+  animate={{ opacity: 1, y: 0 }}
+  exit={{ opacity: 0, y: -10 }}
+  className="surface-card border border-theme rounded-3xl sm:rounded-[2.5rem] p-5 sm:p-8 shadow-sm"
+  >
  <div className="flex items-center justify-between mb-8">
- <h2 className="text-xl font-black text-theme-primary">New Method</h2>
+ <h2 className="text-xl font-bold text-theme-primary">New Method</h2>
  <button onClick={() => setIsAdding(false)} className="p-2 hover:surface-section dark:hover:surface-card rounded-full transition-colors text-theme-muted">
  <X className="w-5 h-5" />
  </button>
@@ -202,7 +202,7 @@ export default function TravelerPaymentsPage() {
 
  <form onSubmit={handleAddMethod} className="space-y-6">
  <div className="space-y-2">
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest ml-1">Cardholder Name</label>
+ <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest ml-1">Cardholder Name</label>
  <input
  type="text"
  value={cardholderName}
@@ -213,7 +213,7 @@ export default function TravelerPaymentsPage() {
  </div>
 
  <div className="space-y-2">
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest ml-1">Card Number</label>
+ <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest ml-1">Card Number</label>
  <div className="relative">
  <div className="absolute left-4 top-1/2 -translate-y-1/2">
  <CreditCard className="w-5 h-5 text-theme-muted" />
@@ -231,7 +231,7 @@ export default function TravelerPaymentsPage() {
 
  <div className="grid grid-cols-3 gap-4">
  <div className="space-y-2">
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest ml-1">MM</label>
+ <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest ml-1">MM</label>
  <select
  value={expiryMonth}
  onChange={(e) => setExpiryMonth(e.target.value)}
@@ -244,7 +244,7 @@ export default function TravelerPaymentsPage() {
  </select>
  </div>
  <div className="space-y-2">
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest ml-1">YYYY</label>
+ <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest ml-1">YYYY</label>
  <select
  value={expiryYear}
  onChange={(e) => setExpiryYear(e.target.value)}
@@ -257,7 +257,7 @@ export default function TravelerPaymentsPage() {
  </select>
  </div>
  <div className="space-y-2">
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest ml-1">CVV</label>
+ <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest ml-1">CVV</label>
  <input
  type="password"
  value={cvv}
@@ -286,7 +286,7 @@ export default function TravelerPaymentsPage() {
  <button
  type="submit"
  disabled={isSaving}
- className="w-full py-4.5 surface-base text-white rounded-2xl font-black text-base transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+ className="w-full py-4.5 surface-base text-white rounded-2xl font-bold text-base transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
  >
  {isSaving ? <RefreshCw className="w-5 h-5 animate-spin mx-auto" /> : 'Save Payment Method'}
  </button>
@@ -306,62 +306,62 @@ export default function TravelerPaymentsPage() {
  </div>
  ) : methods.length > 0 ? (
  methods.map((method) => (
- <div 
- key={method.id}
- className="group surface-card border border-theme rounded-3xl p-6 flex items-center justify-between hover:shadow-lg hover:border-primary-light dark:hover:border-primary-dark/30 transition-all"
- >
- <div className="flex items-center gap-5">
- <div className="w-14 h-14 surface-section rounded-2xl flex items-center justify-center text-theme-muted group-hover:bg-primary-light/10 dark:group-hover:surface-base group-hover:text-primary-light dark:text-primary-dark transition-colors">
- <CreditCard className="w-7 h-7" />
- </div>
- <div className="flex-1 min-w-0">
- <div className="flex items-center gap-2">
- <h4 className="font-black text-theme-primary uppercase tracking-tight">
- {method.brand} •••• {method.last4}
- </h4>
- {method.isDefault ? (
- <span className="px-2 py-0.5 bg-primary-light/20 dark:bg-primary-dark/20 text-primary-light dark:text-primary-dark dark:text-primary-dark text-[8px] font-black uppercase rounded-full">Default</span>
- ) : (
- <button 
- onClick={() => handleSetDefault(method.id)}
- className="px-2 py-0.5 surface-section text-theme-muted hover:text-primary-light dark:text-primary-dark text-[8px] font-black uppercase rounded-full transition-colors"
- >
- Set as Default
- </button>
- )}
- </div>
- <p className="text-[10px] font-bold text-theme-muted uppercase mt-0.5">
- {method.cardholderName || 'John Doe'}
- </p>
- <p className="text-[10px] text-theme-muted font-medium">
- Expires {method.expiryMonth}/{method.expiryYear}
- </p>
- </div>
- </div>
- <button 
- onClick={() => handleDelete(method.id)}
- className="p-3 text-gray-300 hover:text-danger-red hover:bg-danger-red/10 dark:hover:bg-red-950/20 rounded-xl transition-all opacity-0 group-hover:opacity-100"
- >
- <Trash2 className="w-5 h-5" />
- </button>
- </div>
+  <div 
+  key={method.id}
+  className="group surface-card border border-theme rounded-2xl sm:rounded-3xl p-4 sm:p-6 flex items-center justify-between hover:shadow-lg hover:border-primary-light dark:hover:border-primary-dark/30 transition-all"
+  >
+  <div className="flex items-center gap-3 sm:gap-5 min-w-0">
+  <div className="w-12 h-12 sm:w-14 sm:h-14 surface-section rounded-xl sm:rounded-2xl flex items-center justify-center text-theme-muted group-hover:bg-primary-light/10 dark:group-hover:surface-base group-hover:text-primary-light dark:text-primary-dark transition-colors shrink-0">
+  <CreditCard className="w-6 h-6 sm:w-7 sm:h-7" />
+  </div>
+  <div className="min-w-0">
+  <div className="flex flex-wrap items-center gap-2">
+  <h4 className="font-extrabold text-[13px] sm:text-base text-theme-primary uppercase tracking-tight truncate">
+  {method.brand} •••• {method.last4}
+  </h4>
+  {method.isDefault ? (
+  <span className="px-2 py-0.5 bg-primary-light/20 dark:bg-primary-dark/20 text-primary-light dark:text-primary-dark text-[8px] font-bold uppercase rounded-full">Default</span>
+  ) : (
+  <button 
+  onClick={() => handleSetDefault(method.id)}
+  className="px-2 py-0.5 surface-section text-theme-muted hover:text-primary-light text-[8px] font-bold uppercase rounded-full transition-colors border border-theme"
+  >
+  Set Default
+  </button>
+  )}
+  </div>
+  <p className="text-[10px] font-extrabold text-theme-muted uppercase mt-0.5 truncate">
+  {method.cardholderName || 'John Doe'}
+  </p>
+  <p className="text-[10px] text-theme-muted font-bold opacity-60 uppercase tracking-widest">
+  Exp {method.expiryMonth}/{method.expiryYear}
+  </p>
+  </div>
+  </div>
+  <button 
+  onClick={() => handleDelete(method.id)}
+  className="p-2.5 sm:p-3 text-theme-muted hover:text-danger-red hover:bg-danger-red/10 rounded-xl transition-all opacity-100 lg:opacity-0 lg:group-hover:opacity-100 shrink-0"
+  >
+  <Trash2 className="w-4 h-4 sm:w-5 h-5" />
+  </button>
+  </div>
  ))
  ) : (
- <div className="surface-section border-2 border-dashed border-theme rounded-[2.5rem] p-16 text-center">
- <div className="w-16 h-16 surface-card rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
- <CreditCard className="w-8 h-8 text-gray-300" />
- </div>
- <h3 className="text-lg font-bold text-theme-primary mb-2">No Saved Cards</h3>
- <p className="text-sm text-theme-muted max-w-xs mx-auto mb-8 font-medium">
- Save a payment method to speed up your next tour booking experience.
- </p>
- <button 
- onClick={() => setIsAdding(true)}
- className="px-8 py-3 surface-base text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:scale-[1.05] transition-transform"
- >
- Add First Card
- </button>
- </div>
+  <div className="surface-section border-2 border-dashed border-theme rounded-3xl sm:rounded-[2.5rem] p-10 sm:p-16 text-center">
+  <div className="w-16 h-16 surface-card rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-theme">
+  <CreditCard className="w-8 h-8 text-theme-muted opacity-30" />
+  </div>
+  <h3 className="text-lg font-extrabold text-theme-primary mb-2 uppercase tracking-tight">No Saved Cards</h3>
+  <p className="text-[10px] text-theme-muted max-w-xs mx-auto mb-8 font-black uppercase tracking-widest opacity-70 leading-relaxed">
+  Save a payment method to speed up your next tour booking experience.
+  </p>
+  <button 
+  onClick={() => setIsAdding(true)}
+  className="w-full sm:w-auto px-10 py-4 bg-primary-light text-white rounded-2xl text-[11px] font-extrabold uppercase tracking-[0.2em] shadow-2xl shadow-primary-light/30 transition-all hover:scale-[1.05] active:scale-95"
+  >
+  Add First Card
+  </button>
+  </div>
  )}
  </motion.div>
  )}

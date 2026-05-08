@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // GUIDE PROMO CODE FACTORY - CARD 20
 // ============================================================================
 // LOCATION: /frontend/src/app/dashboard/guide/promos/page.tsx
@@ -1322,7 +1322,7 @@ function CreatePromoModal({ isOpen, onClose, onCreate }: CreatePromoModalProps) 
  onChange={(date) => setFormData({ ...formData, endDate: date })}
  />
  ) : (
- <div className="h-[38px] flex items-center px-3 text-xs text-theme-muted italic">
+ <div className="h-[38px] flex items-center px-3 text-xs text-theme-muted">
  No expiration
  </div>
  )}

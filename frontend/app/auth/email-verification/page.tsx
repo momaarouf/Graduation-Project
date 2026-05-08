@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // EMAIL VERIFICATION PAGE
 // ============================================================================
 // LOCATION: /frontend/app/auth/email-verification/page.tsx
@@ -44,7 +44,7 @@ const STATISTICS = [
 
 export default function EmailVerificationPage() {
  return (
- <div className="container-safe mx-auto max-w-6xl pt-20 sm:pt-24 pb-8 sm:pb-12">
+ <div className="container-safe mx-auto max-w-6xl pt-4 pb-8 sm:py-12">
  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
  {/* Left Column - Form */}
  <div className="space-y-6">

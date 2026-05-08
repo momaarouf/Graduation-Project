@@ -56,6 +56,10 @@ public class TourMedia {
     @Column(length = 255)
     private String caption;
 
+    public TourMediaType getMediaType() {
+        return mediaType;
+    }
+
     // ── Timestamps ─────────────────────────────────────────────────────────────
 
     @Column(name = "created_at_utc", nullable = false, updatable = false)

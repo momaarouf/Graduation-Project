@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // ============================================================================
 // GUIDE ONBOARDING PREVIEW - SHOW VERIFICATION STEPS & BENEFITS

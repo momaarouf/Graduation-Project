@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
@@ -111,7 +111,7 @@ const StatMiniCard = ({ icon: Icon, label, value, color }: { icon: any, label: s
  </div>
  <span className="text-xs font-bold text-theme-muted uppercase tracking-widest">{label}</span>
  </div>
- <div className="text-xl font-black text-theme-primary">{value}</div>
+ <div className="text-xl font-bold text-theme-primary">{value}</div>
  </div>
  )
 }
@@ -252,11 +252,11 @@ export default function TourSummaryPage({ params }: { params: Promise<{ id: stri
 
  {/* Right: Info & Primary Actions */}
  <div className="flex-1 min-w-0">
- <div className="flex items-center gap-2 text-primary-light dark:text-primary-dark dark:text-primary-dark font-black text-xs uppercase tracking-widest mb-2">
+ <div className="flex items-center gap-2 text-primary-light dark:text-primary-dark dark:text-primary-dark font-bold text-xs uppercase tracking-widest mb-2">
  <Globe className="w-3 h-3" />
  {tour.category} Tour
  </div>
- <h1 className="text-3xl sm:text-4xl font-black text-theme-primary mb-4 tracking-tight leading-tight">
+ <h1 className="text-3xl sm:text-4xl font-bold text-theme-primary mb-4 tracking-tight leading-tight">
  {tour.title}
  </h1>
 
@@ -298,7 +298,7 @@ export default function TourSummaryPage({ params }: { params: Promise<{ id: stri
  <button
  disabled={isActionLoading}
  onClick={() => handleAction('submit')}
- className="flex-1 py-4 bg-primary-light hover:bg-primary-light-hover text-white font-black rounded-2xl shadow-xl shadow-primary-light/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+ className="flex-1 py-4 bg-primary-light hover:bg-primary-light-hover text-white font-bold rounded-2xl shadow-xl shadow-primary-light/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
  >
  {isActionLoading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
  Submit for Admin Review
@@ -346,7 +346,7 @@ export default function TourSummaryPage({ params }: { params: Promise<{ id: stri
  <div className="flex-1 flex flex-col sm:flex-row gap-3">
  <Link
  href={`/dashboard/guide/tours/${tour.id}/occurrences`}
- className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl transition-all shadow-xl shadow-success-green/20 flex items-center justify-center gap-2"
+ className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl transition-all shadow-xl shadow-success-green/20 flex items-center justify-center gap-2"
  >
  <Calendar className="w-5 h-5" />
  Manage Dates & Schedule
@@ -366,7 +366,7 @@ export default function TourSummaryPage({ params }: { params: Promise<{ id: stri
  <button
  disabled={isActionLoading}
  onClick={() => handleAction('resume')}
- className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl transition-all shadow-xl shadow-success-green/20 flex items-center justify-center gap-2"
+ className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl transition-all shadow-xl shadow-success-green/20 flex items-center justify-center gap-2"
  >
  <Zap className="w-5 h-5" />
  Resume Listing
@@ -392,7 +392,7 @@ export default function TourSummaryPage({ params }: { params: Promise<{ id: stri
  
  {/* General Description */}
  <div className="surface-card border border-theme rounded-3xl p-6 sm:p-8 shadow-sm">
- <h2 className="text-xl font-black text-theme-primary mb-4 flex items-center gap-2 uppercase tracking-tight">
+ <h2 className="text-xl font-bold text-theme-primary mb-4 flex items-center gap-2 uppercase tracking-tight">
  <BarChart3 className="w-5 h-5 text-primary-light dark:text-primary-dark" />
  Description Overview
  </h2>
@@ -404,7 +404,7 @@ export default function TourSummaryPage({ params }: { params: Promise<{ id: stri
  
  <div className="mt-8 pt-6 border-t border-theme flex items-center justify-between">
  <div className="text-xs font-bold text-theme-muted uppercase tracking-widest">Pricing Structure</div>
- <div className="text-sm font-black text-theme-primary truncate max-w-[200px]">
+ <div className="text-sm font-bold text-theme-primary truncate max-w-[200px]">
  {tour.basePrice} {tour.currency} per person base rate
  </div>
  </div>
@@ -412,7 +412,7 @@ export default function TourSummaryPage({ params }: { params: Promise<{ id: stri
 
  {/* Booking Options */}
  <div className="surface-card border border-theme rounded-3xl p-6 sm:p-8 shadow-sm">
- <h2 className="text-xl font-black text-theme-primary mb-6 uppercase tracking-tight">
+ <h2 className="text-xl font-bold text-theme-primary mb-6 uppercase tracking-tight">
  Booking Configuration
  </h2>
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -468,7 +468,7 @@ export default function TourSummaryPage({ params }: { params: Promise<{ id: stri
  <div className="space-y-8">
  {/* Meeting Point Card */}
  <div className="surface-card border border-theme rounded-3xl p-6 shadow-sm">
- <h3 className="text-sm font-black text-theme-primary mb-4 uppercase tracking-widest flex items-center justify-between">
+ <h3 className="text-sm font-bold text-theme-primary mb-4 uppercase tracking-widest flex items-center justify-between">
  Meeting Point
  <MapPin className="w-4 h-4 text-theme-muted" />
  </h3>
@@ -486,7 +486,7 @@ export default function TourSummaryPage({ params }: { params: Promise<{ id: stri
 
  {/* Danger Zone */}
  <div className="bg-danger-red/10/50 dark:bg-red-950/10 border border-danger-red dark:border-danger-red/30 rounded-3xl p-6">
- <h3 className="text-sm font-black text-red-700 dark:text-red-400 mb-4 uppercase tracking-widest">
+ <h3 className="text-sm font-bold text-red-700 dark:text-red-400 mb-4 uppercase tracking-widest">
  Danger Zone
  </h3>
  <div className="space-y-3">
@@ -494,7 +494,7 @@ export default function TourSummaryPage({ params }: { params: Promise<{ id: stri
  onClick={() => handleAction('archive')}
  className="w-full flex items-center justify-between p-3 rounded-2xl surface-card border border-danger-red dark:border-danger-red/50 hover:bg-danger-red/10 dark:hover:bg-red-900/20 text-danger-red dark:text-red-400 transition-colors shadow-sm"
  >
- <span className="text-xs font-black uppercase">Archive Tour</span>
+ <span className="text-xs font-bold uppercase">Archive Tour</span>
  <Trash2 className="w-4 h-4" />
  </button>
  <p className="text-[10px] text-danger-red/60 dark:text-red-400/60 font-medium px-2">

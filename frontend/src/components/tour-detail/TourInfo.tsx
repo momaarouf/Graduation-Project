@@ -39,7 +39,7 @@ import dynamic from 'next/dynamic'
 // Dynamically import Map component with SSR disabled for Leaflet support
 const TourMap = dynamic(() => import('./TourMap'), { 
  ssr: false,
- loading: () => <div className="h-[300px] surface-section rounded-xl animate-pulse flex items-center justify-center font-black text-theme-muted">LOADING MAP...</div>
+ loading: () => <div className="h-[300px] surface-section rounded-xl animate-pulse flex items-center justify-center font-bold text-theme-muted">LOADING MAP...</div>
 })
 import type { TourInfoProps } from '@/src/types/tour-detail.types'
 import { parseList, parseItinerary } from '@/src/lib/utils/tour-parser'
@@ -136,7 +136,7 @@ export default function TourInfo({
  <Globe className="w-4 h-4 text-theme-muted " />
  <div className="flex gap-2.5">
  {languageList.map((lang, i) => (
- <span key={i} className="text-[10px] font-black uppercase tracking-[0.15em] text-theme-primary ">
+ <span key={i} className="text-[10px] font-bold uppercase tracking-[0.15em] text-theme-primary ">
  {typeof lang === 'string' ? lang : (lang.language || JSON.stringify(lang))}
  </span>
  ))}
@@ -212,14 +212,14 @@ export default function TourInfo({
  )}
 
  {/* Real Leaflet Map */}
- <TourMap 
- meetingPoint={{
- lat: meetingPoint.lat,
- lng: meetingPoint.lng,
- name: meetingPoint.name,
- address: meetingPoint.address
- }}
- route={route && route.length > 0 ? route : itineraryList.filter(it => it.location?.lat).map(it => ({
+  <TourMap 
+  meetingPoint={meetingPoint ? {
+  lat: meetingPoint.lat,
+  lng: meetingPoint.lng,
+  name: meetingPoint.name,
+  address: meetingPoint.address
+  } : undefined}
+  route={route && route.length > 0 ? route : (itineraryList || []).filter(it => it.location?.lat).map(it => ({
  id: it.id,
  latitude: it.location.lat,
  longitude: it.location.lng,
@@ -269,7 +269,7 @@ export default function TourInfo({
  )}
 
  {/* Order number - Standard Circle */}
- <div className="relative z-10 w-10 h-10 rounded-lg bg-primary-light dark:bg-primary-dark text-white text-sm font-black flex items-center justify-center flex-shrink-0 shadow-md">
+ <div className="relative z-10 w-10 h-10 rounded-lg bg-primary-light dark:bg-primary-dark text-white text-sm font-bold flex items-center justify-center flex-shrink-0 shadow-md">
  {index + 1}
  </div>
 

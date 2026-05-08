@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
@@ -66,7 +66,7 @@ function PathCard({
  <motion.div
  whileHover={{ y: -4 }}
  className={`
- relative flex flex-col p-8 rounded-3xl transition-all duration-300
+ relative flex flex-col p-6 sm:p-8 rounded-[2rem] sm:rounded-3xl transition-all duration-300
  border  h-full
  ${isSelected
  ? 'bg-primary-light/5 border-primary-light dark:border-primary-dark shadow-xl shadow-blue-600/10'
@@ -76,7 +76,7 @@ function PathCard({
  >
  {isPopular && (
  <div className="absolute -top-3 left-6 z-20">
- <div className="px-3 py-1 bg-amber-500 text-white text-[10px] font-black rounded-full shadow-lg flex items-center gap-1 uppercase tracking-widest">
+ <div className="px-3 py-1 bg-amber-500 text-white text-[10px] font-bold rounded-full shadow-lg flex items-center gap-1 uppercase tracking-widest">
  <Sparkles className="w-3 h-3" />
  Most Popular
  </div>
@@ -94,7 +94,7 @@ function PathCard({
  <Icon size={28} strokeWidth={1.5} />
  </div>
 
- <h3 className="text-2xl font-black text-theme-primary mb-2 tracking-tight">
+ <h3 className="text-2xl font-bold text-theme-primary mb-2 tracking-tight">
  {title}
  </h3>
  
@@ -104,7 +104,7 @@ function PathCard({
 
  <ul className="mb-10 space-y-3">
  {features.map((feature, i) => (
- <li key={i} className="flex items-center gap-3 text-[10px] font-black text-theme-secondary uppercase tracking-widest">
+ <li key={i} className="flex items-center gap-3 text-[10px] font-bold text-theme-secondary uppercase tracking-widest">
  <div className="w-1.5 h-1.5 rounded-full bg-primary-light" />
  {feature}
  </li>
@@ -116,7 +116,7 @@ function PathCard({
  <button
  onClick={onSelect}
  className={`
- w-full py-4 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2
+ w-full py-4 px-6 rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2
  ${isSelected 
  ? 'bg-primary-light text-white shadow-lg' 
  : 'surface-base text-white hover:opacity-90'
@@ -129,14 +129,14 @@ function PathCard({
 
  <div className="relative py-2 flex items-center gap-3">
  <div className="flex-1 h-px surface-section" />
- <span className="text-[10px] text-theme-muted font-black uppercase tracking-widest">or</span>
+ <span className="text-[10px] text-theme-muted font-bold uppercase tracking-widest">or</span>
  <div className="flex-1 h-px surface-section" />
  </div>
 
  <button
  onClick={onGoogleSelect}
  disabled={isGoogleLoading}
- className="w-full py-3.5 px-6 rounded-2xl font-black text-[10px] uppercase tracking-widest surface-card text-theme-secondary border border-theme hover:surface-section dark:hover:surface-section transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50"
+ className="w-full py-3.5 px-6 rounded-2xl font-bold text-[10px] uppercase tracking-widest surface-card text-theme-secondary border border-theme hover:surface-section dark:hover:surface-section transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50"
  >
  {isGoogleLoading ? (
  <div className="w-4 h-4 border-2 border-theme-strong border-t-transparent rounded-full animate-spin" />
@@ -219,4 +219,4 @@ export const SignupPathSelector = ({
 // Keeping a default export for safety if anything expects it, 
 // though we use named export in page.tsx
 export default SignupPathSelector;
-
+

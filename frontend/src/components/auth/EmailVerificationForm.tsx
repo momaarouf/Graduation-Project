@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -97,7 +97,7 @@ export default function EmailVerificationForm({ emailPrefill, onSuccess }: Props
  // Success state
  if (isVerified) {
  return (
- <div className="surface-card rounded-2xl border border-theme shadow-xl p-8 text-center space-y-4">
+ <div className="w-full sm:surface-card rounded-[2rem] sm:border border-theme sm:shadow-xl p-4 sm:p-8 text-center space-y-4">
  <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto">
  <CheckCircle className="w-8 h-8 text-success-green dark:text-emerald-400" />
  </div>
@@ -110,7 +110,7 @@ export default function EmailVerificationForm({ emailPrefill, onSuccess }: Props
  // Step 1: enter email
  if (step === 'email') {
  return (
- <div className="surface-card rounded-2xl border border-theme shadow-xl p-6 sm:p-8 space-y-6">
+ <div className="w-full sm:surface-card rounded-[2rem] sm:border border-theme sm:shadow-xl p-4 sm:p-8 space-y-6">
  <div className="text-center space-y-2">
  <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto">
  <Mail className="w-7 h-7 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
@@ -163,7 +163,7 @@ export default function EmailVerificationForm({ emailPrefill, onSuccess }: Props
 
  // Step 2: enter 6-digit code
  return (
- <div className="surface-card rounded-2xl border border-theme shadow-xl p-6 sm:p-8 space-y-8">
+ <div className="w-full sm:surface-card rounded-[2rem] sm:border border-theme sm:shadow-xl p-4 sm:p-8 space-y-8">
  <div className="text-center space-y-2">
  <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto">
  <Mail className="w-7 h-7 text-success-green dark:text-emerald-400" />

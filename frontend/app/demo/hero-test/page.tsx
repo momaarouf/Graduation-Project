@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import Navigation from '@/src/components/layout/Navigation'
 import { LandingV3 } from '@/src/components/landing/LandingV3'
@@ -13,7 +13,7 @@ export default function HeroTestPage() {
  {/* NEW HERO SECTION */}
  <section className="relative">
  <div className="bg-orange-600/10 dark:bg-orange-500/5 py-4 px-8 border-b dark:border-theme-strong text-center">
- <span className="text-sm font-black uppercase tracking-[0.3em] text-orange-600 dark:text-orange-400">
+ <span className="text-sm font-bold uppercase tracking-[0.3em] text-orange-600 dark:text-orange-400">
  Variant A: New Interactive Globe Hero
  </span>
  </div>
@@ -28,7 +28,7 @@ export default function HeroTestPage() {
  {/* OLD HERO SECTION */}
  <section className="relative">
  <div className="bg-primary-light/10 dark:bg-primary-light/5 py-4 px-8 border-y dark:border-theme-strong text-center">
- <span className="text-sm font-black uppercase tracking-[0.3em] text-primary-light dark:text-primary-dark dark:text-primary-dark ">
+ <span className="text-sm font-bold uppercase tracking-[0.3em] text-primary-light dark:text-primary-dark dark:text-primary-dark ">
  Variant B: Original Cinematic Hero
  </span>
  </div>

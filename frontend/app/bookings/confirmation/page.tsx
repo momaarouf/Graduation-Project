@@ -15,7 +15,7 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
@@ -51,7 +51,8 @@ import { usePaymentCountdown } from '@/src/hooks/usePaymentCountdown'
 import { useRouter } from 'next/navigation'
 import { getTravelerBooking } from '@/src/lib/api/tours'
 
-export default function BookingConfirmationPage() {
+// ── Inner component (owns useSearchParams) ────────────────────────────────────
+function BookingConfirmationContent() {
 
  const router = useRouter()
  const searchParams = useSearchParams()
@@ -321,7 +322,7 @@ Thank you for choosing TravelMarket!
  if (isLoading) {
  return (
  <PageLayout>
- <div className="pt-14 sm:pt-16 min-h-screen surface-section flex items-center justify-center">
+ <div className="min-h-[60vh] surface-section flex items-center justify-center">
  <Loader2 className="w-8 h-8 animate-spin text-primary-light dark:text-primary-dark" />
  </div>
  </PageLayout>
@@ -343,7 +344,7 @@ Thank you for choosing TravelMarket!
  </p>
  <Link
  href="/dashboard/traveler/bookings"
- className="inline-flex items-center gap-2 px-6 py-3 bg-primary-light hover:bg-primary-light-hover text-white font-medium rounded-lg transition-colors"
+ className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-light hover:bg-primary-light-hover text-white font-medium rounded-xl transition-colors min-h-[48px]"
  >
  View My Bookings
  <ChevronRight className="w-4 h-4" />
@@ -389,7 +390,7 @@ Thank you for choosing TravelMarket!
  )}
  </div>
  
- <h1 className="text-2xl sm:text-4xl font-black text-theme-primary mb-2 tracking-tight">
+ <h1 className="text-xl sm:text-3xl font-bold text-theme-primary mb-2 tracking-tight">
  {booking.status === BookingStatus.PendingPayment 
  ? 'Action Required: Complete Payment' 
  : isPending 
@@ -406,11 +407,11 @@ Thank you for choosing TravelMarket!
  <div className="surface-card border border-primary-light/20 dark:border-primary-dark/20 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl shadow-blue-500/10">
  <div className="flex items-center justify-between mb-6">
  <div>
- <h3 className="text-lg font-black text-theme-primary uppercase tracking-tight">Checkout</h3>
+ <h3 className="text-lg font-bold text-theme-primary uppercase tracking-tight">Checkout</h3>
  <div className="flex items-center gap-2 mt-1">
  {/* Countdown pill — reads from backend paymentDeadlineUtc (15-min window) */}
  {countdown && !countdown.isExpired && (
- <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+ <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
  countdown.urgency === 'critical'
  ? 'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 animate-pulse'
  : countdown.urgency === 'warning'
@@ -421,7 +422,7 @@ Thank you for choosing TravelMarket!
  </div>
  )}
  {countdown?.isExpired && (
- <div className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
+ <div className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
  Expired
  </div>
  )}
@@ -532,7 +533,7 @@ Thank you for choosing TravelMarket!
  {booking.bookingMode === 'Instant' ? 'Instant Book' : 'Request to Book'}
  </p>
  </div>
- <span className={`px-3 py-1 text-xs font-black uppercase tracking-widest rounded-full border ${
+ <span className={`px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-full border ${
  booking.status === BookingStatus.PendingPayment
  ? 'bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark border-primary-light/20 dark:border-primary-dark/20'
  : isPending
@@ -681,17 +682,17 @@ Thank you for choosing TravelMarket!
  </div>
 
  {/* Navigation Links */}
- <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+ <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
  <Link
  href="/dashboard/traveler/bookings"
- className="inline-flex items-center gap-2 px-6 py-3 bg-primary-light hover:bg-primary-light-hover text-white font-medium rounded-lg transition-colors"
+ className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-light hover:bg-primary-light-hover text-white font-medium rounded-xl transition-colors min-h-[48px]"
  >
  View My Bookings
  <ChevronRight className="w-4 h-4" />
  </Link>
  <Link
  href="/tours"
- className="inline-flex items-center gap-2 px-6 py-3 surface-section text-theme-secondary font-medium rounded-lg hover:surface-section dark:hover:surface-section transition-colors"
+ className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 surface-section text-theme-secondary font-medium rounded-xl hover:surface-section dark:hover:surface-section transition-colors min-h-[48px]"
  >
  Browse More Tours
  </Link>
@@ -718,5 +719,18 @@ Thank you for choosing TravelMarket!
  </div>
  )}
  </PageLayout>
- )
+  )
+}
+
+// ── Default export: wraps in Suspense (required for useSearchParams in Next 15+) ──
+export default function BookingConfirmationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[60vh] surface-section flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary-light" />
+      </div>
+    }>
+      <BookingConfirmationContent />
+    </Suspense>
+  )
 }

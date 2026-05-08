@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Users, Search, CheckCircle, AlertCircle, Loader2, RefreshCw, Eye,
-  MoreHorizontal, Pause, Ban, ShieldCheck, UserX, UserCheck, Clock, X
+  MoreHorizontal, Pause, Ban, ShieldCheck, UserX, UserCheck, Clock, X,
+  ChevronRight, Filter, Shield, Activity, Info, Mail, Phone, Calendar,
+  History, Unlock, User, Award
 } from 'lucide-react'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import {
@@ -15,35 +17,38 @@ import {
 import toast from 'react-hot-toast'
 
 // ─── Modal Types ─────────────────────────────────────────────────────────────
-type ModalType = 'suspend' | 'ban' | null
+type ModalType = 'suspend' | 'ban' | 'details' | null
 
 interface ModalState {
  type: ModalType
  user: AdminUserResponse | null
 }
 
+type AccountStatusFilter = 'ALL' | 'ACTIVE' | 'SUSPENDED' | 'BANNED' | 'DEACTIVATED'
+type RoleFilter = 'ALL' | 'TRAVELER' | 'GUIDE' | 'ADMIN'
+
 // ─── Status / Role Helpers ────────────────────────────────────────────────────
 function StatusBadge({ u }: { u: AdminUserResponse }) {
  if (u.deletedAtUtc)
- return <span className="px-2 py-0.5 surface-section text-theme-secondary text-xs rounded-full font-medium">Deactivated</span>
+  return <span className="px-2 py-0.5 surface-section text-theme-secondary text-xs rounded-full font-medium border border-theme">Deactivated</span>
  if (u.accountStatus === 'BANNED')
- return <span className="px-2 py-0.5 bg-danger-red/20 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs rounded-full font-medium">Banned</span>
+  return <span className="px-2 py-0.5 bg-danger-red/20 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs rounded-full font-medium border border-danger-red/20">Banned</span>
  if (u.accountStatus === 'SUSPENDED')
- return (
- <span className="px-2 py-0.5 bg-accent-light/20 dark:bg-accent-dark/20 dark:bg-amber-900/30 text-accent-light dark:text-accent-dark dark:text-amber-300 text-xs rounded-full font-medium">
- Suspended{u.suspendedUntilUtc ? ` until ${new Date(u.suspendedUntilUtc).toLocaleDateString()}` : ' (indefinite)'}
- </span>
- )
- return <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded-full font-medium">Active</span>
+  return (
+   <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs rounded-full font-medium border border-amber-200">
+    Suspended{u.suspendedUntilUtc ? ` until ${new Date(u.suspendedUntilUtc).toLocaleDateString()}` : ' (indefinite)'}
+   </span>
+  )
+ return <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded-full font-medium border border-green-200">Active</span>
 }
 
 function RoleBadge({ role }: { role: string }) {
  const normalized = role.toUpperCase()
-  const cls =
-    normalized === 'ADMIN' ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-    : normalized === 'GUIDE' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
-  return <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${cls}`}>{normalized}</span>
+ const cls =
+  normalized === 'ADMIN' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+  : normalized === 'GUIDE' ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+ return <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${cls}`}>{normalized}</span>
 }
 
 // ─── Action Menu ──────────────────────────────────────────────────────────────
@@ -63,9 +68,9 @@ function ActionMenu({
  const isAdmin = u.role.toUpperCase() === 'ADMIN'
 
  useEffect(() => {
- const handler = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
- document.addEventListener('mousedown', handler)
- return () => document.removeEventListener('mousedown', handler)
+  const handler = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+  document.addEventListener('mousedown', handler)
+  return () => document.removeEventListener('mousedown', handler)
  }, [])
 
  if (isAdmin) return <span className="text-xs text-theme-muted">—</span>
@@ -77,55 +82,124 @@ function ActionMenu({
  const isActive = u.accountStatus === 'ACTIVE' && !isDeactivated
 
  return (
- <div ref={ref} className="relative inline-block">
- <button
- onClick={() => setOpen(v => !v)}
- className="p-1.5 hover:surface-section dark:hover:surface-card rounded-lg transition"
- disabled={loading}
- >
- <MoreHorizontal className="w-4 h-4" />
- </button>
+  <div ref={ref} className="relative inline-block">
+   <button
+    onClick={() => setOpen(v => !v)}
+    className="p-2 hover:surface-section dark:hover:surface-card rounded-lg transition min-w-[36px] min-h-[36px] flex items-center justify-center"
+    disabled={loading}
+   >
+    <MoreHorizontal className="w-4 h-4" />
+   </button>
 
- {open && (
- <div className="absolute right-0 mt-1 w-52 surface-card border border-theme rounded-xl shadow-xl z-20 py-1 overflow-hidden">
- {/* Suspend / Activate */}
- {isActive && (
- <button onClick={() => act(onSuspend)}
- className="w-full text-left px-4 py-2 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 flex items-center gap-2.5 transition">
- <Pause className="w-4 h-4" /> Suspend
- </button>
- )}
- {isSuspended && (
- <button onClick={() => act(onActivate)}
- className="w-full text-left px-4 py-2 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center gap-2.5 transition">
- <ShieldCheck className="w-4 h-4" /> Activate (lift suspension)
- </button>
- )}
+   {open && (
+    <div className="absolute right-0 mt-1 w-52 surface-card border border-theme rounded-xl shadow-xl z-20 py-1 overflow-hidden">
+     {isActive && (
+      <button onClick={() => act(onSuspend)}
+       className="w-full text-left px-4 py-2.5 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 flex items-center gap-2.5 transition">
+       <Pause className="w-4 h-4" /> Suspend
+      </button>
+     )}
+     {isSuspended && (
+      <button onClick={() => act(onActivate)}
+       className="w-full text-left px-4 py-2.5 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center gap-2.5 transition">
+       <ShieldCheck className="w-4 h-4" /> Activate (lift suspension)
+      </button>
+     )}
+     {!isDeactivated && !isBanned && (
+      <button onClick={() => act(onDeactivate)}
+       className="w-full text-left px-4 py-2.5 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition">
+       <UserX className="w-4 h-4" /> Deactivate (soft delete)
+      </button>
+     )}
+     {isDeactivated && (
+      <button onClick={() => act(onReactivate)}
+       className="w-full text-left px-4 py-2.5 text-sm text-primary-light dark:text-blue-400 hover:bg-primary-light/10 dark:hover:surface-base flex items-center gap-2.5 transition">
+       <UserCheck className="w-4 h-4" /> Reactivate account
+      </button>
+     )}
+     {!isBanned && (
+      <button onClick={() => act(onBan)}
+       className="w-full text-left px-4 py-2.5 text-sm text-danger-red dark:text-red-400 hover:bg-danger-red/10 dark:hover:bg-red-900/20 flex items-center gap-2.5 transition border-t border-theme mt-1 pt-2.5">
+       <Ban className="w-4 h-4" /> Permanent Ban
+      </button>
+     )}
+    </div>
+   )}
+  </div>
+ )
+}
 
- {/* Deactivate / Reactivate */}
- {!isDeactivated && !isBanned && (
- <button onClick={() => act(onDeactivate)}
- className="w-full text-left px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 transition">
- <UserX className="w-4 h-4" /> Deactivate (soft delete)
- </button>
- )}
-  {isDeactivated && (
-    <button onClick={() => act(onReactivate)}
-    className="w-full text-left px-4 py-2 text-sm text-primary-light dark:text-blue-400 hover:bg-primary-light/10 dark:hover:surface-base flex items-center gap-2.5 transition">
-    <UserCheck className="w-4 h-4" /> Reactivate account
-    </button>
-  )}
+// ─── Mobile User Card ─────────────────────────────────────────────────────────
+function UserCard({
+ u, loading, onSuspend, onBan, onActivate, onDeactivate, onReactivate, onDetails
+}: {
+ u: AdminUserResponse
+ loading: boolean
+ onSuspend: () => void
+ onBan: () => void
+ onActivate: () => void
+ onDeactivate: () => void
+ onReactivate: () => void
+ onDetails: () => void
+}) {
+ return (
+  <div onClick={onDetails} className="surface-card rounded-2xl border border-theme p-4 space-y-4 shadow-sm cursor-pointer hover:border-primary-light transition-colors group">
+   {/* Top row: avatar initial + name + action menu */}
+   <div className="flex items-start justify-between gap-3">
+    <div className="flex items-center gap-3 min-w-0">
+     <div className="w-11 h-11 rounded-xl bg-primary-light/10 dark:bg-primary-dark/20 text-primary-light dark:text-primary-dark flex items-center justify-center font-bold text-base flex-shrink-0 border border-primary-light/20">
+      {(u.fullName || u.email || '?').charAt(0).toUpperCase()}
+     </div>
+     <div className="min-w-0">
+      <p className="text-sm font-bold text-theme-primary truncate leading-tight">{u.fullName || '—'}</p>
+      <p className="text-[11px] text-theme-muted truncate mt-0.5">{u.email}</p>
+     </div>
+    </div>
+    <div onClick={e => e.stopPropagation()}>
+      <ActionMenu
+       u={u} loading={loading}
+       onSuspend={onSuspend} onBan={onBan} onActivate={onActivate}
+       onDeactivate={onDeactivate} onReactivate={onReactivate}
+      />
+    </div>
+   </div>
 
- {/* Ban — always available if not already banned */}
- {!isBanned && (
- <button onClick={() => act(onBan)}
- className="w-full text-left px-4 py-2 text-sm text-danger-red dark:text-red-400 hover:bg-danger-red/10 dark:hover:bg-red-900/20 flex items-center gap-2.5 transition border-t border-theme mt-1 pt-2">
- <Ban className="w-4 h-4" /> Permanent Ban
- </button>
- )}
- </div>
- )}
- </div>
+   {/* Badges row */}
+   <div className="flex flex-wrap items-center gap-2">
+    <RoleBadge role={u.role} />
+    <StatusBadge u={u} />
+    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-section border border-theme">
+      {u.isEmailVerified
+       ? <CheckCircle className="w-3 h-3 text-green-500" />
+       : <AlertCircle className="w-3 h-3 text-amber-500" />
+      }
+      <span className="text-[10px] font-bold uppercase tracking-wider text-theme-secondary">
+        {u.isEmailVerified ? 'Verified' : 'Unverified'}
+      </span>
+    </div>
+   </div>
+
+   {/* Profile Status */}
+   <div className="flex items-center justify-between text-[11px] border-t border-theme pt-3 mt-1">
+    <span className="text-theme-muted flex items-center gap-1.5">
+      <Clock className="w-3 h-3" />
+      Joined {new Date(u.createdAtUtc).toLocaleDateString()}
+    </span>
+    {u.profileCompleted
+     ? <span className="text-green-600 dark:text-green-400 font-bold uppercase tracking-tight">Profile Complete</span>
+     : <span className="text-theme-muted uppercase tracking-tight">Profile Incomplete</span>
+    }
+   </div>
+
+   {/* Status reason if exists */}
+   {u.statusReason && (
+    <div className="p-2.5 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/30 rounded-xl">
+      <p className="text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed italic">
+       ↳ {u.statusReason}
+      </p>
+    </div>
+   )}
+  </div>
  )
 }
 
@@ -138,314 +212,559 @@ export default function AdminUsersPage() {
  const [isLoading, setIsLoading] = useState(true)
  const [actionLoading, setActionLoading] = useState(false)
  const [searchEmail, setSearchEmail] = useState('')
+ 
+ // Filters
+ const [filterStatus, setFilterStatus] = useState<AccountStatusFilter>('ALL')
+ const [filterRole, setFilterRole] = useState<RoleFilter>('ALL')
 
  // Modals
  const [modal, setModal] = useState<ModalState>({ type: null, user: null })
  const [suspendReason, setSuspendReason] = useState('')
- const [suspendUntil, setSuspendUntil] = useState('') // datetime-local string
+ const [suspendUntil, setSuspendUntil] = useState('')
  const [banReason, setBanReason] = useState('')
 
  useEffect(() => {
- if (!authLoading && (!user || user.role !== 'ADMIN')) router.push('/dashboard')
+  if (!authLoading && (!user || user.role !== 'ADMIN')) router.push('/dashboard')
  }, [user, authLoading, router])
 
  useEffect(() => { loadUsers() }, [])
 
  const loadUsers = async () => {
- setIsLoading(true)
- try {
- const res = await adminGetUsers(searchEmail.trim() || undefined)
- setUsers(res.users || [])
- } catch {
- toast.error('Failed to load users')
- } finally {
- setIsLoading(false)
- }
+  setIsLoading(true)
+  try {
+   const res = await adminGetUsers(searchEmail.trim() || undefined)
+   setUsers(res.users || [])
+  } catch {
+   toast.error('Failed to load users')
+  } finally {
+   setIsLoading(false)
+  }
  }
 
+ // Stats Calculation
+ const stats = useMemo(() => {
+  return {
+   total: users.length,
+   active: users.filter(u => u.accountStatus === 'ACTIVE' && !u.deletedAtUtc).length,
+   banned: users.filter(u => u.accountStatus === 'BANNED').length,
+   suspended: users.filter(u => u.accountStatus === 'SUSPENDED').length,
+   deactivated: users.filter(u => !!u.deletedAtUtc).length,
+   guides: users.filter(u => u.role.toUpperCase() === 'GUIDE').length,
+  }
+ }, [users])
+
+ // Apply Filters
+ const filteredUsers = useMemo(() => {
+  return users.filter(u => {
+   // Status Filter
+   if (filterStatus === 'ACTIVE' && (u.accountStatus !== 'ACTIVE' || !!u.deletedAtUtc)) return false
+   if (filterStatus === 'BANNED' && u.accountStatus !== 'BANNED') return false
+   if (filterStatus === 'SUSPENDED' && u.accountStatus !== 'SUSPENDED') return false
+   if (filterStatus === 'DEACTIVATED' && !u.deletedAtUtc) return false
+
+   // Role Filter
+   if (filterRole !== 'ALL' && u.role.toUpperCase() !== filterRole) return false
+
+   return true
+  })
+ }, [users, filterStatus, filterRole])
+
  const closeModal = () => {
- setModal({ type: null, user: null })
- setSuspendReason(''); setSuspendUntil(''); setBanReason('')
+  setModal({ type: null, user: null })
+  setSuspendReason(''); setSuspendUntil(''); setBanReason('')
  }
 
  // ── Actions ────────────────────────────────────────────────────────────────
  const handleSuspend = async () => {
- if (!modal.user || !suspendReason.trim()) { toast.error('Reason is required'); return }
- setActionLoading(true)
- try {
- const untilUtc = suspendUntil ? new Date(suspendUntil).toISOString() : null
- await adminSuspendUser(modal.user.id, { reason: suspendReason.trim(), untilUtc })
- toast.success(untilUtc ? `Suspended until ${new Date(untilUtc).toLocaleDateString()}` : 'Suspended indefinitely')
- closeModal(); loadUsers()
- } catch (e: any) {
- toast.error(e.response?.data?.message || 'Failed to suspend user')
- } finally { setActionLoading(false) }
+  if (!modal.user || !suspendReason.trim()) { toast.error('Reason is required'); return }
+  setActionLoading(true)
+  try {
+   const untilUtc = suspendUntil ? new Date(suspendUntil).toISOString() : null
+   await adminSuspendUser(modal.user.id, { reason: suspendReason.trim(), untilUtc })
+   toast.success(untilUtc ? `Suspended until ${new Date(untilUtc).toLocaleDateString()}` : 'Suspended indefinitely')
+   closeModal(); loadUsers()
+  } catch (e: any) {
+   toast.error(e.response?.data?.message || 'Failed to suspend user')
+  } finally { setActionLoading(false) }
  }
 
  const handleBan = async () => {
- if (!modal.user || !banReason.trim()) { toast.error('Reason is required'); return }
- setActionLoading(true)
- try {
- await adminBanUser(modal.user.id, { reason: banReason.trim() })
- toast.success('User permanently banned')
- closeModal(); loadUsers()
- } catch (e: any) {
- toast.error(e.response?.data?.message || 'Failed to ban user')
- } finally { setActionLoading(false) }
+  if (!modal.user || !banReason.trim()) { toast.error('Reason is required'); return }
+  setActionLoading(true)
+  try {
+   await adminBanUser(modal.user.id, { reason: banReason.trim() })
+   toast.success('User permanently banned')
+   closeModal(); loadUsers()
+  } catch (e: any) {
+   toast.error(e.response?.data?.message || 'Failed to ban user')
+  } finally { setActionLoading(false) }
  }
 
  const handleActivate = async (u: AdminUserResponse) => {
- setActionLoading(true)
- try {
- await adminActivateUser(u.id)
- toast.success(`${u.fullName} activated`)
- loadUsers()
- } catch (e: any) {
- toast.error(e.response?.data?.message || 'Failed to activate')
- } finally { setActionLoading(false) }
+  setActionLoading(true)
+  try {
+   await adminActivateUser(u.id)
+   toast.success(`${u.fullName} activated`)
+   loadUsers()
+  } catch (e: any) {
+   toast.error(e.response?.data?.message || 'Failed to activate')
+  } finally { setActionLoading(false) }
  }
 
  const handleDeactivate = async (u: AdminUserResponse) => {
- setActionLoading(true)
- try {
- await adminDeactivateUser(u.id)
- toast.success(`${u.fullName} deactivated`)
- loadUsers()
- } catch (e: any) {
- toast.error(e.response?.data?.message || 'Failed to deactivate')
- } finally { setActionLoading(false) }
+  setActionLoading(true)
+  try {
+   await adminDeactivateUser(u.id)
+   toast.success(`${u.fullName} deactivated`)
+   loadUsers()
+  } catch (e: any) {
+   toast.error(e.response?.data?.message || 'Failed to deactivate')
+  } finally { setActionLoading(false) }
  }
 
  const handleReactivate = async (u: AdminUserResponse) => {
- setActionLoading(true)
- try {
- await adminReactivateUser(u.id)
- toast.success(`${u.fullName} reactivated`)
- loadUsers()
- } catch (e: any) {
- toast.error(e.response?.data?.message || 'Failed to reactivate')
- } finally { setActionLoading(false) }
+  setActionLoading(true)
+  try {
+   await adminReactivateUser(u.id)
+   toast.success(`${u.fullName} reactivated`)
+   loadUsers()
+  } catch (e: any) {
+   toast.error(e.response?.data?.message || 'Failed to reactivate')
+  } finally { setActionLoading(false) }
  }
 
  if (authLoading || isLoading) {
- return (
-  <div className="w-20 h-20 surface-card rounded-full flex items-center justify-center shadow-lg border border-theme mb-4">
-  <Eye className="w-10 h-10 text-primary-light" />
-  </div>
- )
+  return (
+   <div className="flex flex-col items-center justify-center py-24 gap-4">
+    <div className="relative">
+      <Loader2 className="w-12 h-12 animate-spin text-primary-light" />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <Users className="w-5 h-5 text-primary-light/50" />
+      </div>
+    </div>
+    <div className="text-center space-y-1">
+      <p className="text-sm font-bold text-theme-primary uppercase tracking-widest">Synchronizing Registry</p>
+      <p className="text-xs text-theme-muted">Fetching latest administrative data...</p>
+    </div>
+   </div>
+  )
  }
 
  return (
- <div className="min-h-[calc(100vh-4rem)] surface-section">
- <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+  <div className="space-y-6 pb-20">
+   {/* ── Stats Grid ────────────────────────────────────────────────── */}
+   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+     {[
+       { label: 'Active', value: stats.active, color: 'emerald', icon: UserCheck, filter: () => setFilterStatus('ACTIVE') },
+       { label: 'Banned', value: stats.banned, color: 'red', icon: Ban, filter: () => setFilterStatus('BANNED') },
+       { label: 'Suspended', value: stats.suspended, color: 'amber', icon: Clock, filter: () => setFilterStatus('SUSPENDED') },
+       { label: 'Guides', value: stats.guides, color: 'blue', icon: Award, filter: () => setFilterRole('GUIDE') }
+     ].map(s => (
+       <button
+         key={s.label}
+         onClick={s.filter}
+         className="p-4 surface-card border border-theme rounded-2xl text-left hover:shadow-lg transition-all group active:scale-95"
+       >
+         <div className="flex items-center justify-between mb-2">
+           <div className={`p-2 rounded-xl bg-${s.color}-500/10 text-${s.color}-600 dark:text-${s.color}-400 group-hover:scale-110 transition-transform`}>
+             <s.icon className="w-4 h-4" />
+           </div>
+           <ChevronRight className="w-4 h-4 text-theme-muted opacity-0 group-hover:opacity-100 transition-opacity" />
+         </div>
+         <p className="text-2xl font-black text-theme-primary leading-none">{s.value}</p>
+         <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mt-1">{s.label}</p>
+       </button>
+     ))}
+   </div>
 
- {/* Header */}
- <div className="flex items-center justify-between">
- <div>
- <h1 className="text-2xl font-bold text-theme-primary">Users</h1>
- <p className="text-sm text-theme-muted ">{users.length} total users</p>
- </div>
- <button onClick={loadUsers} disabled={isLoading}
- className="p-2 hover:surface-section dark:hover:surface-card rounded-lg transition">
- <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
- </button>
- </div>
+   {/* ── Header & Search ───────────────────────────────────────────── */}
+   <div className="surface-card p-5 rounded-2xl border border-theme shadow-sm space-y-4">
+     <div className="flex items-center justify-between">
+       <h1 className="text-xl font-black text-theme-primary uppercase tracking-tight flex items-center gap-2">
+         <Users className="w-6 h-6 text-primary-light" />
+         Registry Management
+       </h1>
+       <button onClick={loadUsers} disabled={isLoading} className="p-2 hover:surface-section rounded-lg transition group">
+         <RefreshCw className={`w-5 h-5 text-theme-muted group-hover:text-primary-light ${isLoading ? 'animate-spin' : ''}`} />
+       </button>
+     </div>
 
- {/* Search */}
- <div className="flex gap-2">
- <div className="flex-1 relative">
- <Search className="absolute left-3 top-2.5 w-4 h-4 text-theme-muted" />
- <input type="text" placeholder="Search by email..."
- value={searchEmail}
- onChange={e => setSearchEmail(e.target.value)}
- onKeyDown={e => e.key === 'Enter' && loadUsers()}
- className="w-full pl-9 pr-4 py-2 border border-theme-strong rounded-lg surface-card text-sm focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
- />
- </div>
- <button onClick={loadUsers}
- className="px-4 py-2 bg-primary-light hover:bg-primary-light-hover text-white rounded-lg text-sm font-medium transition">
- Search
- </button>
- </div>
+     <div className="flex flex-col lg:flex-row gap-3">
+       {/* Search */}
+       <div className="flex-1 relative">
+         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
+         <input
+           type="text"
+           placeholder="Search by exact email or name..."
+           value={searchEmail}
+           onChange={e => setSearchEmail(e.target.value)}
+           onKeyDown={e => e.key === 'Enter' && loadUsers()}
+           className="w-full pl-11 pr-4 py-3 surface-section border border-theme rounded-xl text-sm focus:ring-2 focus:ring-primary-light transition-all outline-none shadow-sm"
+         />
+       </div>
 
- {/* Table */}
- <div className="surface-card rounded-xl border border-theme overflow-hidden">
- {users.length === 0 ? (
- <div className="flex flex-col items-center justify-center py-16 text-theme-muted">
- <Users className="w-10 h-10 mb-3" />
- <p className="text-sm">No users found</p>
- </div>
- ) : (
- <div className="overflow-x-auto">
- <table className="w-full">
- <thead className="surface-section border-b border-theme">
- <tr>
- {['User', 'Role', 'Status', 'Email', 'Profile', 'Joined', 'Actions'].map(h => (
- <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-theme-muted uppercase tracking-wide">{h}</th>
- ))}
- </tr>
- </thead>
- <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
- {users.map(u => (
- <tr key={u.id} className="hover:surface-section dark:hover:surface-card transition">
- <td className="px-4 py-3">
- <div>
- <p className="text-sm font-medium text-theme-primary">{u.fullName || '—'}</p>
- <p className="text-xs text-theme-muted ">{u.email}</p>
- {u.statusReason && (
- <p className="text-xs text-accent-light dark:text-accent-dark dark:text-amber-400 mt-0.5 italic truncate max-w-xs" title={u.statusReason}>
- ↳ {u.statusReason}
- </p>
- )}
- </div>
- </td>
- <td className="px-4 py-3"><RoleBadge role={u.role} /></td>
- <td className="px-4 py-3"><StatusBadge u={u} /></td>
- <td className="px-4 py-3">
- {u.isEmailVerified
- ? <CheckCircle className="w-4 h-4 text-green-500" />
- : <AlertCircle className="w-4 h-4 text-accent-light dark:text-accent-dark" />}
- </td>
- <td className="px-4 py-3">
- {u.profileCompleted
- ? <span className="text-xs text-green-600 dark:text-green-400 font-medium">Complete</span>
- : <span className="text-xs text-theme-muted">Incomplete</span>}
- </td>
- <td className="px-4 py-3 text-xs text-theme-muted whitespace-nowrap">
- {new Date(u.createdAtUtc).toLocaleDateString()}
- </td>
- <td className="px-4 py-3">
- <ActionMenu
- u={u}
- loading={actionLoading}
- onSuspend={() => setModal({ type: 'suspend', user: u })}
- onBan={() => setModal({ type: 'ban', user: u })}
- onActivate={() => handleActivate(u)}
- onDeactivate={() => handleDeactivate(u)}
- onReactivate={() => handleReactivate(u)}
- />
- </td>
- </tr>
- ))}
- </tbody>
- </table>
- </div>
- )}
- </div>
- </div>
+       {/* Filters */}
+       <div className="flex gap-2">
+         <select
+           value={filterStatus}
+           onChange={e => setFilterStatus(e.target.value as any)}
+           className="px-4 py-3 surface-section border border-theme rounded-xl text-xs font-bold uppercase tracking-wider text-theme-secondary outline-none cursor-pointer hover:border-primary-light transition-colors"
+         >
+           <option value="ALL">All Status</option>
+           <option value="ACTIVE">Active Only</option>
+           <option value="BANNED">Banned Only</option>
+           <option value="SUSPENDED">Suspended Only</option>
+           <option value="DEACTIVATED">Deactivated</option>
+         </select>
 
- {/* ── Suspend Modal ─────────────────────────────────────────────────── */}
- {modal.type === 'suspend' && modal.user && (
- <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
- <div className="surface-card rounded-2xl p-6 w-full max-w-md shadow-2xl">
- <div className="flex items-center justify-between mb-4">
- <div className="flex items-center gap-2">
- <Pause className="w-5 h-5 text-accent-light dark:text-accent-dark" />
- <h3 className="text-lg font-bold text-theme-primary">Suspend User</h3>
- </div>
- <button onClick={closeModal} className="p-1 hover:surface-section dark:hover:surface-card rounded-lg"><X className="w-4 h-4" /></button>
- </div>
+         <select
+           value={filterRole}
+           onChange={e => setFilterRole(e.target.value as any)}
+           className="px-4 py-3 surface-section border border-theme rounded-xl text-xs font-bold uppercase tracking-wider text-theme-secondary outline-none cursor-pointer hover:border-primary-light transition-colors"
+         >
+           <option value="ALL">All Roles</option>
+           <option value="TRAVELER">Travelers</option>
+           <option value="GUIDE">Guides</option>
+           <option value="ADMIN">Admins</option>
+         </select>
 
- <p className="text-sm text-theme-secondary mb-5">
- Suspending <strong className="text-theme-primary">{modal.user.fullName}</strong> ({modal.user.email})
- </p>
+         <button
+           onClick={() => { setFilterStatus('ALL'); setFilterRole('ALL'); setSearchEmail(''); }}
+           className="p-3 surface-section border border-theme rounded-xl hover:bg-danger-red/10 group transition-colors"
+           title="Reset Filters"
+         >
+           <X className="w-4 h-4 text-theme-muted group-hover:text-danger-red" />
+         </button>
+       </div>
+     </div>
+   </div>
 
- <div className="space-y-4">
- <div>
- <label className="block text-sm font-medium text-theme-secondary mb-1.5">
- Reason <span className="text-danger-red">*</span>
- </label>
- <textarea value={suspendReason} onChange={e => setSuspendReason(e.target.value)}
- placeholder="Why is this user being suspended?"
- rows={3}
- className="w-full px-3 py-2 border border-theme-strong rounded-lg surface-card text-sm focus:outline-none focus:ring-2 focus:ring-accent-light dark:ring-accent-dark resize-none"
- />
- </div>
+   {/* ── Empty State ───────────────────────────────────────────────── */}
+   {filteredUsers.length === 0 && (
+    <div className="surface-card rounded-2xl border-2 border-dashed border-theme flex flex-col items-center justify-center py-20 text-theme-muted">
+     <div className="w-16 h-16 rounded-full bg-surface-section flex items-center justify-center mb-4">
+       <UserX className="w-8 h-8 opacity-20" />
+     </div>
+     <p className="text-sm font-bold uppercase tracking-widest">No matching records found</p>
+     <p className="text-xs mt-1">Try adjusting your filters or search term</p>
+    </div>
+   )}
 
- <div>
- <label className="block text-sm font-medium text-theme-secondary mb-1.5 flex items-center gap-1.5">
- <Clock className="w-3.5 h-3.5" />
- Suspend until (optional — leave blank for indefinite)
- </label>
- <input type="datetime-local"
- value={suspendUntil}
- min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
- onChange={e => setSuspendUntil(e.target.value)}
- className="w-full px-3 py-2 border border-theme-strong rounded-lg surface-card text-sm focus:outline-none focus:ring-2 focus:ring-accent-light dark:ring-accent-dark"
- />
- {suspendUntil && (
- <p className="text-xs text-accent-light dark:text-accent-dark dark:text-amber-400 mt-1">
- Will auto-expire: {new Date(suspendUntil).toLocaleString()}
- </p>
- )}
- {!suspendUntil && (
- <p className="text-xs text-theme-muted mt-1">Indefinite — must be manually lifted using Activate.</p>
- )}
- </div>
- </div>
+   {/* ── Mobile: Card list (< md) ──────────────────────────────────── */}
+   {filteredUsers.length > 0 && (
+    <>
+     <div className="md:hidden space-y-4">
+      {filteredUsers.map(u => (
+       <UserCard
+        key={u.id}
+        u={u}
+        loading={actionLoading}
+        onSuspend={() => setModal({ type: 'suspend', user: u })}
+        onBan={() => setModal({ type: 'ban', user: u })}
+        onActivate={() => handleActivate(u)}
+        onDeactivate={() => handleDeactivate(u)}
+        onReactivate={() => handleReactivate(u)}
+        onDetails={() => setModal({ type: 'details', user: u })}
+       />
+      ))}
+     </div>
 
- <div className="flex gap-2 justify-end mt-6">
- <button onClick={closeModal}
- className="px-4 py-2 text-sm text-theme-secondary hover:surface-section dark:hover:surface-card rounded-lg transition">
- Cancel
- </button>
- <button onClick={handleSuspend}
- disabled={actionLoading || !suspendReason.trim()}
- className="px-5 py-2 text-sm font-medium bg-accent-light/10 dark:bg-accent-dark hover:bg-amber-600 disabled:opacity-50 text-white rounded-lg flex items-center gap-2 transition">
- {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
- Confirm Suspend
- </button>
- </div>
- </div>
- </div>
- )}
+     {/* ── Desktop: Table (md+) ──────────────────────────────────────── */}
+     <div className="hidden md:block surface-card rounded-xl border border-theme overflow-hidden shadow-sm">
+      <div className="overflow-x-auto">
+       <table className="w-full">
+        <thead className="surface-section border-b border-theme">
+         <tr>
+          {['User', 'Role', 'Status', 'Email', 'Profile', 'Joined', 'Actions'].map(h => (
+           <th key={h} className="px-4 py-4 text-left text-[10px] font-black text-theme-muted uppercase tracking-widest">{h}</th>
+          ))}
+         </tr>
+        </thead>
+        <tbody className="divide-y divide-theme">
+         {filteredUsers.map(u => (
+          <tr 
+            key={u.id} 
+            onClick={() => setModal({ type: 'details', user: u })}
+            className="hover:surface-section dark:hover:surface-card transition cursor-pointer group"
+          >
+           <td className="px-4 py-4">
+            <div>
+             <p className="text-sm font-bold text-theme-primary">{u.fullName || '—'}</p>
+             <p className="text-[11px] text-theme-muted truncate max-w-[180px]">{u.email}</p>
+             {u.statusReason && (
+              <p className="text-[11px] text-accent-light dark:text-amber-400 mt-1 truncate max-w-xs" title={u.statusReason}>
+               ↳ {u.statusReason}
+              </p>
+             )}
+            </div>
+           </td>
+           <td className="px-4 py-4"><RoleBadge role={u.role} /></td>
+           <td className="px-4 py-4"><StatusBadge u={u} /></td>
+           <td className="px-4 py-4">
+            {u.isEmailVerified
+             ? <CheckCircle className="w-4 h-4 text-green-500" />
+             : <AlertCircle className="w-4 h-4 text-accent-light dark:text-accent-dark" />}
+           </td>
+           <td className="px-4 py-4">
+            {u.profileCompleted
+             ? <span className="text-[10px] font-black uppercase text-green-600 dark:text-green-400">Complete</span>
+             : <span className="text-[10px] font-black uppercase text-theme-muted">Incomplete</span>}
+           </td>
+           <td className="px-4 py-4 text-[11px] text-theme-muted whitespace-nowrap">
+            {new Date(u.createdAtUtc).toLocaleDateString()}
+           </td>
+           <td className="px-4 py-4">
+            <div onClick={e => e.stopPropagation()}>
+              <ActionMenu
+               u={u}
+               loading={actionLoading}
+               onSuspend={() => setModal({ type: 'suspend', user: u })}
+               onBan={() => setModal({ type: 'ban', user: u })}
+               onActivate={() => handleActivate(u)}
+               onDeactivate={() => handleDeactivate(u)}
+               onReactivate={() => handleReactivate(u)}
+              />
+            </div>
+           </td>
+          </tr>
+         ))}
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </>
+   )}
 
- {/* ── Ban Modal ─────────────────────────────────────────────────────── */}
- {modal.type === 'ban' && modal.user && (
- <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
- <div className="surface-card rounded-2xl p-6 w-full max-w-md shadow-2xl">
- <div className="flex items-center justify-between mb-4">
- <div className="flex items-center gap-2">
- <Ban className="w-5 h-5 text-danger-red" />
- <h3 className="text-lg font-bold text-theme-primary">Permanent Ban</h3>
- </div>
- <button onClick={closeModal} className="p-1 hover:surface-section dark:hover:surface-card rounded-lg"><X className="w-4 h-4" /></button>
- </div>
+   {/* ── Suspend Modal ─────────────────────────────────────────────── */}
+   {modal.type === 'suspend' && modal.user && (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-[60] p-0 sm:p-4">
+     <div className="surface-card rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md shadow-2xl border border-theme">
+      <div className="flex items-center justify-between mb-4">
+       <div className="flex items-center gap-2">
+        <Pause className="w-5 h-5 text-amber-500" />
+        <h3 className="text-lg font-bold text-theme-primary uppercase tracking-tight">Suspend Account</h3>
+       </div>
+       <button onClick={closeModal} className="p-2 hover:surface-section rounded-lg transition"><X className="w-4 h-4" /></button>
+      </div>
 
- <div className="p-3 bg-danger-red/10 dark:bg-red-900/20 border border-danger-red dark:border-danger-red rounded-lg mb-5">
- <p className="text-sm text-red-700 dark:text-red-300 font-medium">⚠ This action is permanent and cannot be undone from the UI.</p>
- </div>
+      <p className="text-sm text-theme-secondary mb-5">
+       Suspending <strong className="text-theme-primary">{modal.user.fullName}</strong>
+       <span className="block text-xs text-theme-muted truncate">{modal.user.email}</span>
+      </p>
 
- <p className="text-sm text-theme-secondary mb-4">
- Banning <strong className="text-theme-primary">{modal.user.fullName}</strong> ({modal.user.email})
- </p>
+      <div className="space-y-4">
+       <div>
+        <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5">
+         Reason <span className="text-danger-red">*</span>
+        </label>
+        <textarea value={suspendReason} onChange={e => setSuspendReason(e.target.value)}
+         placeholder="Why is this user being suspended?"
+         rows={3}
+         className="w-full px-3 py-2.5 border border-theme rounded-xl surface-section text-sm outline-none focus:ring-2 focus:ring-amber-500 resize-none"
+        />
+       </div>
 
- <div>
- <label className="block text-sm font-medium text-theme-secondary mb-1.5">
- Reason <span className="text-danger-red">*</span>
- </label>
- <textarea value={banReason} onChange={e => setBanReason(e.target.value)}
- placeholder="Why is this user being permanently banned?"
- rows={3}
- className="w-full px-3 py-2 border border-danger-red dark:border-danger-red rounded-lg surface-card text-sm focus:outline-none focus:ring-2 focus:ring-danger-red resize-none"
- />
- </div>
+       <div>
+        <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+         <Clock className="w-3.5 h-3.5" />
+         Expiry (leave blank for indefinite)
+        </label>
+        <input type="datetime-local"
+         value={suspendUntil}
+         min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
+         onChange={e => setSuspendUntil(e.target.value)}
+         className="w-full px-3 py-2.5 border border-theme rounded-xl surface-section text-sm outline-none focus:ring-2 focus:ring-amber-500"
+        />
+       </div>
+      </div>
 
- <div className="flex gap-2 justify-end mt-6">
- <button onClick={closeModal}
- className="px-4 py-2 text-sm text-theme-secondary hover:surface-section dark:hover:surface-card rounded-lg transition">
- Cancel
- </button>
- <button onClick={handleBan}
- disabled={actionLoading || !banReason.trim()}
- className="px-5 py-2 text-sm font-medium bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-lg flex items-center gap-2 transition">
- {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
- Permanently Ban
- </button>
- </div>
- </div>
- </div>
- )}
- </div>
+      <div className="flex gap-2 justify-end mt-6">
+       <button onClick={closeModal}
+        className="px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-theme-secondary hover:surface-section rounded-xl transition">
+        Cancel
+       </button>
+       <button onClick={handleSuspend}
+        disabled={actionLoading || !suspendReason.trim()}
+        className="px-5 py-2.5 text-xs font-black uppercase tracking-widest bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white rounded-xl flex items-center gap-2 transition shadow-lg shadow-amber-500/20">
+        {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+        Confirm Suspension
+       </button>
+      </div>
+     </div>
+    </div>
+   )}
+
+   {/* ── Ban Modal ──────────────────────────────────────────────────── */}
+   {modal.type === 'ban' && modal.user && (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-[60] p-0 sm:p-4">
+     <div className="surface-card rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md shadow-2xl border border-theme">
+      <div className="flex items-center justify-between mb-4">
+       <div className="flex items-center gap-2">
+        <Ban className="w-5 h-5 text-danger-red" />
+        <h3 className="text-lg font-bold text-theme-primary uppercase tracking-tight">Permanent Ban</h3>
+       </div>
+       <button onClick={closeModal} className="p-2 hover:surface-section rounded-lg transition"><X className="w-4 h-4" /></button>
+      </div>
+
+      <div className="p-3 bg-danger-red/10 border border-danger-red/20 rounded-xl mb-5">
+       <p className="text-xs text-danger-red font-bold">⚠ CRITICAL: This action is permanent and prevents all logins.</p>
+      </div>
+
+      <p className="text-sm text-theme-secondary mb-4">
+       Banning <strong className="text-theme-primary">{modal.user.fullName}</strong>
+       <span className="block text-xs text-theme-muted truncate">{modal.user.email}</span>
+      </p>
+
+      <div>
+       <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5">
+        Reason <span className="text-danger-red">*</span>
+       </label>
+       <textarea value={banReason} onChange={e => setBanReason(e.target.value)}
+        placeholder="Provide a permanent ban justification..."
+        rows={3}
+        className="w-full px-3 py-2.5 border border-danger-red/30 rounded-xl surface-section text-sm outline-none focus:ring-2 focus:ring-danger-red resize-none"
+       />
+      </div>
+
+      <div className="flex gap-2 justify-end mt-6">
+       <button onClick={closeModal}
+        className="px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-theme-secondary hover:surface-section rounded-xl transition">
+        Cancel
+       </button>
+       <button onClick={handleBan}
+        disabled={actionLoading || !banReason.trim()}
+        className="px-5 py-2.5 text-xs font-black uppercase tracking-widest bg-danger-red hover:bg-red-700 disabled:opacity-50 text-white rounded-xl flex items-center gap-2 transition shadow-lg shadow-danger-red/20">
+        {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+        Execute Ban
+       </button>
+      </div>
+     </div>
+    </div>
+   )}
+
+    {/* ── Details / Enforcement Modal ────────────────────────────────── */}
+    {modal.type === 'details' && modal.user && (
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="surface-card rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden border border-theme flex flex-col max-h-[90vh]">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-primary-light to-primary-light-hover p-6 text-white flex-shrink-0">
+            <div className="flex justify-between items-start">
+              <div className="flex gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center font-black text-2xl border border-white/30">
+                  {modal.user.fullName?.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="text-xl font-black uppercase tracking-tight">{modal.user.fullName}</h3>
+                  <p className="text-white/80 text-sm font-medium">{modal.user.email}</p>
+                  <div className="flex gap-2 mt-2">
+                    <RoleBadge role={modal.user.role} />
+                    <StatusBadge u={modal.user} />
+                  </div>
+                </div>
+              </div>
+              <button onClick={closeModal} className="p-2 hover:bg-white/10 rounded-xl transition">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Scrollable Content */}
+          <div className="p-6 overflow-y-auto space-y-6 flex-1">
+            {/* Quick Info Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 surface-section rounded-2xl border border-theme">
+                <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                  <Calendar className="w-3 h-3" />
+                  Registration Date
+                </p>
+                <p className="text-sm font-bold text-theme-primary">{new Date(modal.user.createdAtUtc).toLocaleString()}</p>
+              </div>
+              <div className="p-4 surface-section rounded-2xl border border-theme">
+                <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                  <Shield className="w-3 h-3" />
+                  ID Verification
+                </p>
+                <p className={`text-sm font-bold ${modal.user.profileCompleted ? 'text-green-600' : 'text-theme-muted'}`}>
+                  {modal.user.profileCompleted ? 'Verified Professional' : 'Verification Pending'}
+                </p>
+              </div>
+            </div>
+
+            {/* Enforcement Section (If Banned/Suspended) */}
+            {(modal.user.accountStatus === 'BANNED' || modal.user.accountStatus === 'SUSPENDED') && (
+              <div className="p-5 bg-danger-red/5 border-2 border-danger-red/10 rounded-2xl space-y-4">
+                <h4 className="text-xs font-black text-danger-red uppercase tracking-widest flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  Enforcement Record
+                </h4>
+                <div>
+                  <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1">Primary Reason</p>
+                  <p className="text-sm text-theme-primary leading-relaxed bg-white dark:bg-black/20 p-3 rounded-xl border border-theme">
+                    {modal.user.statusReason || 'Violation of community guidelines.'}
+                  </p>
+                </div>
+                {modal.user.suspendedUntilUtc && (
+                  <div className="flex items-center gap-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+                    <Clock className="w-4 h-4 text-amber-600" />
+                    <div>
+                      <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Suspension Expiry</p>
+                      <p className="text-xs font-bold text-theme-primary">{new Date(modal.user.suspendedUntilUtc).toLocaleString()}</p>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="pt-2 border-t border-danger-red/10">
+                   <h5 className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <History className="w-3 h-3" />
+                    Audit Logs
+                  </h5>
+                  <div className="space-y-3">
+                    <div className="flex gap-3">
+                      <div className="w-1.5 h-1.5 rounded-full bg-danger-red mt-1" />
+                      <div>
+                        <p className="text-xs font-bold text-theme-primary uppercase">Manual Account Lock</p>
+                        <p className="text-[10px] text-theme-muted">{new Date(modal.user.createdAtUtc).toLocaleDateString()} • System Admin</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Actions for this user */}
+            <div className="space-y-3 pt-4">
+              <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest">Available Operations</p>
+              <div className="grid grid-cols-2 gap-2">
+                {modal.user.accountStatus !== 'ACTIVE' && (
+                  <button 
+                    onClick={() => { handleActivate(modal.user!); closeModal(); }}
+                    className="p-3 surface-section border border-theme rounded-xl text-xs font-bold text-green-600 hover:bg-green-500 hover:text-white transition-all flex items-center justify-center gap-2"
+                  >
+                    <ShieldCheck className="w-4 h-4" /> Lift Restrictions
+                  </button>
+                )}
+                {modal.user.accountStatus === 'ACTIVE' && (
+                  <>
+                    <button 
+                      onClick={() => setModal({ type: 'suspend', user: modal.user })}
+                      className="p-3 surface-section border border-theme rounded-xl text-xs font-bold text-amber-600 hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2"
+                    >
+                      <Pause className="w-4 h-4" /> Suspend Account
+                    </button>
+                    <button 
+                      onClick={() => setModal({ type: 'ban', user: modal.user })}
+                      className="p-3 surface-section border border-theme rounded-xl text-xs font-bold text-danger-red hover:bg-danger-red hover:text-white transition-all flex items-center justify-center gap-2"
+                    >
+                      <Ban className="w-4 h-4" /> Permanent Ban
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
  )
 }

@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // FORGOT PASSWORD PAGE
 // ============================================================================
 // LOCATION: /frontend/src/app/auth/forgot-password/page.tsx
@@ -45,8 +45,8 @@ const STATISTICS = [
 
 export default function ForgotPasswordPage() {
  return (
- <AuthLayout hideBackButton={false}>
- <div className="container-safe mx-auto max-w-6xl pt-20 sm:pt-24 pb-8 sm:pb-12">
+ <>
+ <div className="container-safe mx-auto max-w-6xl pt-4 pb-8 sm:py-12">
  
  {/* Back to Login */}
  <div className="mb-6">
@@ -113,11 +113,11 @@ export default function ForgotPasswordPage() {
  <div className="w-full max-w-md mx-auto lg:mx-0">
  
  {/* Mobile Header */}
- <div className="lg:hidden text-center mb-8">
- <h1 className="text-2xl font-bold text-theme-primary mb-2">
+ <div className="lg:hidden text-center mb-6 sm:mb-8">
+ <h1 className="text-2xl sm:text-3xl font-bold text-theme-primary mb-2">
  Forgot Password
  </h1>
- <p className="text-sm text-theme-secondary ">
+ <p className="text-sm text-theme-muted font-medium">
  Enter your email to reset your password
  </p>
  </div>
@@ -129,6 +129,6 @@ export default function ForgotPasswordPage() {
  </div>
  </div>
  </div>
- </AuthLayout>
+ </>
  )
 }

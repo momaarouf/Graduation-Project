@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // SIGNUP PAGE - COMPLETE API-READY VERSION
 // ============================================================================
 // LOCATION: /frontend/src/app/auth/signup/page.tsx
@@ -144,7 +144,7 @@ function SignupContent() {
  };
 
  return (
- <div className="min-h-screen relative flex flex-col items-center justify-center py-12 px-4 overflow-hidden">
+ <div className="min-h-screen relative flex flex-col items-center justify-start pt-4 pb-12 sm:py-12 px-4 overflow-hidden">
  {/* Background Decorative Elements */}
  <div className="fixed inset-0 pointer-events-none overflow-hidden">
  <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary-light/10 rounded-full blur-[120px]" />
@@ -153,7 +153,7 @@ function SignupContent() {
 
  <div className="w-full max-w-4xl relative z-10">
  {/* BACK BUTTON */}
- <div className="mb-8">
+ <div className="mb-6 sm:mb-8">
  <Link
  href="/"
  className="inline-flex items-center gap-2 text-sm font-bold text-theme-muted hover:text-primary-light dark:text-primary-dark transition-colors group"
@@ -164,28 +164,28 @@ function SignupContent() {
  </div>
  
  {/* Header */}
- <div className="text-center mb-10">
+ <div className="text-center mb-8 sm:mb-10">
  <motion.div
  initial={{ opacity: 0, scale: 0.9 }}
  animate={{ opacity: 1, scale: 1 }}
- className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark dark:text-primary-dark rounded-full text-[10px] font-black uppercase tracking-widest mb-4"
+ className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-[10px] font-bold uppercase tracking-widest mb-4"
  >
  <Sparkles className="w-3 h-3" />
  Join our community
  </motion.div>
 
- <h1 className="text-4xl font-black text-theme-primary tracking-tight mb-3">
+ <h1 className="text-3xl sm:text-4xl font-bold text-theme-primary tracking-tight mb-2 sm:mb-3">
  Create Your <span className="text-primary-light dark:text-primary-dark">Account</span>
  </h1>
 
- <p className="text-theme-muted font-medium max-w-lg mx-auto">
+ <p className="text-sm sm:text-base text-theme-muted font-medium max-w-lg mx-auto">
  Secure your spot in the marketplace and discover authentic halal-friendly experiences.
  </p>
  </div>
 
  {/* Step Indicator */}
  {data.role && (
- <div className="mb-10 max-w-2xl mx-auto">
+ <div className="mb-8 sm:mb-10 max-w-2xl mx-auto">
  <SignupStepIndicator
  currentStep={currentStep}
  completedSteps={completedSteps}
@@ -210,17 +210,17 @@ function SignupContent() {
  </div>
 
  {/* Minimal Footer Footer */}
- <p className="mt-12 text-center text-sm text-theme-muted font-medium">
+ <p className="mt-10 sm:mt-12 text-center text-sm text-theme-muted font-medium">
  Already have an account?{' '}
  <Link 
  href="/auth/login" 
- className="text-primary-light dark:text-primary-dark font-black hover:underline"
+ className="text-primary-light dark:text-primary-dark font-bold hover:underline"
  >
  Sign in
  </Link>
  </p>
 
- <div className="mt-8 flex justify-center gap-6 text-[10px] font-black uppercase tracking-widest text-theme-muted">
+ <div className="mt-8 flex justify-center gap-6 text-[10px] font-bold uppercase tracking-widest text-theme-muted">
  <span className="flex items-center gap-1.5">
  <Shield className="w-3 h-3" />
  Secure SSL
@@ -239,10 +239,8 @@ function SignupContent() {
 
 export default function SignupPage() {
  return (
- <AuthLayout hideBackButton={false}>
  <SignupProvider>
  <SignupContent />
  </SignupProvider>
- </AuthLayout>
  );
 }

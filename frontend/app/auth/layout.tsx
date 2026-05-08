@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // AUTH LAYOUT - FIXED BACKGROUND
 // ============================================================================
 
@@ -42,12 +42,6 @@ export default function AuthLayout({
  {/* Screen Reader Title */}
  <h1 className="sr-only">{getPageTitle()}</h1>
 
- {/* 
- ========================================
- Main Content Area
- Pages add their own padding (pt-14)
- ========================================
- */}
  <div className="flex-1 flex flex-col">
  {children}
  </div>

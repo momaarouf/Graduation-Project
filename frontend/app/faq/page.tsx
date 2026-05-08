@@ -290,7 +290,7 @@ export default function FAQPage() {
 
  {/* Search and Categories */}
  <section className="py-12 surface-card border-b border-theme">
- <div className="container-safe mx-auto max-w-4xl">
+ <div className="mx-auto max-w-4xl">
  
  {/* Search Bar */}
  <div className="relative mb-8">
@@ -339,7 +339,7 @@ export default function FAQPage() {
 
  {/* FAQs List */}
  <section className="py-16 sm:py-20 surface-section">
- <div className="container-safe mx-auto max-w-3xl">
+ <div className="mx-auto max-w-3xl">
  
  {/* Results Count and Toggle All */}
  <div className="flex items-center justify-between mb-6">

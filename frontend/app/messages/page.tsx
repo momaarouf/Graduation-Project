@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -35,7 +35,7 @@ export default function MessagesInboxPage() {
 
  return (
  <PageLayout>
- <div className="pt-24 pb-12 max-w-4xl mx-auto px-4 h-[calc(100vh-theme(spacing.16))]">
+ <div className="pt-20 sm:pt-24 pb-12 max-w-4xl mx-auto px-4 h-[calc(100vh-theme(spacing.16))]">
  <div className="flex items-center gap-3 mb-6">
  <div className="p-2 bg-blue-100 text-primary-light dark:text-primary-dark rounded-lg">
  <MessageSquare className="w-6 h-6" />

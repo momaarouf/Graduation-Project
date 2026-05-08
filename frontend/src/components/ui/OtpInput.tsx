@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useRef, KeyboardEvent, ClipboardEvent, ChangeEvent } from 'react'
 

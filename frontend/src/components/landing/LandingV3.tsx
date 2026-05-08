@@ -15,9 +15,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from '@headlessui/react'
 import { 
- getPublicStats, 
- getDiscoveryCategories, 
- getDiscoveryLocations,
+ getUnifiedDiscovery,
  PublicStatsResponse,
  CategoryDiscoveryResponse,
  LocationDiscoveryResponse
@@ -60,77 +58,82 @@ function HeroV3() {
  }
 
  return (
- <section 
- className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-24 pb-12"
- >
- {/* Hero Content Grid */}
- <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
- <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-8">
+  <section 
+  className="relative min-h-[85vh] sm:min-h-[90vh] flex items-center justify-center overflow-hidden pt-12 sm:pt-20 pb-12"
+  >
+  {/* Hero Content Grid */}
+  <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-8">
+  
+  {/* Left Column: Messaging & Search */}
+  <motion.div 
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+  className="flex-1 text-center lg:text-left w-full"
+  >
+  <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-[10px] font-bold uppercase tracking-[0.2em] mb-4 sm:mb-6 mx-auto lg:mx-0">
+  <Globe className="w-3 h-3" />
+  Explore the undiscovered
+  </div>
+
+  <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-theme-primary leading-[1] lg:leading-[0.95] tracking-tight mb-6 sm:mb-8">
+  Beyond the <br className="sm:hidden" />
+  <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 via-amber-500 to-blue-600 dark:from-orange-400 dark:via-amber-200 dark:to-blue-400">
+  Tourist Trail.
+  </span>
+  </h1>
+  <p className="text-base sm:text-xl text-theme-muted font-medium tracking-wide mb-10 sm:mb-14 max-w-2xl mx-auto lg:mx-0">
+  Connect with local experts who know the soul of every destination. Verified guides, authentic experiences.
+  </p>
+
+  <motion.div 
+  initial={{ opacity: 0, y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+  whileHover={{ y: -5, scale: 1.01 }}
+  transition={{ duration: 1.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+  className="w-full max-w-2xl mx-auto lg:ml-0 surface-card rounded-[2rem] sm:rounded-[2.5rem] p-2 sm:p-3 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] border border-theme relative z-[60]"
+  >
+  <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+  <div className="flex-1 relative group hover:surface-section dark:hover:surface-card rounded-2xl transition-all">
+  <Search className="absolute left-5 sm:left-7 top-1/2 -translate-y-1/2 text-theme-muted w-5 h-5 sm:w-6 sm:h-6 group-focus-within:text-orange-500 transition-colors pointer-events-none" />
+  <div className="flex flex-col pl-14 sm:pl-16 pr-4 sm:pr-6 py-3 sm:py-4 flex-1">
+  <span className="hidden sm:block text-[10px] uppercase tracking-[0.2em] font-bold text-theme-muted group-hover:text-orange-500/70 transition-colors text-left whitespace-nowrap">Explore Global Destinations</span>
+  <input 
+  type="text"
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  placeholder="Where to next?"
+  className={`w-full bg-transparent text-theme-primary border-0 focus:ring-0 font-bold placeholder-gray-400 p-0 leading-tight transition-all duration-300 text-lg sm:text-xl ${
+  searchQuery.length > 25 ? 'text-lg' : 'text-xl'
+  }`}
+  />
+  </div>
+  </div>
+
+  <button 
+  type="submit" 
+  className="bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all text-white px-8 py-4 sm:py-0 sm:h-[68px] rounded-2xl sm:rounded-[1.8rem] font-bold text-lg shadow-2xl shadow-orange-600/30"
+  >
+  Let's Go
+  </button>
+  </form>
+  </motion.div>
+  </motion.div>
  
- {/* Left Column: Messaging & Search */}
- <motion.div 
- initial={{ opacity: 0, x: -30 }}
- animate={{ opacity: 1, x: 0 }}
- transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
- className="flex-1 text-center lg:text-left"
- >
- <h1 className="text-5xl sm:text-7xl md:text-8xl font-black text-theme-primary leading-[0.95] tracking-tight mb-8">
- Beyond the <br />
- <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 via-amber-500 to-blue-600 dark:from-orange-400 dark:via-amber-200 dark:to-blue-400">
- Tourist Trail.
- </span>
- </h1>
- <p className="text-lg sm:text-xl text-theme-muted font-medium tracking-wide mb-14 max-w-2xl mx-auto lg:mx-0">
- Connect with local experts who know the soul of every destination.
- </p>
-
- <motion.div 
- initial={{ opacity: 0, y: 30 }}
- animate={{ opacity: 1, y: 0 }}
- whileHover={{ y: -5, scale: 1.01 }}
- transition={{ duration: 1.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
- className="w-full max-w-2xl mx-auto lg:ml-0 surface-card  rounded-[2.5rem] p-3 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] border border-theme relative z-[60]"
- >
- <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-3">
- <div className="flex-1 relative group hover:surface-section dark:hover:surface-card rounded-2xl transition-all">
- <Search className="absolute left-7 top-1/2 -translate-y-1/2 text-theme-muted w-6 h-6 group-hover:text-orange-500 transition-colors pointer-events-none" />
- <div className="flex flex-col pl-16 pr-6 py-4">
- <span className="text-[10px] uppercase tracking-[0.2em] font-black text-theme-muted group-hover:text-orange-500/70 transition-colors text-left uppercase whitespace-nowrap">Explore Global Destinations</span>
- <input 
- type="text"
- value={searchQuery}
- onChange={(e) => setSearchQuery(e.target.value)}
- placeholder="Where do you want to go?"
- className={`w-full bg-transparent text-theme-primary border-0 focus:ring-0 font-bold placeholder-gray-400 p-0 leading-tight transition-all duration-300 ${
- searchQuery.length > 25 ? 'text-lg' : 'text-xl'
- }`}
- />
- </div>
- </div>
-
- <button 
- type="submit" 
- className="bg-orange-600 hover:bg-orange-700 active:scale-95 transition-all text-white px-10 py-5 lg:py-0 rounded-[1.8rem] font-black text-lg shadow-2xl shadow-orange-600/30"
- >
- Let's Go
- </button>
- </form>
- </motion.div>
- </motion.div>
-
- {/* Right Column: Hero Visual (The Globe) */}
- <motion.div 
- initial={{ opacity: 0, scale: 0.9, rotate: -5 }}
- animate={{ opacity: 1, scale: 1, rotate: 0 }}
- transition={{ duration: 1.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
- className="flex-1 w-full max-w-lg lg:max-w-xl aspect-square relative"
- >
- <div className="absolute inset-0 bg-primary-light/10 dark:bg-blue-400/5 blur-[120px] rounded-full animate-pulse" />
- <GlobePolaroids speed={0.0025} className="relative z-10 w-full h-full" />
- </motion.div>
-
- </div>
- </div>
+  {/* Right Column: Hero Visual (The Globe - Hidden on Mobile) */}
+  <motion.div 
+  initial={{ opacity: 0, scale: 0.9, rotate: -5 }}
+  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+  transition={{ duration: 1.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+  className="hidden lg:flex flex-1 w-full max-w-lg lg:max-w-xl aspect-square relative mx-auto"
+  >
+  <div className="absolute inset-0 bg-primary-light/10 dark:bg-blue-400/5 blur-[120px] rounded-full animate-pulse" />
+  <GlobePolaroids speed={0.0025} className="relative z-10 w-full h-full" />
+  </motion.div>
+ 
+  </div>
+  </div>
  
  {/* Animated Scroll Down Indicator */}
  <motion.div 
@@ -139,7 +142,7 @@ function HeroV3() {
  transition={{ repeat: Infinity, duration: 2 }}
  className="absolute bottom-6 left-1/2 -translate-x-1/2 text-theme-muted/40 flex flex-col items-center gap-3 z-20"
  >
- <span className="text-[10px] uppercase tracking-[0.4em] font-black">Explore</span>
+ <span className="text-[10px] uppercase tracking-[0.4em] font-bold">Explore</span>
  <div className="w-px h-12 bg-gradient-to-b from-gray-400 to-transparent dark:from-white/20 dark:to-transparent" />
  </motion.div>
  </section>
@@ -180,7 +183,7 @@ function PremiumShowcase() {
  ]
 
  return (
- <section className="py-32 px-4 max-w-7xl mx-auto">
+ <section className="py-14 sm:py-20 lg:py-32 px-4 max-w-7xl mx-auto">
  <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
  <motion.div
  initial={{ opacity: 0, x: -30 }}
@@ -189,15 +192,15 @@ function PremiumShowcase() {
  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
  className="max-w-2xl"
  >
- <h2 className="text-4xl sm:text-6xl font-black text-theme-primary mb-6 tracking-tight leading-[0.9]">Local's Choice.</h2>
+ <h2 className="text-2xl sm:text-4xl lg:text-6xl font-bold text-theme-primary mb-4 sm:mb-6 tracking-tight leading-[0.9]">Local's Choice.</h2>
  <p className="text-lg text-theme-muted leading-relaxed font-medium">Handpicked experiences from verified guides across the globe. No tourist traps, just the authentic pulse of every region.</p>
  </motion.div>
- <Link href="/tours" className="group flex items-center gap-3 text-primary-light dark:text-primary-dark hover:gap-5 transition-all font-black uppercase tracking-[0.2em] text-sm">
+ <Link href="/tours" className="group flex items-center gap-3 text-primary-light dark:text-primary-dark hover:gap-5 transition-all font-bold uppercase tracking-[0.2em] text-sm">
  Explore All Stories <ArrowRight className="w-5 h-5 text-primary-light dark:text-primary-dark" />
  </Link>
  </div>
 
- <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+ <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 md:gap-12 pb-8 hide-scrollbar -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-2">
  {tours.map((tour, i) => (
  <motion.div
  key={tour.id}
@@ -205,9 +208,9 @@ function PremiumShowcase() {
  whileInView={{ opacity: 1, y: 0 }}
  viewport={{ once: false, amount: 0.2 }}
  transition={{ delay: i * 0.2, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
- className="group relative"
+ className="group relative snap-center min-w-[85vw] md:min-w-0"
  >
- <div className="relative h-[650px] rounded-[3.5rem] overflow-hidden border border-theme dark:border-theme-strong shadow-2xl">
+ <div className="relative h-[380px] sm:h-[520px] lg:h-[650px] rounded-[2rem] sm:rounded-[3.5rem] overflow-hidden border border-theme dark:border-theme-strong shadow-2xl">
  <Image 
  src={tour.image} 
  alt={tour.title} 
@@ -226,7 +229,7 @@ function PremiumShowcase() {
  <div className="relative">
  <div className="w-5 h-5 surface-card rounded-full animate-ping absolute inset-0 opacity-75" />
  <div className="w-5 h-5 surface-card rounded-full relative border-2 border-orange-500" />
- <div className="absolute left-7 top-1/2 -translate-y-1/2 px-5 py-2.5 bg-slate-900 border border-slate-700 rounded-2xl text-white text-xs font-black whitespace-nowrap opacity-0 group-hover/spot:opacity-100 transition-all pointer-events-none translate-x-4 group-hover/spot:translate-x-0">
+ <div className="absolute left-7 top-1/2 -translate-y-1/2 px-5 py-2.5 bg-slate-900 border border-slate-700 rounded-2xl text-white text-xs font-bold whitespace-nowrap opacity-0 group-hover/spot:opacity-100 transition-all pointer-events-none translate-x-4 group-hover/spot:translate-x-0">
  {spot.label}
  </div>
  </div>
@@ -235,11 +238,11 @@ function PremiumShowcase() {
 
  <div className="absolute inset-x-12 bottom-12">
  <div className="flex items-center gap-4 mb-6">
- <span className="px-5 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-widest">{tour.type}</span>
- <span className="text-orange-400 font-black text-3xl">{tour.price}</span>
+ <span className="px-5 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold uppercase tracking-widest">{tour.type}</span>
+ <span className="text-orange-400 font-bold text-3xl">{tour.price}</span>
  </div>
- <h3 className="text-5xl font-black text-white mb-4 tracking-tight group-hover:text-orange-400 transition-colors">{tour.title}</h3>
- <div className="flex items-center gap-2 text-white/50 font-black uppercase tracking-widest text-[10px]">
+ <h3 className="text-5xl font-bold text-white mb-4 tracking-tight group-hover:text-orange-400 transition-colors">{tour.title}</h3>
+ <div className="flex items-center gap-2 text-white/50 font-bold uppercase tracking-widest text-[10px]">
  <MapPin className="w-4 h-4 text-orange-500" />
  {tour.location}
  </div>
@@ -299,7 +302,7 @@ function ProfessionalJourney() {
  ]
 
  return (
- <section ref={containerRef} className="relative py-32 px-4 max-w-5xl mx-auto">
+ <section ref={containerRef} className="relative py-14 sm:py-24 px-4 max-w-5xl mx-auto">
  {/* Central Trail Line */}
  <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-0.5 surface-section hidden md:block">
  <motion.div 
@@ -308,7 +311,7 @@ function ProfessionalJourney() {
  />
  </div>
 
- <div className="space-y-40">
+ <div className="space-y-8 sm:space-y-28 md:space-y-40">
  {steps.map((step, i) => {
  const isEven = i % 2 === 0
  const Icon = step.icon
@@ -322,17 +325,17 @@ function ProfessionalJourney() {
  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
  className="flex-1 w-full"
  >
- <div className="group p-8 rounded-[2.5rem] surface-card  border border-theme dark:border-theme-strong hover:border-primary-light dark:hover:border-primary-dark/30 transition-all shadow-xl dark:shadow-2xl relative overflow-hidden">
+ <div className="group p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] surface-card  border border-theme dark:border-theme-strong hover:border-primary-light dark:hover:border-primary-dark/30 transition-all shadow-xl dark:shadow-2xl relative overflow-hidden">
  <div className={`absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b ${step.color} opacity-30`} />
  <div className="flex items-center justify-between mb-6">
   <div className={`p-3 rounded-2xl surface-section bg-primary-light/15 dark:bg-primary-dark/15 text-primary-light dark:text-primary-dark transition-transform group-hover:scale-110`}>
   <Icon className="w-6 h-6" fill="currentColor" fillOpacity={0.15} />
  </div>
- <span className="px-3 py-1 rounded-full bg-primary-light/10 text-primary-light dark:text-primary-dark text-[9px] font-black uppercase tracking-widest border border-primary-light/20 dark:border-primary-dark/20">
+ <span className="px-3 py-1 rounded-full bg-primary-light/10 text-primary-light dark:text-primary-dark text-[9px] font-bold uppercase tracking-widest border border-primary-light/20 dark:border-primary-dark/20">
  {step.badge}
  </span>
  </div>
- <h3 className="text-2xl font-black text-theme-primary mb-3 tracking-tight">{step.title}</h3>
+ <h3 className="text-lg sm:text-2xl font-bold text-theme-primary mb-2 sm:mb-3 tracking-tight">{step.title}</h3>
  <p className="text-theme-muted text-lg leading-relaxed">{step.desc}</p>
  </div>
  </motion.div>
@@ -370,8 +373,8 @@ function TrustPillars() {
  ]
 
  return (
- <section className="py-32 px-4 max-w-7xl mx-auto">
- <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+ <section className="py-14 sm:py-20 lg:py-32 px-4 max-w-7xl mx-auto">
+ <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
  {pillars.map((p, i) => {
  const Icon = p.icon
  return (
@@ -382,12 +385,12 @@ function TrustPillars() {
  whileHover={{ y: -5, scale: 1.02 }}
  viewport={{ once: false, amount: 0.2 }}
  transition={{ delay: i * 0.1, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
- className="p-10 rounded-[3rem] surface-card border border-theme dark:border-theme-strong flex flex-col items-center text-center group hover:bg-primary-light/5 dark:hover:surface-card/[0.08] transition-all"
+ className="p-5 sm:p-8 lg:p-10 rounded-[2rem] sm:rounded-[3rem] surface-card border border-theme dark:border-theme-strong flex flex-col items-center text-center group hover:bg-primary-light/5 dark:hover:surface-card/[0.08] transition-all"
  >
     <div className="mb-6 p-5 bg-primary-light/10 dark:bg-orange-500/10 rounded-2xl text-primary-light dark:text-primary-dark dark:text-orange-400 group-hover:scale-110 transition-transform">
     <Icon className="w-8 h-8" fill="currentColor" fillOpacity={0.15} />
  </div>
- <h4 className="text-2xl font-black text-theme-primary mb-3 tracking-tight">{p.title}</h4>
+ <h4 className="text-lg sm:text-2xl font-bold text-theme-primary mb-2 sm:mb-3 tracking-tight">{p.title}</h4>
  <p className="text-theme-muted text-[13px] leading-relaxed font-medium">{p.desc}</p>
  </motion.div>
  )
@@ -411,14 +414,10 @@ export function LandingV3() {
  useEffect(() => {
  const fetchData = async () => {
  try {
- const [s, c, l] = await Promise.all([
- getPublicStats(),
- getDiscoveryCategories(),
- getDiscoveryLocations()
- ])
- setStats(s)
- setCategories(c)
- setLocations(l)
+ const data = await getUnifiedDiscovery();
+ setStats(data.stats);
+ setCategories(data.categories);
+ setLocations(data.locations);
  } catch (error) {
  console.error('Failed to fetch landing data:', error)
  }
@@ -438,14 +437,14 @@ export function LandingV3() {
 
  {/* Page Sections */}
  <div className="relative z-10 bg-transparent w-full">
-  <div className="text-center py-24 px-4">
+  <div className="text-center py-12 sm:py-20 lg:py-24 px-4">
  <motion.div
  initial={{ opacity: 0, scale: 0.95, y: 30 }}
  whileInView={{ opacity: 1, scale: 1, y: 0 }}
  viewport={{ once: false, amount: 0.5 }}
  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
  >
- <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black text-theme-primary mb-6 leading-[0.9] tracking-tighter uppercase">
+ <h2 className="text-2xl sm:text-4xl lg:text-6xl xl:text-7xl font-bold text-theme-primary mb-4 sm:mb-6 leading-[0.9] tracking-tighter uppercase">
  Beyond the <br className="hidden sm:block" /> Tourist Trail.
  </h2>
  <p className="text-theme-muted text-lg sm:text-xl max-w-3xl mx-auto font-medium leading-relaxed">
@@ -459,7 +458,7 @@ export function LandingV3() {
  <TrustPillars />
 
  {/* Final Recruiting & Booking CTA */}
- <div className="max-w-7xl mx-auto px-4 pb-32 grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+ <div className="max-w-7xl mx-auto px-4 pb-14 sm:pb-24 lg:pb-32 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-stretch">
  <motion.div 
  initial={{ opacity: 0, y: 30 }}
  whileInView={{ opacity: 1, y: 0 }}
@@ -467,14 +466,14 @@ export function LandingV3() {
  viewport={{ once: false, amount: 0.3 }}
  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
  onClick={() => router.push('/tours')}
-  className="p-12 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-[3rem] border border-white/10 shadow-2xl relative overflow-hidden group flex flex-col justify-between cursor-pointer"
+  className="p-6 sm:p-10 lg:p-12 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-[3rem] border border-white/10 shadow-2xl relative overflow-hidden group flex flex-col justify-between cursor-pointer"
  >
  <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
  <div>
- <h3 className="text-4xl font-black text-white mb-4 tracking-tighter">Find Your Guide</h3>
- <p className="text-white/50 mb-10 text-xl leading-relaxed">Join thousands of travelers exploring the world with peace of mind.</p>
+ <h3 className="text-2xl sm:text-4xl font-bold text-white mb-3 sm:mb-4 tracking-tighter">Find Your Guide</h3>
+ <p className="text-white/50 mb-5 sm:mb-10 text-sm sm:text-xl leading-relaxed">Join thousands of travelers exploring the world with peace of mind.</p>
  </div>
-  <button className="inline-flex w-full justify-center py-5 bg-white text-blue-700 hover:bg-blue-50 rounded-xl font-black text-xl transition-all shadow-2xl active:scale-95">Browse All Tours</button>
+  <button className="inline-flex w-full justify-center py-3 sm:py-5 bg-white text-blue-700 hover:bg-blue-50 rounded-xl font-bold text-xl transition-all shadow-2xl active:scale-95">Browse All Tours</button>
  </motion.div>
 
  <motion.div 
@@ -484,14 +483,14 @@ export function LandingV3() {
  viewport={{ once: false, amount: 0.3 }}
  transition={{ delay: 0.2, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
  onClick={() => router.push('/auth/signup')}
-  className="p-12 bg-gradient-to-br from-gray-900 via-gray-950 to-black rounded-[3rem] border border-orange-500/20 hover:border-orange-500/40 shadow-xl relative overflow-hidden group flex flex-col justify-between cursor-pointer transition-colors"
+  className="p-6 sm:p-10 lg:p-12 bg-gradient-to-br from-gray-900 via-gray-950 to-black rounded-[3rem] border border-orange-500/20 hover:border-orange-500/40 shadow-xl relative overflow-hidden group flex flex-col justify-between cursor-pointer transition-colors"
  >
   <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-orange-500/20 transition-all duration-700" />
  <div>
- <h3 className="text-4xl font-black text-white mb-4 tracking-tighter">Become a Local Expert</h3>
- <p className="text-white/70 mb-10 text-xl leading-relaxed">Share your culture, build your reputation, and earn more with Whish payouts.</p>
+ <h3 className="text-2xl sm:text-4xl font-bold text-white mb-3 sm:mb-4 tracking-tighter">Become a Local Expert</h3>
+ <p className="text-white/70 mb-5 sm:mb-10 text-sm sm:text-xl leading-relaxed">Share your culture, build your reputation, and earn more with Whish payouts.</p>
  </div>
-  <button className="inline-flex w-full justify-center py-5 bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600 rounded-xl font-black text-xl transition-all shadow-xl active:scale-95">Apply to Guide</button>
+  <button className="inline-flex w-full justify-center py-3 sm:py-5 bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600 rounded-xl font-bold text-xl transition-all shadow-xl active:scale-95">Apply to Guide</button>
  </motion.div>
  </div>
  </div>

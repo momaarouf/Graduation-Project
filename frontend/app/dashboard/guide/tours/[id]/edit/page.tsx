@@ -63,7 +63,7 @@ export default function EditTourPage({ params }: { params: Promise<{ id: string 
  <p className="text-theme-secondary mb-6">{error ||"The tour you're trying to edit doesn't exist or you don't have permission."}</p>
  <button 
  onClick={() => window.location.reload()}
- className="px-8 py-3 bg-primary-light text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-primary-light-hover transition-all shadow-xl shadow-primary-light/20 hover:scale-105 active:scale-95"
+ className="px-8 py-3 bg-primary-light text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-primary-light-hover transition-all shadow-xl shadow-primary-light/20 hover:scale-105 active:scale-95"
  >
  Retry
  </button>
@@ -138,4 +138,4 @@ export default function EditTourPage({ params }: { params: Promise<{ id: string 
  tourId={id}
  />
  )
-}
+}

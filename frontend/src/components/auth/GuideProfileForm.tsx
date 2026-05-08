@@ -181,7 +181,7 @@ function LanguageSelector({ onAdd, existingLanguages }: LanguageSelectorProps) {
  <ListboxButton className="
  relative w-full
  flex items-center justify-between
- px-4 py-2.5
+ px-4 py-3 md:py-2.5
  surface-card
  border border-theme-strong
  rounded-lg
@@ -217,7 +217,7 @@ function LanguageSelector({ onAdd, existingLanguages }: LanguageSelectorProps) {
  value={lang.name}
  className={({ focus, selected }) => `
  relative cursor-default select-none
- py-2.5 pl-4 pr-4
+ py-3 md:py-2.5 pl-4 pr-4
  ${focus ? 'bg-primary-light/10 ' : ''}
  ${selected ? 'font-semibold' : ''}
  `}
@@ -250,7 +250,7 @@ function LanguageSelector({ onAdd, existingLanguages }: LanguageSelectorProps) {
  <ListboxButton className="
  relative w-full
  flex items-center justify-between
- px-4 py-2.5
+ px-4 py-3 md:py-2.5
  surface-card
  border border-theme-strong
  rounded-lg
@@ -285,7 +285,7 @@ function LanguageSelector({ onAdd, existingLanguages }: LanguageSelectorProps) {
  value={level.value}
  className={({ focus, selected }) => `
  relative cursor-default select-none
- py-2.5 px-4
+ py-3 md:py-2.5 px-4
  ${focus ? 'bg-primary-light/10 ' : ''}
  ${selected ? 'font-semibold' : ''}
  `}
@@ -490,7 +490,7 @@ if (isValid) {
  rows={5}
  placeholder="Tell travelers about yourself, your experience, and what makes your tours special..."
  className={`
- w-full pl-9 pr-3 py-2.5
+ w-full pl-9 pr-3 py-3 md:py-2.5
  surface-section
  border rounded-lg
  text-sm text-theme-primary
@@ -659,7 +659,7 @@ if (isValid) {
  placeholder="e.g., Ottoman History, Islamic Architecture, Food Tours"
  className="
  w-full
- px-4 py-2.5
+ px-4 py-3 md:py-2.5
  surface-section
  border border-theme-strong
  rounded-lg
@@ -790,7 +790,7 @@ if (isValid) {
  onClick={onBack}
  className="
  flex-1
- px-4 py-2.5
+ px-4 py-3 md:py-2.5
  surface-section
  text-theme-secondary
  font-medium
@@ -808,7 +808,7 @@ if (isValid) {
  disabled={isLoading}
  className="
  flex-1
- px-4 py-2.5
+ px-4 py-3 md:py-2.5
  bg-gradient-to-r from-blue-600 to-indigo-600
  dark:from-blue-700 dark:to-indigo-700
  text-white font-medium

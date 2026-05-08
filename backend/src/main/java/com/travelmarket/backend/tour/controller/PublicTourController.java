@@ -82,7 +82,11 @@ public class PublicTourController {
             @RequestParam(required = false) BigDecimal minLat,
             @RequestParam(required = false) BigDecimal maxLat,
             @RequestParam(required = false) BigDecimal minLng,
-            @RequestParam(required = false) BigDecimal maxLng) {
+            @RequestParam(required = false) BigDecimal maxLng,
+            // ── pagination params ───────────────────────────────────────────
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Integer offset
+    ) {
 
         // If all four bounding box params are provided → geo path
         boolean hasBbox = minLat != null && maxLat != null
@@ -113,7 +117,8 @@ public class PublicTourController {
         return publicTourService.listTours(
                 regions, category, cities, query, halalFriendly, instantBook,
                 minPrice, maxPrice, minDuration, maxDuration, minCap, maxCap,
-                minRating, isPremium, isFamilyFriendly, hasGroupDiscount, language, sortBy);
+                minRating, isPremium, isFamilyFriendly, hasGroupDiscount, language, sortBy,
+                limit, offset);
     }
 
     // ── Nearby search (radius) ──────────────────────────────────────────────────

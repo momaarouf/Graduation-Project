@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -131,10 +131,10 @@ const StatusBadge = ({ status }: { status: TourOccurrenceStatus }) => {
  const config = styles[status] || styles.SCHEDULED
 
  return (
- <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full ${config.bg} ${config.text}`}>
- <span className={`w-1.5 h-1.5 rounded-full ${config.dot} animate-pulse`} />
- {status}
- </span>
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full ${config.bg} ${config.text}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${config.dot} animate-pulse`} />
+      {status}
+    </span>
  )
 }
 
@@ -160,40 +160,40 @@ const OccurrenceCard = ({
  const capacityPct = Math.min(100, (occurrence.seatsReserved / occurrence.maxCapacity) * 100)
 
  return (
- <motion.div 
- layout
- initial={{ opacity: 0, y: 10 }}
- animate={{ opacity: 1, y: 0 }}
- exit={{ opacity: 0, scale: 0.95 }}
- className={`group relative surface-card  border border-theme rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 ${isPast ? 'opacity-70' : ''}`}
- >
- <div className="p-5">
- <div className="flex items-center justify-between mb-5">
- <div className="flex items-center gap-4">
- <div className="w-12 h-12 surface-section rounded-2xl flex flex-col items-center justify-center border border-theme dark:border-theme shadow-inner">
- <span className="text-[10px] font-black text-theme-muted uppercase leading-none mb-1">{dateInfo.month}</span>
- <span className="text-xl font-black text-theme-primary leading-none">{dateInfo.day}</span>
- </div>
- <div>
- <h4 className="text-sm font-black text-theme-primary uppercase tracking-tight leading-none mb-1.5">
- {dateInfo.weekday}, {dateInfo.year}
- </h4>
- <div className="flex items-center gap-2 text-xs font-bold text-theme-muted">
- <Clock className="w-3.5 h-3.5 text-primary-light dark:text-primary-dark" />
- {getBeirutTimeOnly(occurrence.startTimeUtc)} – {getBeirutTimeOnly(occurrence.endTimeUtc)}
- </div>
- </div>
- </div>
- <StatusBadge status={occurrence.status} />
- </div>
+    <motion.div 
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className={`group relative surface-card border border-theme rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 ${isPast ? 'opacity-70' : ''}`}
+    >
+      <div className="p-4 sm:p-5">
+        <div className="flex items-center justify-between mb-4 sm:mb-5">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 surface-section rounded-xl sm:rounded-2xl flex flex-col items-center justify-center border border-theme shadow-inner shrink-0">
+              <span className="text-[9px] font-bold text-theme-muted uppercase leading-none mb-0.5">{dateInfo.month}</span>
+              <span className="text-lg sm:text-xl font-bold text-theme-primary leading-none">{dateInfo.day}</span>
+            </div>
+            <div className="min-w-0">
+              <h4 className="text-xs sm:text-sm font-bold text-theme-primary uppercase tracking-tight leading-none mb-1.5 truncate">
+                {dateInfo.weekday}, {dateInfo.year}
+              </h4>
+              <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-theme-muted">
+                <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary-light dark:text-primary-dark" />
+                <span className="truncate">{getBeirutTimeOnly(occurrence.startTimeUtc)} – {getBeirutTimeOnly(occurrence.endTimeUtc)}</span>
+              </div>
+            </div>
+          </div>
+          <StatusBadge status={occurrence.status} />
+        </div>
 
- <div className="mb-6">
- <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-theme-muted mb-2">
- <span>Reserved Seats</span>
- <span className={isFull ? 'text-accent-light dark:text-accent-dark' : 'text-success-green'}>
- {occurrence.seatsReserved} / {occurrence.maxCapacity} Guests
- </span>
- </div>
+        <div className="mb-5 sm:mb-6">
+          <div className="flex items-center justify-between text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-theme-muted mb-2">
+            <span>Reserved Seats</span>
+            <span className={isFull ? 'text-accent-light dark:text-accent-dark' : 'text-success-green'}>
+              {occurrence.seatsReserved} / {occurrence.maxCapacity}
+            </span>
+          </div>
  <div className="h-2 w-full surface-section rounded-full overflow-hidden shadow-inner">
  <motion.div 
  initial={{ width: 0 }}
@@ -203,38 +203,36 @@ const OccurrenceCard = ({
  </div>
  </div>
 
- <div className="flex items-center gap-2">
- <Link
- href={`/dashboard/guide/bookings?occurrence=${occurrence.id}`}
- className="flex-1 h-10 surface-section hover:bg-primary-light/10 dark:hover:bg-primary-light/20 text-theme-secondary hover:text-primary-light dark:text-primary-dark dark:hover:text-primary-dark rounded-xl flex items-center justify-center gap-2 transition-all border border-theme dark:border-theme hover:border-primary-light dark:border-primary-dark dark:hover:border-primary-light dark:hover:border-primary-dark/30 text-xs font-black uppercase tracking-widest"
- >
- <Users className="w-4 h-4" />
- Attendees
- </Link>
- 
- <button 
- onClick={() => onAction('edit', occurrence.id)}
- disabled={tourStatus === 'PENDING_REVIEW'}
- className="w-10 h-10 surface-section hover:bg-success-green/10 dark:hover:bg-emerald-600/20 text-theme-muted hover:text-success-green dark:hover:text-emerald-400 border border-theme dark:border-theme hover:border-success-green dark:hover:border-success-green/30 rounded-xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed"
- title="Edit Time"
- >
- <Edit className="w-4 h-4" />
- </button>
-
- <button 
- onClick={() => onAction('delete', occurrence.id)}
- disabled={isLoading || tourStatus === 'PENDING_REVIEW'}
- className="w-10 h-10 surface-section hover:bg-danger-red/10 dark:hover:bg-red-600/20 text-theme-muted hover:text-danger-red dark:hover:text-red-400 border border-theme dark:border-theme hover:border-danger-red dark:hover:border-danger-red/30 rounded-xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed"
- title="Force Delete"
- >
- <Trash2 className="w-4 h-4" />
- </button>
- </div>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/dashboard/guide/bookings?occurrence=${occurrence.id}`}
+            className="flex-1 h-9 sm:h-10 surface-section hover:bg-primary-light/10 text-theme-secondary rounded-xl flex items-center justify-center gap-2 transition-all border border-theme text-[10px] sm:text-xs font-bold uppercase tracking-widest active:scale-95"
+          >
+            <Users className="w-3.5 h-3.5 sm:w-4 h-4" />
+            Attendees
+          </Link>
+          
+          <button 
+            onClick={() => onAction('edit', occurrence.id)}
+            disabled={tourStatus === 'PENDING_REVIEW'}
+            className="w-9 h-9 sm:w-10 sm:h-10 surface-section hover:bg-success-green/10 text-theme-muted hover:text-success-green border border-theme rounded-xl flex items-center justify-center transition-all disabled:opacity-50 active:scale-95"
+          >
+            <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </button>
+  
+          <button 
+            onClick={() => onAction('delete', occurrence.id)}
+            disabled={isLoading || tourStatus === 'PENDING_REVIEW'}
+            className="w-9 h-9 sm:w-10 sm:h-10 surface-section hover:bg-danger-red/10 text-theme-muted hover:text-danger-red border border-theme rounded-xl flex items-center justify-center transition-all disabled:opacity-50 active:scale-95"
+          >
+            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </button>
+        </div>
  </div>
  
  {isCancelled && (
  <div className="absolute inset-0 surface-card dark:bg-black/40 -[1px] flex items-center justify-center pointer-events-none">
- <div className="rotate-12 border-2 border-danger-red/50 text-danger-red/80 px-4 py-1 rounded-lg text-lg font-black uppercase tracking-widest shadow-xl">
+ <div className="rotate-12 border-2 border-danger-red/50 text-danger-red/80 px-4 py-1 rounded-lg text-lg font-bold uppercase tracking-widest shadow-xl">
  Cancelled
  </div>
  </div>
@@ -298,88 +296,88 @@ const OccurrenceModal = ({
  }
 
  return (
- <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80  animate-in fade-in duration-300">
- <motion.div 
- initial={{ scale: 0.9, opacity: 0 }}
- animate={{ scale: 1, opacity: 1 }}
- className="w-full max-w-md surface-card rounded-[2.5rem] shadow-2xl overflow-hidden border border-theme"
- >
- <div className="px-8 py-6 border-b border-theme flex items-center justify-between surface-section ">
- <h3 className="text-xl font-black text-theme-primary uppercase tracking-tight">
- {initialData ? 'Update Date' : 'New Departure'}
- </h3>
- <button onClick={onClose} className="p-2.5 hover:surface-section dark:hover:surface-card rounded-2xl transition-all text-theme-muted hover:text-theme-primary dark:hover:text-white active:scale-90">
- <X className="w-5 h-5" />
- </button>
- </div>
+  <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-black/80 animate-in fade-in duration-300">
+    <motion.div 
+      initial={{ scale: 0.9, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      className="w-full max-w-md surface-card rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl overflow-hidden border border-theme"
+    >
+      <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-theme flex items-center justify-between surface-section">
+        <h3 className="text-lg sm:text-xl font-bold text-theme-primary uppercase tracking-tight">
+          {initialData ? 'Update Date' : 'New Departure'}
+        </h3>
+        <button onClick={onClose} className="p-2 sm:p-2.5 hover:surface-section rounded-xl sm:rounded-2xl transition-all text-theme-muted active:scale-90">
+          <X className="w-5 h-5" />
+        </button>
+      </div>
 
- <form onSubmit={handleSubmit} className="p-8 space-y-8">
- <div className="space-y-6">
- <div className="space-y-2">
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest pl-1">Start Date & Time</label>
- <div className="relative group">
- <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light dark:text-primary-dark transition-colors" />
- <input
- type="datetime-local"
- required
- value={formData.startTime}
- onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
- className="w-full h-14 pl-12 pr-4 surface-section border-2 border-transparent focus:border-primary-light/50 rounded-2xl text-sm font-bold text-theme-primary transition-all outline-none"
- />
- </div>
- </div>
+      <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6 sm:space-y-8">
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest pl-1">Start Date & Time</label>
+            <div className="relative group">
+              <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light dark:text-primary-dark transition-colors" />
+              <input
+                type="datetime-local"
+                required
+                value={formData.startTime}
+                onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                className="w-full h-14 pl-12 pr-4 surface-section border-2 border-transparent focus:border-primary-light/50 rounded-2xl text-sm font-bold text-theme-primary transition-all outline-none"
+              />
+            </div>
+          </div>
 
- <div className="space-y-2">
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest pl-1">Arrival Date & Time</label>
- <div className="relative group">
- <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light dark:text-primary-dark transition-colors" />
- <input
- type="datetime-local"
- required
- value={formData.endTime}
- onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
- className="w-full h-14 pl-12 pr-4 surface-section border-2 border-transparent focus:border-primary-light/50 rounded-2xl text-sm font-bold text-theme-primary transition-all outline-none"
- />
- </div>
- {formData.startTime && formData.endTime && new Date(formData.endTime) <= new Date(formData.startTime) && (
- <p className="px-2 text-[10px] font-bold text-danger-red uppercase tracking-widest pt-1">
- ⚠️ End time must follow start time
- </p>
- )}
- </div>
- </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest pl-1">Arrival Date & Time</label>
+            <div className="relative group">
+              <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light dark:text-primary-dark transition-colors" />
+              <input
+                type="datetime-local"
+                required
+                value={formData.endTime}
+                onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                className="w-full h-14 pl-12 pr-4 surface-section border-2 border-transparent focus:border-primary-light/50 rounded-2xl text-sm font-bold text-theme-primary transition-all outline-none"
+              />
+            </div>
+            {formData.startTime && formData.endTime && new Date(formData.endTime) <= new Date(formData.startTime) && (
+              <p className="px-2 text-[10px] font-bold text-danger-red uppercase tracking-widest pt-1">
+                ⚠️ End time must follow start time
+              </p>
+            )}
+          </div>
+        </div>
 
- <div className="p-5 bg-primary-light/10 dark:bg-primary-light/10 rounded-[1.5rem] border border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark/30 flex items-center gap-4">
- <div className="w-10 h-10 bg-primary-light rounded-xl flex items-center justify-center shadow-lg shadow-primary-light/30 text-white">
- <Users className="w-5 h-5" />
- </div>
- <div>
- <span className="block text-[10px] font-black text-primary-light dark:text-primary-dark dark:text-primary-dark uppercase tracking-widest leading-tight">Capacity Rule</span>
- <p className="text-sm font-black text-theme-primary">
- {template.minCapacity} to {template.maxCapacity} Guests
- </p>
- </div>
- </div>
+        <div className="p-5 bg-primary-light/10 dark:bg-primary-light/10 rounded-[1.5rem] border border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark/30 flex items-center gap-4">
+          <div className="w-10 h-10 bg-primary-light rounded-xl flex items-center justify-center shadow-lg shadow-primary-light/30 text-white">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="block text-[10px] font-bold text-primary-light dark:text-primary-dark dark:text-primary-dark uppercase tracking-widest leading-tight">Capacity Rule</span>
+            <p className="text-sm font-bold text-theme-primary">
+              {template.minCapacity} to {template.maxCapacity} Guests
+            </p>
+          </div>
+        </div>
 
- <div className="flex gap-4">
- <button
- type="button"
- onClick={onClose}
- className="flex-1 h-14 surface-section text-theme-muted font-black rounded-2xl hover:surface-section dark:hover:surface-card transition-all border border-theme dark:border-theme uppercase text-xs tracking-widest"
- >
- Discard
- </button>
- <button
- type="submit"
- disabled={Boolean(loading || (formData.startTime && formData.endTime && new Date(formData.endTime) <= new Date(formData.startTime)))}
- className="flex-[2] h-14 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black rounded-2xl shadow-xl shadow-primary-light/20 transition-all active:scale-95 disabled:opacity-50 uppercase text-xs tracking-widest"
- >
- {loading ? <RefreshCw className="w-5 h-5 animate-spin mx-auto" /> : (initialData ? 'Confirm Update' : 'Publish Date')}
- </button>
- </div>
- </form>
- </motion.div>
- </div>
+        <div className="flex gap-3 sm:gap-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 h-12 sm:h-14 surface-section text-theme-muted font-bold rounded-xl sm:rounded-2xl hover:surface-section transition-all border border-theme uppercase text-[10px] sm:text-xs tracking-widest"
+          >
+            Discard
+          </button>
+          <button
+            type="submit"
+            disabled={Boolean(loading || (formData.startTime && formData.endTime && new Date(formData.endTime) <= new Date(formData.startTime)))}
+            className="flex-[2] h-12 sm:h-14 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl sm:rounded-2xl shadow-xl shadow-primary-light/20 transition-all active:scale-95 disabled:opacity-50 uppercase text-[10px] sm:text-xs tracking-widest"
+          >
+            {loading ? <RefreshCw className="w-5 h-5 animate-spin mx-auto" /> : (initialData ? 'Confirm' : 'Publish')}
+          </button>
+        </div>
+      </form>
+    </motion.div>
+  </div>
  )
 }
 
@@ -451,46 +449,46 @@ const BulkScheduleModal = ({ onClose, onSave, template }: {
  }
 
  return (
- <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80  animate-in fade-in duration-300">
- <motion.div 
- initial={{ scale: 0.95, opacity: 0 }}
- animate={{ scale: 1, opacity: 1 }}
- className="w-full max-w-4xl max-h-[90vh] surface-card rounded-[3rem] shadow-2xl overflow-hidden border border-theme flex flex-col"
- >
- <div className="px-8 py-6 border-b border-theme flex items-center justify-between">
- <div className="flex items-center gap-4">
- <div className="w-10 h-10 bg-primary-light/20 dark:bg-primary-dark/20 dark:bg-primary-light/20 rounded-xl flex items-center justify-center text-primary-light dark:text-primary-dark">
- <Repeat className="w-6 h-6" />
- </div>
- <h3 className="text-xl font-black text-theme-primary uppercase tracking-tight">Bulk Scheduling</h3>
- </div>
- <button onClick={onClose} className="p-2.5 hover:surface-section dark:hover:surface-card rounded-2xl transition-all active:scale-90 text-theme-muted">
- <X className="w-5 h-5" />
- </button>
- </div>
+  <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-black/80 animate-in fade-in duration-300">
+    <motion.div 
+      initial={{ scale: 0.95, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      className="w-full max-w-4xl max-h-[90vh] surface-card rounded-[2rem] sm:rounded-[3rem] shadow-2xl overflow-hidden border border-theme flex flex-col"
+    >
+      <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-theme flex items-center justify-between">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary-light/20 rounded-xl flex items-center justify-center text-primary-light">
+            <Repeat className="w-5 h-5 sm:w-6 sm:h-6" />
+          </div>
+          <h3 className="text-lg sm:text-xl font-bold text-theme-primary uppercase tracking-tight">Bulk Schedule</h3>
+        </div>
+        <button onClick={onClose} className="p-2 sm:p-2.5 hover:surface-section rounded-xl sm:rounded-2xl transition-all active:scale-90 text-theme-muted">
+          <X className="w-5 h-5" />
+        </button>
+      </div>
 
- <div className="flex-1 overflow-y-auto p-8">
+      <div className="flex-1 overflow-y-auto p-6 sm:p-8">
  <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
  <div className="space-y-8">
  <div className="grid grid-cols-2 gap-4">
  <div className="space-y-2">
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest pl-1">Range Start</label>
+ <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest pl-1">Range Start</label>
  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full h-12 px-4 surface-section rounded-2xl text-sm font-bold border-none outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark/50" />
  </div>
  <div className="space-y-2">
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest pl-1">Range End</label>
+ <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest pl-1">Range End</label>
  <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full h-12 px-4 surface-section rounded-2xl text-sm font-bold border-none outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark/50" />
  </div>
  </div>
 
  <div className="space-y-3">
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest pl-1">Weekly Pattern</label>
+ <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest pl-1">Weekly Pattern</label>
  <div className="flex flex-wrap gap-2">
  {weekDays.map((day, i) => (
  <button
  key={day}
  onClick={() => setSelectedDays(prev => prev.includes(i) ? prev.filter(d => d !== i) : [...prev, i])}
- className={`px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${selectedDays.includes(i) ? 'bg-primary-light text-white shadow-lg' : 'surface-section text-theme-muted hover:text-theme-secondary'}`}
+ className={`px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${selectedDays.includes(i) ? 'bg-primary-light text-white shadow-lg' : 'surface-section text-theme-muted hover:text-theme-secondary'}`}
  >
  {day}
  </button>
@@ -500,16 +498,16 @@ const BulkScheduleModal = ({ onClose, onSave, template }: {
 
  <div className="grid grid-cols-2 gap-4">
  <div className="space-y-2">
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest pl-1">Daily Start Time</label>
+ <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest pl-1">Daily Start Time</label>
  <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} className="w-full h-12 px-4 surface-section rounded-2xl text-sm font-bold border-none outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark/50" />
  </div>
  <div className="grid grid-cols-2 gap-2">
  <div className="space-y-2">
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest pl-1">Hours</label>
+ <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest pl-1">Hours</label>
  <input type="number" min="0" value={durationHours} onChange={e => setDurationHours(Number(e.target.value))} className="w-full h-12 px-4 surface-section rounded-2xl text-sm font-bold border-none outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark/50" />
  </div>
  <div className="space-y-2">
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest pl-1">Mins</label>
+ <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest pl-1">Mins</label>
  <input type="number" min="0" max="59" value={durationMinutes} onChange={e => setDurationMinutes(Number(e.target.value))} className="w-full h-12 px-4 surface-section rounded-2xl text-sm font-bold border-none outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark/50" />
  </div>
  </div>
@@ -517,14 +515,14 @@ const BulkScheduleModal = ({ onClose, onSave, template }: {
 
  <button
  onClick={generateDates}
- className="w-full h-14 surface-base text-white font-black rounded-2xl text-xs uppercase tracking-widest shadow-xl shadow-gray-400/10 active:scale-95 transition-all"
+ className="w-full h-14 surface-base text-white font-bold rounded-2xl text-xs uppercase tracking-widest shadow-xl shadow-gray-400/10 active:scale-95 transition-all"
  >
  Scan Range & Preview
  </button>
  </div>
 
  <div>
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest pl-1 mb-3 block">Departures Preview</label>
+ <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest pl-1 mb-3 block">Departures Preview</label>
  <div className="surface-section rounded-[2rem] p-4 border border-theme dark:border-theme">
  <CalendarPicker
  selectedDates={generatedDates}
@@ -541,11 +539,11 @@ const BulkScheduleModal = ({ onClose, onSave, template }: {
  </div>
 
  <div className="p-8 border-t border-theme flex gap-4">
- <button onClick={onClose} className="px-8 h-14 surface-section text-theme-muted font-black rounded-2xl text-xs uppercase tracking-widest">Cancel</button>
+ <button onClick={onClose} className="px-8 h-14 surface-section text-theme-muted font-bold rounded-2xl text-xs uppercase tracking-widest">Cancel</button>
  <button
  onClick={handleSubmit}
  disabled={loading || generatedDates.length === 0}
- className="flex-1 h-14 bg-primary-light text-white font-black rounded-2xl shadow-xl shadow-primary-light/30 disabled:opacity-50 text-xs uppercase tracking-widest flex items-center justify-center gap-2"
+ className="flex-1 h-14 bg-primary-light text-white font-bold rounded-2xl shadow-xl shadow-primary-light/30 disabled:opacity-50 text-xs uppercase tracking-widest flex items-center justify-center gap-2"
  >
  {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : `Commit ${generatedDates.length} Departures`}
  </button>
@@ -589,7 +587,7 @@ const BulkTimeShiftModal = ({ onClose, onSave, template }: {
  <div className="w-10 h-10 bg-orange-100 dark:bg-orange-500/20 rounded-xl flex items-center justify-center text-orange-600">
  <Clock className="w-6 h-6" />
  </div>
- <h3 className="text-xl font-black text-theme-primary uppercase tracking-tight">Time Sync</h3>
+ <h3 className="text-xl font-bold text-theme-primary uppercase tracking-tight">Time Sync</h3>
  </div>
  <button onClick={onClose} className="p-2.5 hover:surface-section dark:hover:surface-card rounded-2xl transition-all">
  <X className="w-5 h-5 text-theme-muted" />
@@ -604,7 +602,7 @@ const BulkTimeShiftModal = ({ onClose, onSave, template }: {
  </div>
 
  <div className="space-y-2">
- <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest pl-1">Global Start Time</label>
+ <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest pl-1">Global Start Time</label>
  <div className="relative group">
  <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-orange-500" />
  <input
@@ -618,8 +616,8 @@ const BulkTimeShiftModal = ({ onClose, onSave, template }: {
  </div>
 
  <div className="flex gap-4">
- <button type="button" onClick={onClose} className="flex-1 h-14 surface-section text-theme-muted font-black rounded-2xl uppercase text-[10px] tracking-widest">Abort</button>
- <button type="submit" disabled={loading} className="flex-1 h-14 bg-orange-600 text-white font-black rounded-2xl shadow-xl shadow-orange-500/30 uppercase text-[10px] tracking-widest">
+ <button type="button" onClick={onClose} className="flex-1 h-14 surface-section text-theme-muted font-bold rounded-2xl uppercase text-[10px] tracking-widest">Abort</button>
+ <button type="submit" disabled={loading} className="flex-1 h-14 bg-orange-600 text-white font-bold rounded-2xl shadow-xl shadow-orange-500/30 uppercase text-[10px] tracking-widest">
  {loading ? <RefreshCw className="w-5 h-5 animate-spin mx-auto" /> : 'Apply Sync'}
  </button>
  </div>
@@ -806,7 +804,7 @@ export default function TourOccurrencesPage() {
  <div className="min-h-screen flex items-center justify-center surface-section">
  <div className="flex flex-col items-center gap-4">
  <RefreshCw className="w-10 h-10 text-primary-light dark:text-primary-dark animate-spin" />
- <p className="text-xs font-black text-theme-muted uppercase tracking-[0.2em] animate-pulse">Initializing Interface...</p>
+ <p className="text-xs font-bold text-theme-muted uppercase tracking-[0.2em] animate-pulse">Initializing Interface...</p>
  </div>
  </div>
  )
@@ -814,64 +812,68 @@ export default function TourOccurrencesPage() {
 
  return (
  <div className="min-h-[calc(100vh-4rem)] pb-20">
- <header className="sticky top-0 z-40 surface-card  border-b border-theme dark:border-theme">
- <div className="max-w-7xl mx-auto px-4 h-24 flex items-center justify-between">
- <div className="flex items-center gap-6">
- <button onClick={() => router.back()} className="w-10 h-10 rounded-xl surface-section border border-theme dark:border-theme flex items-center justify-center text-theme-muted hover:text-theme-primary transition-all hover:scale-110 active:scale-95">
- <ChevronLeft className="w-6 h-6" />
- </button>
- <div>
- <div className="flex items-center gap-2 mb-1">
- <span className="text-[10px] font-black text-primary-light dark:text-primary-dark dark:text-primary-dark uppercase tracking-widest bg-primary-light/10 dark:bg-primary-light/20 px-2 py-0.5 rounded-md">Management</span>
- <span className="text-[10px] font-black text-theme-muted uppercase tracking-widest">ID #{tourId}</span>
- </div>
- <h1 className="text-2xl font-black text-theme-primary tracking-tight uppercase">{tour?.title}</h1>
- </div>
- </div>
-
- <div className="flex items-center gap-3">
- {tour?.status === 'PENDING_REVIEW' && (
- <button 
- onClick={handleWithdrawReview}
- className="h-12 px-6 bg-accent-light/10 dark:bg-accent-dark hover:bg-amber-600 text-white font-black rounded-2xl shadow-lg shadow-accent-light/20 flex items-center gap-2 transition-all active:scale-95 uppercase text-[10px] tracking-widest border border-accent-light dark:border-accent-dark"
- >
- <History className="w-4 h-4" /> Withdraw Review
- </button>
- )}
- <button 
- onClick={() => { setEditingOccId(null); setShowModal(true); }}
- disabled={tour?.status === 'PENDING_REVIEW'}
- className="h-12 px-6 bg-primary-light hover:bg-primary-light-hover text-white font-black rounded-2xl shadow-lg shadow-primary-light/30 flex items-center gap-2 transition-all active:scale-95 uppercase text-[10px] tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
- >
- <Plus className="w-4 h-4" /> Add Date
- </button>
- </div>
- </div>
- </header>
+  <header className="sticky top-0 z-40 surface-card border-b border-theme shadow-sm">
+    <div className="max-w-7xl mx-auto px-4 h-20 sm:h-24 flex items-center justify-between gap-4">
+      <div className="flex items-center gap-3 sm:gap-6 min-w-0">
+        <button onClick={() => router.back()} className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl surface-section border border-theme flex items-center justify-center text-theme-muted hover:text-theme-primary transition-all active:scale-95 shrink-0">
+          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+        </button>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 mb-0.5 sm:mb-1">
+            <span className="text-[9px] sm:text-[10px] font-bold text-primary-light dark:text-primary-dark uppercase tracking-widest bg-primary-light/10 px-2 py-0.5 rounded-md">Guide Hub</span>
+          </div>
+          <h1 className="text-base sm:text-2xl font-bold text-theme-primary tracking-tight uppercase truncate">{tour?.title}</h1>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        {tour?.status === 'PENDING_REVIEW' && (
+          <button 
+            onClick={handleWithdrawReview}
+            className="h-9 sm:h-12 px-3 sm:px-6 bg-accent-light/10 hover:bg-amber-600 text-white font-bold rounded-xl sm:rounded-2xl shadow-lg shadow-accent-light/20 flex items-center gap-2 transition-all active:scale-95 uppercase text-[9px] sm:text-[10px] tracking-widest border border-accent-light"
+          >
+            <History className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> 
+            <span className="hidden xs:inline">Withdraw</span>
+          </button>
+        )}
+        <button 
+          onClick={() => { setEditingOccId(null); setShowModal(true); }}
+          disabled={tour?.status === 'PENDING_REVIEW'}
+          className="h-9 sm:h-12 px-3 sm:px-6 bg-primary-light text-white font-bold rounded-xl sm:rounded-2xl shadow-lg shadow-primary-light/20 flex items-center gap-2 transition-all active:scale-95 uppercase text-[9px] sm:text-[10px] tracking-widest disabled:opacity-50"
+        >
+          <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> 
+          <span className="hidden xs:inline">Add Date</span>
+        </button>
+      </div>
+    </div>
+  </header>
 
  <main className="max-w-7xl mx-auto px-4 py-8">
  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
  <div className="lg:col-span-2 space-y-6">
  <div className="flex items-center justify-between mb-4">
- <div className="flex p-1 surface-section rounded-2xl border border-theme dark:border-theme-strong">
- <button 
- onClick={() => setActiveTab('upcoming')}
- className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'upcoming' ? 'surface-card text-primary-light dark:text-primary-dark dark:text-primary-dark shadow-md' : 'text-theme-muted hover:text-theme-secondary cursor-pointer'}`}
- >
- <LayoutGrid className="w-4 h-4" /> Upcoming ({upcomingOccs.length})
- </button>
- <button 
- onClick={() => setActiveTab('history')}
- className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'history' ? 'surface-card text-theme-primary shadow-md' : 'text-theme-muted hover:text-theme-secondary cursor-pointer'}`}
- >
- <History className="w-4 h-4" /> History ({historyOccs.length})
- </button>
- </div>
+        <div className="flex p-1 surface-section rounded-2xl border border-theme">
+          <button 
+            onClick={() => setActiveTab('upcoming')}
+            className={`flex items-center gap-2 px-3 sm:px-6 py-2 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'upcoming' ? 'surface-card text-primary-light shadow-md' : 'text-theme-muted'}`}
+          >
+            <LayoutGrid className="w-4 h-4" /> 
+            <span className="hidden sm:inline">Upcoming</span>
+            ({upcomingOccs.length})
+          </button>
+          <button 
+            onClick={() => setActiveTab('history')}
+            className={`flex items-center gap-2 px-3 sm:px-6 py-2 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'history' ? 'surface-card text-theme-primary shadow-md' : 'text-theme-muted'}`}
+          >
+            <History className="w-4 h-4" /> 
+            <span className="hidden sm:inline">History</span>
+            ({historyOccs.length})
+          </button>
+        </div>
  
- <div className="relative group">
- <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
- <input type="text" placeholder="Search..." className="h-10 pl-10 pr-4 surface-card border border-theme dark:border-theme rounded-xl text-xs font-bold outline-none focus:border-primary-light/50 transition-all w-48 group-hover:w-64" />
- </div>
+        <div className="relative group hidden sm:block">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
+          <input type="text" placeholder="Search..." className="h-10 pl-10 pr-4 surface-card border border-theme rounded-xl text-xs font-bold outline-none focus:border-primary-light/50 transition-all w-40 group-hover:w-56" />
+        </div>
  </div>
 
  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -895,20 +897,20 @@ export default function TourOccurrencesPage() {
  className="flex flex-col items-center justify-center py-24 surface-card rounded-[3rem] border-2 border-dashed border-theme"
  >
  <CalendarDays className="w-16 h-16 text-gray-200/10 mb-6" />
- <h3 className="text-xl font-black text-theme-muted uppercase tracking-widest mb-2">No Records Found</h3>
+ <h3 className="text-xl font-bold text-theme-muted uppercase tracking-widest mb-2">No Records Found</h3>
  <p className="text-sm font-bold text-theme-muted">Zero departures in this category yet.</p>
  </motion.div>
  )}
  </div>
 
  <div className="space-y-6">
- <div className="p-8 surface-card border border-theme rounded-[2.5rem] shadow-xl shadow-gray-200/50 dark:shadow-none sticky top-32">
- <div className="flex items-center gap-3 mb-6">
- <div className="w-10 h-10 bg-orange-100 dark:bg-orange-500/20 rounded-xl flex items-center justify-center text-orange-600">
- <Settings2 className="w-5 h-5" />
- </div>
- <h3 className="font-black text-theme-primary uppercase tracking-tight text-lg">Smart Tools</h3>
- </div>
+        <div className="p-6 sm:p-8 surface-card border border-theme rounded-[2rem] sm:rounded-[2.5rem] shadow-xl sticky top-32">
+          <div className="flex items-center gap-3 mb-5 sm:mb-6">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-orange-100 dark:bg-orange-500/20 rounded-xl flex items-center justify-center text-orange-600">
+              <Settings2 className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+            <h3 className="font-bold text-theme-primary uppercase tracking-tight text-base sm:text-lg">Smart Tools</h3>
+          </div>
 
  <div className="space-y-3">
  <button 
@@ -919,7 +921,7 @@ export default function TourOccurrencesPage() {
  <Repeat className="w-5 h-5" />
  </div>
  <div>
- <span className="block text-[10px] font-black text-primary-light dark:text-primary-dark dark:text-primary-dark uppercase tracking-widest mb-0.5">Bulk Schedule</span>
+ <span className="block text-[10px] font-bold text-primary-light dark:text-primary-dark dark:text-primary-dark uppercase tracking-widest mb-0.5">Bulk Schedule</span>
  <p className="text-xs font-bold text-theme-secondary ">Add multiple dates</p>
  </div>
  </button>
@@ -932,24 +934,24 @@ export default function TourOccurrencesPage() {
  <Clock className="w-5 h-5" />
  </div>
  <div>
- <span className="block text-[10px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-0.5">Time Sync</span>
+ <span className="block text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-0.5">Time Sync</span>
  <p className="text-xs font-bold text-theme-secondary ">Apply time globally</p>
  </div>
  </button>
 
  <div className="pt-8 pb-4 border-t border-theme mt-2">
- <div className="flex items-center justify-between text-[10px] font-black text-theme-muted uppercase tracking-widest mb-4">
+ <div className="flex items-center justify-between text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-4">
  <span>Stats</span>
  <AlertCircle className="w-3 h-3" />
  </div>
  <div className="grid grid-cols-2 gap-4">
  <div className="p-4 surface-section rounded-2xl border border-theme dark:border-theme">
- <span className="block text-[10px] font-black text-theme-muted uppercase mb-1">Upcoming</span>
- <span className="text-xl font-black text-theme-primary">{upcomingOccs.length}</span>
+ <span className="block text-[10px] font-bold text-theme-muted uppercase mb-1">Upcoming</span>
+ <span className="text-xl font-bold text-theme-primary">{upcomingOccs.length}</span>
  </div>
  <div className="p-4 surface-section rounded-2xl border border-theme dark:border-theme">
- <span className="block text-[10px] font-black text-theme-muted uppercase mb-1">History</span>
- <span className="text-xl font-black text-theme-primary">{historyOccs.length}</span>
+ <span className="block text-[10px] font-bold text-theme-muted uppercase mb-1">History</span>
+ <span className="text-xl font-bold text-theme-primary">{historyOccs.length}</span>
  </div>
  </div>
  </div>

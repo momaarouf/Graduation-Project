@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // GUIDE VERIFICATION FORM - STEP 4 (GUIDE ONLY)
 // ============================================================================
 // LOCATION: /frontend/src/components/auth/GuideVerificationForm.tsx
@@ -920,7 +920,7 @@ const isRequiredComplete = hasRequiredDocuments()
  disabled={isSubmitting}
  className="
  flex-1
- px-4 py-2.5
+ px-4 py-3 md:py-2.5
  surface-section
  text-theme-secondary
  font-medium
@@ -940,7 +940,7 @@ const isRequiredComplete = hasRequiredDocuments()
  disabled={!hasRequiredDocuments() || isSubmitting || !allUploadsComplete}
  className="
  flex-1
- px-4 py-2.5
+ px-4 py-3 md:py-2.5
  bg-gradient-to-r from-blue-600 to-indigo-600
  dark:from-blue-700 dark:to-indigo-700
  text-white font-medium

@@ -56,6 +56,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             JOIN FETCH r.traveler t
             JOIN FETCH t.user u
             JOIN FETCH r.occurrence o
+            JOIN FETCH o.template
             WHERE r.guideId = :guideId
               AND r.hidden = false
               AND r.deletedAtUtc IS NULL
@@ -76,6 +77,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             JOIN FETCH r.traveler t
             JOIN FETCH t.user u
             JOIN FETCH r.occurrence o
+            JOIN FETCH o.template
             WHERE r.tourTemplateId = :tourTemplateId
               AND r.hidden = false
               AND r.deletedAtUtc IS NULL
@@ -97,6 +99,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             JOIN FETCH r.traveler t
             JOIN FETCH t.user u
             JOIN FETCH r.occurrence o
+            JOIN FETCH o.template
             WHERE r.guideId = :guideId
               AND r.hidden = false
               AND r.deletedAtUtc IS NULL
@@ -123,6 +126,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             JOIN FETCH r.traveler t
             JOIN FETCH t.user u
             JOIN FETCH r.occurrence o
+            JOIN FETCH o.template
             WHERE r.travelerId = :travelerId
               AND r.deletedAtUtc IS NULL
             ORDER BY r.createdAt DESC

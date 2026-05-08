@@ -15,46 +15,42 @@
 
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import {
- QrCode,
- Camera,
- Users,
- User,
- Clock,
- CheckCircle,
- XCircle,
- UserPlus,
- Calendar,
- MapPin,
- Phone,
- Mail,
- MessageSquare,
- ChevronDown,
- Check,
- RefreshCw,
- Smartphone,
- Timer,
- TrendingUp,
- Loader2,
- Info,
- Sparkles,
+  QrCode,
+  Users,
+  User,
+  Clock,
+  CheckCircle,
+  XCircle,
+  UserPlus,
+  Calendar,
+  Phone,
+  Mail,
+  MessageSquare,
+  ChevronDown,
+  Check,
+  RefreshCw,
+  Smartphone,
+  Timer,
+  TrendingUp,
+  Loader2,
+  Info,
   ExternalLink,
-  AlertCircle
+  AlertCircle,
+  Search
 } from 'lucide-react'
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from '@headlessui/react'
 
 // API functions — all booking mutations go through this layer
 import {
- getGuideBookings,
- confirmBooking,
- rejectBooking,
- noShowBooking,
- checkInByQrToken,
- completeBooking,
+  getGuideBookings,
+  noShowBooking,
+  checkInByQrToken,
+  completeBooking,
 } from '@/src/lib/api/tours'
 import { BookingStatus, GuideBookingResponse } from '@/src/lib/types/tour.types'
 
@@ -63,34 +59,32 @@ import { BookingStatus, GuideBookingResponse } from '@/src/lib/types/tour.types'
 // ============================================================================
 
 interface OccurrenceGroup {
- occurrenceId: number
- tourId: number
- tourTitle: string
- startTimeUtc: string
- endTimeUtc: string
- bookings: GuideBookingResponse[]
+  occurrenceId: number
+  tourId: number
+  tourTitle: string
+  startTimeUtc: string
+  endTimeUtc: string
+  bookings: GuideBookingResponse[]
 }
 
 // ============================================================================
 // HELPER: Map backend BookingStatus to check-in display status
 // ============================================================================
-// The backend has no"no-show" status yet (future card), so we only show
-// the statuses the backend actually returns for this context.
 
 type CheckInDisplay = 'pending' | 'confirmed' | 'checked-in' | 'cancelled'
 
 function mapToCheckInDisplay(status: BookingStatus | string): CheckInDisplay {
- switch (status) {
- case BookingStatus.InProgress:
- case BookingStatus.Completed:
- return 'checked-in'
- case BookingStatus.Cancelled:
- return 'cancelled'
- case BookingStatus.Confirmed:
- return 'confirmed'
- default:
- return 'pending' // PendingGuide, PendingPayment all show as"pending"
- }
+  switch (status) {
+    case BookingStatus.InProgress:
+    case BookingStatus.Completed:
+      return 'checked-in'
+    case BookingStatus.Cancelled:
+      return 'cancelled'
+    case BookingStatus.Confirmed:
+      return 'confirmed'
+    default:
+      return 'pending'
+  }
 }
 
 // ============================================================================
@@ -98,126 +92,62 @@ function mapToCheckInDisplay(status: BookingStatus | string): CheckInDisplay {
 // ============================================================================
 
 interface StatusBadgeProps {
- status: CheckInDisplay
+  status: CheckInDisplay
 }
 
 function StatusBadge({ status }: StatusBadgeProps) {
- const config = {
- pending: {
- bg: 'bg-accent-light/20 dark:bg-accent-dark/20 dark:bg-amber-950/30',
- text: 'text-accent-light dark:text-accent-dark dark:text-amber-300',
- border: 'border-accent-light dark:border-accent-dark dark:border-accent-light dark:border-accent-dark',
- icon: Clock,
- label: 'Awaiting'
- },
- confirmed: {
- bg: 'bg-primary-light/20 dark:bg-primary-dark/20 ',
- text: 'text-blue-700 dark:text-blue-300',
- border: 'border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark',
- icon: Check,
- label: 'Confirmed'
- },
- 'checked-in': {
- bg: 'bg-success-green/20 dark:bg-emerald-950/30',
- text: 'text-emerald-700 dark:text-emerald-300',
- border: 'border-success-green dark:border-success-green',
- icon: CheckCircle,
- label: 'Checked In'
- },
- cancelled: {
- bg: 'surface-section',
- text: 'text-theme-secondary',
- border: 'border-theme',
- icon: XCircle,
- label: 'Cancelled'
- }
- }
+  const config = {
+    pending: { className: 'badge-warning', icon: Clock, label: 'Awaiting' },
+    confirmed: { className: 'badge-accent', icon: Check, label: 'Confirmed' },
+    'checked-in': { className: 'badge-success', icon: CheckCircle, label: 'Checked In' },
+    cancelled: { className: 'badge-neutral', icon: XCircle, label: 'Cancelled' }
+  }
 
- const { bg, text, border, icon: Icon, label } = config[status]
+  const { className, icon: Icon, label } = config[status]
 
- return (
- <span className={`
- inline-flex items-center gap-1
- px-2 py-1
- ${bg}
- ${border}
- border
- rounded-full
- ${text}
- text-xs font-medium
- `}>
- <Icon className="w-3 h-3" />
- {label}
- </span>
- )
+  return (
+    <span className={`badge-base ${className} gap-1 px-2 py-0.5 text-[10px] uppercase tracking-wider`}>
+      <Icon className="w-2.5 h-2.5" />
+      {label}
+    </span>
+  )
 }
 
 // ============================================================================
 // TOUR STATUS BADGE
 // ============================================================================
 
-// Determines the overall"tour status" from its bookings:
-// - If any booking is InProgress →"in-progress"
-// - If all bookings are Completed →"completed"
-// - Otherwise →"scheduled" (waiting for check-ins to begin)
 type TourStatus = 'scheduled' | 'in-progress' | 'completed'
 
 function deriveTourStatus(bookings: GuideBookingResponse[]): TourStatus {
- const hasInProgress = bookings.some(b => b.status === BookingStatus.InProgress)
- const allCompleted = bookings.length > 0 && bookings.every(
- b => b.status === BookingStatus.Completed || b.status === BookingStatus.Cancelled
- )
- if (allCompleted) return 'completed'
- if (hasInProgress) return 'in-progress'
- return 'scheduled'
+  const hasInProgress = bookings.some(b => b.status === BookingStatus.InProgress)
+  const allCompleted = bookings.length > 0 && bookings.every(
+    b => b.status === BookingStatus.Completed || b.status === BookingStatus.Cancelled
+  )
+  if (allCompleted) return 'completed'
+  if (hasInProgress) return 'in-progress'
+  return 'scheduled'
 }
 
 interface TourStatusBadgeProps {
- status: TourStatus
+  status: TourStatus
 }
 
 function TourStatusBadge({ status }: TourStatusBadgeProps) {
- const config = {
- scheduled: {
- bg: 'bg-primary-light/20 dark:bg-primary-dark/20 ',
- text: 'text-blue-700 dark:text-blue-300',
- border: 'border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark',
- icon: Clock,
- label: 'Scheduled'
- },
- 'in-progress': {
- bg: 'bg-success-green/20 dark:bg-emerald-950/30',
- text: 'text-emerald-700 dark:text-emerald-300',
- border: 'border-success-green dark:border-success-green',
- icon: TrendingUp,
- label: 'In Progress'
- },
- completed: {
- bg: 'bg-purple-100 dark:bg-purple-950/30',
- text: 'text-purple-700 dark:text-purple-300',
- border: 'border-purple-200 dark:border-purple-800',
- icon: CheckCircle,
- label: 'Completed'
- }
- }
+  const config = {
+    scheduled: { className: 'badge-accent', icon: Clock, label: 'Scheduled' },
+    'in-progress': { className: 'badge-success', icon: TrendingUp, label: 'In Progress' },
+    completed: { className: 'badge-primary', icon: CheckCircle, label: 'Completed' }
+  }
 
- const { bg, text, border, icon: Icon, label } = config[status]
+  const { className, icon: Icon, label } = config[status]
 
- return (
- <span className={`
- inline-flex items-center gap-1
- px-3 py-1
- ${bg}
- ${border}
- border
- rounded-full
- ${text}
- text-sm font-medium
- `}>
- <Icon className="w-4 h-4" />
- {label}
- </span>
- )
+  return (
+    <span className={`badge-base ${className} gap-1.5 px-3 py-1 text-[11px] uppercase tracking-widest`}>
+      <Icon className="w-3.5 h-3.5" />
+      {label}
+    </span>
+  )
 }
 
 // ============================================================================
@@ -238,11 +168,10 @@ function QRScannerModal({ isOpen, onClose, onScan }: QRScannerModalProps) {
   const [manualInput, setManualInput] = useState('')
   const [cameraError, setCameraError] = useState<string | null>(null)
   const scannerRef = useRef<Html5Qrcode | null>(null)
-  const regionId ="reader"
+  const regionId = "reader"
 
   useEffect(() => {
     if (isOpen && !scannerRef.current) {
-      // Check if browser supports camera access
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setCameraError("Your browser doesn't support camera access or you are not using HTTPS.")
         return
@@ -256,7 +185,6 @@ function QRScannerModal({ isOpen, onClose, onScan }: QRScannerModalProps) {
           setScanning(true)
           setCameraError(null)
           
-          // Request camera permission and start
           await html5QrCode.start(
             { facingMode: "environment" },
             {
@@ -276,7 +204,6 @@ function QRScannerModal({ isOpen, onClose, onScan }: QRScannerModalProps) {
           )
         } catch (err: any) {
           console.error("Camera error:", err)
-          // Specific message for insecure context
           if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
             setCameraError("Camera requires HTTPS on mobile. Use localhost or an HTTPS tunnel (like ngrok).")
           } else {
@@ -286,7 +213,6 @@ function QRScannerModal({ isOpen, onClose, onScan }: QRScannerModalProps) {
         }
       }
 
-      // Small delay to ensure the DOM element is fully painted
       const timer = setTimeout(startScanner, 300)
       return () => clearTimeout(timer)
     }
@@ -315,41 +241,31 @@ function QRScannerModal({ isOpen, onClose, onScan }: QRScannerModalProps) {
       const text = await navigator.clipboard.readText()
       if (text.length > 10) {
         setManualInput(text)
-        toast.success('Token pasted from clipboard!')
-      } else {
-        toast.error('Clipboard does not contain a valid token')
+        toast.success('Token pasted!')
       }
     } catch (err) {
-      toast.error('Could not access clipboard')
+      toast.error('Clipboard access denied')
     }
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
       <div className="w-full max-w-md surface-card rounded-3xl shadow-2xl overflow-hidden border border-theme">
-        {/* Header */}
         <div className="p-6 bg-primary-light">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 text-white">
               <QrCode className="w-6 h-6" />
               <h3 className="text-xl font-bold">Ticket Scanner</h3>
             </div>
-            <button
-              onClick={onClose}
-              className="p-1 hover:bg-white/10 rounded-lg text-white transition-colors"
-            >
+            <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-lg text-white transition-colors">
               <XCircle className="w-6 h-6" />
             </button>
           </div>
         </div>
 
-        {/* Scanner Content */}
         <div className="p-6">
           <div className="relative aspect-square surface-base rounded-2xl overflow-hidden border-2 border-theme bg-black">
-            {/* The actual scanner viewport */}
             <div id={regionId} className="w-full h-full" />
-            
-            {/* Overlay when not scanning/error */}
             {!scanning && !scannedData && (
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-black/40">
                 {cameraError ? (
@@ -365,29 +281,18 @@ function QRScannerModal({ isOpen, onClose, onScan }: QRScannerModalProps) {
                 )}
               </div>
             )}
-
-            {/* Scan success indicator */}
             {scannedData && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-success-green/90 text-white p-6 animate-in fade-in zoom-in duration-300">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-emerald-600/90 text-white p-6 animate-in fade-in zoom-in duration-300">
                 <CheckCircle className="w-16 h-16 mb-4" />
                 <p className="text-lg font-bold">Scanned Successfully!</p>
-                <p className="text-xs mt-2 opacity-80 break-all">{scannedData}</p>
               </div>
             )}
-
-            {/* Animated scan line */}
             {scanning && !scannedData && (
               <div className="absolute inset-x-0 top-0 h-1 bg-primary-light shadow-[0_0_15px_rgba(59,130,246,0.8)] animate-[scan_3s_linear_infinite]" />
             )}
           </div>
 
           <div className="mt-6 space-y-4">
-            <div className="text-center">
-              <p className="text-xs text-theme-muted mb-4">
-                Align the traveler&apos;s QR code within the frame
-              </p>
-            </div>
-
             <div className="relative">
               <input
                 type="text"
@@ -396,19 +301,14 @@ function QRScannerModal({ isOpen, onClose, onScan }: QRScannerModalProps) {
                 placeholder="Or enter token manually..."
                 className="w-full px-4 py-3 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light"
               />
-              <button
-                onClick={handlePasteFromClipboard}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-theme-muted hover:text-primary-light transition-colors"
-                title="Paste"
-              >
+              <button onClick={handlePasteFromClipboard} className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-theme-muted hover:text-primary-light transition-colors">
                 <Smartphone className="w-4 h-4" />
               </button>
             </div>
-
             <button
               onClick={handleConfirmManual}
               disabled={!manualInput.trim()}
-              className="w-full py-3 bg-primary-light hover:bg-primary-light-hover text-white font-bold rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-primary-light/20"
+              className="w-full py-3 bg-primary-light hover:bg-blue-600 text-white font-bold rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-primary-light/20"
             >
               Verify Ticket
             </button>
@@ -438,169 +338,121 @@ function QRScannerModal({ isOpen, onClose, onScan }: QRScannerModalProps) {
 // ============================================================================
 
 interface TravelerCardProps {
- booking: GuideBookingResponse
- onNoShow: (bookingId: number) => void
- onContact: (booking: GuideBookingResponse) => void
- now: Date
+  booking: GuideBookingResponse
+  onNoShow: (bookingId: number) => void
+  onContact: (booking: GuideBookingResponse) => void
+  now: Date
 }
 
-// Renders one traveler's booking as a card with check-in actions.
 function TravelerCard({ booking, onNoShow, onContact, now }: TravelerCardProps) {
- const [expanded, setExpanded] = useState(false)
- const displayStatus = mapToCheckInDisplay(booking.status)
+  const [expanded, setExpanded] = useState(false)
+  const displayStatus = mapToCheckInDisplay(booking.status)
 
- return (
- <div className="
- surface-card
- border border-theme
- rounded-xl
- overflow-hidden
- hover:shadow-md
- transition-shadow
-">
- {/* Main row */}
- <div className="p-4">
- <div className="flex items-start justify-between">
- <div className="flex items-center gap-3">
- {/* Avatar placeholder */}
- <div className="relative">
- <div className="
- w-10 h-10
- rounded-full
- surface-section
- overflow-hidden
- flex items-center justify-center
-">
- <User className="w-5 h-5 text-theme-muted" />
- </div>
- {displayStatus === 'checked-in' && (
- <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-success-green rounded-full border-2 border-theme " />
- )}
- </div>
+  return (
+    <div className="surface-card border border-theme rounded-xl overflow-hidden hover:shadow-md transition-shadow active:scale-[0.99]">
+      <div className="p-3.5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative shrink-0">
+              <div className="w-9 h-9 rounded-full bg-primary-light/10 flex items-center justify-center text-primary-light text-xs font-bold">
+                {booking.traveler?.fullName?.charAt(0) || 'T'}
+              </div>
+              {displayStatus === 'checked-in' && (
+                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-theme flex items-center justify-center">
+                  <Check className="w-2 h-2 text-white" />
+                </div>
+              )}
+            </div>
+            <div className="min-w-0">
+              <h4 className="font-bold text-sm text-theme-primary truncate max-w-[120px]">
+                {booking.traveler?.fullName || 'Unknown'}
+              </h4>
+              <div className="flex items-center gap-1.5 text-[10px] text-theme-muted uppercase font-bold mt-0.5">
+                <Users className="w-2.5 h-2.5" />
+                <span>{booking.peopleCount} PAX</span>
+                <span>•</span>
+                <span>#{booking.id}</span>
+              </div>
+            </div>
+          </div>
+          <StatusBadge status={displayStatus} />
+        </div>
 
- {/* Info */}
- <div>
- <h4 className="font-semibold text-theme-primary">
- {booking.traveler?.fullName || 'Unknown Traveler'}
- </h4>
- <div className="flex items-center gap-2 text-xs text-theme-muted ">
- <Users className="w-3 h-3" />
- <span>{booking.peopleCount} {booking.peopleCount === 1 ? 'person' : 'people'}</span>
- <span>•</span>
- <span>Booking #{booking.id}</span>
- </div>
- </div>
- </div>
+        <div className="flex items-center gap-2 mt-3.5">
+          {booking.status === BookingStatus.Confirmed && (
+            <button
+              onClick={() => onNoShow(booking.id)}
+              disabled={new Date(now) < new Date(booking.startTimeUtc)}
+              className={`flex-1 h-8 px-3 text-[10px] font-extrabold uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                new Date(now) < new Date(booking.startTimeUtc)
+                  ? 'surface-section text-theme-muted cursor-not-allowed opacity-50 border border-theme'
+                  : 'badge-danger border border-danger-red/20 shadow-sm active:scale-95'
+              }`}
+            >
+              <XCircle className="w-3.5 h-3.5" />
+              No Show
+            </button>
+          )}
+          <button
+            onClick={() => onContact(booking)}
+            className="flex-1 h-8 px-3 bg-surface-base hover:bg-surface-hover text-primary-light border border-theme text-[10px] font-extrabold uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            Contact
+          </button>
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="w-8 h-8 flex items-center justify-center surface-card text-theme-secondary rounded-lg active:scale-90 transition-all border border-theme"
+          >
+            <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
 
- <StatusBadge status={displayStatus} />
- </div>
+        {expanded && (
+          <div className="mt-4 pt-4 border-t border-theme space-y-3 animate-in slide-in-from-top-2 duration-300">
+            <div className="grid grid-cols-1 gap-2.5">
+              <a href={`mailto:${booking.traveler?.email}`} className="flex items-center gap-2 text-xs font-medium text-theme-secondary hover:text-primary-light truncate">
+                <Mail className="w-3.5 h-3.5 text-theme-muted" />
+                {booking.traveler?.email}
+              </a>
+              {booking.traveler?.phoneE164 && (
+                <a href={`tel:${booking.traveler.phoneE164}`} className="flex items-center gap-2 text-xs font-medium text-theme-secondary hover:text-primary-light">
+                  <Phone className="w-3.5 h-3.5 text-theme-muted" />
+                  {booking.traveler.phoneE164}
+                </a>
+              )}
+            </div>
 
- {/* Quick actions */}
- <div className="flex items-center gap-2 mt-3">
- {/* No-show button — enabled after tour starts */}
- {booking.status === BookingStatus.Confirmed && (
- <button
- onClick={() => onNoShow(booking.id)}
- disabled={new Date(now) < new Date(booking.startTimeUtc)}
- title={new Date(now) < new Date(booking.startTimeUtc) ?"Only available after tour starts" :"Mark as No-Show"}
- className={`
- flex-1
- px-3 py-1.5
- text-sm
- rounded-lg
- transition-colors
- flex items-center justify-center gap-1
- ${new Date(now) < new Date(booking.startTimeUtc)
- ? 'surface-section text-theme-muted cursor-not-allowed'
- : 'bg-red-600 hover:bg-red-700 text-white'
- }
- `}
- >
- <XCircle className="w-4 h-4" />
- No Show
- </button>
- )}
- <button
- onClick={() => onContact(booking)}
- className="
- px-3 py-1.5
- bg-primary-light hover:bg-primary-light-hover
- text-white text-sm
- rounded-lg
- transition-colors
- flex items-center justify-center gap-1
-"
- >
- <MessageSquare className="w-4 h-4" />
- Contact
- </button>
- {/* Manual check-in button REMOVED — QR code is mandatory */}
- <button
- onClick={() => setExpanded(!expanded)}
- className="
- px-3 py-1.5
- surface-section
- text-theme-secondary text-sm
- rounded-lg
- hover:surface-section dark:hover:surface-section
- transition-colors
-"
- >
- {expanded ? 'Less' : 'More'}
- </button>
- </div>
-
- {/* Expanded details — shows traveler contact info and check-in time */}
- {expanded && (
- <div className="mt-4 pt-4 border-t border-theme space-y-3">
- <div className="space-y-2">
- <div className="flex items-center gap-2 text-sm">
- <Mail className="w-4 h-4 text-theme-muted" />
- <a href={`mailto:${booking.traveler?.email}`} className="text-primary-light dark:text-primary-dark dark:text-primary-dark ">
- {booking.traveler?.email}
- </a>
- </div>
- {booking.traveler?.phoneE164 && (
- <div className="flex items-center gap-2 text-sm">
- <Phone className="w-4 h-4 text-theme-muted" />
- <a href={`tel:${booking.traveler.phoneE164}`} className="text-primary-light dark:text-primary-dark dark:text-primary-dark ">
- {booking.traveler.phoneE164}
- </a>
- </div>
- )}
-
- {/* Traveler's personalized message / request note */}
- {booking.message && (
- <div className="p-3 bg-primary-light/10 border border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark rounded-lg">
- <div className="flex items-center gap-2 mb-1 text-blue-800 dark:text-blue-300">
- <MessageSquare className="w-3.5 h-3.5" />
- <span className="text-xs font-bold uppercase tracking-wider">Note from Traveler</span>
- </div>
- <p className="text-sm text-blue-700 dark:text-blue-200 indent-0 italic">
- &ldquo;{booking.message}&rdquo;
- </p>
- </div>
- )}
- {/* Show check-in timestamp if guide has already scanned this traveler */}
- {booking.checkedInAtUtc && (
- <div className="flex items-center gap-2 text-sm text-success-green dark:text-emerald-400">
- <CheckCircle className="w-4 h-4" />
- <span>Checked in at {new Date(booking.checkedInAtUtc).toLocaleTimeString()}</span>
- </div>
- )}
- {/* Show completion timestamp for audit trail */}
- {booking.completedAtUtc && (
- <div className="flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400">
- <CheckCircle className="w-4 h-4" />
- <span>Completed at {new Date(booking.completedAtUtc).toLocaleTimeString()}</span>
- </div>
- )}
- </div>
- </div>
- )}
- </div>
- </div>
- )
+            {booking.message && (
+              <div className="p-3 bg-blue-500/5 border border-blue-500/10 rounded-xl">
+                <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-1">Note</p>
+                <p className="text-xs text-theme-secondary leading-relaxed">
+                  &ldquo;{booking.message}&rdquo;
+                </p>
+              </div>
+            )}
+            
+            {(booking.checkedInAtUtc || booking.completedAtUtc) && (
+              <div className="space-y-1.5 pt-1">
+                {booking.checkedInAtUtc && (
+                  <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-600 uppercase">
+                    <CheckCircle className="w-3 h-3" />
+                    In: {new Date(booking.checkedInAtUtc).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                )}
+                {booking.completedAtUtc && (
+                  <div className="flex items-center gap-2 text-[10px] font-bold text-purple-600 uppercase">
+                    <CheckCircle className="w-3 h-3" />
+                    Out: {new Date(booking.completedAtUtc).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
 
 // ============================================================================
@@ -608,127 +460,79 @@ function TravelerCard({ booking, onNoShow, onContact, now }: TravelerCardProps) 
 // ============================================================================
 
 interface TourOverviewProps {
- group: OccurrenceGroup
- tourStatus: TourStatus
- onCompleteTour: () => void
+  group: OccurrenceGroup
+  tourStatus: TourStatus
+  onCompleteTour: () => void
 }
 
-// Displays the selected occurrence's summary with stats, meeting time, and
-// the"Complete Tour" button (which marks all InProgress bookings as Completed).
 function TourOverview({ group, tourStatus, onCompleteTour }: TourOverviewProps) {
- const startTime = new Date(group.startTimeUtc)
- const endTime = new Date(group.endTimeUtc)
- const currentTime = new Date()
- const minutesUntilStart = Math.floor((startTime.getTime() - currentTime.getTime()) / (1000 * 60))
+  const startTime = new Date(group.startTimeUtc)
+  const endTime = new Date(group.endTimeUtc)
+  const currentTime = new Date()
+  const minutesUntilStart = Math.floor((startTime.getTime() - currentTime.getTime()) / (1000 * 60))
 
- // Compute stats from real bookings
- const confirmedCount = group.bookings.filter(
- b => b.status === BookingStatus.Confirmed
- ).length
- const checkedInCount = group.bookings.filter(
- b => b.status === BookingStatus.InProgress || b.status === BookingStatus.Completed
- ).length
- const totalBookings = group.bookings.length
+  const checkedInCount = group.bookings.filter(
+    b => b.status === BookingStatus.InProgress || b.status === BookingStatus.Completed
+  ).length
+  const totalBookings = group.bookings.length
 
- return (
- <div className="
- surface-card
- border border-theme
- rounded-xl
- p-6
-">
- {/* Header */}
- <div className="flex items-start justify-between mb-4">
- <div>
- <div className="flex items-center gap-2 mb-1">
- <h2 className="text-xl font-bold text-theme-primary">
- {group.tourTitle}
- </h2>
- <Link
- href={`/tours/${group.tourId}`}
- className="p-1 text-primary-light dark:text-primary-dark hover:bg-primary-light/10 dark:hover:surface-base rounded-md transition-colors"
- title="View Public Tour Page"
- >
- <ExternalLink className="w-4 h-4" />
- </Link>
- </div>
- <div className="flex items-center gap-4 text-sm text-theme-muted ">
- <span className="flex items-center gap-1">
- <Calendar className="w-4 h-4" />
- {startTime.toLocaleDateString('en-US', {
- weekday: 'long',
- month: 'long',
- day: 'numeric'
- })}
- </span>
- <span className="flex items-center gap-1">
- <Clock className="w-4 h-4" />
- {startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
- </span>
- <span className="flex items-center gap-1 surface-section px-2 py-0.5 rounded-md">
- <Timer className="w-3.5 h-3.5" />
- {Math.round((endTime.getTime() - startTime.getTime()) / 3600000 * 10) / 10}h Duration
- </span>
- </div>
- </div>
- <TourStatusBadge status={tourStatus} />
- </div>
+  return (
+    <div className="surface-card border border-theme rounded-2xl p-5 sm:p-6 shadow-sm">
+      <div className="flex items-start justify-between mb-5 gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 mb-1.5">
+            <h2 className="text-lg sm:text-xl font-bold text-theme-primary truncate">
+              {group.tourTitle}
+            </h2>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-theme-muted font-medium">
+            <span className="flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-primary-light" />
+              {startTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric', weekday: 'short' })}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-primary-light" />
+              {startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+        </div>
+        <TourStatusBadge status={tourStatus} />
+      </div>
 
- {/* Stats grid */}
- <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
- <div className="text-center">
- <div className="text-2xl font-bold text-theme-primary">
- {checkedInCount}/{totalBookings}
- </div>
- <div className="text-xs text-theme-muted ">Checked In</div>
- </div>
- <div className="text-center">
- <div className="text-2xl font-bold text-accent-light dark:text-accent-dark dark:text-amber-400">
- {confirmedCount}
- </div>
- <div className="text-xs text-theme-muted ">Pending Check-in</div>
- </div>
- <div className="text-center">
- <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
- {totalBookings}
- </div>
- <div className="text-xs text-theme-muted ">Total Bookings</div>
- </div>
- </div>
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="surface-section rounded-xl p-3 text-center border border-theme">
+          <div className="text-xl font-extrabold text-theme-primary tracking-tight">{checkedInCount}</div>
+          <div className="text-[9px] text-theme-muted font-bold uppercase tracking-widest">Checked In</div>
+        </div>
+        <div className="surface-section rounded-xl p-3 text-center border border-theme">
+          <div className="text-xl font-extrabold text-theme-primary tracking-tight">{totalBookings - checkedInCount}</div>
+          <div className="text-[9px] text-theme-muted font-bold uppercase tracking-widest">Left</div>
+        </div>
+        <div className="bg-primary-light/5 rounded-xl p-3 text-center border border-primary-light/20">
+          <div className="text-xl font-extrabold text-primary-light tracking-tight">{totalBookings}</div>
+          <div className="text-[9px] text-primary-light/70 font-bold uppercase tracking-widest">Total</div>
+        </div>
+      </div>
 
- {/* Actions */}
- <div className="flex items-center justify-end">
- <div className="flex gap-2">
- {/* Complete Tour: marks all InProgress bookings as Completed.
- Only shows when at least one booking is InProgress. */}
- {tourStatus === 'in-progress' && (
- <button
- onClick={onCompleteTour}
- className="
- px-4 py-2
- bg-primary-light hover:bg-primary-light-hover
- text-white
- rounded-lg
- transition-colors
-"
- >
- Complete Tour
- </button>
- )}
- </div>
- </div>
+      {tourStatus === 'in-progress' && (
+        <button
+          onClick={onCompleteTour}
+          className="w-full py-3 bg-[#16a34a] hover:bg-[#15803d] text-white font-extrabold rounded-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95 text-[11px] uppercase tracking-widest"
+        >
+          Complete Tour Session
+        </button>
+      )}
 
- {/* Countdown timer — shows when tour is scheduled and starting soon */}
- {tourStatus === 'scheduled' && minutesUntilStart > 0 && minutesUntilStart < 60 && (
- <div className="mt-4 p-2 bg-accent-light/10 dark:bg-accent-dark/10 dark:bg-amber-950/30 rounded-lg text-center">
- <Timer className="w-4 h-4 inline-block text-accent-light dark:text-accent-dark dark:text-amber-400 mr-1" />
- <span className="text-sm text-amber-800 dark:text-amber-300">
- Tour starts in {minutesUntilStart} minutes
- </span>
- </div>
- )}
- </div>
- )
+      {tourStatus === 'scheduled' && minutesUntilStart > 0 && minutesUntilStart < 60 && (
+        <div className="p-3 bg-amber-500/5 border border-amber-500/10 rounded-xl text-center flex items-center justify-center gap-2">
+          <Timer className="w-4 h-4 text-amber-500 animate-pulse" />
+          <span className="text-xs text-amber-700 dark:text-amber-400 font-bold uppercase tracking-wider">
+            Starts in {minutesUntilStart}m
+          </span>
+        </div>
+      )}
+    </div>
+  )
 }
 
 // ============================================================================
@@ -736,505 +540,320 @@ function TourOverview({ group, tourStatus, onCompleteTour }: TourOverviewProps) 
 // ============================================================================
 
 export default function GuideOnTourPage() {
- const router = useRouter()
+  const router = useRouter()
 
- // All guide bookings, grouped by occurrence for the tour selector
- const [groups, setGroups] = useState<OccurrenceGroup[]>([])
- // The currently selected occurrence group (one"active tour")
- const [selectedGroup, setSelectedGroup] = useState<OccurrenceGroup | null>(null)
- const [isScannerOpen, setIsScannerOpen] = useState(false)
- const [activeTab, setActiveTab] = useState<'travelers' | 'info'>('travelers')
- const [searchTerm, setSearchTerm] = useState('')
- const [isLoading, setIsLoading] = useState(true)
- const [isProcessing, setIsProcessing] = useState(false)
- const [now, setNow] = useState(new Date())
+  const [groups, setGroups] = useState<OccurrenceGroup[]>([])
+  const [selectedGroup, setSelectedGroup] = useState<OccurrenceGroup | null>(null)
+  const [isScannerOpen, setIsScannerOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<'travelers' | 'info'>('travelers')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [now, setNow] = useState(new Date())
 
- // Update 'now' every minute to keep time-gated buttons fresh
- useEffect(() => {
- const timer = setInterval(() => setNow(new Date()), 60000)
- return () => clearInterval(timer)
- }, [])
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000)
+    return () => clearInterval(timer)
+  }, [])
 
- // ── Data loading ──────────────────────────────────────────────────────────
- // Fetch all guide bookings then group by occurrenceId.
- // We show Confirmed and InProgress bookings as"active" occurrences;
- // Completed bookings are also shown so the guide can see the full roster
- // once the tour is done.
+  const fetchActiveBookings = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const res = await getGuideBookings()
+      const bookings: GuideBookingResponse[] = res || []
 
- const fetchActiveBookings = useCallback(async () => {
- setIsLoading(true)
- try {
- const res = await getGuideBookings()
- const bookings: GuideBookingResponse[] = res || []
+      const grouped = bookings.reduce((acc, booking) => {
+        const id = booking.occurrenceId
+        if (!acc[id]) {
+          acc[id] = {
+            occurrenceId: id,
+            tourId: booking.tourId,
+            tourTitle: booking.tourTitle,
+            startTimeUtc: booking.startTimeUtc,
+            endTimeUtc: booking.endTimeUtc,
+            bookings: []
+          }
+        }
+        acc[id].bookings.push(booking)
+        return acc
+      }, {} as Record<number, OccurrenceGroup>)
 
- // Group bookings by occurrence — each occurrence = one tour run
- const grouped = bookings.reduce((acc, booking) => {
- const id = booking.occurrenceId
- if (!acc[id]) {
- acc[id] = {
- occurrenceId: id,
- tourId: booking.tourId,
- tourTitle: booking.tourTitle,
- startTimeUtc: booking.startTimeUtc,
- endTimeUtc: booking.endTimeUtc,
- bookings: []
- }
- }
- acc[id].bookings.push(booking)
- return acc
- }, {} as Record<number, OccurrenceGroup>)
+      const occurrenceGroups = Object.values(grouped)
+      setGroups(occurrenceGroups)
 
- const occurrenceGroups = Object.values(grouped)
- setGroups(occurrenceGroups)
+      setSelectedGroup(prev => {
+        if (occurrenceGroups.length === 0) return null
+        if (!prev) return occurrenceGroups[0]
+        const refreshed = occurrenceGroups.find(g => g.occurrenceId === prev.occurrenceId)
+        return refreshed || occurrenceGroups[0]
+      })
+    } catch {
+      toast.error('Failed to load active tours')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
- // Update selected group without creating a circular dependency
- setSelectedGroup(prev => {
- if (occurrenceGroups.length === 0) return null
- if (!prev) return occurrenceGroups[0]
- 
- // Re-select same occurrence to preserve context, or fallback to first
- const refreshed = occurrenceGroups.find(g => g.occurrenceId === prev.occurrenceId)
- return refreshed || occurrenceGroups[0]
- })
- } catch {
- toast.error('Failed to load active tours')
- } finally {
- setIsLoading(false)
- }
- }, []) // Stable dependency array prevents infinite loops
+  useEffect(() => {
+    fetchActiveBookings()
+  }, [fetchActiveBookings])
 
- // Load bookings on mount
- useEffect(() => {
- fetchActiveBookings()
- }, [fetchActiveBookings])
+  const handleQRScan = async (qrToken: string) => {
+    setIsProcessing(true)
+    try {
+      const res = await checkInByQrToken(qrToken)
+      toast.success(`${res.traveler?.fullName || 'Traveler'} checked in!`)
+      fetchActiveBookings()
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'QR check-in failed')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
 
- // ── Handlers ──────────────────────────────────────────────────────────────
+  const handleNoShow = async (bookingId: number) => {
+    if (!confirm('Mark this traveler as a No-Show?')) return
 
+    setIsProcessing(true)
+    try {
+      await noShowBooking(bookingId, { reason: 'No-Show' })
+      toast.success('Reported')
+      fetchActiveBookings()
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
 
- // Called by the QR scanner modal when a token is confirmed.
- // The raw UUID scanned from the traveler's QR code is sent directly
- // to the backend, which validates it against this guide's own occurrences.
- const handleQRScan = async (qrToken: string) => {
- setIsProcessing(true)
- try {
- const res = await checkInByQrToken(qrToken)
- toast.success(`${res.traveler?.fullName || 'Traveler'} checked in!`)
- fetchActiveBookings()
- } catch (err: any) {
- const errorMessage = err.response?.data?.message || 'QR check-in failed';
- 
- if (err.response?.status === 404) {
- toast.error('QR code not recognized or not your tour')
- } else {
- toast.error(errorMessage)
- }
- } finally {
- setIsProcessing(false)
- }
- }
+  const onContact = (booking: GuideBookingResponse) => {
+    if (booking.traveler?.email) {
+      window.location.href = `mailto:${booking.traveler.email}`
+    }
+  }
 
- const handleNoShow = async (bookingId: number) => {
- if (!confirm('Are you sure you want to mark this traveler as a No-Show? This will cancel their booking.')) return
+  const handleCompleteTour = async () => {
+    if (!selectedGroup) return
+    const inProgressBookings = selectedGroup.bookings.filter(b => b.status === BookingStatus.InProgress)
+    if (inProgressBookings.length === 0) {
+      toast.error('No sessions in progress')
+      return
+    }
+    setIsProcessing(true)
+    try {
+      await Promise.all(inProgressBookings.map(b => completeBooking(b.id)))
+      toast.success('Tour session completed!')
+      fetchActiveBookings()
+    } catch (err: any) {
+      toast.error('Failed to complete')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
 
- setIsProcessing(true)
- try {
- await noShowBooking(bookingId, { reason: 'No-Show' })
- toast.success('Traveler marked as No-Show')
- fetchActiveBookings()
- } catch (err: any) {
- toast.error(err.response?.data?.message || 'Failed to report no-show')
- } finally {
- setIsProcessing(false)
- }
- }
+  const filteredBookings = useMemo(() => {
+    if (!selectedGroup) return []
+    return selectedGroup.bookings.filter(b =>
+      (b.traveler?.fullName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      String(b.id).includes(searchTerm)
+    )
+  }, [selectedGroup, searchTerm])
 
- // Contact traveler — future chat card
- const onContact = (booking: GuideBookingResponse) => {
- if (booking.traveler?.email) {
- window.location.href = `mailto:${booking.traveler.email}`
- }
- }
+  const tourStatus = useMemo(() => {
+    return selectedGroup ? deriveTourStatus(selectedGroup.bookings) : 'scheduled'
+  }, [selectedGroup])
 
- // Complete tour — marks ALL InProgress bookings for this occurrence as Completed.
- // completedAtUtc starts the 48h payout freeze (future payout card).
- const handleCompleteTour = async () => {
- if (!selectedGroup) return
- const inProgressBookings = selectedGroup.bookings.filter(
- b => b.status === BookingStatus.InProgress
- )
- if (inProgressBookings.length === 0) {
- toast.error('No in-progress bookings to complete')
- return
- }
- setIsProcessing(true)
- try {
- await Promise.all(inProgressBookings.map(b => completeBooking(b.id)))
- toast.success('Tour marked as completed!')
- fetchActiveBookings()
- } catch (err: any) {
- toast.error(err.response?.data?.message || 'Failed to complete tour')
- } finally {
- setIsProcessing(false)
- }
- }
+  if (isLoading) {
+    return (
+      <div className="pt-24 flex items-center justify-center min-h-[calc(100vh-4rem)]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary-light" />
+      </div>
+    )
+  }
 
- // Derived state — filter travelers by search term within the selected group
- const filteredBookings = selectedGroup
- ? selectedGroup.bookings.filter(b =>
- (b.traveler?.fullName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
- String(b.id).includes(searchTerm)
- )
- : []
+  if (groups.length === 0) {
+    return (
+      <div className="pt-12 sm:pt-16 min-h-[calc(100vh-4rem)] surface-base">
+        <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+          <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+          <h2 className="text-xl font-bold text-theme-primary mb-2">No Active Tours</h2>
+          <p className="text-theme-muted max-w-md mx-auto text-sm font-medium">
+            You don't have any upcoming tours with confirmed bookings. They will appear here once travelers book.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
- const tourStatus = selectedGroup ? deriveTourStatus(selectedGroup.bookings) : 'scheduled'
+  return (
+    <div className="surface-base pb-6">
+      <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 mb-8">
+            <div className="text-left">
+              <h1 className="text-2xl sm:text-4xl font-extrabold text-theme-primary mb-1 tracking-tight uppercase">
+                On-Tour <span className="text-primary-light">Toolkit</span>.
+              </h1>
+              <p className="text-xs sm:text-sm text-theme-muted font-bold uppercase tracking-widest">
+                Real-time check-ins and session management
+              </p>
+            </div>
 
- // ── Loading state ─────────────────────────────────────────────────────────
+            <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
+              {/* Tour selector */}
+              <div className="relative flex-1 sm:w-72 min-w-0">
+                <Listbox
+                  value={selectedGroup?.occurrenceId || 0}
+                  onChange={(val) => {
+                    const group = groups.find(g => g.occurrenceId === val)
+                    if (group) setSelectedGroup(group)
+                  }}
+                >
+                  <div className="relative">
+                    <ListboxButton className="relative w-full flex items-center justify-between px-4 py-2.5 surface-card border border-theme rounded-xl text-xs font-bold text-theme-primary shadow-sm active:scale-[0.98] transition-all">
+                      <span className="flex items-center gap-2 truncate">
+                        <Calendar className="w-4 h-4 text-primary-light shrink-0" />
+                        <span className="truncate uppercase tracking-wider">
+                          {selectedGroup
+                            ? `${new Date(selectedGroup.startTimeUtc).toLocaleDateString()} - ${selectedGroup.tourTitle}`
+                            : 'Select Tour'}
+                        </span>
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-theme-muted shrink-0" />
+                    </ListboxButton>
 
- if (isLoading) {
- return (
- <div className="pt-14 sm:pt-16 min-h-[calc(100vh-4rem)] flex items-center justify-center">
- <Loader2 className="w-8 h-8 animate-spin text-primary-light dark:text-primary-dark" />
- </div>
- )
- }
+                    <Transition leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+                      <ListboxOptions className="absolute z-50 mt-1.5 max-h-60 w-full overflow-auto rounded-xl surface-card py-1.5 text-xs font-bold shadow-xl border border-theme focus:outline-none">
+                        {groups.map((group) => (
+                          <ListboxOption
+                            key={group.occurrenceId}
+                            value={group.occurrenceId}
+                            className={({ focus, selected }) => `relative cursor-default select-none py-3 pl-10 pr-4 transition-colors uppercase tracking-wider ${
+                              focus ? 'bg-primary-light/10 text-primary-light' : 'text-theme-primary'
+                            } ${selected ? 'bg-primary-light/5' : ''}`}
+                          >
+                            {({ selected }) => (
+                              <>
+                                <span className="block truncate">{new Date(group.startTimeUtc).toLocaleDateString()} - {group.tourTitle}</span>
+                                {selected && <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-primary-light"><Check className="w-4 h-4" /></span>}
+                              </>
+                            )}
+                          </ListboxOption>
+                        ))}
+                      </ListboxOptions>
+                    </Transition>
+                  </div>
+                </Listbox>
+              </div>
 
- // ── Empty state — no active bookings ──────────────────────────────────────
+              <button
+                onClick={() => setIsScannerOpen(true)}
+                className="w-11 h-11 flex items-center justify-center bg-primary-light text-white rounded-xl shadow-lg shadow-primary-light/20 active:scale-90 transition-all shrink-0"
+              >
+                <QrCode className="w-5 h-5" />
+              </button>
 
- if (groups.length === 0) {
- return (
- <div className="pt-14 sm:pt-16 min-h-[calc(100vh-4rem)]">
- <div className="container-safe mx-auto max-w-7xl py-8 sm:py-10">
- <h1 className="text-2xl sm:text-3xl font-bold text-theme-primary mb-4">
- On-Tour Toolkit
- </h1>
- <div className="text-center py-20">
- <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300 " />
- <h2 className="text-xl font-semibold text-theme-secondary mb-2">
- No Active Tours
- </h2>
- <p className="text-theme-muted max-w-md mx-auto">
- You don&apos;t have any upcoming tours with confirmed bookings yet.
- Once travelers book your tours, they&apos;ll appear here.
- </p>
- </div>
- </div>
- </div>
- )
- }
+              <button
+                onClick={fetchActiveBookings}
+                className="w-11 h-11 flex items-center justify-center surface-card border border-theme text-theme-muted rounded-xl shadow-sm active:scale-90 transition-all shrink-0"
+              >
+                <RefreshCw className={`w-5 h-5 ${isProcessing ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+          </div>
 
- // ── Main render ───────────────────────────────────────────────────────────
+          {selectedGroup && (
+            <div className="mb-8">
+              <TourOverview
+                group={selectedGroup}
+                tourStatus={tourStatus}
+                onCompleteTour={handleCompleteTour}
+              />
+            </div>
+          )}
 
- return (
- <>
- {/* Page offset */}
- <div className="pt-14 sm:pt-16 min-h-[calc(100vh-4rem)]">
+          <div className="flex p-1 bg-theme/5 rounded-xl mb-6">
+            <button
+              onClick={() => setActiveTab('travelers')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+                activeTab === 'travelers' ? 'bg-white dark:bg-card-dark text-primary-light shadow-sm' : 'text-theme-muted'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              Travelers ({selectedGroup?.bookings.length || 0})
+            </button>
+            <button
+              onClick={() => setActiveTab('info')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+                activeTab === 'info' ? 'bg-white dark:bg-card-dark text-purple-600 shadow-sm' : 'text-theme-muted'
+              }`}
+            >
+              <Info className="w-4 h-4" />
+              Guidelines
+            </button>
+          </div>
 
- <div className="container-safe mx-auto max-w-7xl py-8 sm:py-10">
+          {activeTab === 'travelers' && (
+            <>
+              <div className="relative mb-6">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Find traveler by name or reference..."
+                  className="w-full pl-10 pr-4 py-3.5 surface-card border border-theme rounded-2xl text-sm text-theme-primary placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-light/20 transition-all"
+                />
+              </div>
 
- {/* Header */}
- <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
- <div>
- <h1 className="text-2xl sm:text-3xl font-bold text-theme-primary mb-1">
- On-Tour Toolkit
- </h1>
- <p className="text-sm text-theme-secondary ">
- Manage your active tours, check in travelers, and track progress
- </p>
- </div>
+              <div className="space-y-3">
+                {filteredBookings.length > 0 ? (
+                  filteredBookings.map(booking => (
+                    <TravelerCard key={booking.id} booking={booking} now={now} onNoShow={handleNoShow} onContact={onContact} />
+                  ))
+                ) : (
+                  <div className="text-center py-12 border border-dashed border-theme rounded-3xl">
+                    <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                    <p className="text-xs font-bold text-theme-muted uppercase tracking-widest">No travelers found</p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
 
- <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
- {/* Tour selector — picks which occurrence to manage */}
- <div className="relative flex-1 min-w-0 sm:w-80">
- <Listbox
- value={selectedGroup?.occurrenceId || 0}
- onChange={(val) => {
- const group = groups.find(g => g.occurrenceId === val)
- if (group) setSelectedGroup(group)
- }}
- >
- <div className="relative min-w-0">
- <ListboxButton className="
- relative w-full flex items-center justify-between
- px-3 sm:px-4 py-2.5
- surface-card 
- border border-theme 
- rounded-xl text-sm text-left 
- text-theme-primary 
- hover:border-primary-light dark:hover:border-primary-dark dark:hover:border-primary-light dark:hover:border-primary-dark 
- focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark/20 
- transition-all duration-200 shadow-sm hover:shadow-md
- overflow-hidden
-">
- <span className="flex items-center gap-2 min-w-0 truncate font-medium">
- <Calendar className="w-4 h-4 text-primary-light dark:text-primary-dark dark:text-primary-dark shrink-0" />
- <span className="truncate">
- {selectedGroup
- ? `${new Date(selectedGroup.startTimeUtc).toLocaleDateString()} - ${selectedGroup.tourTitle}`
- : 'Select a tour'}
- </span>
- </span>
- <ChevronDown className="w-5 h-5 text-theme-muted shrink-0 transition-transform duration-200 ui-open:rotate-180" />
- </ListboxButton>
+          {activeTab === 'info' && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="p-5 bg-purple-500/5 border border-purple-500/10 rounded-2xl">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0">
+                    <UserPlus className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-purple-900 dark:text-purple-200 mb-1">Waitlist System</h3>
+                    <p className="text-xs text-purple-700 dark:text-purple-300 leading-relaxed">
+                      Travelers manage their own waitlist entries. When a confirmed booking is cancelled, the first eligible waitlisted traveler is automatically promoted to a real booking by the system.
+                    </p>
+                  </div>
+                </div>
+              </div>
 
- <Transition
- leave="transition ease-in duration-100"
- leaveFrom="opacity-100"
- leaveTo="opacity-0"
- >
- <ListboxOptions className="
- absolute z-50 mt-1.5 max-h-60 w-full overflow-auto 
- rounded-xl surface-card 
- py-1.5 text-sm shadow-xl ring-1 ring-black/5 dark:ring-white/10 
- focus:outline-none scrollbar-hide
-">
- {groups.map((group) => (
- <ListboxOption
- key={group.occurrenceId}
- value={group.occurrenceId}
- className={({ focus, selected }) => `
- relative cursor-default select-none py-2.5 pl-10 pr-4 transition-colors
- ${focus ? 'bg-primary-light/10 text-primary-light dark:text-primary-dark dark:text-primary-dark ' : 'text-theme-primary'}
- ${selected ? 'font-semibold' : 'font-normal'}
- `}
- >
- {({ selected }) => (
- <>
- <span className={`block truncate ${selected ? 'text-primary-light dark:text-primary-dark dark:text-primary-dark ' : ''}`}>
- {new Date(group.startTimeUtc).toLocaleDateString()} - {group.tourTitle}
- </span>
- {selected ? (
- <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-primary-light dark:text-primary-dark dark:text-primary-dark ">
- <Check className="w-4 h-4" />
- </span>
- ) : null}
- </>
- )}
- </ListboxOption>
- ))}
- </ListboxOptions>
- </Transition>
- </div>
- </Listbox>
- </div>
+              <div className="p-5 bg-primary-light/5 border border-primary-light/10 rounded-2xl">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-primary-light/10 flex items-center justify-center shrink-0">
+                    <QrCode className="w-5 h-5 text-primary-light" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-blue-900 dark:text-blue-200 mb-1">Check-in Protocol</h3>
+                    <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+                      Scan the traveler's QR code at the meeting point to verify their ticket. This is mandatory for check-in and moves their booking from Confirmed to In Progress.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
- {/* Refresh button */}
- <button
- onClick={fetchActiveBookings}
- disabled={isProcessing}
- className="
- flex-shrink-0
- p-2.5
- surface-card
- border border-theme
- rounded-xl
- hover:surface-section dark:hover:surface-card
- transition-colors
-"
- >
- <RefreshCw className={`w-5 h-5 text-theme-muted ${isProcessing ? 'animate-spin' : ''}`} />
- </button>
-
- {/* QR Scanner button */}
- <button
- onClick={() => setIsScannerOpen(true)}
- className="
- flex-shrink-0
- flex items-center gap-2
- px-4 py-2.5
- bg-primary-light hover:bg-primary-light-hover
- text-white
- rounded-xl
- transition-colors
- shadow-sm
-"
- >
- <QrCode className="w-5 h-5" />
- <span className="hidden sm:inline">Scan QR</span>
- </button>
- </div>
- </div>
-
- {/* Tour Overview */}
- {selectedGroup && (
- <TourOverview
- group={selectedGroup}
- tourStatus={tourStatus}
- onCompleteTour={handleCompleteTour}
- />
- )}
-
- {/* Tabs */}
- <div className="flex gap-2 mt-6 mb-4">
- <button
- onClick={() => setActiveTab('travelers')}
- className={`
- px-4 py-2
- rounded-lg
- font-medium
- transition-colors
- flex items-center gap-2
- ${activeTab === 'travelers'
- ? 'bg-primary-light text-white'
- : 'surface-card text-theme-secondary border border-theme'
- }
- `}
- >
- <Users className="w-4 h-4" />
- Travelers ({selectedGroup?.bookings.length || 0})
- </button>
- <button
- onClick={() => setActiveTab('info')}
- className={`
- px-4 py-2
- rounded-lg
- font-medium
- transition-colors
- flex items-center gap-2
- ${activeTab === 'info'
- ? 'bg-purple-600 text-white'
- : 'surface-card text-theme-secondary border border-theme'
- }
- `}
- >
- <Info className="w-4 h-4" />
- Info
- </button>
- </div>
-
- {/* Search bar (for travelers tab) */}
- {activeTab === 'travelers' && (
- <div className="relative mb-4">
- <input
- type="text"
- value={searchTerm}
- onChange={(e) => setSearchTerm(e.target.value)}
- placeholder="Search travelers by name or booking ID..."
- className="
- w-full
- pl-4 pr-10 py-3
- surface-card
- border border-theme
- rounded-xl
- text-theme-primary
- placeholder-gray-500 dark:placeholder-gray-400
- focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark
-"
- />
- {searchTerm && (
- <button
- onClick={() => setSearchTerm('')}
- className="absolute right-3 top-1/2 -translate-y-1/2"
- >
- <XCircle className="w-5 h-5 text-theme-muted hover:text-theme-secondary" />
- </button>
- )}
- </div>
- )}
-
- {/* Travelers List */}
- {activeTab === 'travelers' && (
- <div className="space-y-3">
- {filteredBookings.length > 0 ? (
- filteredBookings.map(booking => (
- <TravelerCard
- key={booking.id}
- booking={booking}
- now={now}
- onNoShow={handleNoShow}
- onContact={onContact}
- />
- ))
- ) : (
- <div className="text-center py-12">
- <Users className="w-12 h-12 mx-auto mb-4 text-gray-300 " />
- <p className="text-theme-muted ">
- No travelers found
- </p>
- </div>
- )}
- </div>
- )}
-
- {/* Info tab — waitlist is read-only for guides, explain auto-promotion */}
- {activeTab === 'info' && (
- <div className="space-y-4">
- {/* Waitlist explainer — guides have no waitlist management API */}
- <div className="
- p-4 
- bg-purple-50 dark:bg-purple-950/20
- border border-purple-200 dark:border-purple-800
- rounded-xl
-">
- <div className="flex items-start gap-3">
- <UserPlus className="w-5 h-5 text-purple-600 dark:text-purple-400 mt-0.5" />
- <div>
- <h3 className="font-semibold text-purple-900 dark:text-purple-200 mb-1">
- Waitlist
- </h3>
- <p className="text-sm text-purple-700 dark:text-purple-300">
- Travelers manage their own waitlist entries. When a confirmed booking
- is cancelled, the first eligible waitlisted traveler is automatically
- promoted to a real booking by the system — no guide action required.
- </p>
- </div>
- </div>
- </div>
-
- {/* How check-in works */}
- <div className="
- p-4 
- bg-primary-light/10 
- border border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark
- rounded-xl
-">
- <div className="flex items-start gap-3">
- <QrCode className="w-5 h-5 text-primary-light dark:text-primary-dark dark:text-primary-dark mt-0.5" />
- <div>
- <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-1">
- QR Check-in
- </h3>
- <p className="text-sm text-blue-700 dark:text-blue-300">
- Scan the traveler&apos;s QR code at the meeting point to verify their ticket. 
- This is mandatory for check-in and moves their booking from Confirmed to In Progress.
- </p>
- </div>
- </div>
- </div>
- </div>
- )}
-
- {/* Quick stats footer */}
- {selectedGroup && (
- <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-4">
- <div className="p-3 surface-card border border-theme rounded-lg text-center">
- <div className="text-lg font-bold text-theme-primary">
- {selectedGroup.bookings.filter(b => b.status === BookingStatus.InProgress || b.status === BookingStatus.Completed).length}/{selectedGroup.bookings.length}
- </div>
- <div className="text-xs text-theme-muted ">Checked In</div>
- </div>
- <div className="p-3 surface-card border border-theme rounded-lg text-center">
- <div className="text-lg font-bold text-accent-light dark:text-accent-dark dark:text-amber-400">
- {selectedGroup.bookings.filter(b => b.status === BookingStatus.Confirmed).length}
- </div>
- <div className="text-xs text-theme-muted ">Pending</div>
- </div>
- <div className="p-3 surface-card border border-theme rounded-lg text-center">
- <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
- {selectedGroup.bookings.length}
- </div>
- <div className="text-xs text-theme-muted ">Total Bookings</div>
- </div>
- </div>
- )}
- </div>
- </div>
-
- {/* QR Scanner Modal */}
- <QRScannerModal
- isOpen={isScannerOpen}
- onClose={() => setIsScannerOpen(false)}
- onScan={handleQRScan}
- />
- </>
- )
+      <QRScannerModal isOpen={isScannerOpen} onClose={() => setIsScannerOpen(false)} onScan={handleQRScan} />
+    </div>
+  )
 }

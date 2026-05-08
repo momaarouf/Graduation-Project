@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import OnboardingBanner from './OnboardingBanner'

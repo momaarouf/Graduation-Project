@@ -1,6 +1,7 @@
-﻿import Navigation from '@/src/components/layout/Navigation'
+import Navigation from '@/src/components/layout/Navigation'
 import { LandingV3 } from '@/src/components/landing/LandingV3'
 import ImpactMap from '@/src/components/landing/ImpactMap'
+import { Suspense } from 'react'
 
 /**
  * HOME PAGE V3 - CINEMATIC & SPACIOUS
@@ -15,9 +16,11 @@ export default function HomePage() {
  {/* Dynamic Navigation */}
  <Navigation />
 
- <main className="relative overflow-hidden">
+ <main className="relative overflow-hidden pb-24 md:pb-0">
  {/* Unified Cinematic Experience */}
- <LandingV3 />
+ <Suspense fallback={<div className="min-h-screen bg-slate-950" />}>
+  <LandingV3 />
+ </Suspense>
  </main>
 
  {/* Footer is rendered by the root layout */}

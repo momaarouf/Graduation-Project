@@ -1,9 +1,8 @@
-﻿'use client';
+'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import apiClient, { setAccessToken, clearAccessToken, getAccessToken } from '@/src/lib/api/client';
-import axios from 'axios';
 import {
  authRegister,
  authLogin as apiAuthLogin,
@@ -91,8 +90,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  // If we don't have an access token in memory/localStorage, try refresh with the cookie
  if (!token) {
  try {
- const refreshRes = await axios.post(
- `${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`,
+ const refreshRes = await apiClient.post(
+ '/api/auth/refresh',
  {},
  { withCredentials: true }
  );
@@ -258,8 +257,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  // Manually refresh access token (used when needed, normally handled by interceptor)
  const refresh = async () => {
  try {
- const res = await axios.post(
- `${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`,
+ const res = await apiClient.post(
+ '/api/auth/refresh',
  {},
  { withCredentials: true }
  );

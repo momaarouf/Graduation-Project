@@ -227,46 +227,38 @@ function VerificationBadge({ status }: VerificationBadgeProps) {
 // STATS CARD COMPONENT
 // ============================================================================
 
-interface StatCardProps {
- icon: React.ElementType
- label: string
- value: string | number
- change?: string
- color: 'blue' | 'emerald' | 'amber' | 'purple' | 'pink'
-}
+function StatCard({ icon: Icon, label, value, color, change }: { icon: any; label: string; value: string | number; color: string; change?: string }) {
+  const colorClasses = {
+    blue: 'bg-primary-light/10 text-primary-light dark:text-primary-dark border-primary-light dark:border-primary-dark/40',
+    emerald: 'bg-success-green/10 text-success-green dark:text-emerald-400 border-success-green/40 dark:border-emerald-500/30',
+    amber: 'bg-accent-light/10 text-accent-light dark:text-amber-400 border-accent-light dark:border-amber-500/30',
+    purple: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20 dark:border-purple-500/30',
+    pink: 'bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20 dark:border-pink-500/30'
+  }
 
-function StatCard({ icon: Icon, label, value, change, color }: StatCardProps) {
- const colorClasses = {
- blue: 'bg-primary-light/10 text-primary-light dark:text-primary-dark dark:text-primary-dark border-primary-light dark:border-primary-dark/50 dark:border-primary-light dark:border-primary-dark/40',
- emerald: 'bg-success-green/10 dark:bg-emerald-950/30 text-success-green dark:text-emerald-400 border-success-green/50 dark:border-success-green/40',
- amber: 'bg-accent-light/10 dark:bg-accent-dark/10 dark:bg-amber-950/30 text-accent-light dark:text-accent-dark dark:text-amber-400 border-accent-light dark:border-accent-dark/50 dark:border-accent-light dark:border-accent-dark/40',
- purple: 'bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400 border-purple-100/50 dark:border-purple-800/40',
- pink: 'bg-pink-50 dark:bg-pink-950/30 text-pink-600 dark:text-pink-400 border-pink-100/50 dark:border-pink-800/40'
- }
-
- return (
- <motion.div 
- whileHover={{ y: -4 }}
- className="p-5 surface-card border border-theme dark:border-theme rounded-2xl shadow-sm transition-all duration-300"
- >
- <div className="flex items-center justify-between mb-3">
- <div className={` p-2.5 rounded-xl border ${colorClasses[color]} `}>
- <Icon className="w-4 h-4" />
- </div>
- {change && (
- <span className="text-[10px] font-black uppercase tracking-wider text-success-green dark:text-emerald-400 bg-success-green/10 dark:bg-emerald-950/30 px-2 py-0.5 rounded-md border border-success-green/50 dark:border-success-green/40">
- {change}
- </span>
- )}
- </div>
- <div className="text-2xl font-black text-theme-primary leading-none mb-1">
- {value}
- </div>
- <div className="text-[10px] font-black uppercase tracking-widest text-theme-muted">
- {label}
- </div>
- </motion.div>
- )
+  return (
+    <motion.div 
+      whileHover={{ y: -4 }}
+      className="p-3 sm:p-5 surface-card border border-theme rounded-2xl shadow-sm transition-all duration-300 overflow-hidden"
+    >
+      <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-2 sm:gap-4">
+        <div className={`p-2 sm:p-2.5 rounded-xl border flex-shrink-0 ${colorClasses[color as keyof typeof colorClasses]}`}>
+          <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+        </div>
+        <div className="min-w-0">
+          <div className="text-base sm:text-xl font-black text-theme-primary leading-none mb-1 truncate">{value}</div>
+          <div className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-theme-muted truncate">{label}</div>
+          {change && (
+            <div className="mt-1">
+              <span className="text-[8px] font-black uppercase tracking-wider text-success-green bg-success-green/10 px-1.5 py-0.5 rounded-md border border-success-green/40">
+                {change}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  )
 }
 
 // ============================================================================
@@ -287,7 +279,7 @@ function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarC
  return (
  <div className="relative mb-16">
  {/* Cover image */}
- <div className="relative h-48 sm:h-64 rounded-[2.5rem] overflow-hidden surface-section mb-6 group border border-theme shadow-xl">
+ <div className="relative h-48 sm:h-64 rounded-3xl sm:rounded-[2.5rem] overflow-hidden surface-section mb-6 group border border-theme shadow-xl">
  {profile.coverImage ? (
  <Image
  src={profile.coverImage}
@@ -310,60 +302,61 @@ function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarC
  </button>
  </div>
 
- {/* Profile info overlay - Lowered to -bottom-28 */}
- <div className="absolute -bottom-28 left-4 sm:left-8 flex items-end gap-6">
- {/* Avatar with edit button */}
- <div className="relative group/avatar">
- <div className=" relative w-24 h-24 sm:w-40 sm:h-40 rounded-3xl border-4 border-theme surface-card overflow-hidden shadow-2xl ring-2 ring-primary-light dark:ring-primary-dark/10 transition-all duration-700 hover:scale-105 group-hover/avatar:ring-4 group-hover/avatar:ring-primary-light dark:ring-primary-dark/30">
- {profile.avatar ? (
- <Image
- src={profile.avatar}
- alt={`${profile.firstName} ${profile.lastName}`}
- fill
- className="object-cover"
- />
- ) : (
- <div className="w-full h-full flex items-center justify-center surface-section">
- <User className="w-12 h-12 text-theme-muted" />
- </div>
- )}
- </div>
- 
- {/* Avatar edit button - Always accessible on hover */}
- <button
- onClick={onAvatarChange}
- className=" absolute -bottom-2 -right-2 p-2.5 bg-primary-light text-white rounded-xl shadow-lg hover:bg-primary-light-hover transition-all hover:scale-110 opacity-0 group-hover/avatar:opacity-100 z-10"
- title="Change profile picture"
- >
- <Camera className="w-5 h-5" />
- </button>
- </div>
+  {/* Profile info overlay */}
+  <div className="absolute -bottom-24 sm:-bottom-28 left-4 sm:left-8 flex flex-col sm:flex-row items-start sm:items-end gap-3 sm:gap-6">
+    {/* Avatar with edit button */}
+    <div className="relative group/avatar">
+      <div className="relative w-28 h-28 sm:w-40 sm:h-40 rounded-3xl border-4 border-theme surface-card overflow-hidden shadow-2xl ring-2 ring-primary-light dark:ring-primary-dark/10 transition-all duration-700 hover:scale-105 group-hover/avatar:ring-4 group-hover/avatar:ring-primary-light dark:ring-primary-dark/30">
+        {profile.avatar ? (
+          <Image
+            src={profile.avatar}
+            alt={`${profile.firstName} ${profile.lastName}`}
+            fill
+            className="object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center surface-section">
+            <User className="w-12 h-12 text-theme-muted" />
+          </div>
+        )}
+      </div>
+      
+      {/* Avatar edit button */}
+      <button
+        onClick={onAvatarChange}
+        className="absolute -bottom-2 -right-2 p-2 bg-primary-light text-white rounded-xl shadow-lg hover:bg-primary-light-hover transition-all opacity-100 sm:opacity-0 group-hover/avatar:opacity-100 z-10"
+      >
+        <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
+      </button>
+    </div>
 
- <div className="mb-6 space-y-1">
- <div className="flex items-center gap-3">
- <h1 className="text-2xl sm:text-4xl font-black text-theme-primary tracking-tight drop-shadow-sm group-hover:text-primary-light dark:text-primary-dark transition-colors">
- {profile.firstName} {profile.lastName}
- </h1>
- <VerificationBadge status={profile.verificationStatus as any} />
- </div>
- {isEditing ? (
- <input
- type="text"
- value={profile.tagline}
- onChange={(e) => {/* Handle tagline change if needed */}}
- className=" surface-card  px-3 py-1 rounded-lg text-white text-sm border border-theme focus:outline-none focus:ring-2 focus:ring-white/50 w-64"
- placeholder="Your tagline"
- />
- ) : (
- <p className="text-base font-black text-primary-light dark:text-primary-dark drop-shadow-sm tracking-tight italic opacity-90 transition-colors">
- {profile.tagline || 'Leading Local Expert'}
- </p>
- )}
- </div>
- </div>
+    <div className="mb-4 sm:mb-6 space-y-1">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+        <h1 className="text-2xl sm:text-4xl font-black text-theme-primary tracking-tight drop-shadow-md transition-colors break-words">
+          {profile.firstName} {profile.lastName}
+        </h1>
+        <div className="w-fit">
+          <VerificationBadge status={profile.verificationStatus as any} />
+        </div>
+      </div>
+      {isEditing ? (
+        <input
+          type="text"
+          value={profile.tagline}
+          onChange={(e) => {/* Handle tagline change if needed */}}
+          className="surface-card px-3 py-1 rounded-lg text-white text-sm border border-theme focus:outline-none focus:ring-2 focus:ring-white/50 w-full sm:w-64"
+          placeholder="Your tagline"
+        />
+      ) : (
+        <p className="text-sm sm:text-base font-black text-primary-light dark:text-primary-dark italic opacity-90">
+          {profile.tagline || 'Leading Local Expert'}
+        </p>
+      )}
+    </div>
+  </div>
 
  {/* Action buttons */}
-  <div className="absolute top-4 right-4 flex gap-3">
+  <div className="absolute top-4 right-4 flex flex-col sm:flex-row gap-2 sm:gap-3">
   {isEditing ? (
   <>
   <button
@@ -417,12 +410,12 @@ interface BioEditorProps {
 
 function BioEditor({ bio, tagline, isEditing, onChange }: BioEditorProps) {
  return (
- <motion.div 
- whileHover={{ y: -4 }}
- className="p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6"
- >
- <div className="absolute top-0 right-0 w-32 h-32 bg-primary-light/5 rounded-full -mr-16 -mt-16 blur-2xl" />
- <h3 className="text-2xl font-black text-theme-primary mb-6 tracking-tight flex items-center gap-2">
+  <motion.div 
+  whileHover={{ y: -4 }}
+  className="p-6 sm:p-10 surface-card border border-theme rounded-3xl sm:rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6"
+  >
+  <div className="absolute top-0 right-0 w-32 h-32 bg-primary-light/5 rounded-full -mr-16 -mt-16 blur-2xl" />
+  <h3 className="text-xl sm:text-2xl font-black text-theme-primary mb-4 sm:mb-6 tracking-tight flex items-center gap-2">
  Biography
  </h3>
 
@@ -458,7 +451,7 @@ function BioEditor({ bio, tagline, isEditing, onChange }: BioEditorProps) {
  <p className="text-lg font-black text-primary-light dark:text-primary-dark dark:text-primary-dark italic">
  {tagline}
  </p>
- <div className="prose prose-lg dark:prose-invert max-w-none text-theme-secondary leading-relaxed font-bold whitespace-pre-wrap">
+ <div className="prose prose-sm sm:prose-lg dark:prose-invert max-w-none text-theme-secondary leading-relaxed font-bold whitespace-pre-wrap break-words overflow-hidden">
  {bio}
  </div>
  </div>
@@ -485,7 +478,7 @@ function LanguagesEditor({ languages, isEditing, onAdd, onRemove, onChange }: La
  return (
  <motion.div 
  whileHover={{ y: -4 }}
- className=" p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6"
+ className="p-6 sm:p-10 surface-card border border-theme rounded-3xl sm:rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6"
  >
  <div className="flex items-center justify-between mb-8">
  <h3 className="text-[10px] font-black text-theme-secondary uppercase tracking-[0.25em] flex items-center gap-2">
@@ -585,7 +578,7 @@ function ExpertiseEditor({ expertise, isEditing, onAdd, onRemove, onChange }: Ex
  return (
  <motion.div 
  whileHover={{ y: -4 }}
- className=" p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6"
+ className="p-6 sm:p-10 surface-card border border-theme rounded-3xl sm:rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6"
  >
  <div className="flex items-center justify-between mb-8">
  <h3 className="text-[10px] font-black text-theme-secondary uppercase tracking-[0.25em] flex items-center gap-2">
@@ -669,7 +662,7 @@ interface PortfolioSectionProps {
 
 function PortfolioSection({ portfolio, guideId, isEditing, onAdd, onRemove }: PortfolioSectionProps) {
  return (
- <div className="p-10 md:p-12 surface-card border border-theme rounded-[2.5rem] shadow-xl relative overflow-hidden group transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6">
+ <div className="p-6 sm:p-10 md:p-12 surface-card border border-theme rounded-3xl sm:rounded-[2.5rem] shadow-xl relative overflow-hidden group transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6">
  <div className="absolute top-0 right-0 w-32 h-32 bg-orange-600/5 rounded-full -mr-16 -mt-16 blur-2xl" />
  <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-theme">
  <h3 className="text-2xl font-black text-theme-primary tracking-tight uppercase italic">
@@ -786,7 +779,7 @@ function VerificationSection({ status, rejectionReason }: VerificationSectionPro
  return (
  <motion.div 
  whileHover={{ y: -4 }}
- className="p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6 relative overflow-hidden group"
+ className="p-6 sm:p-10 surface-card border border-theme rounded-3xl sm:rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6 relative overflow-hidden group"
  >
  <Shield className="absolute -bottom-6 -right-6 w-24 h-24 text-primary-light dark:text-primary-dark/10 rotate-12 transition-transform duration-500" />
  <h3 className="text-lg font-black mb-8 flex items-center gap-2">
@@ -893,7 +886,7 @@ function SocialLinks({ links, isEditing, onChange }: SocialLinksProps) {
  }
 
  return (
- <div className=" p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6">
+ <div className="p-6 sm:p-10 surface-card border border-theme rounded-3xl sm:rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6">
  <h3 className="text-[10px] font-black text-theme-secondary mb-8 uppercase tracking-[0.25em] flex items-center gap-2">
  <Share2 className="w-4 h-4 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
  Social Presence
@@ -991,7 +984,7 @@ interface GuideInfoCardProps {
 
 function GuideInfoCard({ profile, totalTours, totalTravelers }: GuideInfoCardProps) {
  return (
- <div className=" p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6">
+ <div className="p-6 sm:p-10 surface-card border border-theme rounded-3xl sm:rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6">
  <h3 className="text-[10px] font-black text-theme-secondary mb-8 uppercase tracking-[0.25em] flex items-center gap-2">
  <Info className="w-4 h-4 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
  Expertise Data
@@ -1324,12 +1317,8 @@ export default function GuideProfilePage() {
  }
 
  return (
- <>
- {/* Page offset */}
- <div className="pt-14 sm:pt-16 min-h-screen surface-base relative overflow-hidden">
- <div className="absolute inset-x-0 top-0 h-[600px] bg-theme-grid opacity-[0.03] dark:opacity-[0.02] pointer-events-none" />
- 
- <div className="container-safe mx-auto max-w-7xl py-8 sm:py-10 relative z-10">
+ <div className="flex-1 overflow-y-auto overflow-x-hidden chat-scrollbar">
+ <div className="max-w-7xl mx-auto py-8 sm:py-10 px-4 sm:px-6 lg:px-8 relative z-10">
  
  {/* Profile Header */}
  <ProfileHeader
@@ -1418,7 +1407,7 @@ export default function GuideProfilePage() {
         isEditing={isEditing}
         onChange={handleSocialChange}
       />
-      <div className="p-10 surface-card border border-theme rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6">
+      <div className="p-6 sm:p-10 surface-card border border-theme rounded-3xl sm:rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6">
         <h3 className="text-[10px] font-black text-theme-secondary uppercase tracking-[0.25em] flex items-center gap-2">
           <MapPin className="w-4 h-4 text-orange-500" />
           Service Location
@@ -1450,30 +1439,29 @@ export default function GuideProfilePage() {
 
 
 
- </div>
- </div>
- {/* Hidden file inputs */}
- <input
- type="file"
- ref={avatarInputRef}
- className="hidden"
- accept="image/*"
- onChange={(e) => handleFileChange(e, 'avatar')}
- />
- <input
- type="file"
- ref={coverInputRef}
- className="hidden"
- accept="image/*"
- onChange={(e) => handleFileChange(e, 'cover')}
- />
- <PortfolioAddModal
- isOpen={isPortfolioModalOpen}
- onClose={() => setIsPortfolioModalOpen(false)}
- tours={tours}
- onToggle={handlePortfolioToggle}
- />
- </>
+  {/* Hidden file inputs */}
+  <input
+    type="file"
+    ref={avatarInputRef}
+    className="hidden"
+    accept="image/*"
+    onChange={(e) => handleFileChange(e, 'avatar')}
+  />
+  <input
+    type="file"
+    ref={coverInputRef}
+    className="hidden"
+    accept="image/*"
+    onChange={(e) => handleFileChange(e, 'cover')}
+  />
+  <PortfolioAddModal
+    isOpen={isPortfolioModalOpen}
+    onClose={() => setIsPortfolioModalOpen(false)}
+    tours={tours}
+    onToggle={handlePortfolioToggle}
+  />
+  </div>
+  </div>
  )
 }
 

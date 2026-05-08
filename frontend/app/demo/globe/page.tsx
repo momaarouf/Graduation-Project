@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { GlobePolaroids } from"@/src/components/ui/globe-polaroids"
 

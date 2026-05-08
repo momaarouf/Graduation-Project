@@ -7,7 +7,9 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
+ Globe,
  LayoutDashboard,
  Calendar,
  Heart,
@@ -33,6 +35,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import Navigation from '@/src/components/layout/Navigation'
+import ThemeToggle from '@/src/components/layout/ThemeToggle'
 import { BookingStatus } from '@/src/lib/types/tour.types'
 
 // ============================================================================
@@ -65,6 +68,8 @@ const NAV_ITEMS = [
  { href: '/dashboard/guide/verification', label: 'Verification', icon: Shield },
  { href: '/dashboard/guide/settings', label: 'Settings', icon: Settings },
 ]
+
+const MARKETPLACE_LINK = { href: '/tours', label: 'Explore Marketplace', icon: Globe }
 
 type NavItem = {
  href: string
@@ -230,22 +235,32 @@ export default function GuideDashboardLayout({
  }
 
  return (
- <div className="min-h-screen surface-base flex flex-col">
-      <Navigation />
- <div className="flex-1 flex relative pt-16">
+ <div className="h-dvh surface-base flex flex-col overflow-hidden">
+      <div className="hidden lg:block flex-none">
+        <Navigation />
+      </div>
+ <div className="flex-1 flex min-h-0 relative lg:pt-16">
  {/* ========================================
  MOBILE HEADER
  ======================================== */}
- <div className="lg:hidden flex items-center justify-between px-4 py-3 surface-card border-b border-theme">
- <h1 className="font-bold text-theme-primary">Guide Dashboard</h1>
- <button
- onClick={() => setIsSidebarOpen(!isSidebarOpen)}
- className="p-2 rounded-lg hover:surface-section dark:hover:surface-card transition-colors"
- aria-label="Toggle menu"
- >
- {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
- </button>
- </div>
+  <div className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 h-14 surface-card/80 backdrop-blur-md border-b border-theme shadow-sm">
+  <div className="flex items-center gap-3">
+  <div className="w-8 h-8 bg-primary-light/10 rounded-lg flex items-center justify-center">
+  <LayoutDashboard className="w-4 h-4 text-primary-light dark:text-primary-dark" />
+  </div>
+  <h1 className="font-bold text-[10px] uppercase tracking-[0.2em] text-theme-primary">Guide Hub</h1>
+  </div>
+  <div className="flex items-center gap-2">
+  <ThemeToggle />
+  <button
+  onClick={() => setIsSidebarOpen(true)}
+  className="p-2 rounded-xl hover:surface-section dark:hover:surface-card transition-all active:scale-90"
+  aria-label="Open menu"
+  >
+  <Menu className="w-6 h-6 text-theme-primary" />
+  </button>
+  </div>
+  </div>
 
  {/* ========================================
  SIDEBAR - DESKTOP (Collapsible)
@@ -304,84 +319,122 @@ export default function GuideDashboardLayout({
  {/* ========================================
  MOBILE SIDEBAR - DRAWER
  ======================================== */}
- {isSidebarOpen && (
- <div className="lg:hidden fixed inset-0 z-50 flex">
- {/* Backdrop */}
- <div
- className="fixed inset-0 bg-black/50"
- onClick={() => setIsSidebarOpen(false)}
- />
+  <AnimatePresence>
+  {isSidebarOpen && (
+ <div className="lg:hidden fixed inset-0 z-[100] flex">
+  {/* Backdrop */}
+  <motion.div
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  exit={{ opacity: 0 }}
+  className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+  onClick={() => setIsSidebarOpen(false)}
+  />
  
- {/* Drawer */}
- <div className="relative w-64 surface-card h-full overflow-y-auto">
- <div className="p-4">
- <div className="flex items-center justify-between mb-6">
- <h2 className="font-bold text-theme-primary">Guide Dashboard</h2>
- <button
- onClick={() => setIsSidebarOpen(false)}
- className="p-1 rounded-lg hover:surface-section dark:hover:surface-card"
- >
- <X className="w-5 h-5" />
- </button>
- </div>
+  {/* Drawer */}
+  <motion.div 
+  initial={{ x: '-100%' }}
+  animate={{ x: 0 }}
+  exit={{ x: '-100%' }}
+  transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+  className="relative w-[280px] surface-card h-full overflow-y-auto shadow-2xl flex flex-col"
+  >
+  <div className="p-5 border-b border-theme surface-section flex items-center justify-between">
+  <div className="flex items-center gap-3">
+  <div className="w-10 h-10 bg-primary-light rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary-light/20">
+  <LayoutDashboard className="w-5 h-5" />
+  </div>
+  <div>
+  <h2 className="font-bold text-xs uppercase tracking-widest text-theme-primary">Guide</h2>
+  <p className="text-[9px] font-bold text-theme-muted uppercase tracking-tighter">Control Center</p>
+  </div>
+  </div>
+  <button
+  onClick={() => setIsSidebarOpen(false)}
+  className="p-2.5 rounded-xl surface-base hover:surface-section dark:hover:surface-card transition-all active:scale-90"
+  >
+  <X className="w-5 h-5" />
+  </button>
+  </div>
 
- {/* Mobile Navigation */}
- <nav className="space-y-1">
- {NAV_ITEMS.map((item, index) => {
- if ('type' in item && item.type === 'divider') {
- return (
- <div key={`mobile-divider-${index}`} className="my-2 border-t border-theme" />
- )
- }
- const navItem = item as NavItem
- const Icon = navItem.icon
- const isActive = pathname === navItem.href
+  <div className="flex-1 p-4 overflow-y-auto">
+  {/* Marketplace Link - Mobile only (for easy exit) */}
+  <div className="mb-5 lg:hidden">
+  <Link
+  href={MARKETPLACE_LINK.href}
+  onClick={() => setIsSidebarOpen(false)}
+  className="flex items-center gap-4 px-4 py-2.5 rounded-2xl transition-all active:scale-[0.98] text-primary-light dark:text-primary-dark bg-primary-light/5 font-bold text-[11px] uppercase tracking-wider border border-primary-light/10"
+  >
+  <Globe className="w-4 h-4" />
+  <span>{MARKETPLACE_LINK.label}</span>
+  </Link>
+  </div>
 
- return (
- <Link
- key={navItem.href}
- href={navItem.href}
- onClick={() => setIsSidebarOpen(false)}
- className={`
- flex items-center justify-between px-3 py-2 rounded-lg transition-colors
- ${isActive
- ? 'bg-primary-light text-white'
- : 'text-theme-secondary hover:surface-section dark:hover:surface-card'
- }
- `}
- >
- <div className="flex items-center gap-3">
- <Icon className="w-4 h-4" />
- <span className="text-sm">{navItem.label}</span>
+  <nav className="space-y-1.5">
+  {NAV_ITEMS.map((item, index) => {
+  if ('type' in item && item.type === 'divider') {
+  return (
+  <div key={`mobile-divider-${index}`} className="my-3 border-t border-theme opacity-50" />
+  )
+  }
+  const navItem = item as NavItem
+  const Icon = navItem.icon
+  const isActive = pathname === navItem.href
+
+  return (
+  <Link
+  key={navItem.href}
+  href={navItem.href}
+  onClick={() => setIsSidebarOpen(false)}
+  className={`
+  flex items-center justify-between px-4 py-2.5 rounded-2xl transition-all active:scale-[0.98]
+  ${isActive
+  ? 'bg-primary-light text-white shadow-lg shadow-primary-light/20'
+  : 'text-theme-secondary hover:surface-section dark:hover:surface-card'
+  }
+  `}
+  >
+  <div className="flex items-center gap-4">
+  <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-theme-muted'}`} />
+  <span className={`text-[13px] font-bold ${isActive ? 'text-white' : 'text-theme-primary'}`}>{navItem.label}</span>
+  </div>
+  {navItem.badgeKey && badges[navItem.badgeKey] > 0 && (
+  <span className="px-2 py-0.5 bg-red-600 text-white text-[10px] font-bold rounded-full shadow-sm">
+  {badges[navItem.badgeKey]}
+  </span>
+  )}
+  </Link>
+  )
+  })}
+  </nav>
+  </div>
+
+  <div className="p-4 border-t border-theme surface-section pb-[calc(1rem+env(safe-area-inset-bottom))]">
+  <button 
+  onClick={() => logout()}
+  className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl text-danger-red hover:bg-danger-red/10 transition-all font-bold text-sm"
+  >
+  <LogOutIcon className="w-5 h-5" />
+  Sign Out
+  </button>
+  </div>
+  </motion.div>
  </div>
- {navItem.badgeKey && badges[navItem.badgeKey] > 0 && (
- <span className="px-1.5 py-0.5 bg-red-600 text-white text-xs font-bold rounded-full">
- {badges[navItem.badgeKey]}
- </span>
  )}
- </Link>
- )
- })}
-
-
- </nav>
- </div>
- </div>
- </div>
- )}
+ </AnimatePresence>
 
  {/* ========================================
  MAIN CONTENT
  ======================================== */}
- <main className="flex-1 min-w-0 transition-all duration-300 w-full" style={{ marginLeft: mounted && !isSidebarOpen ? (isCollapsed ? '5rem' : '16rem') : '0' }}>
- {/* Mobile Header in Main Content */}
- <div className="lg:hidden flex items-center justify-between px-4 py-3 surface-card border-b border-theme mb-4">
- <h1 className="font-bold text-theme-primary">Guide Dashboard</h1>
- <button onClick={() => setIsSidebarOpen(true)} className="p-2 rounded-lg hover:surface-section dark:hover:surface-card transition-colors">
- <Menu className="w-5 h-5" />
- </button>
- </div>
- {children}
+    <main 
+      className={`flex-1 min-w-0 transition-all duration-300 w-full pt-14 lg:pt-0 pb-[calc(4rem+1px+env(safe-area-inset-bottom))] lg:pb-0 flex flex-col min-h-0 ${pathname.includes('/messages') ? 'overflow-hidden' : 'overflow-y-auto chat-scrollbar'}`} 
+      style={{ 
+        marginLeft: mounted && typeof window !== 'undefined' && window.innerWidth >= 1024 
+          ? (isCollapsed ? '5rem' : '16rem') 
+          : '0' 
+      }}
+    >
+   {children}
  </main>
  </div>
  </div>

@@ -114,7 +114,7 @@ export default function ReviewList({
  id: String(newReview.id),
  travelerId: String(newReview.travelerId),
  guideReply: newReview.guideReply ? {
- comment: newReview.guideReply,
+ comment: typeof newReview.guideReply === 'string' ? newReview.guideReply : newReview.guideReply.comment,
  createdAt: newReview.guideRepliedAt ?? newReview.createdAt
  } : existing?.guideReply
  }
@@ -127,6 +127,19 @@ export default function ReviewList({
  syncHelpfulStatus()
  }
  }, [user?.userId, tourId]) // Re-run if user changes or tour changes
+
+ // Safe date formatting to prevent hydration mismatches
+ const [mounted, setMounted] = useState(false)
+ useEffect(() => { setMounted(true) }, [])
+
+ const formatDate = (dateStr: string, options: Intl.DateTimeFormatOptions) => {
+   if (!mounted) return "" 
+   try {
+     return new Date(dateStr).toLocaleDateString('en-US', options)
+   } catch (e) {
+     return ""
+   }
+ }
 
  const userRole = user?.role?.toUpperCase()
  const isAdmin = userRole === 'ADMIN'
@@ -401,12 +414,12 @@ export default function ReviewList({
  <div className="flex items-center gap-2">
  <p className="font-bold text-theme-primary group-hover:text-primary-light dark:group-hover:text-primary-dark transition-colors">{review.travelerName}</p>
  {review.travelerTier && (
- <span className="px-2 py-0.5 bg-primary-light/10 text-primary-light rounded-lg text-[10px] font-black uppercase tracking-widest border border-primary-light/20">{review.travelerTier}</span>
+ <span className="px-2 py-0.5 bg-primary-light/10 text-primary-light rounded-lg text-[10px] font-bold uppercase tracking-widest border border-primary-light/20">{review.travelerTier}</span>
  )}
  </div>
- <p className="text-xs text-theme-muted ">
- Toured {new Date(review.tourDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
- </p>
+  <p className="text-xs text-theme-muted ">
+  Toured {formatDate(review.tourDate, { month: 'short', year: 'numeric' })}
+  </p>
  </div>
  </Link>
  <div className="relative">
@@ -446,9 +459,9 @@ export default function ReviewList({
  <div className="flex items-center gap-0.5">
  {renderStars(review.ratingOverall || 0, "w-3.5 h-3.5")}
  </div>
- <span className="text-sm text-theme-muted whitespace-nowrap">
- {new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
- </span>
+  <span className="text-sm text-theme-muted whitespace-nowrap">
+  {formatDate(review.createdAt, { month: 'short', day: 'numeric', year: 'numeric' })}
+  </span>
  </div>
 
  <div className="space-y-4">
@@ -459,10 +472,10 @@ export default function ReviewList({
  {review.guideReply && (
  <div className="ml-10 p-5 surface-section border border-theme rounded-xl rounded-tl-none space-y-2 shadow-sm">
  <div className="flex items-center gap-2">
- <p className="text-[10px] font-black text-primary-light uppercase tracking-[0.2em]">Guide Response</p>
+ <p className="text-[10px] font-bold text-primary-light uppercase tracking-[0.2em]">Guide Response</p>
  <CheckCircle className="w-3" />
  </div>
- <p className="text-sm text-theme-muted italic leading-relaxed">
+ <p className="text-sm text-theme-muted leading-relaxed">
 "{typeof review.guideReply === 'string' ? review.guideReply : review.guideReply.comment}"
  </p>
  </div>
@@ -497,7 +510,7 @@ export default function ReviewList({
  ))}
 
  {!isFullPage && totalReviews > reviews.length && (
- <Link href={`/tours/${tourId}/reviews`} className="w-full py-4 block text-center text-sm font-black uppercase tracking-widest text-theme-primary border border-theme rounded-lg hover:surface-section dark:hover:surface-card transition-all shadow-md hover:shadow-lg active:scale-[0.98]">
+ <Link href={`/tours/${tourId}/reviews`} className="w-full py-4 block text-center text-sm font-bold uppercase tracking-widest text-theme-primary border border-theme rounded-lg hover:surface-section dark:hover:surface-card transition-all shadow-md hover:shadow-lg active:scale-[0.98]">
  Read all {totalReviews} reviews
  </Link>
  )}

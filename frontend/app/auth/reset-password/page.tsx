@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // RESET PASSWORD PAGE
 // ============================================================================
 // LOCATION: /frontend/src/app/auth/reset-password/page.tsx
@@ -56,8 +56,8 @@ export default async function ResetPasswordPage({ searchParams }: ResetPasswordP
  const { token } = await searchParams
 
  return (
- <AuthLayout hideBackButton={false}>
- <div className="container-safe mx-auto max-w-6xl pt-20 sm:pt-24 pb-8 sm:pb-12">
+ <>
+ <div className="container-safe mx-auto max-w-6xl pt-4 pb-8 sm:py-12">
  
  {/* Back to Login */}
  <div className="mb-6">
@@ -124,11 +124,11 @@ export default async function ResetPasswordPage({ searchParams }: ResetPasswordP
  <div className="w-full max-w-lg mx-auto lg:mx-0">
  
  {/* Mobile Header */}
- <div className="lg:hidden text-center mb-8">
- <h1 className="text-2xl font-bold text-theme-primary mb-2">
+ <div className="lg:hidden text-center mb-6 sm:mb-8">
+ <h1 className="text-2xl sm:text-3xl font-bold text-theme-primary mb-2">
  Reset Password
  </h1>
- <p className="text-sm text-theme-secondary ">
+ <p className="text-sm text-theme-muted font-medium">
  Enter your new password below
  </p>
  </div>
@@ -140,6 +140,6 @@ export default async function ResetPasswordPage({ searchParams }: ResetPasswordP
  </div>
  </div>
  </div>
- </AuthLayout>
+ </>
  )
 }

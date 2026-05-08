@@ -30,8 +30,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -94,7 +94,9 @@ public class PublicTourService {
             Boolean isFamilyFriendly,
             Boolean hasGroupDiscount,
             String language,
-            String sortBy
+            String sortBy,
+            Integer limit,
+            Integer offset
     ) {
         List<String> countryCodes = new java.util.ArrayList<>();
         List<String> actualRegions = new java.util.ArrayList<>();
@@ -124,6 +126,10 @@ public class PublicTourService {
 
         String sort = sortBy != null ? sortBy : "newest";
 
+        // Pagination: default limit 20, max 100; default offset 0
+        int pageLimit = limit != null ? Math.min(Math.max(limit, 1), 100) : 20;
+        int pageOffset = offset != null ? Math.max(offset, 0) : 0;
+
         List<TourTemplate> templates = switch (sort) {
             case "price_asc"  -> tourTemplateRepository.findWithFiltersPriceAsc(
                     TourTemplateStatus.PUBLISHED, regionFilter, countryFilter, categoryFilter, cityFilter, queryFilter,
@@ -139,25 +145,36 @@ public class PublicTourService {
                     minRating, isPremium, isFamilyFriendly, hasGroupDiscount, languageFilter);
         };
 
+        List<Long> templateIds = templates.stream().map(TourTemplate::getId).collect(Collectors.toList());
+
+        if (templateIds.isEmpty()) return new ArrayList<>();
+
+        // Batch-load occurrences and media — 2 queries instead of 2N
         Instant now = Instant.now();
+        Map<Long, TourOccurrence> nextOccurrenceByTemplateId = buildNextOccurrenceMap(templateIds, now);
+        Map<Long, TourMedia> coverByTemplateId = buildCoverMediaMap(templateIds);
+
         List<PublicTourCardResponse> results = new ArrayList<>();
-
         for (TourTemplate t : templates) {
-            List<TourOccurrence> upcoming = occurrenceRepository
-                    .findPublicFutureByTemplateId(t.getId(), now);
-
+            TourOccurrence next = nextOccurrenceByTemplateId.get(t.getId());
             // Skip tours with no future bookable occurrences
-            if (upcoming.isEmpty()) continue;
+            if (next == null) continue;
 
-            GuideProfile guide  = t.getGuide();
-            User guideUser      = userRepository.findById(guide.getUser().getId()).orElse(null);
-            List<TourMedia> media = tourMediaRepository.findCoverByTemplateId(t.getId());
-            TourOccurrence next = upcoming.get(0);
+            GuideProfile guide = t.getGuide();
+            User guideUser    = guide.getUser();
+            TourMedia cover   = coverByTemplateId.get(t.getId());
+            List<TourMedia> media = cover != null ? List.of(cover) : List.of();
 
             results.add(tourMapper.toPublicCardResponse(t, guide, guideUser, media, next));
         }
 
-        return results;
+        // Apply pagination to final results
+        int start = pageOffset;
+        int end = Math.min(start + pageLimit, results.size());
+        if (start >= results.size()) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(results.subList(start, end));
     }
 
     // ── Public: Bounding box search ─────────────────────────────────────────────
@@ -188,22 +205,23 @@ public class PublicTourService {
         List<TourTemplate> candidates = tourTemplateRepository
                 .findWithinBoundingBox(minLat, maxLat, minLng, maxLng);
 
+        List<Long> templateIds = candidates.stream().map(TourTemplate::getId).collect(Collectors.toList());
+        if (templateIds.isEmpty()) return new ArrayList<>();
+
         Instant now = Instant.now();
+        Map<Long, TourOccurrence> nextOccurrenceByTemplateId = buildNextOccurrenceMap(templateIds, now);
+        Map<Long, TourMedia> coverByTemplateId = buildCoverMediaMap(templateIds);
+
         List<PublicTourCardResponse> results = new ArrayList<>();
-
         for (TourTemplate t : candidates) {
+            TourOccurrence next = nextOccurrenceByTemplateId.get(t.getId());
+            if (next == null) continue;
 
-            // Skip tours with no upcoming bookable occurrences — same guard as listTours
-            List<TourOccurrence> upcoming = occurrenceRepository
-                    .findPublicFutureByTemplateId(t.getId(), now);
-            if (upcoming.isEmpty()) continue;
+            GuideProfile guide = t.getGuide();
+            User guideUser    = guide.getUser();
+            TourMedia cover   = coverByTemplateId.get(t.getId());
+            List<TourMedia> media = cover != null ? List.of(cover) : List.of();
 
-            GuideProfile guide  = t.getGuide();
-            User guideUser      = userRepository.findById(guide.getUser().getId()).orElse(null);
-            List<TourMedia> media = tourMediaRepository.findCoverByTemplateId(t.getId());
-            TourOccurrence next = upcoming.get(0);
-
-            // Build the card including the meeting coordinates for pin placement
             results.add(buildCardWithCoords(t, guide, guideUser, media, next));
         }
 
@@ -238,31 +256,31 @@ public class PublicTourService {
 
         List<TourTemplate> candidates = tourTemplateRepository.findWithinRadius(lat, lng, radiusKm);
 
+        List<Long> templateIds = candidates.stream().map(TourTemplate::getId).collect(Collectors.toList());
+        if (templateIds.isEmpty()) return new ArrayList<>();
+
         Instant now = Instant.now();
+        Map<Long, TourOccurrence> nextOccurrenceByTemplateId = buildNextOccurrenceMap(templateIds, now);
+        Map<Long, TourMedia> coverByTemplateId = buildCoverMediaMap(templateIds);
+
         List<NearbyTourResponse> results = new ArrayList<>();
-
         for (TourTemplate t : candidates) {
+            TourOccurrence next = nextOccurrenceByTemplateId.get(t.getId());
+            if (next == null) continue;
 
-            List<TourOccurrence> upcoming = occurrenceRepository
-                    .findPublicFutureByTemplateId(t.getId(), now);
-            if (upcoming.isEmpty()) continue;
+            GuideProfile guide = t.getGuide();
+            User guideUser    = guide.getUser();
+            TourMedia cover   = coverByTemplateId.get(t.getId());
+            List<TourMedia> media = cover != null ? List.of(cover) : List.of();
 
-            GuideProfile guide  = t.getGuide();
-            User guideUser      = userRepository.findById(guide.getUser().getId()).orElse(null);
-            List<TourMedia> media = tourMediaRepository.findCoverByTemplateId(t.getId());
-            TourOccurrence next = upcoming.get(0);
-
-            // Build the base card with coordinates
             PublicTourCardResponse card = buildCardWithCoords(t, guide, guideUser, media, next);
 
-            // Compute exact distance to attach — rounded to 1 decimal ("2.3 km away")
             double distKm = haversineKm(
                     lat, lng,
                     t.getMeetingLatitude().doubleValue(),
                     t.getMeetingLongitude().doubleValue()
             );
 
-            // Copy card fields into NearbyTourResponse and attach distance
             NearbyTourResponse nearby = new NearbyTourResponse();
             copyCardFields(card, nearby);
             nearby.setDistanceKm(Math.round(distKm * 10.0) / 10.0);
@@ -351,9 +369,7 @@ public class PublicTourService {
         }
 
         GuideProfile guide = t.getGuide();
-        User guideUser = userRepository.findById(guide.getUser().getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                        "Guide user data missing"));
+        User guideUser = guide.getUser(); // already loaded via JOIN FETCH on the template query
 
         List<TourMedia> media = tourMediaRepository.findAllByTemplateIdOrdered(t.getId());
         List<TourOccurrence> occurrences = occurrenceRepository
@@ -404,15 +420,22 @@ public class PublicTourService {
         if (ids == null || ids.isEmpty()) return new java.util.ArrayList<>();
 
         List<TourTemplate> templates = tourTemplateRepository.findAllById(ids);
-        Instant now = Instant.now();
-        List<PublicTourCardResponse> results = new java.util.ArrayList<>();
+        if (templates.isEmpty()) return new java.util.ArrayList<>();
 
+        List<Long> templateIds = templates.stream().map(TourTemplate::getId).collect(Collectors.toList());
+        Instant now = Instant.now();
+
+        // Batch-load media and occurrences
+        Map<Long, TourMedia> coverByTemplateId = buildCoverMediaMap(templateIds);
+        Map<Long, TourOccurrence> nextOccurrenceByTemplateId = buildNextOccurrenceMap(templateIds, now);
+
+        List<PublicTourCardResponse> results = new java.util.ArrayList<>();
         for (TourTemplate t : templates) {
             GuideProfile guide  = t.getGuide();
-            User guideUser      = userRepository.findById(guide.getUser().getId()).orElse(null);
-            List<TourMedia> media = tourMediaRepository.findCoverByTemplateId(t.getId());
-            List<TourOccurrence> upcoming = occurrenceRepository.findNextScheduledByTemplateId(t.getId(), now);
-            TourOccurrence next = upcoming.isEmpty() ? null : upcoming.get(0);
+            User guideUser      = guide.getUser();
+            TourMedia cover     = coverByTemplateId.get(t.getId());
+            List<TourMedia> media = cover != null ? List.of(cover) : List.of();
+            TourOccurrence next = nextOccurrenceByTemplateId.get(t.getId());
             results.add(tourMapper.toPublicCardResponse(t, guide, guideUser, media, next));
         }
         return results;
@@ -439,12 +462,28 @@ public class PublicTourService {
     public List<GuidePortfolioTourResponse> getGuidePortfolio(Long guideId) {
         GuideProfile guide = findGuideProfileChecked(guideId);
         List<TourTemplate> portfolioTours = tourTemplateRepository.findPortfolioByGuideId(guide.getId());
-        List<GuidePortfolioTourResponse> results = new ArrayList<>();
+        if (portfolioTours.isEmpty()) return new ArrayList<>();
 
+        List<Long> templateIds = portfolioTours.stream().map(TourTemplate::getId).collect(Collectors.toList());
+
+        // Batch-load media and occurrences
+        Map<Long, TourMedia> coverByTemplateId = buildCoverMediaMap(templateIds);
+
+        // For portfolio, we need completed counts. We can't use buildNextOccurrenceMap easily here.
+        // But we can batch fetch completed occurrences.
+        List<TourOccurrence> allCompleted = occurrenceRepository.findAllByTemplateIdInAndStatus(
+                templateIds, com.travelmarket.backend.tour.enums.TourOccurrenceStatus.COMPLETED);
+
+        Map<Long, List<TourOccurrence>> completedMap = allCompleted.stream()
+                .collect(Collectors.groupingBy(o -> o.getTemplate().getId()));
+
+        List<GuidePortfolioTourResponse> results = new ArrayList<>();
         for (TourTemplate t : portfolioTours) {
-            List<TourMedia> media = tourMediaRepository.findCoverByTemplateId(t.getId());
-            List<TourOccurrence> completed = occurrenceRepository.findCompletedByTemplateId(t.getId());
-            int runCount      = completed.size();
+            TourMedia cover = coverByTemplateId.get(t.getId());
+            List<TourMedia> media = cover != null ? List.of(cover) : List.of();
+            List<TourOccurrence> completed = completedMap.getOrDefault(t.getId(), List.of());
+
+            int runCount = completed.size();
             int totalTravelers = completed.stream()
                     .mapToInt(o -> o.getSeatsReserved() != null ? o.getSeatsReserved() : 0)
                     .sum();
@@ -546,7 +585,40 @@ public class PublicTourService {
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Guide not found")));
     }
 
+    // ── Private batch helpers (N+1 elimination) ──────────────────────────────────
+
+    /**
+     * Returns the first upcoming occurrence per templateId, keyed by templateId.
+     * Uses a single batch query — O(1) DB round-trips regardless of result count.
+     */
+    private Map<Long, TourOccurrence> buildNextOccurrenceMap(List<Long> templateIds, Instant now) {
+        List<TourOccurrence> all = occurrenceRepository.findPublicFutureByTemplateIds(templateIds, now);
+        // Query returns results ORDER BY templateId ASC, startTimeUtc ASC
+        // — so the first occurrence we see per templateId is the earliest one
+        Map<Long, TourOccurrence> map = new LinkedHashMap<>();
+        for (TourOccurrence o : all) {
+            map.putIfAbsent(o.getTemplate().getId(), o);
+        }
+        return map;
+    }
+
+    /**
+     * Returns the cover (lowest displayOrder) media per templateId, keyed by templateId.
+     * Uses a single batch query — O(1) DB round-trips regardless of result count.
+     */
+    private Map<Long, TourMedia> buildCoverMediaMap(List<Long> templateIds) {
+        List<TourMedia> all = tourMediaRepository.findCoversByTemplateIds(templateIds);
+        // Query returns results ORDER BY templateId ASC, displayOrder ASC
+        // — so the first media we see per templateId is the cover
+        Map<Long, TourMedia> map = new LinkedHashMap<>();
+        for (TourMedia m : all) {
+            map.putIfAbsent(m.getTemplate().getId(), m);
+        }
+        return map;
+    }
+
     // ── Private geo helpers ──────────────────────────────────────────────────────
+
 
     /**
      * Builds a PublicTourCardResponse and populates the meeting coordinates.
