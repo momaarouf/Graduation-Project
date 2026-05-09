@@ -88,7 +88,7 @@ export default function Navigation() {
   ]
 
   return (
-    <nav className="fixed top-0 w-full z-50 glass-theme border-b border-theme">
+    <nav suppressHydrationWarning className="fixed top-0 w-full z-50 glass-theme border-b border-theme">
       <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16">
 

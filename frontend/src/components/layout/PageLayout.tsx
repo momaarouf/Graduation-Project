@@ -28,9 +28,9 @@ export default function PageLayout({ children }: PageLayoutProps) {
       {/* Navigation - fixed position, always visible */}
       <Navigation />
 
-      {/* Main content area - Added pt-16 to clear sticky nav on mobile */}
+      {/* Main content area - Added pt-14/16 to clear sticky nav on all screen sizes */}
       {/* Added pb-24 conditionally to make room for MobileBottomNav on mobile */}
-      <main className={`flex-1 w-full pt-16 md:pt-0 ${!isAuthOrAdmin ? 'pb-24 md:pb-0' : ''}`}>
+      <main className={`flex-1 w-full pt-14 sm:pt-16 ${!isAuthOrAdmin ? 'pb-24 md:pb-0' : ''}`}>
         {children}
       </main>
 

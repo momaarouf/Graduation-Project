@@ -149,7 +149,7 @@ export default function AdminDashboardPage() {
               Administrative monitoring and oversight
             </p>
           </div>
-          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-theme-muted surface-card px-3 py-1.5 rounded-xl border border-theme shadow-sm w-fit">
+          <div suppressHydrationWarning className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-theme-muted surface-card px-3 py-1.5 rounded-xl border border-theme shadow-sm w-fit">
             <Clock className="w-3.5 h-3.5 text-primary-light" />
             Live: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
@@ -220,7 +220,7 @@ export default function AdminDashboardPage() {
                           <span className="text-sm font-bold text-theme-primary truncate uppercase tracking-tight">
                             {event.action.replace(/_/g, ' ')}
                           </span>
-                          <span className="text-[10px] text-theme-muted font-bold whitespace-nowrap ml-2">
+                          <span suppressHydrationWarning className="text-[10px] text-theme-muted font-bold whitespace-nowrap ml-2">
                             {new Date(event.createdAtUtc).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>

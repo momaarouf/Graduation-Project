@@ -1088,7 +1088,7 @@ function TravelerMessagingContent() {
  }
 
   return (
-  <div className="h-[100dvh] md:h-[calc(100vh-4rem)] surface-base overflow-hidden">
+    <div className="flex-1 h-full surface-base overflow-hidden relative">
  <NewChatModal 
  isOpen={isNewChatModalOpen}
  onClose={() => setIsNewChatModalOpen(false)}

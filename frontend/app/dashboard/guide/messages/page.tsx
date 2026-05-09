@@ -1400,7 +1400,7 @@ function GuideMessagingContent() {
  }
 
  return (
- <div className="h-[100dvh] md:h-[calc(100vh-4rem)] surface-base overflow-hidden relative">
+  <div className="flex-1 h-full surface-base overflow-hidden relative">
  <div className="h-full flex flex-col overflow-hidden">
  <div className="flex-none surface-base border-b border-theme px-4 sm:px-6 py-2.5 sm:py-3">
  <div className="flex items-center justify-between">

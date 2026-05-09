@@ -176,7 +176,10 @@ export default function LoginForm() {
  const handleSocialLogin = (provider: string) => {
  if (provider === 'Google') {
  setIsSocialLoading('Google');
- window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/oauth2/google/start?role=Traveler`;
+    // Use the same hostname as the frontend but port 8081 for the backend
+    const backendUrl = `${window.location.protocol}//${window.location.hostname}:8081`;
+    window.location.href = `${backendUrl}/api/auth/oauth2/google/start?role=Traveler`;
+
  } else {
  alert(`${provider} login coming in Phase 3`);
  }
@@ -193,7 +196,7 @@ export default function LoginForm() {
  transition={{ duration: 0.5 }}
  className="w-full"
  >
- <div className="w-full sm:surface-card rounded-[2rem] sm:rounded-[2.5rem] sm:border border-theme sm:shadow-2xl px-0 py-4 sm:p-12">
+ <div suppressHydrationWarning className="w-full sm:surface-card rounded-[2rem] sm:rounded-[2.5rem] sm:border border-theme sm:shadow-2xl px-0 py-4 sm:p-12">
  {/* ========================================
  GENERAL ERROR MESSAGE
  ======================================== */}
@@ -383,7 +386,7 @@ export default function LoginForm() {
  <div className="w-full border-t border-theme" />
  </div>
  <div className="relative flex justify-center text-[10px] tracking-widest uppercase font-bold">
- <span className="px-4 bg-transparent text-theme-muted">
+ <span className="px-4 surface-base sm:surface-card text-theme-muted">
  Or connect with
  </span>
  </div>

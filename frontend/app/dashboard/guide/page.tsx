@@ -250,7 +250,7 @@ export default function GuideDashboardPage() {
                     <div className="min-w-0">
                       <h4 className="font-bold text-sm sm:text-lg text-theme-primary truncate group-hover/item:text-primary-light transition-colors tracking-tight">{b.tourTitle}</h4>
                       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-2">
-                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-theme-muted flex items-center gap-2">
+                        <span suppressHydrationWarning className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-theme-muted flex items-center gap-2">
                           <Clock className="w-3.5 h-3.5 text-orange-500" /> {new Date(b.startTimeUtc).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                         </span>
                         <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-primary-light flex items-center gap-2">

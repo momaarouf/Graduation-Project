@@ -20,6 +20,14 @@ const nextConfig: NextConfig = {
         source: '/api/:path*',
         destination: 'http://localhost:8081/api/:path*',
       },
+      {
+        source: '/oauth2/:path*',
+        destination: 'http://localhost:8081/oauth2/:path*',
+      },
+      {
+        source: '/login/oauth2/:path*',
+        destination: 'http://localhost:8081/login/oauth2/:path*',
+      },
     ];
   },
 };

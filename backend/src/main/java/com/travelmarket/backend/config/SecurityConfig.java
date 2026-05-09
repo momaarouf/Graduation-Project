@@ -117,6 +117,7 @@ public class SecurityConfig {
                 "http://localhost:[*]",
                 "http://127.0.0.1:[*]",
                 "http://192.168.*:[*]",
+                "http://172.*:[*]",
                 "http://10.*:[*]",
                 "https://*.trycloudflare.com",
                 "https://*.loca.lt"
