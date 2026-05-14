@@ -130,13 +130,25 @@ export default function TourInfo({
  </AnimatePresence>
  )}
 
+ {/* Tags */}
+ {tagList.length > 0 && (
+ <div className="flex flex-wrap gap-2">
+ {tagList.map((tag, i) => (
+ <span key={i} className="flex items-center gap-1.5 px-3 py-2 bg-primary-light/5 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark rounded-lg border border-primary-light/20 text-xs font-bold capitalize tracking-normal shadow-sm">
+ <Tag className="w-3.5 h-3.5" />
+ {typeof tag === 'string' ? tag : JSON.stringify(tag)}
+ </span>
+ ))}
+ </div>
+ )}
+
  {/* Languages */}
  {languageList.length > 0 && (
  <div className="flex items-center gap-2 px-5 py-2 surface-section rounded-lg border border-theme shadow-sm transition-all hover:shadow-md">
  <Globe className="w-4 h-4 text-theme-muted " />
  <div className="flex gap-2.5">
  {languageList.map((lang, i) => (
- <span key={i} className="text-[10px] font-bold uppercase tracking-[0.15em] text-theme-primary ">
+ <span key={i} className="text-[10px] font-bold capitalize tracking-[0.15em] text-theme-primary ">
  {typeof lang === 'string' ? lang : (lang.language || JSON.stringify(lang))}
  </span>
  ))}
@@ -280,12 +292,12 @@ export default function TourInfo({
  <div className="flex flex-wrap items-center gap-4 text-sm text-theme-muted ">
  <div className="flex items-center gap-1.5 surface-section px-3 py-1 rounded-xl border border-theme ">
  <Clock className="w-3.5 h-3.5 text-primary-light" />
- <span className="font-bold text-[11px] uppercase tracking-wider">{stop.duration}</span>
+ <span className="font-bold text-[11px] capitalize tracking-normal">{stop.duration}</span>
  </div>
  {stop.location && (
  <div className="flex items-center gap-1.5 surface-section px-3 py-1 rounded-xl border border-theme ">
  <MapPin className="w-3.5 h-3.5 text-orange-500" />
- <span className="font-bold text-[11px] uppercase tracking-wider">{stop.location.name}</span>
+ <span className="font-bold text-[11px] capitalize tracking-normal">{stop.location.name}</span>
  </div>
  )}
  </div>
@@ -381,7 +393,7 @@ export default function TourInfo({
  {/* Requirements */}
  {requirements && requirements.length > 0 && (
  <div className="space-y-4">
- <h3 className="text-sm font-bold text-primary-light dark:text-primary-dark flex items-center gap-2 uppercase tracking-wider">
+ <h3 className="text-sm font-bold text-primary-light dark:text-primary-dark flex items-center gap-2 capitalize tracking-normal">
  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
  Requirements
  </h3>
@@ -399,7 +411,7 @@ export default function TourInfo({
  {/* What to bring */}
  {whatToBring && whatToBring.length > 0 && (
  <div className="space-y-4">
- <h3 className="text-sm font-bold text-primary-light dark:text-primary-dark flex items-center gap-2 uppercase tracking-wider">
+ <h3 className="text-sm font-bold text-primary-light dark:text-primary-dark flex items-center gap-2 capitalize tracking-normal">
  <Backpack className="w-4 h-4 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
  What to bring
  </h3>

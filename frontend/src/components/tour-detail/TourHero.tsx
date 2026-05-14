@@ -56,6 +56,7 @@ import VideoPlayer from '@/src/components/ui/VideoPlayer'
 export default function TourHero({
  id,
  title,
+ category,
  location,
  country,
  mainImage,
@@ -441,6 +442,13 @@ export default function TourHero({
  <div className="space-y-4 pt-2">
  {/* Feature Badges Row */}
  <div className="flex flex-wrap items-center gap-3">
+ {/* Category badge */}
+ {category && (
+ <span className="inline-flex items-center px-3 h-11 bg-primary-light/5 dark:bg-primary-dark/10 border border-primary-light/20 text-primary-light dark:text-primary-dark rounded-lg text-xs font-bold capitalize tracking-normal shadow-sm">
+ {category}
+ </span>
+ )}
+ 
  {/* Booking mode badge */}
  <motion.span 
  whileHover={{ scale: 1.05 }}
@@ -501,7 +509,7 @@ export default function TourHero({
  {/* Status Badge (Special states) */}
  {status && status !== TourStatus.SCHEDULED && status !== TourStatus.CONFIRMED && (
  <span 
- className="px-4 h-11 flex items-center justify-center bg-amber-500 text-white rounded-lg text-[10px] font-bold uppercase tracking-[0.1em] shadow-lg"
+ className="px-4 h-11 flex items-center justify-center bg-amber-500 text-white rounded-lg text-[10px] font-bold capitalize tracking-[0.1em] shadow-lg"
  >
  {status.replace('_', ' ')}
  </span>
@@ -512,6 +520,7 @@ export default function TourHero({
  font-bold tracking-tight
  text-theme-primary
  leading-tight
+ capitalize
 ">
  {title}
  </h1>

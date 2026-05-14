@@ -12,7 +12,7 @@ const config: Config = {
  ],
  darkMode: 'class',
  theme: {
- extend: {
+ extend: { fontFamily: { sans: ['var(--font-inter)', 'sans-serif'] },
  colors: {
  // ── BRAND BLUE (Trust · Action · Booking) ──────────────────────────
  'primary-light': '#2563eb', // light mode blue
@@ -107,7 +107,7 @@ const config: Config = {
  'pop-dark': '0 20px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.5)',
  },
 
- scale: {
+ fontWeight: { black: '600', extrabold: '600', bold: '600' }, scale: {
  '102': '1.02',
  },
  },

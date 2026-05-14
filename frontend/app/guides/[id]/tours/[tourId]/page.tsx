@@ -128,7 +128,7 @@ export default function PortfolioDetailPage() {
  Back
  </button>
  <div className="flex items-center gap-2">
- <span className="text-[10px] font-bold text-primary-light dark:text-primary-dark dark:text-primary-dark uppercase tracking-[0.2em] bg-primary-light/10 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-900/50">
+ <span className="text-[10px] font-bold text-primary-light dark:text-primary-dark dark:text-primary-dark capitalize tracking-[0.2em] bg-primary-light/10 px-3 py-1 rounded-full border border-blue-100 dark:border-blue-900/50">
  Signature Experience
  </span>
  </div>
@@ -158,7 +158,7 @@ export default function PortfolioDetailPage() {
  
  {/* Status Overlay */}
  <div className="absolute top-4 left-4 flex gap-2">
- <div className="px-4 py-2 bg-black/60  rounded-2xl border border-white/20 text-white text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+ <div className="px-4 py-2 bg-black/60  rounded-2xl border border-white/20 text-white text-[10px] font-bold capitalize tracking-normal flex items-center gap-2">
  <CheckCircle className="w-4 h-4 text-emerald-400" />
  Verified Performance
  </div>
@@ -188,14 +188,14 @@ export default function PortfolioDetailPage() {
  <div className="flex flex-col justify-center">
  <div className="mb-8">
  <div className="flex items-center gap-2 mb-4">
- <div className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-bold uppercase tracking-widest rounded-full">
+ <div className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-bold capitalize tracking-normal rounded-full">
  {tour.category || 'Experience'}
  </div>
- <div className="px-3 py-1 surface-section text-theme-secondary text-[10px] font-bold uppercase tracking-widest rounded-full">
+ <div className="px-3 py-1 surface-section text-theme-secondary text-[10px] font-bold capitalize tracking-normal rounded-full">
  {tour.region}
  </div>
  </div>
- <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-theme-primary leading-[1.1] mb-6 tracking-tight">
+ <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-theme-primary leading-[1.1] mb-6 tracking-tight capitalize">
  {tour.title}
  </h1>
  <p className="text-xl text-theme-muted leading-relaxed font-bold">
@@ -208,21 +208,21 @@ export default function PortfolioDetailPage() {
  <div className="p-6 surface-card border border-theme rounded-[1.5rem] shadow-sm hover:shadow-xl hover:border-primary-light dark:hover:border-primary-dark/30 transition-all duration-300">
  <div className="flex items-center gap-2 mb-2">
  <Calendar className="w-4 h-4 text-primary-light dark:text-primary-dark" />
- <span className="text-[10px] font-bold uppercase tracking-widest text-theme-muted">Total Runs</span>
+ <span className="text-[10px] font-bold capitalize tracking-normal text-theme-muted">Total Runs</span>
  </div>
  <div className="text-3xl font-bold text-theme-primary leading-none tracking-tight">{tour.completedRunCount}</div>
  </div>
  <div className="p-6 surface-card border border-theme rounded-[1.5rem] shadow-sm hover:shadow-xl hover:border-success-green/30 transition-all duration-300">
  <div className="flex items-center gap-2 mb-2">
  <Users className="w-4 h-4 text-emerald-600" />
- <span className="text-[10px] font-bold uppercase tracking-widest text-theme-muted">Travelers</span>
+ <span className="text-[10px] font-bold capitalize tracking-normal text-theme-muted">Travelers</span>
  </div>
  <div className="text-3xl font-bold text-theme-primary leading-none tracking-tight">{tour.totalTravelersCount}</div>
  </div>
  <div className="p-6 surface-card border border-theme rounded-[1.5rem] shadow-sm hover:shadow-xl hover:border-accent-light dark:hover:border-accent-dark/30 transition-all duration-300">
  <div className="flex items-center gap-2 mb-2">
  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
- <span className="text-[10px] font-bold uppercase tracking-widest text-theme-muted">Avg Rating</span>
+ <span className="text-[10px] font-bold capitalize tracking-normal text-theme-muted">Avg Rating</span>
  </div>
  <div className="text-3xl font-bold text-theme-primary leading-none tracking-tight">{tour.averageRating || '4.9'}</div>
  </div>
@@ -235,7 +235,7 @@ export default function PortfolioDetailPage() {
  <Image src={tour.guideAvatarUrl ||"/images/guides/default-avatar.jpg"} alt="guide" width={56} height={56} className="object-cover" />
  </div>
  <div>
- <p className="text-[9px] text-theme-muted font-bold uppercase tracking-[0.2em] mb-1">Designed By</p>
+ <p className="text-[9px] text-theme-muted font-bold capitalize tracking-[0.2em] mb-1">Designed By</p>
  <p className="font-bold text-lg text-theme-primary group-hover:text-primary-light dark:text-primary-dark transition-colors flex items-center gap-1.5 leading-none">
  {tour.guideDisplayName}
  {tour.guideVerified && <Shield className="w-4 h-4 text-primary-light dark:text-primary-dark fill-current opacity-20" />}
@@ -246,7 +246,7 @@ export default function PortfolioDetailPage() {
  {tour.currentlyAvailable && tour.relatedPublishedTourId && (
  <Link 
  href={`/tours/${tour.relatedPublishedTourId}`}
- className="w-full sm:w-auto px-10 py-4 bg-primary-light hover:bg-primary-light-hover text-white font-bold text-[11px] uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl shadow-blue-600/20 active:scale-95 flex items-center justify-center gap-2 group"
+ className="w-full sm:w-auto px-10 py-4 bg-primary-light hover:bg-primary-light-hover text-white font-bold text-[11px] capitalize tracking-[0.2em] rounded-2xl transition-all shadow-xl shadow-blue-600/20 active:scale-95 flex items-center justify-center gap-2 group"
  >
  Go to Active Tour
  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -291,7 +291,7 @@ export default function PortfolioDetailPage() {
  <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
  <h3 className="font-bold text-theme-primary tracking-tight">{stop.title}</h3>
  {stop.duration && (
- <div className="flex items-center gap-1.5 px-3 py-1 surface-section rounded-lg text-[10px] font-bold text-theme-muted uppercase tracking-widest">
+ <div className="flex items-center gap-1.5 px-3 py-1 surface-section rounded-lg text-[10px] font-bold text-theme-muted capitalize tracking-normal">
  <Clock className="w-3 h-3" />
  {stop.duration}
  </div>
@@ -313,7 +313,7 @@ export default function PortfolioDetailPage() {
  <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
  {/* Inclusions */}
  <div className="space-y-6">
- <h3 className="text-sm font-bold text-theme-primary uppercase tracking-[0.2em] flex items-center gap-2">
+ <h3 className="text-sm font-bold text-theme-primary capitalize tracking-[0.2em] flex items-center gap-2">
  <CheckCircle className="w-4 h-4 text-emerald-500" />
  Inclusions
  </h3>
@@ -333,7 +333,7 @@ export default function PortfolioDetailPage() {
 
  {/* Exclusions */}
  <div className="space-y-6">
- <h3 className="text-sm font-bold text-theme-primary uppercase tracking-[0.2em] flex items-center gap-2">
+ <h3 className="text-sm font-bold text-theme-primary capitalize tracking-[0.2em] flex items-center gap-2">
  <X className="w-4 h-4 text-red-500" />
  Exclusions
  </h3>
@@ -365,9 +365,9 @@ export default function PortfolioDetailPage() {
  <table className="w-full text-left">
  <thead>
  <tr className="surface-section border-b border-theme">
- <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-[0.25em] text-theme-muted ">Run Date</th>
- <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-[0.25em] text-theme-muted ">Attendees</th>
- <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-[0.25em] text-theme-muted ">Verified By</th>
+ <th className="px-8 py-5 text-[10px] font-bold capitalize tracking-[0.25em] text-theme-muted ">Run Date</th>
+ <th className="px-8 py-5 text-[10px] font-bold capitalize tracking-[0.25em] text-theme-muted ">Attendees</th>
+ <th className="px-8 py-5 text-[10px] font-bold capitalize tracking-[0.25em] text-theme-muted ">Verified By</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-100 dark:divide-gray-800 surface-card">
@@ -384,7 +384,7 @@ export default function PortfolioDetailPage() {
  </span>
  </td>
  <td className="px-8 py-6">
- <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+ <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 capitalize tracking-normal">
  <Shield className="w-3.5 h-3.5" />
  System Verified
  </div>
@@ -395,7 +395,7 @@ export default function PortfolioDetailPage() {
  <tr>
  <td colSpan={3} className="px-8 py-16 text-center text-sm font-bold text-theme-muted">
  <div className="mb-2">No run history found in the digital vault.</div>
- <div className="text-[10px] uppercase font-bold opacity-40">System Record Required</div>
+ <div className="text-[10px] capitalize font-bold opacity-40">System Record Required</div>
  </td>
  </tr>
  )}
@@ -414,7 +414,7 @@ export default function PortfolioDetailPage() {
  <motion.div 
  initial={{ opacity: 0, x: 20 }}
  animate={{ opacity: 1, x: 0 }}
- className="p-8 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-[2rem] border border-emerald-100 dark:border-emerald-800 uppercase tracking-tight relative overflow-hidden group"
+ className="p-8 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-[2rem] border border-emerald-100 dark:border-emerald-800 capitalize tracking-tight relative overflow-hidden group"
  >
  <Globe className="absolute -bottom-8 -right-8 w-24 h-24 text-emerald-600/10 -rotate-12 transition-transform duration-700 group-hover:scale-110" />
  <div className="relative flex items-center gap-4">
@@ -422,7 +422,7 @@ export default function PortfolioDetailPage() {
  <Globe className="w-7 h-7 text-emerald-600" />
  </div>
  <div>
- <h4 className="font-bold text-theme-primary text-sm uppercase tracking-wide">Halal Certified</h4>
+ <h4 className="font-bold text-theme-primary text-sm capitalize tracking-wide">Halal Certified</h4>
  <p className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 mt-1">SafarHub Quality Guaranteed</p>
  </div>
  </div>
@@ -432,13 +432,13 @@ export default function PortfolioDetailPage() {
  {/* Project Snapshot (Summary Box) */}
  <div className="p-8 surface-card border border-theme rounded-[2.5rem] shadow-sm space-y-8 relative overflow-hidden group hover:border-primary-light dark:hover:border-primary-dark/30 transition-all duration-300">
  <div className="absolute top-0 right-0 w-24 h-24 surface-section rounded-full -mr-12 -mt-12" />
- <h3 className="font-bold text-theme-primary uppercase tracking-[0.2em] text-[10px] relative">Experience Highlights</h3>
+ <h3 className="font-bold text-theme-primary capitalize tracking-[0.2em] text-[10px] relative">Experience Highlights</h3>
  
  <div className="space-y-6 relative">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2 text-theme-muted">
  <MapPin className="w-4 h-4" />
- <span className="text-[10px] font-bold uppercase tracking-widest">Pricing Range</span>
+ <span className="text-[10px] font-bold capitalize tracking-normal">Pricing Range</span>
  </div>
  <span className="font-bold text-theme-primary text-sm">{tour.basePrice} {tour.currency}</span>
  </div>
@@ -446,7 +446,7 @@ export default function PortfolioDetailPage() {
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2 text-theme-muted">
  <Users className="w-4 h-4" />
- <span className="text-[10px] font-bold uppercase tracking-widest">Capacity Track</span>
+ <span className="text-[10px] font-bold capitalize tracking-normal">Capacity Track</span>
  </div>
  <span className="font-bold text-theme-primary text-sm">{tour.minCapacity}-{tour.maxCapacity} Seats</span>
  </div>
@@ -454,7 +454,7 @@ export default function PortfolioDetailPage() {
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2 text-theme-muted">
  <Zap className="w-4 h-4" />
- <span className="text-[10px] font-bold uppercase tracking-widest">Premiere Date</span>
+ <span className="text-[10px] font-bold capitalize tracking-normal">Premiere Date</span>
  </div>
  <span className="font-bold text-theme-primary text-sm">
  {tour.lastPublishedAtUtc ? new Date(tour.lastPublishedAtUtc).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '2024 Premiere'}
@@ -464,7 +464,7 @@ export default function PortfolioDetailPage() {
  <div className="pt-8 border-t border-theme">
  <button 
  onClick={() => toast.success("Recording interest... Experience inquiry sent.")}
- className="w-full py-5 surface-section hover:surface-card dark:hover:bg-primary-light dark:hover:text-white hover:shadow-xl text-theme-primary font-bold text-[10px] uppercase tracking-[0.25em] rounded-2xl transition-all border border-transparent hover:border-theme dark:hover:border-white/5 active:scale-95 flex items-center justify-center gap-2"
+ className="w-full py-5 surface-section hover:surface-card dark:hover:bg-primary-light dark:hover:text-white hover:shadow-xl text-theme-primary font-bold text-[10px] capitalize tracking-[0.25em] rounded-2xl transition-all border border-transparent hover:border-theme dark:hover:border-white/5 active:scale-95 flex items-center justify-center gap-2"
  >
  <MessageSquare className="w-4 h-4" />
  Inquire Experience
@@ -475,16 +475,16 @@ export default function PortfolioDetailPage() {
 
  {/* Technical Blueprint (Tags) */}
  <div className="p-8 surface-card border border-theme rounded-[2.5rem] shadow-sm space-y-6">
- <h3 className="font-bold text-theme-primary uppercase tracking-[0.2em] text-[10px]">Experience DNA</h3>
+ <h3 className="font-bold text-theme-primary capitalize tracking-[0.2em] text-[10px]">Experience DNA</h3>
  <div className="flex flex-wrap gap-2.5">
- <div className="px-4 py-2 bg-primary-light/10 dark:bg-primary-dark/14 text-primary-light dark:text-primary-dark dark:text-primary-dark text-[9px] font-bold uppercase tracking-widest rounded-xl border border-blue-100 dark:border-blue-900/40">
+ <div className="px-4 py-2 bg-primary-light/10 dark:bg-primary-dark/14 text-primary-light dark:text-primary-dark dark:text-primary-dark text-[9px] font-bold capitalize tracking-normal rounded-xl border border-blue-100 dark:border-blue-900/40">
  {tour.category}
  </div>
- <div className="px-4 py-2 bg-emerald-50 dark:bg-emerald-900/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-bold uppercase tracking-widest rounded-xl border border-emerald-100 dark:border-emerald-900/40">
+ <div className="px-4 py-2 bg-emerald-50 dark:bg-emerald-900/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-bold capitalize tracking-normal rounded-xl border border-emerald-100 dark:border-emerald-900/40">
  High Conversion
  </div>
  {tour.instantBook && (
- <div className="px-4 py-2 bg-amber-50 dark:bg-amber-900/10 text-amber-600 dark:text-amber-400 text-[9px] font-bold uppercase tracking-widest rounded-xl border border-amber-100 dark:border-amber-900/40">
+ <div className="px-4 py-2 bg-amber-50 dark:bg-amber-900/10 text-amber-600 dark:text-amber-400 text-[9px] font-bold capitalize tracking-normal rounded-xl border border-amber-100 dark:border-amber-900/40">
  Standardized
  </div>
  )}

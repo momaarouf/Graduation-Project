@@ -87,6 +87,21 @@ export interface SpringPage<T> {
 
 export type AuditPage = SpringPage<AuditEventResponse>;
 
+// ==================== ADMIN SUPPORT TYPES ====================
+
+export interface AdminSupportTicketResponse {
+  id: number;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  adminNote?: string;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+}
+
 // ==================== USER MANAGEMENT ENDPOINTS ====================
 
 export const adminGetUsers = async (emailFilter?: string): Promise<AdminUserListResponse> => {
@@ -248,5 +263,31 @@ export const adminUpdateGuideFeeMultiplier = async (
   data: { multiplier: number; reason?: string }
 ): Promise<any> => {
   const response = await apiClient.patch(`/api/admin/guides/${guideProfileId}/fee-multiplier`, data);
+  return response.data;
+};
+
+// ==================== SUPPORT TICKET ENDPOINTS ====================
+
+export const adminGetSupportTickets = async (): Promise<AdminSupportTicketResponse[]> => {
+  const response = await apiClient.get('/api/admin/support/tickets');
+  return response.data;
+};
+
+export const adminGetSupportTicket = async (ticketId: number): Promise<AdminSupportTicketResponse> => {
+  const response = await apiClient.get(`/api/admin/support/tickets/${ticketId}`);
+  return response.data;
+};
+
+export const adminUpdateSupportTicketStatus = async (
+  ticketId: number,
+  status: AdminSupportTicketResponse['status'],
+  adminNote?: string
+): Promise<AdminSupportTicketResponse> => {
+  const response = await apiClient.patch(`/api/admin/support/tickets/${ticketId}/status`, { status, adminNote });
+  return response.data;
+};
+
+export const adminSendSupportMessage = async (ticketId: number, content: string): Promise<any> => {
+  const response = await apiClient.post(`/api/admin/support/tickets/${ticketId}/messages`, { content });
   return response.data;
 };

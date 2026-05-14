@@ -30,6 +30,7 @@ import toast from 'react-hot-toast'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import { passwordChange, updateNotificationPreferences } from '@/src/lib/api/auth'
 import { motion, AnimatePresence } from 'framer-motion'
+import SettingsSkeleton from '@/src/components/dashboard/SettingsSkeleton'
 
 // ============================================================================
 // CONFIGS
@@ -70,7 +71,11 @@ const TIMEZONES = [
 
 export default function TravelerSettingsPage() {
  const router = useRouter()
- const { user, forgotPassword } = useAuth()
+ const { user, forgotPassword, isLoading } = useAuth()
+ 
+ if (isLoading || !user) {
+   return <SettingsSkeleton />
+ }
  
  const [activeTab, setActiveTab] = useState<'account' | 'notifications' | 'security'>('account')
  
@@ -158,8 +163,8 @@ export default function TravelerSettingsPage() {
  <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
  <Link href="/dashboard/traveler" className="p-2 text-theme-muted hover:text-theme-primary transition-all rounded-xl hover:surface-section border border-transparent hover:border-theme"><ChevronLeft className="w-5 h-5" /></Link>
  <div>
- <h1 className="text-xl sm:text-3xl font-black text-theme-primary tracking-tight uppercase italic leading-none mb-1">Settings</h1>
- <p className="text-[10px] sm:text-xs text-theme-secondary font-black uppercase tracking-widest opacity-70">Identity & Experience Tuning</p>
+ <h1 className="text-xl sm:text-3xl font-black text-theme-primary tracking-tight capitalize italic leading-none mb-1">Settings</h1>
+ <p className="text-[10px] sm:text-xs text-theme-secondary font-black capitalize tracking-normal opacity-70">Identity & Experience Tuning</p>
  </div>
  </div>
 
@@ -172,7 +177,7 @@ export default function TravelerSettingsPage() {
  <button
  key={tab}
  onClick={() => setActiveTab(tab as any)}
- className={`flex-1 px-2 sm:px-4 py-4 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] transition-all relative ${
+ className={`flex-1 px-2 sm:px-4 py-4 text-[9px] sm:text-[10px] font-black capitalize tracking-[0.2em] transition-all relative ${
  activeTab === tab ? 'text-primary-light dark:text-primary-dark' : 'text-theme-muted hover:text-theme-secondary'
  }`}
  >
@@ -187,24 +192,24 @@ export default function TravelerSettingsPage() {
  {activeTab === 'account' && (
  <motion.div key="account" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8">
  <div>
- <h2 className="text-[9px] sm:text-[10px] font-black text-theme-secondary uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
+ <h2 className="text-[9px] sm:text-[10px] font-black text-theme-secondary capitalize tracking-[0.3em] mb-6 flex items-center gap-2">
  <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
  Security Matrix
  </h2>
  
  <div className="space-y-5">
  <div>
- <label className="block text-[10px] font-black uppercase tracking-widest text-theme-muted mb-2 ml-1">Access Token</label>
+ <label className="block text-[10px] font-black capitalize tracking-normal text-theme-muted mb-2 ml-1">Access Token</label>
  <div className="relative group">
  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light transition-colors" />
  <input type={showCurrentPassword ? 'text' : 'password'} value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="w-full pl-11 pr-11 py-3.5 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:ring-2 focus:ring-primary-light transition-all font-black" placeholder="CURRENT PASSWORD" />
  <button onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-primary">{showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
  </div>
- <button onClick={handleForgotPassword} className="mt-3 text-[10px] text-primary-light hover:opacity-80 font-black uppercase tracking-widest ml-1 transition-all">Emergency Recovery Code</button>
+ <button onClick={handleForgotPassword} className="mt-3 text-[10px] text-primary-light hover:opacity-80 font-black capitalize tracking-normal ml-1 transition-all">Emergency Recovery Code</button>
  </div>
 
  <div>
- <label className="block text-[10px] font-black uppercase tracking-widest text-theme-muted mb-2 ml-1">New Signature</label>
+ <label className="block text-[10px] font-black capitalize tracking-normal text-theme-muted mb-2 ml-1">New Signature</label>
  <div className="relative group">
  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light transition-colors" />
  <input type={showNewPassword ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full pl-11 pr-11 py-3.5 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:ring-2 focus:ring-primary-light transition-all font-black" placeholder="NEW PASSWORD" />
@@ -212,7 +217,7 @@ export default function TravelerSettingsPage() {
  </div>
  {newPassword && (
  <div className="mt-4 px-1 space-y-2">
- <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-widest text-theme-muted"><span>Entropy Strength</span><span>{passwordStrength.label}</span></div>
+ <div className="flex justify-between items-center text-[8px] font-black capitalize tracking-normal text-theme-muted"><span>Entropy Strength</span><span>{passwordStrength.label}</span></div>
  <div className="h-1.5 surface-section rounded-full overflow-hidden p-0.5 border border-theme">
  <div className={`h-full ${passwordStrength.color} rounded-full transition-all duration-500`} style={{ width: `${passwordStrength.score}%` }} />
  </div>
@@ -221,20 +226,20 @@ export default function TravelerSettingsPage() {
  </div>
 
  <div>
- <label className="block text-[10px] font-black uppercase tracking-widest text-theme-muted mb-2 ml-1">Confirm Signature</label>
+ <label className="block text-[10px] font-black capitalize tracking-normal text-theme-muted mb-2 ml-1">Confirm Signature</label>
  <div className="relative group">
  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light transition-colors" />
  <input type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full pl-11 pr-11 py-3.5 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:ring-2 focus:ring-primary-light transition-all font-black" placeholder="CONFIRM PASSWORD" />
  <button onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-primary">{showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
  </div>
  {confirmPassword && (
- <p className={`mt-3 text-[10px] font-black flex items-center gap-1.5 ml-1 uppercase tracking-widest ${passwordsMatch ? 'text-success-green' : 'text-danger-red'}`}>
+ <p className={`mt-3 text-[10px] font-black flex items-center gap-1.5 ml-1 capitalize tracking-normal ${passwordsMatch ? 'text-success-green' : 'text-danger-red'}`}>
  {passwordsMatch ? <><CheckCircle className="w-3.5 h-3.5" /> Identity Match</> : <><AlertCircle className="w-3.5 h-3.5" /> Identity Mismatch</>}
  </p>
  )}
  </div>
 
- <button onClick={handleSavePassword} disabled={isSaving || !currentPassword || !newPassword || !passwordsMatch} className="w-full sm:w-auto px-8 py-4 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl transition-all shadow-xl shadow-primary-light/20 disabled:opacity-50 flex items-center justify-center gap-3 active:scale-95">
+ <button onClick={handleSavePassword} disabled={isSaving || !currentPassword || !newPassword || !passwordsMatch} className="w-full sm:w-auto px-8 py-4 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-black capitalize tracking-[0.2em] rounded-xl transition-all shadow-xl shadow-primary-light/20 disabled:opacity-50 flex items-center justify-center gap-3 active:scale-95">
  {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Committing...</> : <><Save className="w-4 h-4" /> Commit Changes</>}
  </button>
  </div>
@@ -245,26 +250,26 @@ export default function TravelerSettingsPage() {
  {activeTab === 'notifications' && (
  <motion.div key="notif" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8">
  <div>
- <h2 className="text-[9px] sm:text-[10px] font-black text-theme-secondary uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
+ <h2 className="text-[9px] sm:text-[10px] font-black text-theme-secondary capitalize tracking-[0.3em] mb-6 flex items-center gap-2">
  <div className="w-1.5 h-1.5 rounded-full bg-primary-light shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
  Ecosystem Preferences
  </h2>
  
  <div className="space-y-6">
  <div>
- <label className="block text-[10px] font-black uppercase tracking-widest text-theme-muted mb-3 ml-1">Linguistics</label>
+ <label className="block text-[10px] font-black capitalize tracking-normal text-theme-muted mb-3 ml-1">Linguistics</label>
  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
  {LANGUAGES.map((lang) => (
  <button key={lang.code} onClick={() => setLanguage(lang.code)} className={`p-4 rounded-xl border text-center transition-all duration-300 ${language === lang.code ? 'bg-primary-light text-white border-primary-light shadow-xl' : 'surface-section text-theme-secondary border-theme hover:border-primary-light'}`}>
  <span className="text-2xl mb-2 block">{lang.flag}</span>
- <span className="text-[9px] font-black uppercase tracking-widest block">{lang.name}</span>
+ <span className="text-[9px] font-black capitalize tracking-normal block">{lang.name}</span>
  </button>
  ))}
  </div>
  </div>
 
  <div>
- <label className="block text-[10px] font-black uppercase tracking-widest text-theme-muted mb-2 ml-1">Temporal Alignment</label>
+ <label className="block text-[10px] font-black capitalize tracking-normal text-theme-muted mb-2 ml-1">Temporal Alignment</label>
  <div className="relative group">
  <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light transition-colors" />
  <select value={timezone} onChange={(e) => setTimezone(e.target.value)} className="w-full pl-11 pr-4 py-3.5 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:ring-2 focus:ring-primary-light font-black appearance-none cursor-pointer">
@@ -274,7 +279,7 @@ export default function TravelerSettingsPage() {
  </div>
 
  <div className="space-y-4 pt-4">
- <label className="block text-[10px] font-black uppercase tracking-widest text-theme-muted mb-1 ml-1">Broadcast Channels</label>
+ <label className="block text-[10px] font-black capitalize tracking-normal text-theme-muted mb-1 ml-1">Broadcast Channels</label>
  {[
  { id: 'email', label: 'Email Broadcasts', desc: 'Detailed expedition updates', icon: Mail, state: emailNotifications, toggle: setEmailNotifications },
  { id: 'push', label: 'Direct Alerts', desc: 'Real-time mobile synchronization', icon: Smartphone, state: pushNotifications, toggle: setPushNotifications }
@@ -283,8 +288,8 @@ export default function TravelerSettingsPage() {
  <div className="flex items-center gap-4">
  <div className="w-10 h-10 flex items-center justify-center bg-primary-light/10 text-primary-light rounded-xl border border-primary-light/20 group-hover:scale-110 transition-transform"><item.icon className="w-5 h-5" /></div>
  <div className="min-w-0">
- <p className="text-xs font-black text-theme-primary uppercase italic tracking-tight">{item.label}</p>
- <p className="text-[9px] text-theme-muted font-bold uppercase tracking-widest opacity-70">{item.desc}</p>
+ <p className="text-xs font-black text-theme-primary capitalize italic tracking-tight">{item.label}</p>
+ <p className="text-[9px] text-theme-muted font-bold capitalize tracking-normal opacity-70">{item.desc}</p>
  </div>
  </div>
  <button onClick={() => item.toggle(!item.state)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${item.state ? 'bg-primary-light' : 'bg-gray-200 dark:bg-gray-800'}`}><motion.span layout className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ${item.state ? 'translate-x-6' : 'translate-x-1'}`} /></button>
@@ -292,7 +297,7 @@ export default function TravelerSettingsPage() {
  ))}
  </div>
 
- <button onClick={handleSavePreferences} disabled={isSaving} className="w-full sm:w-auto px-8 py-4 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl transition-all shadow-xl shadow-primary-light/20 disabled:opacity-50 flex items-center justify-center gap-3 active:scale-95">
+ <button onClick={handleSavePreferences} disabled={isSaving} className="w-full sm:w-auto px-8 py-4 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-black capitalize tracking-[0.2em] rounded-xl transition-all shadow-xl shadow-primary-light/20 disabled:opacity-50 flex items-center justify-center gap-3 active:scale-95">
  {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Synchronizing...</> : <><Save className="w-4 h-4" /> Save Configuration</>}
  </button>
  </div>
@@ -307,28 +312,28 @@ export default function TravelerSettingsPage() {
  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10 text-center sm:text-left">
  <div className="w-14 h-14 flex items-center justify-center bg-primary-light text-white rounded-2xl shadow-2xl shadow-primary-light/30 border border-white/20 flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform"><Shield className="w-7 h-7" /></div>
  <div className="min-w-0 flex-1">
- <h3 className="text-sm font-black text-theme-primary mb-2 uppercase italic tracking-tight">Two-Factor Authentication</h3>
- <p className="text-[10px] sm:text-xs text-theme-secondary mb-6 leading-relaxed font-bold uppercase tracking-widest opacity-80">Inject a secondary validation layer into your login sequence for maximum account integrity.</p>
- <button className="px-6 py-3 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg active:scale-95">Initialize 2FA</button>
+ <h3 className="text-sm font-black text-theme-primary mb-2 capitalize italic tracking-tight">Two-Factor Authentication</h3>
+ <p className="text-[10px] sm:text-xs text-theme-secondary mb-6 leading-relaxed font-bold capitalize tracking-normal opacity-80">Inject a secondary validation layer into your login sequence for maximum account integrity.</p>
+ <button className="px-6 py-3 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-black capitalize tracking-normal rounded-xl transition-all shadow-lg active:scale-95">Initialize 2FA</button>
  </div>
  </div>
  </div>
 
  <div className="p-6 sm:p-10 bg-red-500/5 border border-red-500/20 rounded-[2rem] sm:rounded-[3rem]">
- <h3 className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-[0.3em] mb-4 flex items-center gap-2"><Trash2 className="w-4 h-4" /> Termination Protocol</h3>
- <p className="text-[10px] sm:text-xs text-theme-secondary mb-6 leading-relaxed font-bold uppercase tracking-widest opacity-80">Deleting your account will trigger a permanent data purge. All expeditions, loyalty credits, and historical logs will be non-recoverable.</p>
+ <h3 className="text-[10px] font-black text-red-600 dark:text-red-400 capitalize tracking-[0.3em] mb-4 flex items-center gap-2"><Trash2 className="w-4 h-4" /> Termination Protocol</h3>
+ <p className="text-[10px] sm:text-xs text-theme-secondary mb-6 leading-relaxed font-bold capitalize tracking-normal opacity-80">Deleting your account will trigger a permanent data purge. All expeditions, loyalty credits, and historical logs will be non-recoverable.</p>
 
  {!showDeleteConfirm ? (
- <button onClick={() => setShowDeleteConfirm(true)} className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-xl shadow-red-500/20 active:scale-95">Initialize Account Purge</button>
+ <button onClick={() => setShowDeleteConfirm(true)} className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black capitalize tracking-normal rounded-xl transition-all shadow-xl shadow-red-500/20 active:scale-95">Initialize Account Purge</button>
  ) : (
  <div className="space-y-4 max-w-sm">
- <p className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest">Input <span className="font-mono bg-red-600/10 px-2 py-1 rounded text-xs">DELETE</span> to confirm intent:</p>
- <input type="text" value={deleteText} onChange={(e) => setDeleteText(e.target.value)} className="w-full px-5 py-4 surface-card border-2 border-red-500 rounded-2xl text-sm text-theme-primary focus:outline-none focus:ring-4 focus:ring-red-500/20 transition-all font-black uppercase tracking-[0.3em]" placeholder="DELETE" />
+ <p className="text-[10px] font-black text-red-600 dark:text-red-400 capitalize tracking-normal">Input <span className="font-mono bg-red-600/10 px-2 py-1 rounded text-xs">DELETE</span> to confirm intent:</p>
+ <input type="text" value={deleteText} onChange={(e) => setDeleteText(e.target.value)} className="w-full px-5 py-4 surface-card border-2 border-red-500 rounded-2xl text-sm text-theme-primary focus:outline-none focus:ring-4 focus:ring-red-500/20 transition-all font-black capitalize tracking-[0.3em]" placeholder="DELETE" />
  <div className="flex flex-col sm:flex-row gap-3 pt-2">
- <button onClick={handleDeleteAccount} disabled={deleteText !== 'DELETE' || isDeleting} className="order-1 sm:order-2 px-8 py-4 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-2xl shadow-red-600/30">
+ <button onClick={handleDeleteAccount} disabled={deleteText !== 'DELETE' || isDeleting} className="order-1 sm:order-2 px-8 py-4 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black capitalize tracking-normal rounded-2xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-2xl shadow-red-600/30">
  {isDeleting ? <><Loader2 className="w-4 h-4 animate-spin" /> Purging...</> : <>Confirm Permanent Purge</>}
  </button>
- <button onClick={() => { setShowDeleteConfirm(false); setDeleteText(''); }} className="order-2 sm:order-1 px-8 py-4 surface-section text-theme-muted hover:text-theme-primary text-[10px] font-black uppercase tracking-widest rounded-2xl transition-all border border-theme">Abort Mission</button>
+ <button onClick={() => { setShowDeleteConfirm(false); setDeleteText(''); }} className="order-2 sm:order-1 px-8 py-4 surface-section text-theme-muted hover:text-theme-primary text-[10px] font-black capitalize tracking-normal rounded-2xl transition-all border border-theme">Abort Mission</button>
  </div>
  </div>
  )}
@@ -340,5 +345,5 @@ export default function TravelerSettingsPage() {
  </div>
  </div>
  </div>
- )
+ );
 }

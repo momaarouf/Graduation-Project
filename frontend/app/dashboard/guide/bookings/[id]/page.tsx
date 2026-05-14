@@ -26,6 +26,7 @@ import toast from 'react-hot-toast'
 import { getGuideBooking, confirmBooking, rejectBooking } from '@/src/lib/api/tours'
 import { notificationsApi } from '@/src/lib/api/notifications'
 import { GuideBookingResponse, BookingStatus } from '@/src/lib/types/tour.types'
+import GuideBookingDetailSkeleton from './skeleton'
 
 export default function GuideBookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -98,12 +99,7 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
   }
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
-        <RefreshCw className="w-10 h-10 text-primary-light dark:text-primary-dark animate-spin" />
-        <p className="text-theme-muted font-bold animate-pulse">Loading booking details...</p>
-      </div>
-    )
+    return <GuideBookingDetailSkeleton />
   }
 
   if (!booking) return null
@@ -142,7 +138,7 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
               <CreditCard className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
             </div>
             <div className="flex-1">
-              <p className="text-[10px] font-bold text-indigo-900 dark:text-indigo-100 uppercase tracking-widest leading-none mb-1">
+              <p className="text-[10px] font-bold text-indigo-900 dark:text-indigo-100 capitalize tracking-normal leading-none mb-1">
                 Awaiting Traveler Payment
               </p>
               <p className="text-[11px] text-indigo-700 dark:text-indigo-300 font-medium leading-normal">
@@ -168,7 +164,7 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
               Booking Details
             </h1>
             <div className="flex items-center gap-3">
-              <span className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border shadow-sm ${statusColors[booking.status]}`}>
+              <span className={`px-3 py-1 rounded-full text-[9px] font-bold capitalize tracking-normal border shadow-sm ${statusColors[booking.status]}`}>
                 {booking.status.replace(/([A-Z])/g, ' $1').trim()}
               </span>
               <span className="text-xs font-mono font-bold text-theme-muted">
@@ -204,7 +200,7 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
             <div className="surface-card rounded-2xl sm:rounded-3xl p-6 sm:p-10 shadow-xl border border-theme relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-indigo-600" />
               
-              <h3 className="text-[10px] font-bold text-theme-muted uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+              <h3 className="text-[10px] font-bold text-theme-muted capitalize tracking-[0.2em] mb-4 flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-primary-light" />
                 Tour Information
               </h3>
@@ -214,21 +210,21 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 pt-2">
                   <div className="space-y-1">
-                    <p className="text-[9px] font-bold text-theme-muted uppercase tracking-widest">Date & Time</p>
+                    <p className="text-[9px] font-bold text-theme-muted capitalize tracking-normal">Date & Time</p>
                     <div className="flex items-center gap-2 text-theme-primary font-bold text-sm sm:text-base">
                       <Clock className="w-4 h-4 text-primary-light" />
                       <span>{formattedDate}</span>
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[9px] font-bold text-theme-muted uppercase tracking-widest">Party Size</p>
+                    <p className="text-[9px] font-bold text-theme-muted capitalize tracking-normal">Party Size</p>
                     <div className="flex items-center gap-2 text-theme-primary font-bold text-sm sm:text-base">
                       <Users className="w-4 h-4 text-primary-light" />
                       <span>{booking.peopleCount} Participants</span>
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[9px] font-bold text-theme-muted uppercase tracking-widest">Duration</p>
+                    <p className="text-[9px] font-bold text-theme-muted capitalize tracking-normal">Duration</p>
                     <div className="flex items-center gap-2 text-theme-primary font-bold text-sm sm:text-base">
                       <Clock className="w-4 h-4 text-indigo-500" />
                       <span>
@@ -237,7 +233,7 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[9px] font-bold text-theme-muted uppercase tracking-widest">Booking Mode</p>
+                    <p className="text-[9px] font-bold text-theme-muted capitalize tracking-normal">Booking Mode</p>
                     <div className="flex items-center gap-2 text-theme-primary font-bold text-sm sm:text-base">
                       <Zap className="w-4 h-4 text-accent-light" />
                       <span className="capitalize">{booking.bookingMode.replace('_', ' ')}</span>
@@ -249,7 +245,7 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
 
             {/* Traveler Info */}
             <div className="surface-card rounded-2xl sm:rounded-3xl p-6 sm:p-10 shadow-xl border border-theme">
-              <h3 className="text-[10px] font-bold text-theme-muted uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+              <h3 className="text-[10px] font-bold text-theme-muted capitalize tracking-[0.2em] mb-6 flex items-center gap-2">
                 <User className="w-4 h-4 text-indigo-500" />
                 Traveler Information
               </h3>
@@ -262,7 +258,7 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
                     </div>
                     <div>
                       <p className="text-lg font-bold text-theme-primary mb-0.5">{booking.traveler.fullName}</p>
-                      <p className="text-[10px] font-bold text-theme-muted uppercase tracking-wider">
+                      <p className="text-[10px] font-bold text-theme-muted capitalize tracking-normal">
                         Joined {new Date(booking.createdAtUtc).toLocaleDateString()}
                       </p>
                     </div>
@@ -274,7 +270,7 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
                         <Mail className="w-4 h-4 text-theme-muted" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[9px] font-bold text-theme-muted uppercase tracking-widest leading-none mb-1">Email Address</p>
+                        <p className="text-[9px] font-bold text-theme-muted capitalize tracking-normal leading-none mb-1">Email Address</p>
                         <p className="text-xs font-bold text-theme-primary truncate">{booking.traveler.email}</p>
                       </div>
                     </a>
@@ -283,7 +279,7 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
                         <Phone className="w-4 h-4 text-theme-muted" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[9px] font-bold text-theme-muted uppercase tracking-widest leading-none mb-1">Phone Number</p>
+                        <p className="text-[9px] font-bold text-theme-muted capitalize tracking-normal leading-none mb-1">Phone Number</p>
                         <p className="text-xs font-bold text-theme-primary truncate">{booking.traveler.phoneE164}</p>
                       </div>
                     </a>
@@ -300,7 +296,7 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
               ) : (
                 <div className="py-10 text-center surface-section rounded-2xl border border-dashed border-theme">
                   <AlertCircle className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                  <p className="text-[10px] text-theme-muted font-bold uppercase tracking-widest mb-1">
+                  <p className="text-[10px] text-theme-muted font-bold capitalize tracking-normal mb-1">
                     Identity Protected
                   </p>
                   <p className="text-[11px] text-theme-muted font-medium px-4">
@@ -317,11 +313,11 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
             <div className="surface-card rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xl border border-theme overflow-hidden relative">
               <div className="absolute top-0 right-0 w-24 h-24 bg-primary-light/5 rounded-full blur-2xl -mr-12 -mt-12" />
               
-              <h3 className="text-sm font-bold text-theme-primary mb-6 text-center uppercase tracking-widest">Financial Hub</h3>
+              <h3 className="text-sm font-bold text-theme-primary mb-6 text-center capitalize tracking-normal">Financial Hub</h3>
               
               <div className="space-y-4">
                 <div className="flex justify-between items-center surface-section p-4 rounded-xl border border-theme">
-                  <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                  <span className={`text-[10px] font-bold capitalize tracking-normal ${
                     booking.status === BookingStatus.PendingPayment ? 'text-indigo-600' : 'text-theme-muted'
                   }`}>
                     {booking.status === BookingStatus.PendingPayment ? 'Awaiting Payment' : 'Total Paid'}
@@ -335,7 +331,7 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
                 
                 <div className="p-6 bg-primary-light rounded-2xl text-white shadow-lg shadow-primary-light/20 relative overflow-hidden">
                   <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-white/10 rounded-full blur-xl" />
-                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] mb-1 opacity-80">Estimated Profit</p>
+                  <p className="text-[10px] font-bold capitalize tracking-[0.1em] mb-1 opacity-80">Estimated Profit</p>
                   <p className="text-2xl font-bold mb-1">
                     {booking.currency} {(booking.finalPrice * 0.9).toFixed(2)}
                   </p>
@@ -345,7 +341,7 @@ export default function GuideBookingDetailPage({ params }: { params: Promise<{ i
             </div>
 
             <div className="p-6 bg-accent-light/5 rounded-2xl border border-accent-light/20">
-              <h4 className="flex items-center gap-2 text-[10px] font-bold text-accent-light mb-3 uppercase tracking-widest">
+              <h4 className="flex items-center gap-2 text-[10px] font-bold text-accent-light mb-3 capitalize tracking-normal">
                 <AlertCircle className="w-3.5 h-3.5" />
                 Guidelines
               </h4>

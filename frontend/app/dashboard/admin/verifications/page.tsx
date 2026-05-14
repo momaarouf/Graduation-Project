@@ -38,6 +38,7 @@ import {
 } from '@/src/lib/api/admin'
 import { useBadgeReset } from '@/src/lib/hooks/useBadgeReset'
 import { toast } from 'react-hot-toast'
+import AdminVerificationsSkeleton from './skeleton'
 
 // ============================================================================
 // STATUS BADGES
@@ -59,7 +60,7 @@ const StatusBadge = ({ status }: { status: string }) => {
  }
 
  return (
-  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-sm ${styles[status]}`}>
+  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black capitalize tracking-normal border shadow-sm ${styles[status]}`}>
    {status === 'APPROVED' ? <CheckCircle className="w-3 h-3" /> : status === 'REJECTED' ? <XCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
    {status}
   </span>
@@ -157,18 +158,7 @@ export default function AdminVerificationQueuePage() {
  }
 
  if (isLoading) {
-  return (
-   <div className="flex flex-col items-center justify-center py-40 gap-6">
-    <div className="relative">
-     <RefreshCw className="w-16 h-16 text-primary-light animate-spin opacity-10" />
-     <Shield className="absolute inset-0 m-auto w-6 h-6 text-primary-light" />
-    </div>
-    <div className="text-center">
-     <h2 className="text-sm font-black uppercase tracking-[0.3em] text-theme-primary">Scanning Identity Vault</h2>
-     <p className="text-xs text-theme-muted mt-2 animate-pulse">Syncing encrypted document queue...</p>
-    </div>
-   </div>
-  )
+  return <AdminVerificationsSkeleton />
  }
 
  return (
@@ -180,7 +170,7 @@ export default function AdminVerificationQueuePage() {
       <div className="w-10 h-10 bg-primary-light rounded-2xl flex items-center justify-center shadow-xl shadow-primary-light/20 text-white">
        <Shield className="w-5 h-5" />
       </div>
-      <span className="text-[10px] font-black text-primary-light uppercase tracking-[0.2em] bg-primary-light/10 px-3 py-1 rounded-xl border border-primary-light/10">Security Compliance</span>
+      <span className="text-[10px] font-black text-primary-light capitalize tracking-[0.2em] bg-primary-light/10 px-3 py-1 rounded-xl border border-primary-light/10">Security Compliance</span>
      </div>
      <h1 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tighter">
       Guide <span className="text-primary-light">Verification</span>
@@ -193,7 +183,7 @@ export default function AdminVerificationQueuePage() {
     <div className="flex items-center gap-3 p-1.5 surface-card rounded-[1.5rem] border border-theme shadow-sm">
      <button
       onClick={() => setActiveTab('pending')}
-      className={`px-6 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${
+      className={`px-6 py-2.5 text-[10px] font-black capitalize tracking-normal rounded-xl transition-all ${
        activeTab === 'pending'
        ? 'bg-primary-light text-white shadow-lg'
        : 'text-theme-muted hover:text-theme-secondary'
@@ -203,7 +193,7 @@ export default function AdminVerificationQueuePage() {
      </button>
      <button
       onClick={() => setActiveTab('rejected')}
-      className={`px-6 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${
+      className={`px-6 py-2.5 text-[10px] font-black capitalize tracking-normal rounded-xl transition-all ${
        activeTab === 'rejected'
        ? 'bg-danger-red text-white shadow-lg'
        : 'text-theme-muted hover:text-theme-secondary'
@@ -242,14 +232,14 @@ export default function AdminVerificationQueuePage() {
           <h3 className="text-base font-black text-theme-primary truncate tracking-tight">
            {v.user?.fullName || 'Anonymous Guide'}
           </h3>
-          <p className="text-[11px] text-theme-muted truncate flex items-center gap-1 font-bold uppercase tracking-widest mt-0.5">
+          <p className="text-[11px] text-theme-muted truncate flex items-center gap-1 font-bold capitalize tracking-normal mt-0.5">
            <Mail className="w-3 h-3 text-primary-light" /> {v.user?.email}
           </p>
          </div>
          <ChevronRight className={`w-5 h-5 transition-transform ${selectedVerification?.id === v.id ? 'translate-x-1 text-primary-light' : 'text-theme-muted group-hover:translate-x-1'}`} />
         </div>
         <div className="mt-4 flex items-center justify-between pt-4 border-t border-theme/50">
-         <div className="flex items-center gap-2 text-[9px] font-black text-theme-muted uppercase tracking-[0.15em]">
+         <div className="flex items-center gap-2 text-[9px] font-black text-theme-muted capitalize tracking-[0.15em]">
           <Calendar className="w-3.5 h-3.5" />
           {v.verificationSubmittedAtUtc ? new Date(v.verificationSubmittedAtUtc).toLocaleDateString() : 'Pending'}
          </div>
@@ -260,9 +250,9 @@ export default function AdminVerificationQueuePage() {
      ) : (
       <div className="py-32 text-center surface-card rounded-[3rem] border-2 border-dashed border-theme px-8">
        <ShieldCheck className="w-16 h-16 text-theme-muted opacity-10 mx-auto mb-6" />
-       <h3 className="text-xl font-black text-theme-primary uppercase tracking-tight">Vault Clear</h3>
+       <h3 className="text-xl font-black text-theme-primary capitalize tracking-tight">Vault Clear</h3>
        <p className="text-sm text-theme-muted mt-2 font-medium">No {activeTab} identities require verification at this time.</p>
-       <button onClick={fetchData} className="mt-8 px-6 py-2 bg-surface-section hover:bg-surface-hover rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Refresh Sync</button>
+       <button onClick={fetchData} className="mt-8 px-6 py-2 bg-surface-section hover:bg-surface-hover rounded-xl text-[10px] font-black capitalize tracking-normal transition-all">Refresh Sync</button>
       </div>
      )}
     </div>
@@ -280,7 +270,7 @@ export default function AdminVerificationQueuePage() {
        >
         {/* Mobile Header */}
         <div className="lg:hidden p-6 border-b border-theme flex items-center justify-between bg-surface-paper shadow-sm z-20">
-         <button onClick={() => setSelectedVerification(null)} className="flex items-center gap-2 text-primary-light font-black text-[10px] uppercase tracking-[0.2em] bg-primary-light/10 px-4 py-2 rounded-xl border border-primary-light/20">
+         <button onClick={() => setSelectedVerification(null)} className="flex items-center gap-2 text-primary-light font-black text-[10px] capitalize tracking-[0.2em] bg-primary-light/10 px-4 py-2 rounded-xl border border-primary-light/20">
           <ChevronLeft className="w-4 h-4" /> Back to Queue
          </button>
          <StatusBadge status={getVerificationStatus(selectedVerification)} />
@@ -304,16 +294,16 @@ export default function AdminVerificationQueuePage() {
          
          {/* Asset Selector */}
          <div className="absolute top-8 left-8 flex flex-col gap-3 z-10">
-          <button onClick={() => setSelectedDocType('front')} className={`h-12 px-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border transition-all flex items-center gap-3 ${selectedDocType === 'front' ? 'bg-primary-light text-white border-primary-light shadow-xl shadow-primary-light/30' : 'bg-black/60 backdrop-blur-md text-white/70 border-white/20 hover:bg-black/80'}`}>
+          <button onClick={() => setSelectedDocType('front')} className={`h-12 px-5 rounded-2xl text-[10px] font-black capitalize tracking-[0.2em] border transition-all flex items-center gap-3 ${selectedDocType === 'front' ? 'bg-primary-light text-white border-primary-light shadow-xl shadow-primary-light/30' : 'bg-black/60 backdrop-blur-md text-white/70 border-white/20 hover:bg-black/80'}`}>
            <CreditCard className="w-4 h-4" /> ID Front
           </button>
           {(selectedVerification.idBackImage || (selectedVerification as any).id_back_image) && (
-           <button onClick={() => setSelectedDocType('back')} className={`h-12 px-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border transition-all flex items-center gap-3 ${selectedDocType === 'back' ? 'bg-primary-light text-white border-primary-light shadow-xl shadow-primary-light/30' : 'bg-black/60 backdrop-blur-md text-white/70 border-white/20 hover:bg-black/80'}`}>
+           <button onClick={() => setSelectedDocType('back')} className={`h-12 px-5 rounded-2xl text-[10px] font-black capitalize tracking-[0.2em] border transition-all flex items-center gap-3 ${selectedDocType === 'back' ? 'bg-primary-light text-white border-primary-light shadow-xl shadow-primary-light/30' : 'bg-black/60 backdrop-blur-md text-white/70 border-white/20 hover:bg-black/80'}`}>
             <CreditCard className="w-4 h-4" /> ID Back
            </button>
           )}
           {(selectedVerification.selfieImage || (selectedVerification as any).selfie_image) && (
-           <button onClick={() => setSelectedDocType('selfie')} className={`h-12 px-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border transition-all flex items-center gap-3 ${selectedDocType === 'selfie' ? 'bg-purple-600 text-white border-purple-500 shadow-xl shadow-purple-600/30' : 'bg-black/60 backdrop-blur-md text-white/70 border-white/20 hover:bg-black/80'}`}>
+           <button onClick={() => setSelectedDocType('selfie')} className={`h-12 px-5 rounded-2xl text-[10px] font-black capitalize tracking-[0.2em] border transition-all flex items-center gap-3 ${selectedDocType === 'selfie' ? 'bg-purple-600 text-white border-purple-500 shadow-xl shadow-purple-600/30' : 'bg-black/60 backdrop-blur-md text-white/70 border-white/20 hover:bg-black/80'}`}>
             <Camera className="w-4 h-4" /> Selfie Match
            </button>
           )}
@@ -335,16 +325,16 @@ export default function AdminVerificationQueuePage() {
           <div className="min-w-0">
            <h2 className="text-2xl font-black text-theme-primary tracking-tight truncate">{selectedVerification.user?.fullName}</h2>
            <div className="flex flex-wrap items-center gap-4 mt-2">
-            <span className="flex items-center gap-1.5 text-[11px] font-bold text-theme-muted tracking-widest uppercase"><Mail className="w-3.5 h-3.5 text-primary-light" /> {selectedVerification.user?.email}</span>
+            <span className="flex items-center gap-1.5 text-[11px] font-bold text-theme-muted tracking-normal capitalize"><Mail className="w-3.5 h-3.5 text-primary-light" /> {selectedVerification.user?.email}</span>
             <span className="w-1.5 h-1.5 rounded-full bg-theme-muted opacity-20" />
-            <span className="flex items-center gap-1.5 text-[11px] font-black text-primary-light tracking-[0.15em] uppercase"><Fingerprint className="w-3.5 h-3.5" /> {selectedVerification.idDocumentType || 'Government ID'}</span>
+            <span className="flex items-center gap-1.5 text-[11px] font-black text-primary-light tracking-[0.15em] capitalize"><Fingerprint className="w-3.5 h-3.5" /> {selectedVerification.idDocumentType || 'Government ID'}</span>
            </div>
           </div>
 
           {activeTab === 'pending' && (
            <div className="flex items-center gap-3">
-            <button disabled={isProcessing} onClick={() => setShowRejectModal(true)} className="h-14 px-8 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-danger-red border-2 border-danger-red/20 hover:bg-danger-red/5 active:scale-95 transition-all">Reject Identity</button>
-            <button disabled={isProcessing} onClick={() => handleApprove(selectedVerification.id)} className="h-14 px-10 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] bg-primary-light text-white shadow-xl shadow-primary-light/30 hover:bg-primary-light-hover active:scale-95 transition-all flex items-center gap-2">
+            <button disabled={isProcessing} onClick={() => setShowRejectModal(true)} className="h-14 px-8 rounded-2xl text-[10px] font-black capitalize tracking-[0.2em] text-danger-red border-2 border-danger-red/20 hover:bg-danger-red/5 active:scale-95 transition-all">Reject Identity</button>
+            <button disabled={isProcessing} onClick={() => handleApprove(selectedVerification.id)} className="h-14 px-10 rounded-2xl text-[10px] font-black capitalize tracking-[0.2em] bg-primary-light text-white shadow-xl shadow-primary-light/30 hover:bg-primary-light-hover active:scale-95 transition-all flex items-center gap-2">
              {isProcessing ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />} Validate Protocol
             </button>
            </div>
@@ -354,7 +344,7 @@ export default function AdminVerificationQueuePage() {
          {selectedVerification.verificationRejectedReason && (
           <div className="p-6 bg-danger-red/5 border-2 border-dashed border-danger-red/20 rounded-[1.5rem] relative overflow-hidden group">
            <div className="absolute top-0 left-0 w-1 h-full bg-danger-red opacity-20" />
-           <h4 className="text-[10px] font-black text-danger-red uppercase tracking-[0.2em] mb-2 flex items-center gap-2"><ShieldAlert className="w-4 h-4" /> Historical Rejection Rationale</h4>
+           <h4 className="text-[10px] font-black text-danger-red capitalize tracking-[0.2em] mb-2 flex items-center gap-2"><ShieldAlert className="w-4 h-4" /> Historical Rejection Rationale</h4>
            <p className="text-sm font-medium text-danger-red italic opacity-80 leading-relaxed">"{selectedVerification.verificationRejectedReason}"</p>
           </div>
          )}
@@ -366,7 +356,7 @@ export default function AdminVerificationQueuePage() {
          <Eye className="w-12 h-12 text-primary-light opacity-20 group-hover:opacity-40 transition-opacity" />
          <div className="absolute inset-0 bg-primary-light/5 rounded-[2rem] scale-0 group-hover:scale-100 transition-transform" />
         </div>
-        <h3 className="text-2xl font-black text-theme-primary uppercase tracking-tight">Identity Observer</h3>
+        <h3 className="text-2xl font-black text-theme-primary capitalize tracking-tight">Identity Observer</h3>
         <p className="text-sm text-theme-muted max-w-xs mt-3 font-medium leading-relaxed">Select a verification request from the temporal queue to begin identity authentication protocol.</p>
        </div>
       )}
@@ -382,16 +372,16 @@ export default function AdminVerificationQueuePage() {
        <div className="flex items-center gap-4 mb-8">
         <div className="w-12 h-12 bg-danger-red/10 rounded-2xl flex items-center justify-center text-danger-red border border-danger-red/20"><ShieldAlert className="w-6 h-6" /></div>
         <div>
-         <h3 className="text-xl font-black text-theme-primary uppercase tracking-tight">Enforcement Action</h3>
-         <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mt-0.5">Define Rejection Rationale</p>
+         <h3 className="text-xl font-black text-theme-primary capitalize tracking-tight">Enforcement Action</h3>
+         <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal mt-0.5">Define Rejection Rationale</p>
         </div>
        </div>
        
        <textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="Specify exactly why this identity failed verification (e.g., blurry documentation, facial mismatch)..." className="w-full h-40 p-6 surface-section border-2 border-theme rounded-[2rem] text-sm font-medium text-theme-primary focus:ring-4 focus:ring-danger-red/10 focus:border-danger-red outline-none resize-none mb-8 transition-all shadow-inner" />
 
        <div className="flex items-center gap-4">
-        <button onClick={() => setShowRejectModal(false)} className="flex-1 h-14 text-[10px] font-black uppercase tracking-[0.2em] text-theme-muted hover:surface-section rounded-2xl transition-all">Cancel</button>
-        <button onClick={handleReject} disabled={isProcessing || !rejectReason.trim()} className="flex-1 h-14 bg-danger-red text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-danger-red/30 hover:bg-red-700 active:scale-95 transition-all disabled:opacity-50">Confirm Rejection</button>
+        <button onClick={() => setShowRejectModal(false)} className="flex-1 h-14 text-[10px] font-black capitalize tracking-[0.2em] text-theme-muted hover:surface-section rounded-2xl transition-all">Cancel</button>
+        <button onClick={handleReject} disabled={isProcessing || !rejectReason.trim()} className="flex-1 h-14 bg-danger-red text-white text-[10px] font-black capitalize tracking-[0.2em] rounded-2xl shadow-xl shadow-danger-red/30 hover:bg-red-700 active:scale-95 transition-all disabled:opacity-50">Confirm Rejection</button>
        </div>
       </div>
      </motion.div>

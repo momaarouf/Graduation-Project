@@ -136,7 +136,7 @@ export default function LoadingOverlay({ isVisible, message = 'Loading...' }: Lo
  initial={{ opacity: 0 }}
  animate={{ opacity: 1 }}
  transition={{ delay: 0.8 }}
- className="mt-12 text-[10px] font-bold uppercase tracking-[0.3em] text-theme-muted "
+ className="mt-12 text-[10px] font-bold capitalize tracking-[0.3em] text-theme-muted "
  >
  Verified Secure Session
  </motion.p>

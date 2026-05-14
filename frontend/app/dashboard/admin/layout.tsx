@@ -22,7 +22,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Users,
-  Settings
+  Settings,
+  MessageSquare
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Navigation from '@/src/components/layout/Navigation'
@@ -39,6 +40,7 @@ const NAV_ITEMS = [
   { name: 'Verifications', href: '/dashboard/admin/verifications', icon: Shield, color: 'amber', badgeKey: 'admin-verifications' },
   { name: 'Users', href: '/dashboard/admin/users', icon: Users, color: 'blue' },
   { name: 'Disputes', href: '/dashboard/admin/disputes', icon: Scale, color: 'red' },
+  { name: 'Support', href: '/dashboard/admin/support', icon: MessageSquare, color: 'blue' },
   { name: 'Payouts', href: '/dashboard/admin/payouts', icon: DollarSign, color: 'emerald' },
   { name: 'Tours', href: '/dashboard/admin/tours', icon: Globe, color: 'indigo', badgeKey: 'admin-tours' },
   { name: 'Audit', href: '/dashboard/admin/audit', icon: History, color: 'gray' },
@@ -201,7 +203,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <main className={`flex-1 min-w-0 relative lg:ml-20 ${!isCollapsed ? 'lg:ml-64' : ''}`}>
           <div className="lg:hidden h-14 glass-theme border-b border-theme flex items-center justify-between px-4 sticky top-0 z-30 shadow-sm">
             <button onClick={() => setIsMobileOpen(true)} className="p-2 -ml-2"><Menu className="w-5 h-5" /></button>
-            <span className="text-xs font-black uppercase tracking-widest text-theme-primary">Admin Control</span>
+            <span className="text-xs font-black capitalize tracking-normal text-theme-primary">Admin Control</span>
             <div className="w-8" />
           </div>
           <div className="p-3 sm:p-6 lg:p-8">{children}</div>

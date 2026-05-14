@@ -3,12 +3,18 @@ package com.travelmarket.backend.booking.controller;
 import com.travelmarket.backend.booking.dto.request.*;
 import com.travelmarket.backend.booking.dto.response.*;
 import com.travelmarket.backend.booking.service.BookingService;
+import com.travelmarket.backend.booking.service.PricingService;
+import com.travelmarket.backend.entity.TravelerProfile;
+import com.travelmarket.backend.repository.TravelerProfileRepository;
+import com.travelmarket.backend.tour.entity.TourOccurrence;
+import com.travelmarket.backend.tour.repository.TourOccurrenceRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -45,6 +51,69 @@ import java.util.List;
 public class BookingController {
 
     private final BookingService bookingService;
+    private final PricingService pricingService;
+    private final TourOccurrenceRepository occurrenceRepository;
+    private final TravelerProfileRepository travelerProfileRepository;
+
+    // ── Public: Price Preview ─────────────────────────────────────────────────
+
+    /**
+     * Returns a full price breakdown for the given occurrence + people count.
+     * No authentication required — available to all public visitors.
+     * If an authenticated traveler calls this, their loyalty tier discount is included.
+     *
+     * Query params:
+     *   occurrenceId (path)  — the specific scheduled run being quoted
+     *   peopleCount (query)  — number of travelers (min 1, max tour.maxCapacity)
+     *
+     * Example: GET /api/public/tours/5/occurrences/42/price-preview?peopleCount=4
+     *
+     * Response shape: {@link PricePreviewResponse}
+     */
+    @GetMapping("/public/tours/{tourId}/occurrences/{occurrenceId}/price-preview")
+    public PricePreviewResponse getPricePreview(
+            @PathVariable Long tourId,
+            @PathVariable Long occurrenceId,
+            @RequestParam(defaultValue = "1") int peopleCount,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        // Validate peopleCount early so we return 400 before hitting the DB
+        if (peopleCount < 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "peopleCount must be at least 1");
+        }
+
+        TourOccurrence occurrence = occurrenceRepository.findById(occurrenceId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Occurrence not found"));
+
+        // Validate that the occurrence belongs to the requested tour
+        if (!occurrence.getTemplate().getId().equals(tourId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Occurrence does not belong to tour " + tourId);
+        }
+
+        // Validate peopleCount against max capacity
+        int maxCapacity = occurrence.getTemplate().getMaxCapacity();
+        if (peopleCount > maxCapacity) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "peopleCount exceeds tour max capacity of " + maxCapacity);
+        }
+
+        // Optionally resolve traveler for loyalty discount — null for guests
+        TravelerProfile traveler = null;
+        if (userDetails != null) {
+            traveler = travelerProfileRepository
+                    .findByUserEmail(userDetails.getUsername())
+                    .orElse(null);
+        }
+
+        return pricingService.previewPrice(
+                occurrence.getTemplate(),
+                occurrence.getStartTimeUtc(),
+                peopleCount,
+                traveler);
+    }
 
     // ── Traveler: Booking CRUD ─────────────────────────────────────────────────
 

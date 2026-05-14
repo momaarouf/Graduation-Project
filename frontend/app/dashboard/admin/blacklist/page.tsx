@@ -470,14 +470,14 @@ const BlacklistDetailsModal = ({ isOpen, onClose, entry, onRemove, onUpdate }: a
           {/* Ban Details / Edit Form */}
           <div className="p-5 surface-section rounded-2xl border-2 border-danger-red/10 space-y-4">
             <div className="flex items-center justify-between mb-2">
-              <h5 className="text-sm font-black text-theme-secondary uppercase tracking-widest flex items-center gap-2">
+              <h5 className="text-sm font-black text-theme-secondary capitalize tracking-normal flex items-center gap-2">
                 <Shield className="w-4 h-4 text-danger-red" />
                 Enforcement Record
               </h5>
               {!isEditing && (
                 <button 
                   onClick={() => setIsEditing(true)}
-                  className="text-xs text-primary-light hover:underline font-bold uppercase tracking-widest"
+                  className="text-xs text-primary-light hover:underline font-bold capitalize tracking-normal"
                 >
                   Edit Record
                 </button>
@@ -487,7 +487,7 @@ const BlacklistDetailsModal = ({ isOpen, onClose, entry, onRemove, onUpdate }: a
             {isEditing ? (
               <div className="space-y-4 pt-2">
                 <div>
-                  <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5">
+                  <label className="block text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1.5">
                     Ban Reason & Details
                   </label>
                   <textarea
@@ -499,7 +499,7 @@ const BlacklistDetailsModal = ({ isOpen, onClose, entry, onRemove, onUpdate }: a
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5">
+                    <label className="block text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1.5">
                       Duration Type
                     </label>
                     <select
@@ -513,7 +513,7 @@ const BlacklistDetailsModal = ({ isOpen, onClose, entry, onRemove, onUpdate }: a
                   </div>
                   {editData.banDuration === 'temporary' && (
                     <div>
-                      <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5">
+                      <label className="block text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1.5">
                         Expires At
                       </label>
                       <input
@@ -528,13 +528,13 @@ const BlacklistDetailsModal = ({ isOpen, onClose, entry, onRemove, onUpdate }: a
                 <div className="flex gap-2 pt-2">
                   <button
                     onClick={handleSave}
-                    className="flex-1 py-3 bg-danger-red text-white text-[11px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-danger-red/20 active:scale-95 transition-all"
+                    className="flex-1 py-3 bg-danger-red text-white text-[11px] font-black capitalize tracking-normal rounded-xl shadow-lg shadow-danger-red/20 active:scale-95 transition-all"
                   >
                     Save Changes
                   </button>
                   <button
                     onClick={() => setIsEditing(false)}
-                    className="flex-1 py-3 surface-card text-theme-secondary text-[11px] font-black uppercase tracking-widest rounded-xl border border-theme"
+                    className="flex-1 py-3 surface-card text-theme-secondary text-[11px] font-black capitalize tracking-normal rounded-xl border border-theme"
                   >
                     Cancel
                   </button>
@@ -544,21 +544,21 @@ const BlacklistDetailsModal = ({ isOpen, onClose, entry, onRemove, onUpdate }: a
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1">Status</p>
+                    <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1">Status</p>
                     <p className="text-sm font-bold text-theme-primary">{entry.status.toUpperCase()}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1">Banned At</p>
+                    <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1">Banned At</p>
                     <p className="text-sm font-bold text-theme-primary">{new Date(entry.bannedAt).toLocaleDateString()}</p>
                   </div>
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1">Primary Reason</p>
+                  <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1">Primary Reason</p>
                   <p className="text-sm text-theme-secondary leading-relaxed">{entry.description}</p>
                 </div>
                 {entry.expiresAt && (
                   <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl">
-                    <p className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                    <p className="text-[10px] font-black text-amber-600 dark:text-amber-400 capitalize tracking-normal mb-1 flex items-center gap-1.5">
                       <Clock className="w-3 h-3" />
                       Timed Enforcement
                     </p>
@@ -571,7 +571,7 @@ const BlacklistDetailsModal = ({ isOpen, onClose, entry, onRemove, onUpdate }: a
 
           {/* History Timeline */}
           <div className="p-4 surface-section rounded-xl border border-theme">
-            <h5 className="text-[10px] font-black text-theme-secondary uppercase tracking-widest mb-4 flex items-center gap-2">
+            <h5 className="text-[10px] font-black text-theme-secondary capitalize tracking-normal mb-4 flex items-center gap-2">
               <History className="w-4 h-4 text-danger-red" />
               Audit History
             </h5>
@@ -588,7 +588,7 @@ const BlacklistDetailsModal = ({ isOpen, onClose, entry, onRemove, onUpdate }: a
                   </div>
                   <div className="flex-1 pb-4 border-b border-theme last:border-0 last:pb-0">
                     <div className="flex justify-between items-start mb-1">
-                      <p className="text-xs font-bold text-theme-primary uppercase">{item.action}</p>
+                      <p className="text-xs font-bold text-theme-primary capitalize">{item.action}</p>
                       <span className="text-[10px] text-theme-muted">{new Date(item.timestamp).toLocaleString()}</span>
                     </div>
                     <p className="text-xs text-theme-muted">by {item.adminName || 'System'}</p>
@@ -606,7 +606,7 @@ const BlacklistDetailsModal = ({ isOpen, onClose, entry, onRemove, onUpdate }: a
             <div className="flex gap-3">
               <button
                 onClick={() => onRemove(entry.id)}
-                className="flex-1 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-[11px] font-black uppercase tracking-widest rounded-xl shadow-lg hover:shadow-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                className="flex-1 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-[11px] font-black capitalize tracking-normal rounded-xl shadow-lg hover:shadow-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
               >
                 <Unlock className="w-4 h-4" />
                 Revoke Enforcement
@@ -847,7 +847,7 @@ export default function AdminBlacklistPage() {
                   <div className={`text-2xl sm:text-3xl font-bold text-${colorClass}-600 dark:text-${colorClass}-400 mb-1`}>
                     {stat.value}
                   </div>
-                  <div className="text-[10px] font-black text-theme-muted uppercase tracking-widest leading-tight">{stat.label}</div>
+                  <div className="text-[10px] font-black text-theme-muted capitalize tracking-normal leading-tight">{stat.label}</div>
                   <div className={`absolute bottom-0 left-0 w-full h-1 bg-${colorClass}-500/20 opacity-0 group-hover:opacity-100 transition-opacity`} />
                 </div>
               );
@@ -920,12 +920,12 @@ export default function AdminBlacklistPage() {
             <table className="w-full">
               <thead className="surface-section border-b border-theme">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Guide</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Reason</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Duration</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Banned At</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Guide</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Reason</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Duration</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Status</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Banned At</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -1007,7 +1007,7 @@ export default function AdminBlacklistPage() {
                       </div>
                       <div className="min-w-0">
                         <h3 className="font-bold text-theme-primary truncate leading-tight">{entry.guideName}</h3>
-                        <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mt-1">{entry.guideId}</p>
+                        <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal mt-1">{entry.guideId}</p>
                       </div>
                     </div>
                     <StatusBadge status={entry.status} />
@@ -1021,7 +1021,7 @@ export default function AdminBlacklistPage() {
                   <div className="pt-2">
                     <button
                       onClick={() => { setSelectedEntry(entry); setShowDetailsModal(true); }}
-                      className="w-full py-3.5 bg-danger-red/10 text-danger-red hover:bg-danger-red hover:text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-xl transition-all border border-danger-red/20 active:scale-95 shadow-sm"
+                      className="w-full py-3.5 bg-danger-red/10 text-danger-red hover:bg-danger-red hover:text-white text-[11px] font-black capitalize tracking-[0.2em] rounded-xl transition-all border border-danger-red/20 active:scale-95 shadow-sm"
                     >
                       Review Enforcement
                     </button>

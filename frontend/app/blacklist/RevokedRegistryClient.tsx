@@ -282,19 +282,19 @@ export default function RevokedRegistryClient({
  <table className="w-full">
  <thead className="surface-section border-b border-theme">
  <tr>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">
+ <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">
  Guide ID
  </th>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">
+ <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">
  Ban Date
  </th>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">
+ <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">
  Violation
  </th>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">
+ <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">
  Complaints
  </th>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">
+ <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">
  Details
  </th>
  </tr>

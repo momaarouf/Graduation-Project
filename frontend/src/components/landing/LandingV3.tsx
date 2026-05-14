@@ -72,7 +72,7 @@ function HeroV3() {
   transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
   className="flex-1 text-center lg:text-left w-full"
   >
-  <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-[10px] font-bold uppercase tracking-[0.2em] mb-4 sm:mb-6 mx-auto lg:mx-0">
+  <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-[10px] font-bold capitalize tracking-[0.2em] mb-4 sm:mb-6 mx-auto lg:mx-0">
   <Globe className="w-3 h-3" />
   Explore the undiscovered
   </div>
@@ -98,7 +98,7 @@ function HeroV3() {
   <div className="flex-1 relative group hover:surface-section dark:hover:surface-card rounded-2xl transition-all">
   <Search className="absolute left-5 sm:left-7 top-1/2 -translate-y-1/2 text-theme-muted w-5 h-5 sm:w-6 sm:h-6 group-focus-within:text-orange-500 transition-colors pointer-events-none" />
   <div className="flex flex-col pl-14 sm:pl-16 pr-4 sm:pr-6 py-3 sm:py-4 flex-1">
-  <span className="hidden sm:block text-[10px] uppercase tracking-[0.2em] font-bold text-theme-muted group-hover:text-orange-500/70 transition-colors text-left whitespace-nowrap">Explore Global Destinations</span>
+  <span className="hidden sm:block text-[10px] capitalize tracking-[0.2em] font-bold text-theme-muted group-hover:text-orange-500/70 transition-colors text-left whitespace-nowrap">Explore Global Destinations</span>
   <input 
   type="text"
   value={searchQuery}
@@ -142,7 +142,7 @@ function HeroV3() {
  transition={{ repeat: Infinity, duration: 2 }}
  className="absolute bottom-6 left-1/2 -translate-x-1/2 text-theme-muted/40 flex flex-col items-center gap-3 z-20"
  >
- <span className="text-[10px] uppercase tracking-[0.4em] font-bold">Explore</span>
+ <span className="text-[10px] capitalize tracking-[0.4em] font-bold">Explore</span>
  <div className="w-px h-12 bg-gradient-to-b from-gray-400 to-transparent dark:from-white/20 dark:to-transparent" />
  </motion.div>
  </section>
@@ -195,7 +195,7 @@ function PremiumShowcase() {
  <h2 className="text-2xl sm:text-4xl lg:text-6xl font-bold text-theme-primary mb-4 sm:mb-6 tracking-tight leading-[0.9]">Local's Choice.</h2>
  <p className="text-lg text-theme-muted leading-relaxed font-medium">Handpicked experiences from verified guides across the globe. No tourist traps, just the authentic pulse of every region.</p>
  </motion.div>
- <Link href="/tours" className="group flex items-center gap-3 text-primary-light dark:text-primary-dark hover:gap-5 transition-all font-bold uppercase tracking-[0.2em] text-sm">
+ <Link href="/tours" className="group flex items-center gap-3 text-primary-light dark:text-primary-dark hover:gap-5 transition-all font-bold capitalize tracking-[0.2em] text-sm">
  Explore All Stories <ArrowRight className="w-5 h-5 text-primary-light dark:text-primary-dark" />
  </Link>
  </div>
@@ -238,11 +238,11 @@ function PremiumShowcase() {
 
  <div className="absolute inset-x-12 bottom-12">
  <div className="flex items-center gap-4 mb-6">
- <span className="px-5 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold uppercase tracking-widest">{tour.type}</span>
+ <span className="px-5 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold capitalize tracking-normal">{tour.type}</span>
  <span className="text-orange-400 font-bold text-3xl">{tour.price}</span>
  </div>
  <h3 className="text-5xl font-bold text-white mb-4 tracking-tight group-hover:text-orange-400 transition-colors">{tour.title}</h3>
- <div className="flex items-center gap-2 text-white/50 font-bold uppercase tracking-widest text-[10px]">
+ <div className="flex items-center gap-2 text-white/50 font-bold capitalize tracking-normal text-[10px]">
  <MapPin className="w-4 h-4 text-orange-500" />
  {tour.location}
  </div>
@@ -331,7 +331,7 @@ function ProfessionalJourney() {
   <div className={`p-3 rounded-2xl surface-section bg-primary-light/15 dark:bg-primary-dark/15 text-primary-light dark:text-primary-dark transition-transform group-hover:scale-110`}>
   <Icon className="w-6 h-6" fill="currentColor" fillOpacity={0.15} />
  </div>
- <span className="px-3 py-1 rounded-full bg-primary-light/10 text-primary-light dark:text-primary-dark text-[9px] font-bold uppercase tracking-widest border border-primary-light/20 dark:border-primary-dark/20">
+ <span className="px-3 py-1 rounded-full bg-primary-light/10 text-primary-light dark:text-primary-dark text-[9px] font-bold capitalize tracking-normal border border-primary-light/20 dark:border-primary-dark/20">
  {step.badge}
  </span>
  </div>
@@ -444,7 +444,7 @@ export function LandingV3() {
  viewport={{ once: false, amount: 0.5 }}
  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
  >
- <h2 className="text-2xl sm:text-4xl lg:text-6xl xl:text-7xl font-bold text-theme-primary mb-4 sm:mb-6 leading-[0.9] tracking-tighter uppercase">
+ <h2 className="text-2xl sm:text-4xl lg:text-6xl xl:text-7xl font-bold text-theme-primary mb-4 sm:mb-6 leading-[0.9] tracking-tighter capitalize">
  Beyond the <br className="hidden sm:block" /> Tourist Trail.
  </h2>
  <p className="text-theme-muted text-lg sm:text-xl max-w-3xl mx-auto font-medium leading-relaxed">

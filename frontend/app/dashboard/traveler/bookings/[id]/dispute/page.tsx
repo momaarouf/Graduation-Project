@@ -42,7 +42,7 @@ export default function OpenDisputePage({ params }: { params: Promise<{ id: stri
       <div className="max-w-2xl mx-auto">
         <Link
           href={`/dashboard/traveler/bookings/${bookingId}`}
-          className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-theme-secondary hover:text-primary-light transition-colors mb-12 group"
+          className="flex items-center gap-2 text-xs font-bold capitalize tracking-normal text-theme-secondary hover:text-primary-light transition-colors mb-12 group"
         >
           <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span>Back to Booking Detail</span>
@@ -65,7 +65,7 @@ export default function OpenDisputePage({ params }: { params: Promise<{ id: stri
 
           <form onSubmit={handleSubmit} className="space-y-8">
             <div className="space-y-3">
-              <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-theme-muted ml-1">What is the primary issue?</label>
+              <label className="block text-[10px] font-bold capitalize tracking-[0.2em] text-theme-muted ml-1">What is the primary issue?</label>
               <select
                 value={reason}
                 onChange={(e) => setReason(e.target.value as OpenDisputeRequest['reason'])}
@@ -82,7 +82,7 @@ export default function OpenDisputePage({ params }: { params: Promise<{ id: stri
             </div>
 
             <div className="space-y-3">
-              <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-theme-muted ml-1">Detailed Statement</label>
+              <label className="block text-[10px] font-bold capitalize tracking-[0.2em] text-theme-muted ml-1">Detailed Statement</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -95,7 +95,7 @@ export default function OpenDisputePage({ params }: { params: Promise<{ id: stri
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-5 bg-red-600 hover:bg-red-500 text-white font-bold uppercase tracking-[0.2em] text-xs rounded-2xl flex items-center justify-center gap-3 transition-all shadow-xl shadow-red-500/20 disabled:opacity-50 active:scale-[0.98]"
+              className="w-full py-5 bg-red-600 hover:bg-red-500 text-white font-bold capitalize tracking-[0.2em] text-xs rounded-2xl flex items-center justify-center gap-3 transition-all shadow-xl shadow-red-500/20 disabled:opacity-50 active:scale-[0.98]"
             >
               {isSubmitting ? (
                 <Loader2 className="w-5 h-5 animate-spin" />

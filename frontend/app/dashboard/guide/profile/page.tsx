@@ -81,6 +81,7 @@ import {
 import { getGuideProfile, getGuideBookings, getGuideTours, getGuidePortfolio, updateTour } from '@/src/lib/api/tours'
 import { GuideBookingResponse, BookingStatus, TourTemplateResponse } from '@/src/lib/types/tour.types'
 import { motion, AnimatePresence } from 'framer-motion'
+import GuideProfileSkeleton from './skeleton'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -247,10 +248,10 @@ function StatCard({ icon: Icon, label, value, color, change }: { icon: any; labe
         </div>
         <div className="min-w-0">
           <div className="text-base sm:text-xl font-black text-theme-primary leading-none mb-1 truncate">{value}</div>
-          <div className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-theme-muted truncate">{label}</div>
+          <div className="text-[8px] sm:text-[10px] font-black capitalize tracking-normal text-theme-muted truncate">{label}</div>
           {change && (
             <div className="mt-1">
-              <span className="text-[8px] font-black uppercase tracking-wider text-success-green bg-success-green/10 px-1.5 py-0.5 rounded-md border border-success-green/40">
+              <span className="text-[8px] font-black capitalize tracking-normal text-success-green bg-success-green/10 px-1.5 py-0.5 rounded-md border border-success-green/40">
                 {change}
               </span>
             </div>
@@ -295,7 +296,7 @@ function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarC
  {/* Cover image edit button - Always accessible on hover */}
  <button
  onClick={onCoverChange}
- className=" absolute bottom-4 right-4 flex items-center gap-2 px-4 py-2 bg-black/40 hover:bg-black/60  text-white rounded-xl shadow-lg transition-all text-xs font-black uppercase tracking-widest opacity-0 group-hover:opacity-100"
+ className=" absolute bottom-4 right-4 flex items-center gap-2 px-4 py-2 bg-black/40 hover:bg-black/60  text-white rounded-xl shadow-lg transition-all text-xs font-black capitalize tracking-normal opacity-0 group-hover:opacity-100"
  >
  <Camera className="w-4 h-4" />
  Change Cover
@@ -361,14 +362,14 @@ function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarC
   <>
   <button
   onClick={onSave}
-  className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-xl hover:scale-105"
+  className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black capitalize tracking-normal rounded-xl transition-all shadow-xl hover:scale-105"
   >
   <Save className="w-4 h-4" />
   <span className="hidden sm:inline">Save</span>
   </button>
   <button
   onClick={onCancel}
-  className="flex items-center gap-2 px-6 py-2.5 surface-card text-theme-secondary text-xs font-black uppercase tracking-widest rounded-xl border border-theme transition-all shadow-xl hover:scale-105"
+  className="flex items-center gap-2 px-6 py-2.5 surface-card text-theme-secondary text-xs font-black capitalize tracking-normal rounded-xl border border-theme transition-all shadow-xl hover:scale-105"
   >
   <X className="w-4 h-4" />
   <span className="hidden sm:inline">Cancel</span>
@@ -378,14 +379,14 @@ function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarC
   <>
   <button
   onClick={onEdit}
-  className="flex items-center gap-2 px-6 py-2.5 surface-card text-theme-secondary text-xs font-black uppercase tracking-widest rounded-xl border border-theme transition-all shadow-xl hover:scale-105"
+  className="flex items-center gap-2 px-6 py-2.5 surface-card text-theme-secondary text-xs font-black capitalize tracking-normal rounded-xl border border-theme transition-all shadow-xl hover:scale-105"
   >
   <Edit2 className="w-4 h-4" />
   <span className="hidden sm:inline">Edit Profile</span>
   </button>
   <Link
   href={`/guides/${profile.id}`}
-  className="flex items-center gap-2 px-6 py-2.5 bg-primary-light hover:bg-primary-light-hover text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-xl hover:scale-105"
+  className="flex items-center gap-2 px-6 py-2.5 bg-primary-light hover:bg-primary-light-hover text-white text-xs font-black capitalize tracking-normal rounded-xl transition-all shadow-xl hover:scale-105"
   >
   <Eye className="w-4 h-4" />
   <span className="hidden sm:inline">View Public</span>
@@ -481,7 +482,7 @@ function LanguagesEditor({ languages, isEditing, onAdd, onRemove, onChange }: La
  className="p-6 sm:p-10 surface-card border border-theme rounded-3xl sm:rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6"
  >
  <div className="flex items-center justify-between mb-8">
- <h3 className="text-[10px] font-black text-theme-secondary uppercase tracking-[0.25em] flex items-center gap-2">
+ <h3 className="text-[10px] font-black text-theme-secondary capitalize tracking-[0.25em] flex items-center gap-2">
  <Globe className="w-4 h-4 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
  Available Languages
  </h3>
@@ -545,7 +546,7 @@ function LanguagesEditor({ languages, isEditing, onAdd, onRemove, onChange }: La
  <p className="text-sm font-medium text-theme-muted mb-4">No languages listed yet</p>
  <button
  onClick={onAdd}
- className="px-4 py-2 bg-primary-light hover:bg-primary-light-hover text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95"
+ className="px-4 py-2 bg-primary-light hover:bg-primary-light-hover text-white text-xs font-black capitalize tracking-normal rounded-xl transition-all shadow-md active:scale-95"
  >
  Add Your First Language
  </button>
@@ -581,7 +582,7 @@ function ExpertiseEditor({ expertise, isEditing, onAdd, onRemove, onChange }: Ex
  className="p-6 sm:p-10 surface-card border border-theme rounded-3xl sm:rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6"
  >
  <div className="flex items-center justify-between mb-8">
- <h3 className="text-[10px] font-black text-theme-secondary uppercase tracking-[0.25em] flex items-center gap-2">
+ <h3 className="text-[10px] font-black text-theme-secondary capitalize tracking-[0.25em] flex items-center gap-2">
  <Sparkles className="w-4 h-4 text-accent-light dark:text-accent-dark" />
  Core Expertise
  </h3>
@@ -630,7 +631,7 @@ function ExpertiseEditor({ expertise, isEditing, onAdd, onRemove, onChange }: Ex
  <button
  onClick={onAdd}
  type="button"
- className="px-4 py-2 bg-primary-light hover:bg-primary-light-hover text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95"
+ className="px-4 py-2 bg-primary-light hover:bg-primary-light-hover text-white text-xs font-black capitalize tracking-normal rounded-xl transition-all shadow-md active:scale-95"
  >
  Add Your First Tag
  </button>
@@ -665,13 +666,13 @@ function PortfolioSection({ portfolio, guideId, isEditing, onAdd, onRemove }: Po
  <div className="p-6 sm:p-10 md:p-12 surface-card border border-theme rounded-3xl sm:rounded-[2.5rem] shadow-xl relative overflow-hidden group transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6">
  <div className="absolute top-0 right-0 w-32 h-32 bg-orange-600/5 rounded-full -mr-16 -mt-16 blur-2xl" />
  <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-theme">
- <h3 className="text-2xl font-black text-theme-primary tracking-tight uppercase italic">
+ <h3 className="text-2xl font-black text-theme-primary tracking-tight capitalize italic">
  Professional Portfolio
  </h3>
  {isEditing && (
  <button 
  onClick={onAdd}
- className="flex items-center gap-2 px-6 py-3 bg-primary-light hover:bg-primary-light-hover text-white text-xs font-black uppercase tracking-widest rounded-2xl shadow-lg transition-all hover:scale-105 active:scale-95"
+ className="flex items-center gap-2 px-6 py-3 bg-primary-light hover:bg-primary-light-hover text-white text-xs font-black capitalize tracking-normal rounded-2xl shadow-lg transition-all hover:scale-105 active:scale-95"
  >
  <Plus className="w-4 h-4" />
  Add to Portfolio
@@ -705,13 +706,13 @@ function PortfolioSection({ portfolio, guideId, isEditing, onAdd, onRemove }: Po
  >
  <div className="surface-card px-5 py-2.5 rounded-2xl shadow-lg shadow-primary-light/30 border border-primary-light dark:border-primary-dark/50 dark:border-primary-light dark:border-primary-dark/20 flex items-center gap-2 transform translate-y-4 group-hover/item:translate-y-0 transition-transform duration-500">
  <Eye className="w-4 h-4 text-primary-light dark:text-primary-dark" />
- <span className="text-[11px] font-black text-theme-primary uppercase tracking-[0.2em]">View Story</span>
+ <span className="text-[11px] font-black text-theme-primary capitalize tracking-[0.2em]">View Story</span>
  </div>
  </Link>
  
  {/* Category Badge */}
  <div className="absolute top-4 left-4 z-20">
- <div className="px-3 py-1.5 bg-black/50  text-white text-[9px] uppercase tracking-[0.2em] font-black rounded-full border border-theme shadow-xl flex items-center gap-1.5 transition-all group-hover/item:bg-primary-light/80 group-hover/item:border-primary-light dark:border-primary-dark/50">
+ <div className="px-3 py-1.5 bg-black/50  text-white text-[9px] capitalize tracking-[0.2em] font-black rounded-full border border-theme shadow-xl flex items-center gap-1.5 transition-all group-hover/item:bg-primary-light/80 group-hover/item:border-primary-light dark:border-primary-dark/50">
  <Award className="w-3.5 h-3.5 text-accent-light dark:text-accent-dark" />
  Signature Experience
  </div>
@@ -719,11 +720,11 @@ function PortfolioSection({ portfolio, guideId, isEditing, onAdd, onRemove }: Po
  </div>
 
  <div className="p-4 relative">
- <h4 className="font-black text-sm text-theme-primary mb-2 group-hover/item:text-primary-light dark:text-primary-dark dark:group-hover/item:text-primary-light dark:text-primary-dark transition-colors uppercase tracking-tight">
+ <h4 className="font-black text-sm text-theme-primary mb-2 group-hover/item:text-primary-light dark:text-primary-dark dark:group-hover/item:text-primary-light dark:text-primary-dark transition-colors capitalize tracking-tight">
  {item.caption || 'Untitled Project'}
  </h4>
 
- <div className="flex items-center gap-4 text-[10px] font-bold text-theme-muted uppercase tracking-widest">
+ <div className="flex items-center gap-4 text-[10px] font-bold text-theme-muted capitalize tracking-normal">
  <span className="flex items-center gap-1">
  <CheckCircle2 className="w-3 h-3 text-success-green" />
  Published
@@ -750,7 +751,7 @@ function PortfolioSection({ portfolio, guideId, isEditing, onAdd, onRemove }: Po
  {isEditing && (
  <button
  onClick={onAdd}
- className="flex items-center gap-2 px-6 py-3 bg-primary-light hover:bg-primary-light-hover text-white text-xs font-black uppercase tracking-widest rounded-2xl shadow-lg transition-all hover:scale-105 active:scale-95"
+ className="flex items-center gap-2 px-6 py-3 bg-primary-light hover:bg-primary-light-hover text-white text-xs font-black capitalize tracking-normal rounded-2xl shadow-lg transition-all hover:scale-105 active:scale-95"
  >
  <Plus className="w-4 h-4" />
  Add to Portfolio
@@ -792,8 +793,8 @@ function VerificationSection({ status, rejectionReason }: VerificationSectionPro
  <div className="flex items-center gap-3">
  <CheckCircle className="w-4 h-4 text-success-green group-hover/seal:scale-110 transition-transform" />
  <div className="flex flex-col">
- <span className="text-[10px] font-black uppercase tracking-widest text-theme-primary">Identity Status</span>
- <span className="text-[8px] font-bold text-theme-muted uppercase tracking-wider">KYC Verification</span>
+ <span className="text-[10px] font-black capitalize tracking-normal text-theme-primary">Identity Status</span>
+ <span className="text-[8px] font-bold text-theme-muted capitalize tracking-normal">KYC Verification</span>
  </div>
  </div>
  <VerificationBadge status={status as any} />
@@ -804,8 +805,8 @@ function VerificationSection({ status, rejectionReason }: VerificationSectionPro
  <div className="flex items-center gap-3">
  <CheckCircle className={`w-4 h-4 ${user?.emailVerified ? 'text-success-green' : 'text-theme-muted'} group-hover/seal:scale-110 transition-transform`} />
  <div className="flex flex-col">
- <span className="text-[10px] font-black uppercase tracking-widest text-theme-primary">Email Verified</span>
- <span className="text-[8px] font-bold text-theme-muted uppercase tracking-wider">Account Security</span>
+ <span className="text-[10px] font-black capitalize tracking-normal text-theme-primary">Email Verified</span>
+ <span className="text-[8px] font-bold text-theme-muted capitalize tracking-normal">Account Security</span>
  </div>
  </div>
  {user?.emailVerified && <div className="w-2 h-2 bg-success-green rounded-full animate-pulse" />}
@@ -816,11 +817,11 @@ function VerificationSection({ status, rejectionReason }: VerificationSectionPro
  <div className="flex items-center gap-3">
  <Shield className="w-4 h-4 text-primary-light dark:text-primary-dark group-hover/seal:scale-110 transition-transform" />
  <div className="flex flex-col">
- <span className="text-[10px] font-black uppercase tracking-widest text-theme-primary">Two-Factor Auth</span>
- <span className="text-[8px] font-bold text-theme-muted uppercase tracking-wider">Advanced Protection</span>
+ <span className="text-[10px] font-black capitalize tracking-normal text-theme-primary">Two-Factor Auth</span>
+ <span className="text-[8px] font-bold text-theme-muted capitalize tracking-normal">Advanced Protection</span>
  </div>
  </div>
- <div className="text-[8px] font-black text-danger-red uppercase tracking-widest bg-danger-red/10 dark:bg-red-900/20 px-2 py-0.5 rounded-md">Disabled</div>
+ <div className="text-[8px] font-black text-danger-red capitalize tracking-normal bg-danger-red/10 dark:bg-red-900/20 px-2 py-0.5 rounded-md">Disabled</div>
  </div>
 
  {status === 'REJECTED' && rejectionReason && (
@@ -887,7 +888,7 @@ function SocialLinks({ links, isEditing, onChange }: SocialLinksProps) {
 
  return (
  <div className="p-6 sm:p-10 surface-card border border-theme rounded-3xl sm:rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6">
- <h3 className="text-[10px] font-black text-theme-secondary mb-8 uppercase tracking-[0.25em] flex items-center gap-2">
+ <h3 className="text-[10px] font-black text-theme-secondary mb-8 capitalize tracking-[0.25em] flex items-center gap-2">
  <Share2 className="w-4 h-4 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
  Social Presence
  </h3>
@@ -934,7 +935,7 @@ function SocialLinks({ links, isEditing, onChange }: SocialLinksProps) {
  {/* Add New Link Form */}
  {isEditing && (
  <div className="pt-4 border-t border-theme space-y-3">
- <p className="text-xs font-medium text-theme-muted uppercase tracking-wider">Add New Link</p>
+ <p className="text-xs font-medium text-theme-muted capitalize tracking-normal">Add New Link</p>
  <div className="grid grid-cols-2 gap-2">
  <input
  type="text"
@@ -985,7 +986,7 @@ interface GuideInfoCardProps {
 function GuideInfoCard({ profile, totalTours, totalTravelers }: GuideInfoCardProps) {
  return (
  <div className="p-6 sm:p-10 surface-card border border-theme rounded-3xl sm:rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6">
- <h3 className="text-[10px] font-black text-theme-secondary mb-8 uppercase tracking-[0.25em] flex items-center gap-2">
+ <h3 className="text-[10px] font-black text-theme-secondary mb-8 capitalize tracking-[0.25em] flex items-center gap-2">
  <Info className="w-4 h-4 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
  Expertise Data
  </h3>
@@ -1309,11 +1310,7 @@ export default function GuideProfilePage() {
 
 
  if (isLoadingData) {
- return (
- <div className="min-h-screen flex items-center justify-center surface-section">
- <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-light dark:border-primary-dark" />
- </div>
- )
+ return <GuideProfileSkeleton />
  }
 
  return (
@@ -1408,7 +1405,7 @@ export default function GuideProfilePage() {
         onChange={handleSocialChange}
       />
       <div className="p-6 sm:p-10 surface-card border border-theme rounded-3xl sm:rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6">
-        <h3 className="text-[10px] font-black text-theme-secondary uppercase tracking-[0.25em] flex items-center gap-2">
+        <h3 className="text-[10px] font-black text-theme-secondary capitalize tracking-[0.25em] flex items-center gap-2">
           <MapPin className="w-4 h-4 text-orange-500" />
           Service Location
         </h3>
@@ -1491,8 +1488,8 @@ function PortfolioAddModal({ isOpen, onClose, tours, onToggle }: PortfolioAddMod
  <div className="surface-card rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl border border-theme">
  <div className="p-6 border-b border-theme flex items-center justify-between">
  <div>
- <h2 className="text-xl font-black text-theme-primary uppercase tracking-tight">Manage Portfolio</h2>
- <p className="text-[10px] text-theme-muted font-black uppercase tracking-[0.2em] mt-1">
+ <h2 className="text-xl font-black text-theme-primary capitalize tracking-tight">Manage Portfolio</h2>
+ <p className="text-[10px] text-theme-muted font-black capitalize tracking-[0.2em] mt-1">
  Feature your best tours as Signature Experiences
  </p>
  </div>
@@ -1503,7 +1500,7 @@ function PortfolioAddModal({ isOpen, onClose, tours, onToggle }: PortfolioAddMod
 
  <div className="flex-1 overflow-y-auto p-6 space-y-4">
  <div className="p-4 bg-primary-light/10 border border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark/50 rounded-xl space-y-2">
- <div className="flex items-center gap-2 text-primary-light dark:text-primary-dark font-black text-[10px] uppercase tracking-widest">
+ <div className="flex items-center gap-2 text-primary-light dark:text-primary-dark font-black text-[10px] capitalize tracking-normal">
  <Award className="w-4 h-4 text-accent-light dark:text-accent-dark" />
  What is a Signature Experience?
  </div>
@@ -1536,15 +1533,15 @@ function PortfolioAddModal({ isOpen, onClose, tours, onToggle }: PortfolioAddMod
  )}
  </div>
  <div>
- <h4 className="font-bold text-theme-primary text-sm line-clamp-1">{tour.title}</h4>
+ <h4 className="font-bold text-theme-primary text-sm line-clamp-1 capitalize">{tour.title}</h4>
  <div className="flex items-center gap-2 mt-1">
  {tour.lastPublishedAtUtc ? (
- <span className="flex items-center gap-1 text-[10px] text-success-green dark:text-emerald-400 font-bold uppercase tracking-wider">
+ <span className="flex items-center gap-1 text-[10px] text-success-green dark:text-emerald-400 font-bold capitalize tracking-normal">
  <CheckCircle2 className="w-3 h-3" />
  Eligible
  </span>
  ) : (
- <span className="flex items-center gap-1 text-[10px] text-accent-light dark:text-accent-dark dark:text-amber-400 font-bold uppercase tracking-wider">
+ <span className="flex items-center gap-1 text-[10px] text-accent-light dark:text-accent-dark dark:text-amber-400 font-bold capitalize tracking-normal">
  <AlertCircle className="w-3 h-3" />
  Pending Approval
  </span>

@@ -411,7 +411,7 @@ function MessageContent({ content, isFlagged, hasBlurredContent, hasSuspiciousCo
  {shouldBlur && (
  <div className="absolute inset-0  surface-card rounded flex items-center justify-center z-10">
  {hasSuspiciousContent ? (
- <span className="flex items-center gap-1 px-2 py-1 bg-red-600 text-white text-[10px] font-bold uppercase tracking-wider rounded">
+ <span className="flex items-center gap-1 px-2 py-1 bg-red-600 text-white text-[10px] font-bold capitalize tracking-normal rounded">
  <Lock className="w-3 h-3" />
  Payment Info Locked
  </span>
@@ -1409,7 +1409,7 @@ function GuideMessagingContent() {
  <h1 className="text-lg font-bold text-theme-primary">
  Messages
  </h1>
- <span className="px-2 py-0.5 bg-primary-light/10 text-primary-light dark:text-primary-dark text-[10px] font-bold uppercase tracking-wider rounded-full border border-primary-light/20">
+ <span className="px-2 py-0.5 bg-primary-light/10 text-primary-light dark:text-primary-dark text-[10px] font-bold capitalize tracking-normal rounded-full border border-primary-light/20">
  {mappedConvs.reduce((acc, c) => acc + c.unreadCount, 0)}
  </span>
  <button
@@ -1671,9 +1671,11 @@ function GuideMessagingContent() {
   )
 }
 
+import GuideMessagesSkeleton from './skeleton'
+
 export default function GuideMessagesPage() {
   return (
-    <React.Suspense fallback={<div className="h-screen surface-base flex items-center justify-center"><div className="w-8 h-8 border-4 border-primary-light border-t-transparent rounded-full animate-spin" /></div>}>
+    <React.Suspense fallback={<GuideMessagesSkeleton />}>
       <GuideMessagingContent />
     </React.Suspense>
   )

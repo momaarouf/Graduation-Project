@@ -13,7 +13,7 @@ const getPasswordStrength = (p: string) => {
  if (!p) return { score: 0, label: '', color: 'surface-section', message: '' }
  const checks = [p.length >= 8, p.length >= 12, /[A-Z]/.test(p), /[0-9]/.test(p), /[^A-Za-z0-9]/.test(p)]
  const s = checks.filter(Boolean).length
- if (s <= 1) return { score: 20, label: 'Weak', color: 'bg-red-500', message: 'Add uppercase, numbers & symbols' }
+ if (s <= 1) return { score: 20, label: 'Weak', color: 'bg-red-500', message: 'Add capitalize, numbers & symbols' }
  if (s <= 2) return { score: 40, label: 'Fair', color: 'bg-orange-500', message: 'Make it longer' }
  if (s <= 3) return { score: 60, label: 'Good', color: 'bg-amber-500', message: 'Getting stronger' }
  if (s <= 4) return { score: 80, label: 'Strong', color: 'bg-primary-light', message: 'Almost perfect' }
@@ -241,7 +241,7 @@ export default function ResetPasswordForm({ token: propToken }: Props) {
  <div className="flex-1 h-1.5 surface-section rounded-full overflow-hidden">
  <div className={`h-full ${strength.color} transition-all duration-300`} style={{ width: `${strength.score}%` }} />
  </div>
- {strength.label && <span className="text-[10px] uppercase tracking-wider font-bold text-theme-muted w-20 text-right">{strength.label}</span>}
+ {strength.label && <span className="text-[10px] capitalize tracking-normal font-bold text-theme-muted w-20 text-right">{strength.label}</span>}
  </div>
  </div>
  )}

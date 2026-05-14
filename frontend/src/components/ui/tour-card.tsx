@@ -176,7 +176,7 @@ const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
  <motion.p 
   initial={{ opacity: 0, y: 10 }}
   animate={{ opacity: 1, y: 0 }}
-  className="text-white text-xs font-bold tracking-[0.2em] uppercase drop-shadow-lg"
+  className="text-white text-xs font-bold tracking-[0.2em] capitalize drop-shadow-lg"
  >
    Tap for details
  </motion.p>
@@ -230,12 +230,12 @@ const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
  transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
  className="p-4 sm:p-6 space-y-2 sm:space-y-3"
  >
- <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary-light dark:text-primary-dark">
+ <p className="text-[10px] font-bold capitalize tracking-[0.2em] text-primary-light dark:text-primary-dark">
  - {category} -
  </p>
 
  <div>
- <h2 className="text-lg sm:text-xl font-bold leading-tight tracking-tight text-white md:text-2xl">
+ <h2 className="text-lg sm:text-xl font-bold leading-tight tracking-tight text-white md:text-2xl capitalize">
  {title}
  </h2>
  <div className="mt-1 flex items-center gap-1.5 text-white/80">
@@ -270,7 +270,7 @@ const TourCard = React.forwardRef<HTMLDivElement, TourCardProps>(
  >
  <div className="flex items-center justify-between border-t border-white/10 pt-2 pointer-events-auto gap-2 flex-wrap">
  <div className="min-w-0 flex-shrink-0">
- <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-0.5">EST. PRICE</p>
+ <p className="text-[10px] font-bold capitalize tracking-normal text-white/50 mb-0.5">EST. PRICE</p>
  <div className="flex items-baseline gap-1">
  <span className="text-2xl font-bold text-white leading-none">{price}</span>
  <span className="text-[9px] font-medium text-white/60 leading-none">{pricePeriod}</span>

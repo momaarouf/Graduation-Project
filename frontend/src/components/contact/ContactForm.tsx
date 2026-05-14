@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Send, CheckCircle, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { contactSupport } from '@/src/lib/api/support'
 
 export default function ContactForm() {
  const [formData, setFormData] = useState({
@@ -23,12 +24,15 @@ export default function ContactForm() {
  e.preventDefault()
  setIsSubmitting(true)
 
- // Phase 2: Replace with actual API call
- await new Promise(resolve => setTimeout(resolve, 1500))
- 
- toast.success('Message sent successfully!')
- setIsSubmitted(true)
- setIsSubmitting(false)
+ try {
+   await contactSupport(formData)
+   toast.success('Message sent successfully!')
+   setIsSubmitted(true)
+ } catch (error: any) {
+   toast.error(error.response?.data?.message || 'Failed to send message. Please try again.')
+ } finally {
+   setIsSubmitting(false)
+ }
  }
 
  if (isSubmitted) {

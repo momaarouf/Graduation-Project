@@ -120,7 +120,7 @@ export default async function TourDetailPage({ params}:PageProps ) {
   {/* Navigation Back */}
   <Link
   href="/tours"
-  className="inline-flex items-center gap-2 mb-4 group px-0 py-2 bg-transparent text-[10px] font-bold uppercase tracking-widest text-theme-secondary hover:text-primary-light dark:hover:text-primary-dark transition-all"
+  className="inline-flex items-center gap-2 mb-4 group px-0 py-2 bg-transparent text-[10px] font-bold capitalize tracking-normal text-theme-secondary hover:text-primary-light dark:hover:text-primary-dark transition-all"
   >
   <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
   Back to all tours
@@ -134,6 +134,7 @@ export default async function TourDetailPage({ params}:PageProps ) {
   <TourHero
   id={tour.id}
   title={tour.title}
+  category={tour.category}
   location={tour.locationName || tour.region || ''}
   country={tour.countryCode as any}
   mainImage={mainImage}

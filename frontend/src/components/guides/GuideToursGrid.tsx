@@ -88,7 +88,7 @@ export default function GuideToursGrid({ guideId }: { guideId: string }) {
  {/* High-End Badges */}
  <div className="absolute top-4 left-4 flex flex-wrap gap-2">
  {tour.halalFriendly && (
- <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black/50  rounded-full text-[10px] font-bold text-white uppercase tracking-widest border border-theme-strong shadow-lg">
+ <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black/50  rounded-full text-[10px] font-bold text-white capitalize tracking-normal border border-theme-strong shadow-lg">
  <Leaf className="w-3.5 h-3.5 fill-emerald-500 text-emerald-500" />
  Halal
  </div>
@@ -96,34 +96,34 @@ export default function GuideToursGrid({ guideId }: { guideId: string }) {
  </div>
  
  <div className="absolute top-4 right-4">
- <div className={`px-3 py-1.5  border border-theme-strong rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg ${tour.currentlyAvailable ? 'bg-primary-light/80 text-white' : 'surface-section text-gray-200'}`}>
+ <div className={`px-3 py-1.5  border border-theme-strong rounded-full text-[10px] font-bold capitalize tracking-normal shadow-lg ${tour.currentlyAvailable ? 'bg-primary-light/80 text-white' : 'surface-section text-gray-200'}`}>
  {tour.currentlyAvailable ? 'Active' : 'Offline'}
  </div>
  </div>
  </div>
 
  <div className="p-8 flex flex-col flex-1">
- <h3 className="text-xl font-bold text-theme-primary mb-3 line-clamp-2 leading-tight group-hover:text-orange-600 transition-colors">
+ <h3 className="text-xl font-bold text-theme-primary mb-3 line-clamp-2 leading-tight group-hover:text-orange-600 transition-colors capitalize">
  {tour.title}
  </h3>
  
- <div className="flex items-center gap-2 text-xs font-bold text-theme-muted uppercase tracking-widest mb-6">
+ <div className="flex items-center gap-2 text-xs font-bold text-theme-muted capitalize tracking-normal mb-6">
  <MapPin className="w-3.5 h-3.5 text-orange-600" />
  <span>{tour.region || tour.locationName}</span>
  </div>
 
  <div className="mt-auto pt-6 border-t border-theme dark:border-theme flex items-end justify-between">
  <div className="flex flex-col">
- <span className="text-[10px] font-bold text-theme-muted uppercase tracking-[0.2em] mb-1">Impact</span>
+ <span className="text-[10px] font-bold text-theme-muted capitalize tracking-[0.2em] mb-1">Impact</span>
  <div className="flex items-center gap-2">
  <Users className="w-4 h-4 text-primary-light dark:text-primary-dark" />
  <span className="text-sm font-bold text-theme-primary">{tour.totalTravelersCount}</span>
- <span className="text-[10px] font-bold text-theme-muted uppercase">served</span>
+ <span className="text-[10px] font-bold text-theme-muted capitalize">served</span>
  </div>
  </div>
  
  <div className="text-right">
- <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-[0.2em] block mb-1">From</span>
+ <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 capitalize tracking-[0.2em] block mb-1">From</span>
  <div className="text-2xl font-bold text-theme-primary leading-none">
  {tour.currency} {tour.basePrice}
  </div>

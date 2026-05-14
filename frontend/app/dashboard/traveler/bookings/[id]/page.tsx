@@ -33,6 +33,7 @@ import {
 import { getTravelerBooking, cancelBooking, getTravelerReviews } from '@/src/lib/api/tours'
 import { notificationsApi } from '@/src/lib/api/notifications'
 import { BookingResponse, BookingStatus } from '@/src/lib/types/tour.types'
+import TravelerBookingDetailSkeleton from './skeleton'
 
 // ============================================================================
 // HELPERS
@@ -190,11 +191,7 @@ Thank you for choosing TravelMarket!
  }
 
  if (isLoading) {
- return (
- <div className="pt-24 min-h-[60vh] surface-section flex items-center justify-center">
- <Loader2 className="w-8 h-8 animate-spin text-primary-light dark:text-primary-dark" />
- </div>
- )
+  return <TravelerBookingDetailSkeleton />
  }
 
  if (!booking) return null
@@ -255,7 +252,7 @@ Thank you for choosing TravelMarket!
  </p>
  </div>
  <div className="flex items-center gap-2">
-  <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border ${statusStyle}`}>
+  <span className={`px-4 py-1.5 rounded-full text-[10px] font-black capitalize tracking-[0.2em] border ${statusStyle}`}>
  {displayStatus}
  </span>
  <button
@@ -338,7 +335,7 @@ Thank you for choosing TravelMarket!
  {/* QR Code Section */}
  {booking.qrCode && booking.status === BookingStatus.Confirmed && (
  <div className="surface-card rounded-3xl p-6 border border-theme shadow-xl text-center space-y-4">
- <h3 className="font-bold text-theme-primary uppercase tracking-widest text-xs">Your Ticket</h3>
+ <h3 className="font-bold text-theme-primary capitalize tracking-normal text-xs">Your Ticket</h3>
  <div className="p-6 surface-card rounded-3xl inline-block mx-auto border-4 border-theme shadow-2xl">
  <QRCodeCanvas 
  value={booking.qrCode} 
@@ -360,13 +357,13 @@ Thank you for choosing TravelMarket!
  <Smartphone className="w-3 h-3" />
  </button>
  </div>
- <p className="text-xs text-primary-light dark:text-primary-dark dark:text-primary-dark font-bold uppercase tracking-wider">Scanning required for check-in</p>
+ <p className="text-xs text-primary-light dark:text-primary-dark dark:text-primary-dark font-bold capitalize tracking-normal">Scanning required for check-in</p>
  </div>
  )}
 
  {/* Price Summary */}
  <div className="surface-card rounded-3xl p-6 border border-theme shadow-xl space-y-6">
- <h3 className="text-lg font-bold text-theme-primary text-center uppercase tracking-wider">Summary</h3>
+ <h3 className="text-lg font-bold text-theme-primary text-center capitalize tracking-normal">Summary</h3>
  <div className="space-y-3">
  <div className="flex justify-between text-sm">
  <span className="text-theme-muted">Travelers</span>

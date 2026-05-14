@@ -25,6 +25,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { adminGetAuditEvents } from '@/src/lib/api/admin'
 import { AuditEventResponse, AuditPage } from '@/src/lib/api/admin'
 import { toast } from 'react-hot-toast'
+import AdminAuditSkeleton from './skeleton'
 
 // ============================================================================
 // STATUS BADGES
@@ -43,7 +44,7 @@ const ActionBadge = ({ action }: { action: string }) => {
  const Icon = isCritical ? AlertCircle : isPositive ? CheckCircleIcon : Clock
 
  return (
-  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-full border ${styles}`}>
+  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-black capitalize tracking-normal rounded-full border ${styles}`}>
    <Icon className="w-3 h-3" />
    {action.replace(/_/g, ' ')}
   </span>
@@ -96,7 +97,7 @@ const AuditDetailRenderer = ({ json }: { json?: string }) => {
      
      return (
       <div key={field} className="px-2 py-1 bg-black/5 dark:bg-white/5 rounded-lg border border-theme flex items-center gap-2">
-       <span className="text-[9px] font-black text-theme-muted uppercase tracking-widest">{field}:</span>
+       <span className="text-[9px] font-black text-theme-muted capitalize tracking-normal">{field}:</span>
        <div className="flex items-center gap-1.5">
         {values.old !== undefined && (
          <span className="text-[10px] font-bold text-danger-red line-through opacity-60">
@@ -132,11 +133,11 @@ function AuditMobileCard({ event }: { event: AuditEventResponse }) {
    <div className="flex items-center justify-between">
     <div className="flex items-center gap-2">
      <Calendar className="w-3.5 h-3.5 text-theme-muted" />
-     <span className="text-[10px] font-black text-theme-muted uppercase tracking-widest">
+     <span className="text-[10px] font-black text-theme-muted capitalize tracking-normal">
       {new Date(event.createdAtUtc).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
      </span>
     </div>
-    <span className="px-2 py-0.5 surface-section border border-theme rounded-lg text-[9px] font-black text-theme-muted uppercase tracking-widest">
+    <span className="px-2 py-0.5 surface-section border border-theme rounded-lg text-[9px] font-black text-theme-muted capitalize tracking-normal">
      {event.targetType} #{event.targetId}
     </span>
    </div>
@@ -210,18 +211,7 @@ export default function AdminAuditPage() {
  }, [auditPage, searchTerm])
 
  if (isLoading) {
-  return (
-   <div className="flex flex-col items-center justify-center py-40 gap-6">
-    <div className="relative">
-     <RefreshCw className="w-16 h-16 text-primary-light animate-spin opacity-10" />
-     <History className="absolute inset-0 m-auto w-6 h-6 text-primary-light" />
-    </div>
-    <div className="text-center">
-     <h2 className="text-sm font-black uppercase tracking-[0.3em] text-theme-primary">Synchronizing Ledger</h2>
-     <p className="text-xs text-theme-muted mt-2 animate-pulse">Retrieving immutable audit records...</p>
-    </div>
-   </div>
-  )
+  return <AdminAuditSkeleton />
  }
 
  return (
@@ -233,7 +223,7 @@ export default function AdminAuditPage() {
       <div className="w-10 h-10 bg-theme-primary dark:bg-surface-section rounded-2xl flex items-center justify-center shadow-xl text-theme-reverse">
        <History className="w-5 h-5" />
       </div>
-      <span className="text-[10px] font-black text-primary-light uppercase tracking-[0.2em] bg-primary-light/10 px-3 py-1 rounded-xl border border-primary-light/10">Audit Authority</span>
+      <span className="text-[10px] font-black text-primary-light capitalize tracking-[0.2em] bg-primary-light/10 px-3 py-1 rounded-xl border border-primary-light/10">Audit Authority</span>
      </div>
      <h1 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tighter">
       System <span className="text-primary-light">Audit Trail</span>
@@ -245,7 +235,7 @@ export default function AdminAuditPage() {
     
     <div className="flex items-center gap-4">
      <div className="px-6 py-4 surface-card rounded-[2rem] border border-theme shadow-sm flex flex-col items-center min-w-[120px] border-b-4 border-b-primary-light">
-      <span className="text-[8px] font-black text-theme-muted uppercase tracking-widest mb-1">Total Records</span>
+      <span className="text-[8px] font-black text-theme-muted capitalize tracking-normal mb-1">Total Records</span>
       <span className="text-2xl font-black text-theme-primary">{auditPage?.totalElements || 0}</span>
      </div>
      <button 
@@ -286,7 +276,7 @@ export default function AdminAuditPage() {
        <thead>
         <tr className="surface-section border-b border-theme">
          {['Timestamp', 'Authority', 'Protocol', 'Manifest', 'Subject'].map(h => (
-          <th key={h} className="px-8 py-5 text-[10px] font-black text-theme-muted uppercase tracking-[0.2em]">{h}</th>
+          <th key={h} className="px-8 py-5 text-[10px] font-black text-theme-muted capitalize tracking-[0.2em]">{h}</th>
          ))}
         </tr>
        </thead>
@@ -298,7 +288,7 @@ export default function AdminAuditPage() {
             <span className="text-xs font-bold text-theme-primary">
              {new Date(event.createdAtUtc).toLocaleDateString([], { dateStyle: 'medium' })}
             </span>
-            <span className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mt-0.5">
+            <span className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mt-0.5">
              {new Date(event.createdAtUtc).toLocaleTimeString([], { timeStyle: 'short' })}
             </span>
            </div>
@@ -312,7 +302,7 @@ export default function AdminAuditPage() {
              <p className="text-sm font-black text-theme-primary truncate">
               {event.adminEmail?.split('@')[0] || 'SYSTEM'}
              </p>
-             <p className="text-[9px] font-black text-theme-muted uppercase tracking-widest">
+             <p className="text-[9px] font-black text-theme-muted capitalize tracking-normal">
               {event.adminEmail ? 'Manual Intervention' : 'Automatic Trigger'}
              </p>
             </div>
@@ -331,7 +321,7 @@ export default function AdminAuditPage() {
           </td>
           <td className="px-8 py-5 text-right">
            <div className="inline-flex flex-col items-end">
-            <span className="px-3 py-1 bg-black/5 dark:bg-black/20 border border-theme rounded-lg text-[9px] font-black text-theme-muted uppercase tracking-widest">
+            <span className="px-3 py-1 bg-black/5 dark:bg-black/20 border border-theme rounded-lg text-[9px] font-black text-theme-muted capitalize tracking-normal">
              {event.targetType}
             </span>
             <span className="text-[10px] font-black text-primary-light mt-1.5">ID-{event.targetId}</span>
@@ -349,7 +339,7 @@ export default function AdminAuditPage() {
        <div className="w-20 h-20 bg-surface-section rounded-[2rem] flex items-center justify-center mx-auto mb-6">
         <Activity className="w-10 h-10 opacity-20" />
        </div>
-       <h3 className="text-xl font-black text-theme-primary uppercase tracking-tight">No Events Recorded</h3>
+       <h3 className="text-xl font-black text-theme-primary capitalize tracking-tight">No Events Recorded</h3>
        <p className="text-sm text-theme-muted mt-2 max-w-xs mx-auto font-medium">No audit activities match your current search parameters in this temporal window.</p>
       </div>
      )}
@@ -357,7 +347,7 @@ export default function AdminAuditPage() {
      {/* Pagination Footer */}
      {auditPage && (
       <div className="px-8 py-6 surface-section border-t border-theme flex flex-col sm:flex-row items-center justify-between gap-4">
-       <div className="text-[10px] font-black text-theme-muted uppercase tracking-[0.2em]">
+       <div className="text-[10px] font-black text-theme-muted capitalize tracking-[0.2em]">
         Inventory: <span className="text-theme-primary">{filteredEvents.length}</span> / {auditPage.totalElements} Records
        </div>
        

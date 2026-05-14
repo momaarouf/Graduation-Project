@@ -237,7 +237,7 @@ export default function HowItWorksPage() {
  className="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-black/5 rounded-full text-xs sm:text-sm font-bold border border-black/10 dark:border-theme-strong text-theme-primary"
  >
  <Sparkles className="w-4 h-4 text-amber-500" />
- <span className="tracking-widest uppercase">Your journey starts here</span>
+ <span className="tracking-normal capitalize">Your journey starts here</span>
  </motion.div>
 
  <motion.div
@@ -388,7 +388,7 @@ export default function HowItWorksPage() {
  <h2 className="text-4xl sm:text-6xl font-bold text-theme-primary mb-6 tracking-tight">
  Our <span className="text-emerald-600 dark:text-emerald-400">Halal-First</span> Values.
  </h2>
- <p className="text-theme-secondary font-bold max-w-xl mx-auto uppercase tracking-[0.2em] text-xs opacity-70">
+ <p className="text-theme-secondary font-bold max-w-xl mx-auto capitalize tracking-[0.2em] text-xs opacity-70">
  Travel without compromising your faith.
  </p>
  </motion.div>
@@ -554,7 +554,7 @@ export default function HowItWorksPage() {
  <HelpCircle className="w-10 h-10 text-primary-light dark:text-primary-dark" />
  </div>
  <h2 className="text-3xl sm:text-5xl font-bold text-theme-primary mb-4">Common Questions.</h2>
- <p className="text-theme-secondary font-bold uppercase tracking-widest text-xs opacity-60">Everything you need to know about the platform.</p>
+ <p className="text-theme-secondary font-bold capitalize tracking-normal text-xs opacity-60">Everything you need to know about the platform.</p>
  </motion.div>
 
   <motion.div 

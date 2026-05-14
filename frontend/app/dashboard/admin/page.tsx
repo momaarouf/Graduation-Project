@@ -30,6 +30,7 @@ import {
 import { getAdminPendingTours } from '@/src/lib/api/tours'
 import { toast } from 'react-hot-toast'
 import { getGreeting } from '@/src/lib/greeting'
+import AdminDashboardSkeleton from './skeleton'
 
 // ==================== STAT CARD COMPONENT ====================
 
@@ -76,7 +77,7 @@ const StatCard = ({ title, value, direction, trend, icon: Icon, color, isLoading
         )}
       </div>
       <div>
-        <p className="text-[11px] uppercase tracking-widest text-theme-muted font-bold mb-1">{title}</p>
+        <p className="text-[11px] capitalize tracking-normal text-theme-muted font-bold mb-1">{title}</p>
         <div className="flex items-baseline gap-2">
           {isLoading ? (
             <div className="h-8 w-16 surface-section animate-pulse rounded-md" />
@@ -133,6 +134,10 @@ export default function AdminDashboardPage() {
     fetchData()
   }, [])
 
+  if (isLoading) {
+    return <AdminDashboardSkeleton />
+  }
+
   return (
     <div className="flex-1 overflow-y-auto chat-scrollbar">
       <div className="max-w-7xl mx-auto py-6 sm:py-10 px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
@@ -140,7 +145,7 @@ export default function AdminDashboardPage() {
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-lg text-[10px] font-bold uppercase tracking-widest">
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-lg text-[10px] font-bold capitalize tracking-normal">
               <Sparkles className="w-3 h-3" />
               {getGreeting()}
             </div>
@@ -149,7 +154,7 @@ export default function AdminDashboardPage() {
               Administrative monitoring and oversight
             </p>
           </div>
-          <div suppressHydrationWarning className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-theme-muted surface-card px-3 py-1.5 rounded-xl border border-theme shadow-sm w-fit">
+          <div suppressHydrationWarning className="flex items-center gap-2 text-[10px] font-bold capitalize tracking-normal text-theme-muted surface-card px-3 py-1.5 rounded-xl border border-theme shadow-sm w-fit">
             <Clock className="w-3.5 h-3.5 text-primary-light" />
             Live: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
@@ -189,7 +194,7 @@ export default function AdminDashboardPage() {
                   <History className="w-4 h-4 text-theme-muted" />
                   System Audit Trail
                 </h2>
-                <Link href="/dashboard/admin/audit" className="text-xs text-primary-light dark:text-primary-dark hover:underline flex items-center font-bold uppercase tracking-widest">
+                <Link href="/dashboard/admin/audit" className="text-xs text-primary-light dark:text-primary-dark hover:underline flex items-center font-bold capitalize tracking-normal">
                   History <ArrowRight className="w-3 h-3 ml-1" />
                 </Link>
               </div>
@@ -217,7 +222,7 @@ export default function AdminDashboardPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-0.5">
-                          <span className="text-sm font-bold text-theme-primary truncate uppercase tracking-tight">
+                          <span className="text-sm font-bold text-theme-primary truncate capitalize tracking-tight">
                             {event.action.replace(/_/g, ' ')}
                           </span>
                           <span suppressHydrationWarning className="text-[10px] text-theme-muted font-bold whitespace-nowrap ml-2">
@@ -228,7 +233,7 @@ export default function AdminDashboardPage() {
                           {event.summary}
                         </p>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold text-theme-muted uppercase tracking-widest bg-surface-section px-1.5 py-0.5 rounded border border-theme">
+                          <span className="text-[10px] font-bold text-theme-muted capitalize tracking-normal bg-surface-section px-1.5 py-0.5 rounded border border-theme">
                             By {event.adminEmail?.split('@')[0] || 'System'}
                           </span>
                         </div>
@@ -281,7 +286,7 @@ export default function AdminDashboardPage() {
                           <p className="text-sm font-bold text-theme-primary truncate">
                             {verif.user.fullName}
                           </p>
-                          <p className="text-[10px] font-bold text-theme-muted uppercase tracking-widest truncate">
+                          <p className="text-[10px] font-bold text-theme-muted capitalize tracking-normal truncate">
                             {verif.idDocumentType}
                           </p>
                         </div>
@@ -297,13 +302,13 @@ export default function AdminDashboardPage() {
                 ) : (
                   <div className="py-8 text-center bg-surface-section/20 rounded-xl border border-dashed border-theme">
                     <CheckCircle className="w-8 h-8 text-success-green/20 mx-auto mb-2" />
-                    <p className="text-xs text-theme-muted font-bold uppercase tracking-widest">Clear Queue</p>
+                    <p className="text-xs text-theme-muted font-bold capitalize tracking-normal">Clear Queue</p>
                   </div>
                 )}
                 
                 <Link 
                   href="/dashboard/admin/verifications"
-                  className="block w-full text-center py-3 mt-2 bg-surface-section hover:bg-surface-section/80 text-theme-primary text-[10px] font-bold uppercase tracking-[0.2em] rounded-xl transition-all border border-theme shadow-sm active:scale-[0.98]"
+                  className="block w-full text-center py-3 mt-2 bg-surface-section hover:bg-surface-section/80 text-theme-primary text-[10px] font-bold capitalize tracking-[0.2em] rounded-xl transition-all border border-theme shadow-sm active:scale-[0.98]"
                 >
                   Manage All Requests
                 </Link>

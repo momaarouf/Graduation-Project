@@ -25,6 +25,8 @@ import {
 } from '@/src/lib/api/traveler-payments'
 import toast from 'react-hot-toast'
 
+import TravelerPaymentsSkeleton from './skeleton'
+
 export default function TravelerPaymentsPage() {
  const [methods, setMethods] = useState<TravelerPaymentMethod[]>([])
  const [isLoading, setIsLoading] = useState(true)
@@ -143,16 +145,18 @@ export default function TravelerPaymentsPage() {
  }
  }
 
+ if (isLoading && methods.length === 0) return <TravelerPaymentsSkeleton />
+
  return (
  <div className="p-4 sm:p-8 max-w-5xl mx-auto space-y-8">
   <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
   <div className="space-y-1">
-  <h1 className="text-2xl sm:text-4xl font-extrabold text-theme-primary tracking-tight uppercase">Payment <span className="text-primary-light">Methods</span></h1>
-  <p className="text-xs sm:text-sm text-theme-secondary font-medium uppercase tracking-widest opacity-70">Manage your saved cards for faster checkouts.</p>
+  <h1 className="text-2xl sm:text-4xl font-extrabold text-theme-primary tracking-tight capitalize">Payment <span className="text-primary-light">Methods</span></h1>
+  <p className="text-xs sm:text-sm text-theme-secondary font-medium capitalize tracking-normal opacity-70">Manage your saved cards for faster checkouts.</p>
   </div>
   <button 
   onClick={() => setIsAdding(true)}
-  className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-primary-light text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-primary-light-hover transition-all shadow-2xl shadow-primary-light/30 active:scale-95"
+  className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-primary-light text-white rounded-2xl text-[11px] font-black capitalize tracking-normal hover:bg-primary-light-hover transition-all shadow-2xl shadow-primary-light/30 active:scale-95"
   >
   <Plus className="w-5 h-5" />
   Add New Card
@@ -174,7 +178,7 @@ export default function TravelerPaymentsPage() {
  { icon: RefreshCw, text: 'One-click Checkouts' },
  { icon: History, text: 'Manage Anytime' }
  ].map((item, i) => (
- <li key={i} className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-blue-300">
+ <li key={i} className="flex items-center gap-3 text-xs font-bold capitalize tracking-normal text-blue-300">
  <item.icon className="w-4 h-4" />
  {item.text}
  </li>
@@ -202,18 +206,18 @@ export default function TravelerPaymentsPage() {
 
  <form onSubmit={handleAddMethod} className="space-y-6">
  <div className="space-y-2">
- <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest ml-1">Cardholder Name</label>
+ <label className="text-[10px] font-bold text-theme-muted capitalize tracking-normal ml-1">Cardholder Name</label>
  <input
  type="text"
  value={cardholderName}
  onChange={(e) => setCardholderName(e.target.value)}
  placeholder="JOHN DOE"
- className="w-full px-4 py-3 surface-section border-2 border-transparent focus:border-primary-light dark:border-primary-dark rounded-xl text-sm font-bold transition-all outline-none uppercase"
+ className="w-full px-4 py-3 surface-section border-2 border-transparent focus:border-primary-light dark:border-primary-dark rounded-xl text-sm font-bold transition-all outline-none capitalize"
  />
  </div>
 
  <div className="space-y-2">
- <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest ml-1">Card Number</label>
+ <label className="text-[10px] font-bold text-theme-muted capitalize tracking-normal ml-1">Card Number</label>
  <div className="relative">
  <div className="absolute left-4 top-1/2 -translate-y-1/2">
  <CreditCard className="w-5 h-5 text-theme-muted" />
@@ -231,7 +235,7 @@ export default function TravelerPaymentsPage() {
 
  <div className="grid grid-cols-3 gap-4">
  <div className="space-y-2">
- <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest ml-1">MM</label>
+ <label className="text-[10px] font-bold text-theme-muted capitalize tracking-normal ml-1">MM</label>
  <select
  value={expiryMonth}
  onChange={(e) => setExpiryMonth(e.target.value)}
@@ -244,7 +248,7 @@ export default function TravelerPaymentsPage() {
  </select>
  </div>
  <div className="space-y-2">
- <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest ml-1">YYYY</label>
+ <label className="text-[10px] font-bold text-theme-muted capitalize tracking-normal ml-1">YYYY</label>
  <select
  value={expiryYear}
  onChange={(e) => setExpiryYear(e.target.value)}
@@ -257,7 +261,7 @@ export default function TravelerPaymentsPage() {
  </select>
  </div>
  <div className="space-y-2">
- <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest ml-1">CVV</label>
+ <label className="text-[10px] font-bold text-theme-muted capitalize tracking-normal ml-1">CVV</label>
  <input
  type="password"
  value={cvv}
@@ -299,12 +303,7 @@ export default function TravelerPaymentsPage() {
  animate={{ opacity: 1 }}
  className="space-y-4"
  >
- {isLoading ? (
- <div className="py-20 flex flex-col items-center">
- <RefreshCw className="w-8 h-8 text-primary-light dark:text-primary-dark animate-spin mb-4" />
- <p className="text-theme-muted font-medium animate-pulse">Loading methods...</p>
- </div>
- ) : methods.length > 0 ? (
+ {methods.length > 0 ? (
  methods.map((method) => (
   <div 
   key={method.id}
@@ -316,24 +315,24 @@ export default function TravelerPaymentsPage() {
   </div>
   <div className="min-w-0">
   <div className="flex flex-wrap items-center gap-2">
-  <h4 className="font-extrabold text-[13px] sm:text-base text-theme-primary uppercase tracking-tight truncate">
+  <h4 className="font-extrabold text-[13px] sm:text-base text-theme-primary capitalize tracking-tight truncate">
   {method.brand} •••• {method.last4}
   </h4>
   {method.isDefault ? (
-  <span className="px-2 py-0.5 bg-primary-light/20 dark:bg-primary-dark/20 text-primary-light dark:text-primary-dark text-[8px] font-bold uppercase rounded-full">Default</span>
+  <span className="px-2 py-0.5 bg-primary-light/20 dark:bg-primary-dark/20 text-primary-light dark:text-primary-dark text-[8px] font-bold capitalize rounded-full">Default</span>
   ) : (
   <button 
   onClick={() => handleSetDefault(method.id)}
-  className="px-2 py-0.5 surface-section text-theme-muted hover:text-primary-light text-[8px] font-bold uppercase rounded-full transition-colors border border-theme"
+  className="px-2 py-0.5 surface-section text-theme-muted hover:text-primary-light text-[8px] font-bold capitalize rounded-full transition-colors border border-theme"
   >
   Set Default
   </button>
   )}
   </div>
-  <p className="text-[10px] font-extrabold text-theme-muted uppercase mt-0.5 truncate">
+  <p className="text-[10px] font-extrabold text-theme-muted capitalize mt-0.5 truncate">
   {method.cardholderName || 'John Doe'}
   </p>
-  <p className="text-[10px] text-theme-muted font-bold opacity-60 uppercase tracking-widest">
+  <p className="text-[10px] text-theme-muted font-bold opacity-60 capitalize tracking-normal">
   Exp {method.expiryMonth}/{method.expiryYear}
   </p>
   </div>
@@ -351,13 +350,13 @@ export default function TravelerPaymentsPage() {
   <div className="w-16 h-16 surface-card rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-theme">
   <CreditCard className="w-8 h-8 text-theme-muted opacity-30" />
   </div>
-  <h3 className="text-lg font-extrabold text-theme-primary mb-2 uppercase tracking-tight">No Saved Cards</h3>
-  <p className="text-[10px] text-theme-muted max-w-xs mx-auto mb-8 font-black uppercase tracking-widest opacity-70 leading-relaxed">
+  <h3 className="text-lg font-extrabold text-theme-primary mb-2 capitalize tracking-tight">No Saved Cards</h3>
+  <p className="text-[10px] text-theme-muted max-w-xs mx-auto mb-8 font-black capitalize tracking-normal opacity-70 leading-relaxed">
   Save a payment method to speed up your next tour booking experience.
   </p>
   <button 
   onClick={() => setIsAdding(true)}
-  className="w-full sm:w-auto px-10 py-4 bg-primary-light text-white rounded-2xl text-[11px] font-extrabold uppercase tracking-[0.2em] shadow-2xl shadow-primary-light/30 transition-all hover:scale-[1.05] active:scale-95"
+  className="w-full sm:w-auto px-10 py-4 bg-primary-light text-white rounded-2xl text-[11px] font-extrabold capitalize tracking-[0.2em] shadow-2xl shadow-primary-light/30 transition-all hover:scale-[1.05] active:scale-95"
   >
   Add First Card
   </button>

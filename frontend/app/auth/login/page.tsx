@@ -67,7 +67,7 @@ export default function LoginPage() {
  <motion.div
  initial={{ opacity: 0, scale: 0.9 }}
  animate={{ opacity: 1, scale: 1 }}
- className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-[10px] font-bold uppercase tracking-widest mb-4"
+ className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-[10px] font-bold capitalize tracking-normal mb-4"
  >
  <Sparkles className="w-3 h-3" />
  Welcome back
@@ -96,7 +96,7 @@ export default function LoginPage() {
  </Link>
  </p>
 
- <div className="mt-10 sm:mt-12 flex justify-center gap-6 text-[10px] font-bold uppercase tracking-widest text-theme-muted">
+ <div className="mt-10 sm:mt-12 flex justify-center gap-6 text-[10px] font-bold capitalize tracking-normal text-theme-muted">
  <Link href="/terms" className="hover:text-theme-secondary dark:hover:text-gray-200 transition-colors">Terms</Link>
  <Link href="/privacy" className="hover:text-theme-secondary dark:hover:text-gray-200 transition-colors">Privacy</Link>
  <Link href="/contact" className="hover:text-theme-secondary dark:hover:text-gray-200 transition-colors">Support</Link>

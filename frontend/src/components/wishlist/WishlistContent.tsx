@@ -111,17 +111,17 @@ const WishlistCard = ({ tour, onRemove, index }: { tour: PublicTourCardResponse;
  <div className="flex justify-between items-start gap-4 mb-2">
  <div>
  <div className="flex items-center gap-2 mb-1">
- <div className="text-[9px] font-black text-primary-light dark:text-primary-dark uppercase tracking-[0.2em]">
+ <div className="text-[9px] font-black text-primary-light dark:text-primary-dark capitalize tracking-[0.2em]">
  {tour.category || 'Experience'}
  </div>
  {tour.isPremium && (
- <div className="px-2 py-0.5 bg-amber-50 dark:bg-amber-950/30 border border-accent-light dark:border-accent-dark dark:border-accent-light dark:border-accent-dark/50 rounded-full text-[9px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1">
+ <div className="px-2 py-0.5 bg-amber-50 dark:bg-amber-950/30 border border-accent-light dark:border-accent-dark dark:border-accent-light dark:border-accent-dark/50 rounded-full text-[9px] font-bold capitalize tracking-normal text-amber-600 dark:text-amber-400 flex items-center gap-1">
  <Star className="w-2.5 h-2.5 fill-current" />
  Premium
  </div>
  )}
  </div>
- <h3 className="text-lg sm:text-xl font-extrabold text-theme-primary leading-tight group-hover:text-primary-light transition-colors uppercase tracking-tight">
+ <h3 className="text-lg sm:text-xl font-extrabold text-theme-primary leading-tight group-hover:text-primary-light transition-colors capitalize tracking-tight">
  {tour.title}
  </h3>
  </div>
@@ -130,28 +130,28 @@ const WishlistCard = ({ tour, onRemove, index }: { tour: PublicTourCardResponse;
  <span className="text-xs font-bold mr-0.5 opacity-50">{tour.currency}</span>
  {tour.basePrice}
  </div>
- <div className="text-[9px] text-theme-muted uppercase font-black tracking-widest opacity-60">per person</div>
+ <div className="text-[9px] text-theme-muted capitalize font-black tracking-normal opacity-60">per person</div>
  </div>
  </div>
 
  <div className="flex items-center gap-3 mt-2 mb-4">
  {tour.halalFriendly && (
- <div className="flex items-center gap-1 text-[11px] font-bold text-success-green dark:text-emerald-500 uppercase tracking-widest" title="Halal / Muslim Friendly">
+ <div className="flex items-center gap-1 text-[11px] font-bold text-success-green dark:text-emerald-500 capitalize tracking-normal" title="Halal / Muslim Friendly">
  <MoonStar className="w-3.5 h-3.5" />
  </div>
  )}
  {tour.instantBook && (
- <div className="flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-accent-light dark:text-accent-dark uppercase tracking-widest" title="Instant Confirmation">
+ <div className="flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-accent-light dark:text-accent-dark capitalize tracking-normal" title="Instant Confirmation">
  <TicketCheck className="w-3.5 h-3.5" />
  </div>
  )}
  {tour.isFamilyFriendly && (
- <div className="flex items-center gap-1 text-[11px] font-bold text-pink-600 dark:text-pink-500 uppercase tracking-widest" title="Family Friendly">
+ <div className="flex items-center gap-1 text-[11px] font-bold text-pink-600 dark:text-pink-500 capitalize tracking-normal" title="Family Friendly">
  <Baby className="w-3.5 h-3.5" />
  </div>
  )}
  {tour.hasGroupDiscount && (
- <div className="flex items-center gap-1 text-[11px] font-bold text-purple-600 dark:text-purple-500 uppercase tracking-widest" title="Group Discounts Available">
+ <div className="flex items-center gap-1 text-[11px] font-bold text-purple-600 dark:text-purple-500 capitalize tracking-normal" title="Group Discounts Available">
  <BadgePercent className="w-3.5 h-3.5" />
  </div>
  )}
@@ -168,21 +168,21 @@ const WishlistCard = ({ tour, onRemove, index }: { tour: PublicTourCardResponse;
 
  <div className="grid grid-cols-3 gap-2 py-4 border-y border-theme mb-auto">
  <div className="flex flex-col gap-1">
- <span className="text-[10px] text-theme-muted uppercase font-bold tracking-wider">Location</span>
+ <span className="text-[10px] text-theme-muted capitalize font-bold tracking-normal">Location</span>
  <span className="text-xs font-semibold text-theme-secondary flex items-center gap-1 truncate">
  <MapPin className="w-3 h-3 text-primary-light dark:text-primary-dark" />
  {tour.locationName || tour.city || tour.countryCode}
  </span>
  </div>
  <div className="flex flex-col gap-1">
- <span className="text-[10px] text-theme-muted uppercase font-bold tracking-wider">Duration</span>
+ <span className="text-[10px] text-theme-muted capitalize font-bold tracking-normal">Duration</span>
  <span className="text-xs font-semibold text-theme-secondary flex items-center gap-1">
  <Clock className="w-3 h-3 text-primary-light dark:text-primary-dark" />
  {durationText}
  </span>
  </div>
  <div className="flex flex-col gap-1">
- <span className="text-[10px] text-theme-muted uppercase font-bold tracking-wider">Rating</span>
+ <span className="text-[10px] text-theme-muted capitalize font-bold tracking-normal">Rating</span>
  <span className="text-xs font-semibold text-theme-secondary flex items-center gap-1">
  <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
  {tour.averageRating?.toFixed(1) || 'N/A'}
@@ -193,7 +193,7 @@ const WishlistCard = ({ tour, onRemove, index }: { tour: PublicTourCardResponse;
  <div className="flex items-center gap-3 mt-6">
  <Link
  href={`/tours/${tour.id}`}
- className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-light text-white text-[11px] font-extrabold uppercase tracking-widest rounded-xl hover:bg-primary-light-hover transition-all shadow-2xl shadow-primary-light/30 active:scale-95"
+ className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-light text-white text-[11px] font-extrabold capitalize tracking-normal rounded-xl hover:bg-primary-light-hover transition-all shadow-2xl shadow-primary-light/30 active:scale-95"
  >
  Learn More
  <ArrowRight className="w-4 h-4" />
@@ -288,12 +288,12 @@ export default function WishlistContent() {
  <div className="p-2.5 bg-primary-light rounded-2xl shadow-lg shadow-primary-light/20">
  <Heart className="w-6 h-6 text-white fill-white/20" />
  </div>
- <span className="text-sm font-bold text-theme-muted uppercase tracking-widest">Saved Experiences</span>
+ <span className="text-sm font-bold text-theme-muted capitalize tracking-normal">Saved Experiences</span>
  </div>
- <h1 className="text-2xl sm:text-4xl font-extrabold text-theme-primary mb-1 tracking-tight uppercase">
+ <h1 className="text-2xl sm:text-4xl font-extrabold text-theme-primary mb-1 tracking-tight capitalize">
  {title}
  </h1>
- <p className="text-sm sm:text-lg text-theme-secondary font-medium uppercase tracking-widest opacity-70">
+ <p className="text-sm sm:text-lg text-theme-secondary font-medium capitalize tracking-normal opacity-70">
  {subtitle}
  </p>
  </div>
@@ -317,21 +317,38 @@ export default function WishlistContent() {
  {/* Transitioning Content */}
  <AnimatePresence mode="wait">
  {isLoading ? (
- <motion.div 
- key="loading"
- initial={{ opacity: 0 }}
- animate={{ opacity: 1 }}
- exit={{ opacity: 0 }}
- className="flex flex-col items-center justify-center py-32 gap-6"
- >
- <div className="relative">
- <div className="w-16 h-16 border-4 border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark/30 rounded-full" />
- <div className="absolute inset-0 w-16 h-16 border-4 border-primary-light dark:border-primary-dark rounded-full border-t-transparent animate-spin" />
- </div>
- <p className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-500 dark:from-white dark:to-gray-400 bg-clip-text text-transparent">
- Fetching your favorites...
- </p>
- </motion.div>
+    <div className="w-full animate-pulse">
+      <div className="flex flex-col gap-8">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="surface-card border border-theme rounded-2xl overflow-hidden h-72 sm:h-64 flex flex-col sm:flex-row">
+            <div className="w-full sm:w-64 h-48 sm:h-full surface-section" />
+            <div className="flex-1 p-6 space-y-6">
+              <div className="flex justify-between items-start">
+                <div className="space-y-2">
+                  <div className="h-7 w-64 surface-section rounded" />
+                  <div className="h-4 w-32 surface-section rounded" />
+                </div>
+                <div className="h-10 w-10 surface-section rounded-xl" />
+              </div>
+              <div className="flex gap-8">
+                <div className="space-y-2">
+                  <div className="h-3 w-12 surface-section rounded" />
+                  <div className="h-5 w-20 surface-section rounded" />
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3 w-12 surface-section rounded" />
+                  <div className="h-5 w-20 surface-section rounded" />
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="h-12 flex-1 surface-section rounded-xl" />
+                <div className="h-12 w-12 surface-section rounded-xl" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
  ) : wishlist.length > 0 ? (
  <motion.div 
  key="list"
@@ -364,16 +381,16 @@ export default function WishlistContent() {
  <div className="absolute inset-0 bg-primary-light/5 rounded-full animate-ping pointer-events-none" />
  </div>
  
- <h3 className="text-xl sm:text-3xl font-extrabold text-theme-primary mb-3 uppercase tracking-tight">
+ <h3 className="text-xl sm:text-3xl font-extrabold text-theme-primary mb-3 capitalize tracking-tight">
  Start your collection
  </h3>
- <p className="text-[10px] sm:text-xl text-theme-muted mb-8 max-w-xs sm:max-w-md mx-auto font-black uppercase tracking-widest opacity-70 leading-relaxed">
+ <p className="text-[10px] sm:text-xl text-theme-muted mb-8 max-w-xs sm:max-w-md mx-auto font-black capitalize tracking-normal opacity-70 leading-relaxed">
  Save the experiences that speak to you and we'll keep them here for your next perfect trip.
  </p>
  
  <Link
  href="/tours"
- className="inline-flex items-center gap-3 px-8 py-4 bg-primary-light text-white text-[11px] font-extrabold uppercase tracking-[0.2em] rounded-2xl hover:scale-105 transition-all shadow-2xl shadow-primary-light/30 active:scale-95 group"
+ className="inline-flex items-center gap-3 px-8 py-4 bg-primary-light text-white text-[11px] font-extrabold capitalize tracking-[0.2em] rounded-2xl hover:scale-105 transition-all shadow-2xl shadow-primary-light/30 active:scale-95 group"
  >
  Explore Tours
  <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />

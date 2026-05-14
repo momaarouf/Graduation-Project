@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // BOOKING CARD - PRICING & AVAILABILITY WIDGET
 // ============================================================================
 // LOCATION: /frontend/src/components/tour-detail/BookingCard.tsx
@@ -17,7 +17,7 @@
 
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import toast from 'react-hot-toast'
 import {
  Calendar,
@@ -33,10 +33,13 @@ import {
  Hourglass,
  Star,
  Loader2,
- CreditCard
+ CreditCard,
+ TrendingUp,
+ Tag
 } from 'lucide-react'
 import { BookingCardProps, BookingMode } from '@/src/types/tour-detail.types'
-import { PublicActiveBookingResponse, BookingStatus } from '@/src/lib/types/tour.types'
+import { PublicActiveBookingResponse, BookingStatus, PricePreviewResponse } from '@/src/lib/types/tour.types'
+import { getPricePreview } from '@/src/lib/api/tours'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
 export default function BookingCard({
@@ -83,7 +86,14 @@ export default function BookingCard({
  const [isPricingOpen, setIsPricingOpen] = useState(false)
  const [isRequestMode, setIsRequestMode] = useState(bookingMode === 'request')
  const [waiverSigned, setWaiverSigned] = useState(false)
-  const [isMobileExpanded, setIsMobileExpanded] = useState(false)
+ const [isMobileExpanded, setIsMobileExpanded] = useState(false)
+ /**
+  * Server-computed price breakdown — fetched when date or peopleCount changes.
+  * Null while loading or before any date is selected.
+  * Falls back to local calculateTotalPrice() when null.
+  */
+ const [serverPreview, setServerPreview] = useState<PricePreviewResponse | null>(null)
+ const [isPreviewLoading, setIsPreviewLoading] = useState(false)
 
  // ========================================
  // IDENTITY & CONTEXT
@@ -178,6 +188,38 @@ export default function BookingCard({
  }
 
  // ========================================
+ // SERVER PRICE PREVIEW
+ // ========================================
+
+ // Fetch a server-computed breakdown whenever the user changes date or people count.
+ // This ensures 100% parity with the backend calculation (including loyalty tier).
+ useEffect(() => {
+  if (!selectedDate || !upcomingDates) return
+  const occurrence = upcomingDates.find(o => o.date === selectedDate)
+  if (!occurrence?.id) return
+
+  let cancelled = false
+  const fetchPreview = async () => {
+   setIsPreviewLoading(true)
+   try {
+    // Extract tourId from the first occurrence (all belong to the same template)
+    const tourId = (occurrence as any).templateId
+    if (!tourId) return
+    const preview = await getPricePreview(tourId, occurrence.id, peopleCount)
+    if (!cancelled) setServerPreview(preview)
+   } catch {
+    // Silently fall back to local calculation — don't show error for preview failures
+    if (!cancelled) setServerPreview(null)
+   } finally {
+    if (!cancelled) setIsPreviewLoading(false)
+   }
+  }
+
+  fetchPreview()
+  return () => { cancelled = true }
+ }, [selectedDate, peopleCount, upcomingDates])
+
+ // ========================================
  // DERIVED VALUES
  // ========================================
 
@@ -224,6 +266,10 @@ export default function BookingCard({
  }
  }
 
+ const surchargePercent = appliedMultiplier !== 1.0
+  ? Math.round((Math.min(appliedMultiplier, 5.0) - 1) * 100)
+  : 0
+
  let subtotal = pricePerPerson * peopleCount
  let discountAmount = 0
 
@@ -240,11 +286,34 @@ export default function BookingCard({
  total: subtotal,
  pricePerPerson,
  multiplier: appliedMultiplier,
+ surchargePercent,
  adjustmentType
  }
  }
 
- const price = calculateTotalPrice()
+ const localPrice = calculateTotalPrice()
+
+ // Use server preview when available (more accurate — includes loyalty tier);
+ // fall back to local calculation for instant responsiveness.
+ const price = serverPreview
+  ? {
+   pricePerPerson: serverPreview.finalPrice / peopleCount,
+   subtotal: serverPreview.subtotal,
+   discount: serverPreview.groupDiscountAmount + serverPreview.tierDiscountAmount,
+   total: serverPreview.finalPrice,
+   multiplier: 1.0,
+   surchargePercent: serverPreview.weekendApplied
+    ? serverPreview.weekendPercent
+    : serverPreview.holidayApplied
+    ? serverPreview.holidayPercent
+    : 0,
+   adjustmentType: serverPreview.holidayApplied
+    ? ('holiday' as const)
+    : serverPreview.weekendApplied
+    ? ('weekend' as const)
+    : (null as null)
+  }
+  : localPrice
 
  /**
  * Determine if booking is available for the selected date
@@ -364,7 +433,7 @@ export default function BookingCard({
  {currency === 'USD' && '$'}
  {currency === 'TRY' && '₺'}
  {currency === 'LBP' && 'ل.ل '}
- {price.pricePerPerson}
+ {Number(price.pricePerPerson).toFixed(2)}
  </span>
  <span className="text-sm text-theme-muted ml-1">
  / person
@@ -577,48 +646,68 @@ export default function BookingCard({
 
  {isPricingOpen && (
  <div className="mt-3 space-y-2 text-sm">
+ {/* Base price line */}
  <div className="flex justify-between">
  <span className="text-theme-secondary ">
- {currency === 'USD' && '$'}
- {currency === 'TRY' && '₺'}
- {currency === 'LBP' && 'ل.ل '}
+ {currency === 'USD' && '$'}{currency === 'TRY' && '₺'}{currency === 'LBP' && 'ل.ل '}
  {basePrice} × {peopleCount} {peopleCount === 1 ? 'person' : 'people'}
  </span>
  <span className="text-theme-primary">
- {currency === 'USD' && '$'}
- {currency === 'TRY' && '₺'}
- {currency === 'LBP' && 'ل.ل '}
+ {currency === 'USD' && '$'}{currency === 'TRY' && '₺'}{currency === 'LBP' && 'ل.ل '}
  {(basePrice * peopleCount).toFixed(2)}
  </span>
  </div>
 
- {price.multiplier !== 1.0 && (
+ {/* Weekend surcharge */}
+ {price.adjustmentType === 'weekend' && price.surchargePercent > 0 && (
  <div className="flex justify-between text-amber-600 dark:text-amber-400">
- <span className="capitalize">{price.adjustmentType} Adjustment ({ (price.multiplier * 100).toFixed(1) }%)</span>
- <span>
- ×{price.multiplier.toFixed(2)}
+ <span className="flex items-center gap-1">
+ <TrendingUp className="w-3.5 h-3.5" />
+ +{price.surchargePercent}% Weekend Rate
  </span>
+ <span>+{currency === 'USD' && '$'}{currency === 'TRY' && '₺'}{currency === 'LBP' && 'ل.ل '}{(basePrice * peopleCount * price.surchargePercent / 100).toFixed(2)}</span>
  </div>
  )}
 
- {hasGroupDiscount && peopleCount >= (groupDiscountThreshold || 4) && (
+ {/* Holiday surcharge */}
+ {price.adjustmentType === 'holiday' && price.surchargePercent > 0 && (
+ <div className="flex justify-between text-orange-600 dark:text-orange-400">
+ <span className="flex items-center gap-1">
+ <Star className="w-3.5 h-3.5" />
+ +{price.surchargePercent}% Holiday Rate
+ </span>
+ <span>+{currency === 'USD' && '$'}{currency === 'TRY' && '₺'}{currency === 'LBP' && 'ل.ل '}{(basePrice * peopleCount * price.surchargePercent / 100).toFixed(2)}</span>
+ </div>
+ )}
+
+ {/* Group discount */}
+ {(serverPreview?.groupDiscountApplied || (!serverPreview && hasGroupDiscount && peopleCount >= (groupDiscountThreshold || 4))) && (
  <div className="flex justify-between text-success-green dark:text-emerald-400">
- <span>Group discount ({Number(groupDiscountPercent || 5).toLocaleString('en-US', { maximumFractionDigits: 2 })}%)</span>
- <span>
- -{currency === 'USD' && '$'}
- {currency === 'TRY' && '₺'}
- {currency === 'LBP' && 'ل.ل '}
- {price.discount.toFixed(2)}
+ <span className="flex items-center gap-1">
+ <Tag className="w-3.5 h-3.5" />
+ -{serverPreview ? serverPreview.groupDiscountPercent : (groupDiscountPercent || 5)}% Group Discount
  </span>
+ <span>-{currency === 'USD' && '$'}{currency === 'TRY' && '₺'}{currency === 'LBP' && 'ل.ل '}{(serverPreview ? serverPreview.groupDiscountAmount : price.discount).toFixed(2)}</span>
  </div>
  )}
 
+ {/* Loyalty tier discount */}
+ {serverPreview && serverPreview.tierDiscountPercent > 0 && (
+ <div className="flex justify-between text-sky-600 dark:text-sky-400">
+ <span className="flex items-center gap-1">
+ <Star className="w-3.5 h-3.5" />
+ -{serverPreview.tierDiscountPercent}% Member Discount
+ </span>
+ <span>-{currency === 'USD' && '$'}{currency === 'TRY' && '₺'}{currency === 'LBP' && 'ل.ل '}{serverPreview.tierDiscountAmount.toFixed(2)}</span>
+ </div>
+ )}
+
+ {/* Total */}
  <div className="flex justify-between font-medium pt-2 border-t border-primary-light/10 dark:border-primary-dark/10">
  <span className="text-theme-primary">Total</span>
- <span className="text-xl text-theme-primary">
- {currency === 'USD' && '$'}
- {currency === 'TRY' && '₺'}
- {currency === 'LBP' && 'ل.ل '}
+ <span className="text-xl text-theme-primary flex items-center gap-1.5">
+ {isPreviewLoading && <Loader2 className="w-3.5 h-3.5 animate-spin opacity-60" />}
+ {currency === 'USD' && '$'}{currency === 'TRY' && '₺'}{currency === 'LBP' && 'ل.ل '}
  {price.total.toFixed(2)}
  </span>
  </div>

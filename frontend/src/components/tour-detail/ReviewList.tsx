@@ -269,7 +269,7 @@ export default function ReviewList({
  <div className="flex justify-end">
  <button 
  onClick={() => setShowDebugIds(!showDebugIds)}
- className="text-[10px] uppercase font-bold tracking-widest text-theme-muted hover:text-primary-light dark:text-primary-dark transition-colors flex items-center gap-1.5 px-3 py-1 rounded-lg border border-theme"
+ className="text-[10px] capitalize font-bold tracking-normal text-theme-muted hover:text-primary-light dark:text-primary-dark transition-colors flex items-center gap-1.5 px-3 py-1 rounded-lg border border-theme"
  >
  {showDebugIds ? 'Hide Debug Info' : 'Show Debug Info'}
  </button>
@@ -414,7 +414,7 @@ export default function ReviewList({
  <div className="flex items-center gap-2">
  <p className="font-bold text-theme-primary group-hover:text-primary-light dark:group-hover:text-primary-dark transition-colors">{review.travelerName}</p>
  {review.travelerTier && (
- <span className="px-2 py-0.5 bg-primary-light/10 text-primary-light rounded-lg text-[10px] font-bold uppercase tracking-widest border border-primary-light/20">{review.travelerTier}</span>
+ <span className="px-2 py-0.5 bg-primary-light/10 text-primary-light rounded-lg text-[10px] font-bold capitalize tracking-normal border border-primary-light/20">{review.travelerTier}</span>
  )}
  </div>
   <p className="text-xs text-theme-muted ">
@@ -472,7 +472,7 @@ export default function ReviewList({
  {review.guideReply && (
  <div className="ml-10 p-5 surface-section border border-theme rounded-xl rounded-tl-none space-y-2 shadow-sm">
  <div className="flex items-center gap-2">
- <p className="text-[10px] font-bold text-primary-light uppercase tracking-[0.2em]">Guide Response</p>
+ <p className="text-[10px] font-bold text-primary-light capitalize tracking-[0.2em]">Guide Response</p>
  <CheckCircle className="w-3" />
  </div>
  <p className="text-sm text-theme-muted leading-relaxed">
@@ -510,7 +510,7 @@ export default function ReviewList({
  ))}
 
  {!isFullPage && totalReviews > reviews.length && (
- <Link href={`/tours/${tourId}/reviews`} className="w-full py-4 block text-center text-sm font-bold uppercase tracking-widest text-theme-primary border border-theme rounded-lg hover:surface-section dark:hover:surface-card transition-all shadow-md hover:shadow-lg active:scale-[0.98]">
+ <Link href={`/tours/${tourId}/reviews`} className="w-full py-4 block text-center text-sm font-bold capitalize tracking-normal text-theme-primary border border-theme rounded-lg hover:surface-section dark:hover:surface-card transition-all shadow-md hover:shadow-lg active:scale-[0.98]">
  Read all {totalReviews} reviews
  </Link>
  )}

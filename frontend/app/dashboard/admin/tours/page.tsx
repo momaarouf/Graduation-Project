@@ -27,6 +27,7 @@ import {
  ShieldAlert,
  Fingerprint,
  Languages,
+ Activity,
  AlertTriangle,
  FileWarning,
  MessageSquare,
@@ -35,7 +36,9 @@ import {
  Play,
  Info,
  History,
- Star
+ Star,
+ Sparkles,
+ Filter
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useBadgeReset } from '@/src/lib/hooks/useBadgeReset'
@@ -49,6 +52,7 @@ import {
  TourTemplateStatus 
 } from '@/src/lib/types/tour.types'
 import { isVideoUrl } from '@/src/lib/utils/tour-utils'
+import AdminToursSkeleton from './skeleton'
 
 // ============================================================================
 // STATUS BADGE
@@ -65,7 +69,7 @@ const StatusBadge = ({ status }: { status: TourTemplateStatus }) => {
  }
 
  return (
-  <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-full border ${styles[status] || styles.DRAFT}`}>
+  <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[9px] font-black capitalize tracking-normal rounded-full border ${styles[status] || styles.DRAFT}`}>
    <AlertCircle className="w-2.5 h-2.5" />
    {status.replace('_', ' ')}
   </span>
@@ -195,8 +199,8 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
         <StatusBadge status="PENDING_REVIEW" />
        </div>
        <div className="flex items-center gap-3 mt-0.5">
-        <span className="text-[9px] font-black text-theme-muted uppercase tracking-[0.15em] flex items-center gap-1"><Fingerprint className="w-2.5 h-2.5" /> ID-{tour.id}</span>
-        <span className="text-[9px] font-black text-theme-muted uppercase tracking-[0.15em] flex items-center gap-1"><Calendar className="w-2.5 h-2.5" /> {new Date(tour.createdAtUtc).toLocaleDateString()}</span>
+        <span className="text-[9px] font-black text-theme-muted capitalize tracking-[0.15em] flex items-center gap-1"><Fingerprint className="w-2.5 h-2.5" /> ID-{tour.id}</span>
+        <span className="text-[9px] font-black text-theme-muted capitalize tracking-[0.15em] flex items-center gap-1"><Calendar className="w-2.5 h-2.5" /> {new Date(tour.createdAtUtc).toLocaleDateString()}</span>
        </div>
       </div>
      </div>
@@ -204,7 +208,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
      <div className="flex items-center gap-3">
       <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 surface-section rounded-xl border border-theme">
        <div className="w-6 h-6 rounded-lg bg-primary-light/20 flex items-center justify-center text-primary-light font-black text-[10px]">G</div>
-       <span className="text-[10px] font-black text-theme-secondary uppercase tracking-widest">Verified Guide</span>
+       <span className="text-[10px] font-black text-theme-secondary capitalize tracking-normal">Verified Guide</span>
       </div>
       <button onClick={onClose} className="p-2.5 surface-section hover:bg-danger-red/10 hover:text-danger-red rounded-2xl transition-all active:scale-90">
        <X className="w-6 h-6" />
@@ -222,10 +226,10 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
        {/* Hero Section */}
        <div className="space-y-6">
         <div className="flex items-center gap-2">
-         <span className="px-2 py-1 bg-primary-light/10 text-primary-light text-[10px] font-black uppercase tracking-widest rounded-lg border border-primary-light/20">
+         <span className="px-2 py-1 bg-primary-light/10 text-primary-light text-[10px] font-black capitalize tracking-normal rounded-lg border border-primary-light/20">
           {tour.category || 'Curated Tour'}
          </span>
-         <span className="px-2 py-1 surface-card text-theme-muted text-[10px] font-black uppercase tracking-widest rounded-lg border border-theme">
+         <span className="px-2 py-1 surface-card text-theme-muted text-[10px] font-black capitalize tracking-normal rounded-lg border border-theme">
           {tour.countryCode}
          </span>
         </div>
@@ -255,7 +259,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
            ) : (
             <div className="w-full h-full flex flex-col items-center justify-center text-theme-muted gap-4">
              <FileWarning className="w-16 h-16 opacity-10" />
-             <p className="text-xs font-black uppercase tracking-widest opacity-30">No Media Assets</p>
+             <p className="text-xs font-black capitalize tracking-normal opacity-30">No Media Assets</p>
             </div>
            )}
           </motion.div>
@@ -268,7 +272,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
           </div>
          )}
 
-         <div className="absolute bottom-6 right-6 px-4 py-1.5 bg-black/60 backdrop-blur-md rounded-full text-[10px] font-black text-white border border-white/20 uppercase tracking-[0.2em]">
+         <div className="absolute bottom-6 right-6 px-4 py-1.5 bg-black/60 backdrop-blur-md rounded-full text-[10px] font-black text-white border border-white/20 capitalize tracking-[0.2em]">
           {activeMediaIndex + 1} / {uniqueMedia.length}
          </div>
         </div>
@@ -291,7 +295,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
        {/* Full Description */}
        <div className="surface-card p-8 rounded-[2.5rem] border border-theme shadow-sm relative overflow-hidden group">
         <div className="absolute top-0 left-0 w-1 h-full bg-primary-light opacity-20" />
-        <h4 className="text-[10px] font-black text-theme-muted uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+        <h4 className="text-[10px] font-black text-theme-muted capitalize tracking-[0.2em] mb-6 flex items-center gap-2">
          <FileText className="w-4 h-4 text-primary-light" /> Full Catalog Description
         </h4>
         <div className="prose prose-lg dark:prose-invert max-w-none text-theme-secondary leading-relaxed whitespace-pre-line font-medium text-sm">
@@ -302,8 +306,8 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
        {/* Itinerary */}
        <div className="space-y-8">
         <div className="flex items-center justify-between border-b border-theme pb-4">
-         <h4 className="text-[10px] font-black text-theme-muted uppercase tracking-[0.2em]">Chronological Itinerary</h4>
-         <span className="text-[10px] font-black text-primary-light uppercase tracking-widest">{itinerary.length} Phases</span>
+         <h4 className="text-[10px] font-black text-theme-muted capitalize tracking-[0.2em]">Chronological Itinerary</h4>
+         <span className="text-[10px] font-black text-primary-light capitalize tracking-normal">{itinerary.length} Phases</span>
         </div>
         <div className="space-y-6">
          {itinerary.length > 0 ? itinerary.map((step: any, idx: number) => (
@@ -315,7 +319,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
            <div className="surface-card p-6 rounded-3xl border border-theme shadow-sm group-hover/step:shadow-md transition-all">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
              <h5 className="text-lg font-black text-theme-primary tracking-tight">{step.title}</h5>
-             <span className="text-[9px] font-black text-primary-light bg-primary-light/10 px-3 py-1 rounded-full uppercase tracking-widest border border-primary-light/20 self-start sm:self-auto">
+             <span className="text-[9px] font-black text-primary-light bg-primary-light/10 px-3 py-1 rounded-full capitalize tracking-normal border border-primary-light/20 self-start sm:self-auto">
               {step.duration || 'Variable Duration'}
              </span>
             </div>
@@ -325,7 +329,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
          )) : (
           <div className="py-20 surface-card border-2 border-dashed border-theme rounded-[2.5rem] flex flex-col items-center justify-center text-center">
            <History className="w-12 h-12 text-theme-muted opacity-20 mb-4" />
-           <p className="text-xs font-black text-theme-muted uppercase tracking-widest">Itinerary Draft Not Provided</p>
+           <p className="text-xs font-black text-theme-muted capitalize tracking-normal">Itinerary Draft Not Provided</p>
           </div>
          )}
         </div>
@@ -338,14 +342,14 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
        {/* High Level Stats */}
        <div className="grid grid-cols-2 gap-4">
         <div className="p-6 surface-card rounded-3xl border border-theme shadow-sm border-b-4 border-b-primary-light">
-         <span className="block text-[10px] font-black text-theme-muted uppercase tracking-[0.15em] mb-2">Base Price</span>
+         <span className="block text-[10px] font-black text-theme-muted capitalize tracking-[0.15em] mb-2">Base Price</span>
          <div className="flex items-baseline gap-2">
           <span className="text-3xl font-black text-theme-primary">${tour.basePrice}</span>
-          <span className="text-xs font-black text-theme-muted uppercase">{tour.currency}</span>
+          <span className="text-xs font-black text-theme-muted capitalize">{tour.currency}</span>
          </div>
         </div>
         <div className="p-6 surface-card rounded-3xl border border-theme shadow-sm border-b-4 border-b-primary-light">
-         <span className="block text-[10px] font-black text-theme-muted uppercase tracking-[0.15em] mb-2">Duration</span>
+         <span className="block text-[10px] font-black text-theme-muted capitalize tracking-[0.15em] mb-2">Duration</span>
          <div className="flex items-baseline gap-1 text-theme-primary">
           <span className="text-3xl font-black">{tour.durationHours}</span>
           <span className="text-sm font-black opacity-40">H</span>
@@ -363,12 +367,12 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
            <Users className="w-5 h-5" />
           </div>
           <div>
-           <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest">Pax Capacity</p>
+           <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal">Pax Capacity</p>
            <p className="text-lg font-black text-theme-primary">{tour.minCapacity} — {tour.maxCapacity}</p>
           </div>
          </div>
          <div className="text-right">
-          <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest">Languages</p>
+          <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal">Languages</p>
           <div className="flex flex-wrap justify-end gap-1 mt-1">
            {languages.slice(0, 2).map((l: any, i: number) => (
             <span key={i} className="text-[10px] font-black text-theme-secondary">{typeof l === 'object' ? l.language : l}{i < languages.slice(0,2).length-1 ? ',' : ''}</span>
@@ -379,7 +383,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
         </div>
 
         <div className="space-y-6">
-         <h4 className="text-[10px] font-black text-theme-muted uppercase tracking-[0.2em] flex items-center gap-2">
+         <h4 className="text-[10px] font-black text-theme-muted capitalize tracking-[0.2em] flex items-center gap-2">
           <MapPin className="w-4 h-4 text-primary-light" /> Meeting Point
          </h4>
          <div className="p-5 surface-section rounded-2xl border border-theme relative group">
@@ -389,7 +393,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
            <a 
             href={`https://maps.google.com/?q=${tour.meetingLatitude},${tour.meetingLongitude}`} 
             target="_blank" 
-            className="mt-4 inline-flex items-center gap-2 text-[10px] font-black text-primary-light hover:text-primary-light-hover uppercase tracking-widest transition-colors"
+            className="mt-4 inline-flex items-center gap-2 text-[10px] font-black text-primary-light hover:text-primary-light-hover capitalize tracking-normal transition-colors"
            >
             Verify Geolocation <Eye className="w-4 h-4" />
            </a>
@@ -403,7 +407,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
         <div className="p-6 bg-green-500/5 border border-green-500/20 rounded-3xl space-y-4">
          <div className="flex items-center gap-2 text-green-600">
           <CheckCircle className="w-4 h-4" />
-          <span className="text-[10px] font-black uppercase tracking-widest">Inclusions</span>
+          <span className="text-[10px] font-black capitalize tracking-normal">Inclusions</span>
          </div>
          <ul className="space-y-2">
           {inclusions.slice(0, 4).map((item: string, idx: number) => (
@@ -417,7 +421,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
         <div className="p-6 bg-red-500/5 border border-red-500/20 rounded-3xl space-y-4">
          <div className="flex items-center gap-2 text-red-600">
           <XCircle className="w-4 h-4" />
-          <span className="text-[10px] font-black uppercase tracking-widest">Exclusions</span>
+          <span className="text-[10px] font-black capitalize tracking-normal">Exclusions</span>
          </div>
          <ul className="space-y-2">
           {exclusions.slice(0, 4).map((item: string, idx: number) => (
@@ -434,7 +438,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
        <div className="surface-card p-8 rounded-[2.5rem] border border-theme shadow-sm space-y-6">
         <div className="space-y-6">
          <div>
-          <span className="text-[10px] font-black text-theme-muted uppercase tracking-[0.2em] block mb-4">Participant Requirements</span>
+          <span className="text-[10px] font-black text-theme-muted capitalize tracking-[0.2em] block mb-4">Participant Requirements</span>
           <div className="flex flex-wrap gap-2">
            {requirements.length > 0 ? requirements.map((r: string, idx: number) => (
             <span key={idx} className="px-3 py-1.5 surface-section rounded-xl text-[10px] font-black text-theme-secondary border border-theme">{r}</span>
@@ -442,10 +446,10 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
           </div>
          </div>
          <div>
-          <span className="text-[10px] font-black text-theme-muted uppercase tracking-[0.2em] block mb-4">Required Gear</span>
+          <span className="text-[10px] font-black text-theme-muted capitalize tracking-[0.2em] block mb-4">Required Gear</span>
           <div className="flex flex-wrap gap-2">
            {whatToBring.length > 0 ? whatToBring.map((w: string, idx: number) => (
-            <span key={idx} className="px-3 py-1.5 bg-amber-500/10 text-amber-600 rounded-xl text-[10px] font-black border border-amber-500/20 uppercase tracking-widest">{w}</span>
+            <span key={idx} className="px-3 py-1.5 bg-amber-500/10 text-amber-600 rounded-xl text-[10px] font-black border border-amber-500/20 capitalize tracking-normal">{w}</span>
            )) : <span className="text-xs font-bold text-theme-muted italic">Standard traveler gear recommended.</span>}
           </div>
          </div>
@@ -463,9 +467,9 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
        <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
          <AlertTriangle className="w-5 h-5 text-danger-red" />
-         <h4 className="text-xs font-black text-danger-red uppercase tracking-[0.2em]">Rejection Rationale</h4>
+         <h4 className="text-xs font-black text-danger-red capitalize tracking-[0.2em]">Rejection Rationale</h4>
         </div>
-        <button onClick={() => setShowRejectForm(false)} className="text-[10px] font-black text-theme-muted hover:text-theme-primary uppercase tracking-widest flex items-center gap-1 group">
+        <button onClick={() => setShowRejectForm(false)} className="text-[10px] font-black text-theme-muted hover:text-theme-primary capitalize tracking-normal flex items-center gap-1 group">
          <ChevronLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" /> Back to Decisions
         </button>
        </div>
@@ -478,7 +482,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
        <button 
         onClick={handleReject}
         disabled={loading || !rejectReason.trim()}
-        className="w-full h-16 bg-danger-red text-white font-black text-xs uppercase tracking-[0.3em] rounded-[1.5rem] shadow-2xl shadow-danger-red/30 hover:bg-red-700 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+        className="w-full h-16 bg-danger-red text-white font-black text-xs capitalize tracking-[0.3em] rounded-[1.5rem] shadow-2xl shadow-danger-red/30 hover:bg-red-700 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
        >
         {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <ShieldAlert className="w-5 h-5" />}
         Confirm Enforcement Action
@@ -489,7 +493,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
        <button 
         onClick={() => setShowRejectForm(true)}
         disabled={loading}
-        className="flex-1 h-16 surface-card border-2 border-danger-red/20 text-danger-red font-black text-xs uppercase tracking-[0.3em] rounded-[1.5rem] hover:bg-danger-red/5 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+        className="flex-1 h-16 surface-card border-2 border-danger-red/20 text-danger-red font-black text-xs capitalize tracking-[0.3em] rounded-[1.5rem] hover:bg-danger-red/5 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
        >
         <ShieldAlert className="w-5 h-5" />
         Reject Template
@@ -497,7 +501,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
        <button 
         onClick={handleApprove}
         disabled={loading}
-        className="flex-[2] h-16 bg-primary-light text-white font-black text-xs uppercase tracking-[0.3em] rounded-[1.5rem] shadow-2xl shadow-primary-light/30 hover:bg-primary-light-hover active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+        className="flex-[2] h-16 bg-primary-light text-white font-black text-xs capitalize tracking-[0.3em] rounded-[1.5rem] shadow-2xl shadow-primary-light/30 hover:bg-primary-light-hover active:scale-[0.98] transition-all flex items-center justify-center gap-3"
        >
         {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <ShieldCheck className="w-5 h-5" />}
         Approve & Publish
@@ -548,18 +552,7 @@ export default function AdminTourModerationPage() {
  }, [tours, searchTerm])
 
  if (loading) {
-  return (
-   <div className="flex flex-col items-center justify-center py-40 gap-6">
-    <div className="relative">
-     <RefreshCw className="w-16 h-16 text-primary-light animate-spin opacity-20" />
-     <Shield className="absolute inset-0 m-auto w-6 h-6 text-primary-light" />
-    </div>
-    <div className="text-center">
-     <h2 className="text-sm font-black uppercase tracking-[0.3em] text-theme-primary">Scanning Vault</h2>
-     <p className="text-xs text-theme-muted mt-2 animate-pulse">Syncing pending submissions...</p>
-    </div>
-   </div>
-  )
+    return <AdminToursSkeleton />
  }
 
  return (
@@ -572,7 +565,7 @@ export default function AdminTourModerationPage() {
       <div className="w-10 h-10 bg-primary-light rounded-2xl flex items-center justify-center shadow-xl shadow-primary-light/20 text-white">
        <Shield className="w-5 h-5" />
       </div>
-      <span className="text-[10px] font-black text-primary-light uppercase tracking-[0.2em] bg-primary-light/10 px-3 py-1 rounded-xl border border-primary-light/10">Admin Gatekeeper</span>
+      <span className="text-[10px] font-black text-primary-light capitalize tracking-[0.2em] bg-primary-light/10 px-3 py-1 rounded-xl border border-primary-light/10">Admin Gatekeeper</span>
      </div>
      <h1 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tighter">
       Tour <span className="text-primary-light">Moderation</span>
@@ -584,7 +577,7 @@ export default function AdminTourModerationPage() {
     
     <div className="flex items-center gap-4">
      <div className="px-6 py-4 surface-card rounded-[2rem] border border-theme shadow-sm flex flex-col items-center min-w-[120px] border-b-4 border-b-primary-light">
-      <span className="text-[8px] font-black text-theme-muted uppercase tracking-widest mb-1">Queue Depth</span>
+      <span className="text-[8px] font-black text-theme-muted capitalize tracking-normal mb-1">Queue Depth</span>
       <span className="text-2xl font-black text-theme-primary">{tours.length}</span>
      </div>
      <button 
@@ -637,14 +630,14 @@ export default function AdminTourModerationPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
         
         <div className="absolute top-5 left-5">
-         <span className="px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl text-[9px] font-black text-white uppercase tracking-[0.2em] shadow-lg">
+         <span className="px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 rounded-xl text-[9px] font-black text-white capitalize tracking-[0.2em] shadow-lg">
           {tour.category || 'Curated'}
          </span>
         </div>
 
         <div className="absolute bottom-5 left-5 right-5 flex justify-between items-end">
          <div className="flex flex-col">
-          <span className="text-[10px] font-black text-white/70 uppercase tracking-widest">ID-{tour.id}</span>
+          <span className="text-[10px] font-black text-white/70 capitalize tracking-normal">ID-{tour.id}</span>
           <span className="text-xl font-black text-white truncate max-w-[180px]">{tour.title}</span>
          </div>
          <div className="bg-primary-light px-3 py-1 rounded-xl shadow-lg border border-white/20">
@@ -659,9 +652,9 @@ export default function AdminTourModerationPage() {
          <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
            <MapPin className="w-3.5 h-3.5 text-primary-light" />
-           <span className="text-[10px] font-black text-theme-secondary uppercase tracking-widest">{tour.locationName || tour.countryCode}</span>
+           <span className="text-[10px] font-black text-theme-secondary capitalize tracking-normal">{tour.locationName || tour.countryCode}</span>
           </div>
-          <span className="text-[9px] font-black text-theme-muted uppercase tracking-widest">{new Date(tour.createdAtUtc).toLocaleDateString()}</span>
+          <span className="text-[9px] font-black text-theme-muted capitalize tracking-normal">{new Date(tour.createdAtUtc).toLocaleDateString()}</span>
          </div>
 
          <p className="text-xs text-theme-secondary line-clamp-2 leading-relaxed h-10 font-medium">
@@ -671,16 +664,16 @@ export default function AdminTourModerationPage() {
          <div className="flex flex-wrap gap-2">
           <div className="flex items-center gap-1 px-2 py-1 surface-section rounded-lg border border-theme">
            <Clock className="w-3 h-3 text-primary-light" />
-           <span className="text-[9px] font-black text-theme-muted uppercase">{tour.durationHours}H {tour.durationMinutes}M</span>
+           <span className="text-[9px] font-black text-theme-muted capitalize">{tour.durationHours}H {tour.durationMinutes}M</span>
           </div>
           <div className="flex items-center gap-1 px-2 py-1 surface-section rounded-lg border border-theme">
            <Users className="w-3 h-3 text-success-green" />
-           <span className="text-[9px] font-black text-theme-muted uppercase">{tour.maxCapacity} MAX</span>
+           <span className="text-[9px] font-black text-theme-muted capitalize">{tour.maxCapacity} MAX</span>
           </div>
           {tour.halalFriendly && (
            <div className="flex items-center gap-1 px-2 py-1 bg-emerald-500/10 text-emerald-600 rounded-lg border border-emerald-500/20">
             <Star className="w-3 h-3 fill-current" />
-            <span className="text-[9px] font-black uppercase">Halal</span>
+            <span className="text-[9px] font-black capitalize">Halal</span>
            </div>
           )}
          </div>
@@ -688,7 +681,7 @@ export default function AdminTourModerationPage() {
 
         <button
          onClick={() => setSelectedTour(tour)}
-         className="mt-8 w-full h-12 bg-theme-primary dark:bg-surface-section hover:bg-primary-light hover:text-white text-theme-reverse font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all flex items-center justify-center gap-2 group/btn"
+         className="mt-8 w-full h-12 bg-theme-primary dark:bg-surface-section hover:bg-primary-light hover:text-white text-theme-reverse font-black text-[10px] capitalize tracking-[0.2em] rounded-2xl transition-all flex items-center justify-center gap-2 group/btn"
         >
          Review Entry
          <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
@@ -712,7 +705,7 @@ export default function AdminTourModerationPage() {
      </p>
      <button 
       onClick={fetchTours}
-      className="mt-10 px-8 py-3 bg-primary-light hover:bg-primary-light-hover text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-primary-light/20 flex items-center gap-3"
+      className="mt-10 px-8 py-3 bg-primary-light hover:bg-primary-light-hover text-white rounded-2xl text-[10px] font-black capitalize tracking-normal transition-all shadow-xl shadow-primary-light/20 flex items-center gap-3"
      >
       <RefreshCw className="w-4 h-4" />
       Sync Vault

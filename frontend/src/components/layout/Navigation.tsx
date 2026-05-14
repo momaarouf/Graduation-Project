@@ -294,13 +294,13 @@ export default function Navigation() {
                 <div className="md:hidden flex items-center gap-0.5">
                   <Link 
                     href="/auth/login" 
-                    className="h-9 px-2 flex items-center justify-center text-[10px] font-bold uppercase tracking-widest text-theme-secondary hover:text-primary-light dark:hover:text-primary-dark transition-all"
+                    className="h-9 px-2 flex items-center justify-center text-[10px] font-bold capitalize tracking-normal text-theme-secondary hover:text-primary-light dark:hover:text-primary-dark transition-all"
                   >
                     Login
                   </Link>
                   <Link 
                     href="/auth/signup" 
-                    className="h-9 px-3 flex items-center justify-center text-[10px] font-bold uppercase tracking-widest bg-primary-light dark:bg-primary-dark text-white rounded-xl shadow-lg shadow-primary-light/20 active:scale-95 transition-all"
+                    className="h-9 px-3 flex items-center justify-center text-[10px] font-bold capitalize tracking-normal bg-primary-light dark:bg-primary-dark text-white rounded-xl shadow-lg shadow-primary-light/20 active:scale-95 transition-all"
                   >
                     Join
                   </Link>

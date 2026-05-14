@@ -109,7 +109,7 @@ function StatCard({ icon: Icon, label, value, color }: { icon: any; label: strin
  </div>
  <div className="min-w-0">
  <div className="text-base sm:text-xl font-extrabold text-theme-primary leading-none mb-1 truncate">{value}</div>
- <div className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-theme-muted truncate">{label}</div>
+ <div className="text-[8px] sm:text-[10px] font-black capitalize tracking-normal text-theme-muted truncate">{label}</div>
  </div>
  </div>
  </motion.div>
@@ -119,6 +119,8 @@ function StatCard({ icon: Icon, label, value, color }: { icon: any; label: strin
 // ============================================================================
 // MAIN PAGE
 // ============================================================================
+
+import TravelerProfileLoading from './skeleton'
 
 export default function TravelerDashboardProfilePage() {
  const router = useRouter()
@@ -209,7 +211,7 @@ export default function TravelerDashboardProfilePage() {
  })
  }
 
- if (loading && !profile) return <LoadingOverlay isVisible={true} message="Loading Profile..." />
+ if (loading && !profile) return <TravelerProfileLoading />
  if (!profile) return null
 
  return (
@@ -228,7 +230,7 @@ export default function TravelerDashboardProfilePage() {
   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
   <button 
   onClick={handleCoverClick}
-  className="absolute bottom-4 right-4 flex items-center gap-2 px-4 py-2 bg-black/40 hover:bg-black/60  text-white rounded-xl shadow-lg transition-all text-xs font-black uppercase tracking-widest opacity-0 group-hover:opacity-100"
+  className="absolute bottom-4 right-4 flex items-center gap-2 px-4 py-2 bg-black/40 hover:bg-black/60  text-white rounded-xl shadow-lg transition-all text-xs font-black capitalize tracking-normal opacity-0 group-hover:opacity-100"
   >
   <Camera className="w-4 h-4" />
   Change Cover
@@ -254,14 +256,14 @@ export default function TravelerDashboardProfilePage() {
     </div>
 
     <div className="mb-4 sm:mb-6 space-y-0.5 sm:space-y-1">
-      <h1 className="text-xl sm:text-4xl font-extrabold text-theme-primary tracking-tight drop-shadow-md break-words uppercase">
+      <h1 className="text-xl sm:text-4xl font-extrabold text-theme-primary tracking-tight drop-shadow-md break-words capitalize">
         {profile.fullName}
       </h1>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="px-2.5 py-1 bg-emerald-600 text-white text-[8px] sm:text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
+        <span className="px-2.5 py-1 bg-emerald-600 text-white text-[8px] sm:text-[10px] font-black capitalize tracking-normal rounded-full shadow-lg">
           Active Traveler
         </span>
-        <span className="text-[9px] sm:text-xs font-bold text-theme-muted flex items-center gap-1 uppercase tracking-widest">
+        <span className="text-[9px] sm:text-xs font-bold text-theme-muted flex items-center gap-1 capitalize tracking-normal">
           <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           {profile.city}, {profile.country}
         </span>
@@ -272,22 +274,22 @@ export default function TravelerDashboardProfilePage() {
   <div className="absolute top-4 right-4 flex flex-col sm:flex-row gap-2 sm:gap-3">
   {isEditing ? (
   <div className="flex gap-2">
-  <button onClick={handleSave} className="flex items-center gap-2 px-5 py-2 sm:px-6 sm:py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-xl">
+  <button onClick={handleSave} className="flex items-center gap-2 px-5 py-2 sm:px-6 sm:py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] sm:text-xs font-black capitalize tracking-normal rounded-xl transition-all shadow-xl">
   <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
   Save
   </button>
-  <button onClick={() => { setIsEditing(false); setFormData(profile); }} className="flex items-center gap-2 px-5 py-2 sm:px-6 sm:py-2.5 surface-card text-theme-secondary text-[9px] sm:text-xs font-black uppercase tracking-widest rounded-xl border border-theme transition-all shadow-xl">
+  <button onClick={() => { setIsEditing(false); setFormData(profile); }} className="flex items-center gap-2 px-5 py-2 sm:px-6 sm:py-2.5 surface-card text-theme-secondary text-[9px] sm:text-xs font-black capitalize tracking-normal rounded-xl border border-theme transition-all shadow-xl">
   <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
   Cancel
   </button>
   </div>
   ) : (
   <div className="flex gap-2">
-  <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-5 py-2 sm:px-6 sm:py-2.5 surface-card text-theme-secondary text-[9px] sm:text-xs font-black uppercase tracking-widest rounded-xl border border-theme transition-all shadow-xl">
+  <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-5 py-2 sm:px-6 sm:py-2.5 surface-card text-theme-secondary text-[9px] sm:text-xs font-black capitalize tracking-normal rounded-xl border border-theme transition-all shadow-xl">
   <Edit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
   Edit
   </button>
-  <Link href={`/travelers/${user?.travelerProfileId}`} className="flex items-center gap-2 px-5 py-2 sm:px-6 sm:py-2.5 bg-primary-light hover:bg-primary-light-hover text-white text-[9px] sm:text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-xl">
+  <Link href={`/travelers/${user?.travelerProfileId}`} className="flex items-center gap-2 px-5 py-2 sm:px-6 sm:py-2.5 bg-primary-light hover:bg-primary-light-hover text-white text-[9px] sm:text-xs font-black capitalize tracking-normal rounded-xl transition-all shadow-xl">
   <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
   View
   </Link>
@@ -316,13 +318,13 @@ export default function TravelerDashboardProfilePage() {
   whileHover={{ y: -4 }}
   className="surface-card p-6 sm:p-10 rounded-3xl sm:rounded-[2.5rem] border border-theme shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary-light dark:hover:border-primary-dark/20 space-y-6"
   >
-  <h2 className="text-xl sm:text-2xl font-extrabold text-theme-primary flex items-center gap-3 uppercase tracking-tight">
+  <h2 className="text-xl sm:text-2xl font-extrabold text-theme-primary flex items-center gap-3 capitalize tracking-tight">
   About Me
   </h2>
   {isEditing ? (
   <div className="space-y-6">
   <div>
-  <label className="block text-[10px] font-black uppercase tracking-widest text-theme-muted mb-2">Headline / Tagline</label>
+  <label className="block text-[10px] font-black capitalize tracking-normal text-theme-muted mb-2">Headline / Tagline</label>
   <input
   type="text"
   value={formData.tagline || ''}
@@ -332,7 +334,7 @@ export default function TravelerDashboardProfilePage() {
   />
   </div>
   <div>
-  <label className="block text-[10px] font-black uppercase tracking-widest text-theme-muted mb-2">My Story (Bio)</label>
+  <label className="block text-[10px] font-black capitalize tracking-normal text-theme-muted mb-2">My Story (Bio)</label>
   <textarea
   value={formData.bio || ''}
   onChange={(e) => setFormData({...formData, bio: e.target.value})}
@@ -344,7 +346,7 @@ export default function TravelerDashboardProfilePage() {
   </div>
   ) : (
   <div className="space-y-4">
-  <p className="text-lg sm:text-xl font-extrabold text-primary-light dark:text-primary-dark italic uppercase tracking-tight">
+  <p className="text-lg sm:text-xl font-extrabold text-primary-light dark:text-primary-dark italic capitalize tracking-tight">
   {profile.tagline || 'World Explorer'}
   </p>
   <p className="text-xs sm:text-sm text-theme-secondary font-bold leading-relaxed whitespace-pre-wrap break-words overflow-hidden opacity-80">
@@ -359,7 +361,7 @@ export default function TravelerDashboardProfilePage() {
   className="surface-section p-6 sm:p-10 rounded-3xl sm:rounded-[2.5rem] border border-theme shadow-sm transition-all duration-300 hover:shadow-lg hover:border-orange-500/20"
   >
   <div className="flex items-center justify-between mb-8">
-  <h2 className="text-lg sm:text-xl font-extrabold text-theme-primary uppercase tracking-tight italic flex items-center gap-3">
+  <h2 className="text-lg sm:text-xl font-extrabold text-theme-primary capitalize tracking-tight italic flex items-center gap-3">
   <Compass className="w-5 h-5 sm:w-6 h-6 text-orange-500" />
   Travel Interests
   </h2>
@@ -390,7 +392,7 @@ export default function TravelerDashboardProfilePage() {
   />
   <button 
   onClick={handleAddPreference}
-  className="px-6 py-2.5 bg-primary-light text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-primary-light-hover transition-all"
+  className="px-6 py-2.5 bg-primary-light text-white text-[10px] font-black capitalize tracking-normal rounded-xl shadow-lg hover:bg-primary-light-hover transition-all"
   >
   Add
   </button>
@@ -400,7 +402,7 @@ export default function TravelerDashboardProfilePage() {
   <div className="flex flex-wrap gap-3">
   {formData.preferences?.map((pref, idx) => (
   <div key={idx} className="group relative">
-  <span className="px-5 py-2.5 surface-card border border-theme rounded-2xl text-xs font-black text-theme-primary uppercase tracking-widest shadow-sm flex items-center gap-2">
+  <span className="px-5 py-2.5 surface-card border border-theme rounded-2xl text-xs font-black text-theme-primary capitalize tracking-normal shadow-sm flex items-center gap-2">
   <Sparkles className="w-3.5 h-3.5 text-primary-light dark:text-primary-dark" />
   {pref}
   {isEditing && (
@@ -425,7 +427,7 @@ export default function TravelerDashboardProfilePage() {
    {/* Loyalty Card Premium Style */}
    <div className="surface-card p-6 sm:p-10 rounded-3xl sm:rounded-[2.5rem] border border-theme shadow-xl overflow-hidden relative group">
      <div className={`absolute top-0 right-0 w-40 h-40 bg-primary-light/5 rounded-full -mr-20 -mt-20 blur-3xl group-hover:bg-primary-light/10 transition-colors`} />
-     <h3 className="text-base sm:text-lg font-extrabold text-theme-primary mb-6 flex items-center gap-2 uppercase tracking-tight">
+     <h3 className="text-base sm:text-lg font-extrabold text-theme-primary mb-6 flex items-center gap-2 capitalize tracking-tight">
        <Trophy className="w-5 h-5 text-accent-light dark:text-accent-dark" />
        Loyalty Progress
      </h3>
@@ -433,14 +435,14 @@ export default function TravelerDashboardProfilePage() {
      <div className="space-y-6">
        <div className="flex items-center justify-between">
          <div>
-           <div className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1">Current Tier</div>
+           <div className="text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1">Current Tier</div>
            <div className="text-2xl font-black text-theme-primary flex items-center gap-2">
              <Medal className="w-6 h-6 text-accent-light dark:text-accent-dark" />
              {TIER_CONFIG[profile.loyaltyTier as LoyaltyTierType]?.label || profile.loyaltyTier}
            </div>
          </div>
          <div className="text-right">
-           <div className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1">Discount</div>
+           <div className="text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1">Discount</div>
            <div className="text-2xl font-black text-success-green dark:text-emerald-400">
              {loyalty?.discountPct || 0}%
            </div>
@@ -448,7 +450,7 @@ export default function TravelerDashboardProfilePage() {
        </div>
 
        <div className="space-y-2">
-         <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+         <div className="flex justify-between text-[10px] font-black capitalize tracking-normal">
            <span className="text-theme-muted">Progress</span>
            <span className="text-primary-light dark:text-primary-dark">{profile.completedTrips} Trips Total</span>
          </div>
@@ -464,12 +466,12 @@ export default function TravelerDashboardProfilePage() {
                />
              </div>
              <p className="text-[9px] font-bold text-theme-muted text-center leading-relaxed">
-               Only {loyalty.tripsToNextTier} more trip{loyalty.tripsToNextTier !== 1 ? 's' : ''} to reach <span className="text-primary-light dark:text-primary-dark uppercase">{loyalty.nextTier}</span> status!
+               Only {loyalty.tripsToNextTier} more trip{loyalty.tripsToNextTier !== 1 ? 's' : ''} to reach <span className="text-primary-light dark:text-primary-dark capitalize">{loyalty.nextTier}</span> status!
              </p>
            </>
          ) : (
            <div className="text-center p-4 bg-yellow-500/10 rounded-2xl border border-yellow-500/20">
-             <p className="text-[10px] font-black text-yellow-600 dark:text-yellow-400 uppercase tracking-[0.2em]">✨ Ultimate Tier Achieved</p>
+             <p className="text-[10px] font-black text-yellow-600 dark:text-yellow-400 capitalize tracking-[0.2em]">✨ Ultimate Tier Achieved</p>
            </div>
          )}
        </div>
@@ -483,7 +485,7 @@ export default function TravelerDashboardProfilePage() {
   >
   <div className="absolute top-0 right-0 w-32 h-32 bg-success-green/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-success-green/10 transition-colors" />
   <Shield className="absolute -bottom-8 -right-8 w-24 h-24 text-gray-100/5 rotate-12" />
-  <h3 className="text-base sm:text-lg font-extrabold text-theme-primary mb-8 flex items-center gap-3 uppercase tracking-tight">
+  <h3 className="text-base sm:text-lg font-extrabold text-theme-primary mb-8 flex items-center gap-3 capitalize tracking-tight">
   <Shield className="w-5 h-5 sm:w-6 h-6 text-success-green" />
   Digital Security
   </h3>
@@ -492,7 +494,7 @@ export default function TravelerDashboardProfilePage() {
   <div className="flex items-center justify-between p-4 surface-section rounded-2xl border border-theme dark:border-theme-strong">
   <div className="flex items-center gap-3">
   <CheckCircle className={`w-4 h-4 ${profile.emailVerified ? 'text-success-green' : 'text-theme-muted'}`} />
-  <span className="text-[10px] font-black uppercase tracking-widest text-theme-secondary">Email Verified</span>
+  <span className="text-[10px] font-black capitalize tracking-normal text-theme-secondary">Email Verified</span>
   </div>
   {profile.emailVerified && <div className="w-2 h-2 bg-success-green rounded-full animate-pulse" />}
   </div>
@@ -501,12 +503,12 @@ export default function TravelerDashboardProfilePage() {
   <div className="flex items-center justify-between p-4 surface-section rounded-2xl border border-theme dark:border-theme-strong">
   <div className="flex items-center gap-3">
   <Shield className="w-4 h-4 text-primary-light dark:text-primary-dark" />
-  <span className="text-[10px] font-black uppercase tracking-widest text-theme-secondary">Two-Factor Auth</span>
+  <span className="text-[10px] font-black capitalize tracking-normal text-theme-secondary">Two-Factor Auth</span>
   </div>
-  <div className="text-[8px] font-black text-danger-red uppercase tracking-widest bg-danger-red/10 dark:bg-red-900/20 px-2 py-0.5 rounded-md">Disabled</div>
+  <div className="text-[8px] font-black text-danger-red capitalize tracking-normal bg-danger-red/10 dark:bg-red-900/20 px-2 py-0.5 rounded-md">Disabled</div>
   </div>
   </div>
-  <button className="w-full mt-6 py-4 surface-base shadow-lg shadow-gray-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all">
+  <button className="w-full mt-6 py-4 surface-base shadow-lg shadow-gray-200 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] text-white text-[10px] font-black capitalize tracking-[0.2em] rounded-2xl transition-all">
   Manage Security
   </button>
   </motion.div>

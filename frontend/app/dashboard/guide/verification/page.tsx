@@ -20,6 +20,7 @@ import {
 import { guideGetVerificationStatus, GuideVerificationStatusResponse } from '@/src/lib/api/auth'
 import toast from 'react-hot-toast'
 import { motion, AnimatePresence } from 'framer-motion'
+import GuideVerificationSkeleton from './skeleton'
 
 // ============================================================================
 // STATUS CARD
@@ -82,13 +83,13 @@ function StatusCard({ status, submittedAt, verifiedAt }: { status: any, submitte
         <div className="flex-1 text-center sm:text-left">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
             <h2 className="text-2xl sm:text-4xl font-bold text-theme-primary tracking-tight">{cfg.title}</h2>
-            <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest ${cfg.bg} ${cfg.color} border-2 ${cfg.border} w-fit mx-auto sm:mx-0 shadow-sm`}>
+            <span className={`px-4 py-1.5 rounded-full text-xs font-black capitalize tracking-normal ${cfg.bg} ${cfg.color} border-2 ${cfg.border} w-fit mx-auto sm:mx-0 shadow-sm`}>
               {cfg.action}
             </span>
           </div>
           <p className="text-lg text-theme-secondary leading-relaxed mb-6 font-medium max-w-2xl">{cfg.msg}</p>
           {date && (
-            <div className="flex items-center justify-center sm:justify-start gap-2.5 text-xs font-bold uppercase tracking-[0.2em] text-theme-muted bg-surface-section w-fit px-4 py-2 rounded-xl border border-theme">
+            <div className="flex items-center justify-center sm:justify-start gap-2.5 text-xs font-bold capitalize tracking-[0.2em] text-theme-muted bg-surface-section w-fit px-4 py-2 rounded-xl border border-theme">
               <Clock className="w-4 h-4 text-primary-light" />
               Updated {new Date(date).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })}
             </div>
@@ -124,14 +125,7 @@ export default function GuideVerificationPage() {
   useEffect(() => { fetchStatus() }, [fetchStatus])
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center surface-base">
-        <div className="flex flex-col items-center gap-6">
-          <div className="w-16 h-16 border-4 border-primary-light border-t-transparent rounded-full animate-spin shadow-xl" />
-          <p className="text-xs font-black uppercase tracking-[0.3em] text-theme-muted animate-pulse">Synchronizing Identity Status</p>
-        </div>
-      </div>
-    )
+    return <GuideVerificationSkeleton />
   }
 
   if (!status) return null
@@ -147,10 +141,10 @@ export default function GuideVerificationPage() {
             className="inline-flex items-center gap-2.5 text-theme-muted hover:text-primary-light transition-all group px-4 py-2 surface-section rounded-xl border border-theme shadow-sm"
           >
             <ChevronRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" /> 
-            <span className="text-xs font-bold uppercase tracking-widest">Guide Dashboard</span>
+            <span className="text-xs font-bold capitalize tracking-normal">Guide Dashboard</span>
           </Link>
           <div className="space-y-2">
-            <h1 className="text-4xl sm:text-6xl font-black text-theme-primary tracking-tighter uppercase">
+            <h1 className="text-4xl sm:text-6xl font-black text-theme-primary tracking-tighter capitalize">
               Trust & <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">Identity</span>
             </h1>
             <p className="text-base sm:text-xl text-theme-secondary font-medium max-w-2xl leading-relaxed">
@@ -174,7 +168,7 @@ export default function GuideVerificationPage() {
                   <AlertCircle className="w-8 h-8" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-lg font-black text-red-600 dark:text-red-400 uppercase tracking-widest">Rejection Audit Note</h3>
+                  <h3 className="text-lg font-black text-red-600 dark:text-red-400 capitalize tracking-normal">Rejection Audit Note</h3>
                   <p className="text-xl text-theme-primary leading-relaxed font-bold italic">
                     &ldquo;{status.rejectionReason}&rdquo;
                   </p>
@@ -182,7 +176,7 @@ export default function GuideVerificationPage() {
               </div>
               <button 
                 onClick={() => router.push('/dashboard/guide/verification/submit')} 
-                className="w-full sm:w-auto px-10 py-5 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-[0.2em] rounded-2xl transition-all flex items-center justify-center gap-3 shadow-2xl shadow-red-600/30 active:scale-95 relative z-10"
+                className="w-full sm:w-auto px-10 py-5 bg-red-600 hover:bg-red-700 text-white font-black capitalize tracking-[0.2em] rounded-2xl transition-all flex items-center justify-center gap-3 shadow-2xl shadow-red-600/30 active:scale-95 relative z-10"
               >
                 <RefreshCw className="w-5 h-5" /> Resubmit My Credentials
               </button>
@@ -200,14 +194,14 @@ export default function GuideVerificationPage() {
                 <Shield className="w-12 h-12" />
               </div>
               <div className="space-y-4 relative z-10">
-                <h3 className="text-3xl sm:text-5xl font-black text-theme-primary tracking-tighter uppercase">Join the Verified Network</h3>
+                <h3 className="text-3xl sm:text-5xl font-black text-theme-primary tracking-tighter capitalize">Join the Verified Network</h3>
                 <p className="text-lg sm:text-xl text-theme-secondary max-w-xl mx-auto leading-relaxed font-medium">
                   Submit your credentials to unlock professional hosting features and start accepting bookings today.
                 </p>
               </div>
               <Link 
                 href="/dashboard/guide/verification/submit" 
-                className="inline-flex items-center gap-3 px-12 py-5 bg-primary-light hover:bg-primary-light-hover text-white font-black uppercase tracking-[0.25em] rounded-2xl transition-all shadow-2xl shadow-primary-light/30 active:scale-95 relative z-10"
+                className="inline-flex items-center gap-3 px-12 py-5 bg-primary-light hover:bg-primary-light-hover text-white font-black capitalize tracking-[0.25em] rounded-2xl transition-all shadow-2xl shadow-primary-light/30 active:scale-95 relative z-10"
               >
                 Launch Verification Flow <ChevronRight className="w-5 h-5" />
               </Link>
@@ -216,7 +210,7 @@ export default function GuideVerificationPage() {
 
           {status.status !== 'approved' && status.status !== 'not_submitted' && (
             <div className="p-8 sm:p-12 surface-section border-2 border-theme rounded-[2.5rem] space-y-10 shadow-inner">
-              <h3 className="text-lg font-black text-theme-primary uppercase tracking-[0.3em] flex items-center gap-4">
+              <h3 className="text-lg font-black text-theme-primary capitalize tracking-[0.3em] flex items-center gap-4">
                 <div className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
                 Audit Lifecycle
               </h3>
@@ -231,7 +225,7 @@ export default function GuideVerificationPage() {
                       <step.icon className="w-6 h-6" />
                     </div>
                     <div className="space-y-2">
-                      <h4 className="text-sm font-black text-theme-primary uppercase tracking-widest">{step.label}</h4>
+                      <h4 className="text-sm font-black text-theme-primary capitalize tracking-normal">{step.label}</h4>
                       <p className="text-sm text-theme-muted leading-relaxed font-medium">{step.msg}</p>
                     </div>
                   </div>
@@ -245,7 +239,7 @@ export default function GuideVerificationPage() {
         <div className="flex flex-col sm:flex-row gap-6 pt-6">
           <button 
             onClick={() => router.push('/dashboard/guide')} 
-            className={`flex-1 px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-xl ${
+            className={`flex-1 px-10 py-5 rounded-2xl font-black text-sm capitalize tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-xl ${
               status.status === 'approved' 
                 ? 'bg-primary-light text-white shadow-primary-light/20 hover:bg-primary-light-hover' 
                 : 'surface-section border-2 border-theme text-theme-secondary hover:text-theme-primary hover:border-primary-light/50'
@@ -260,7 +254,7 @@ export default function GuideVerificationPage() {
         <div className="pt-10 text-center border-t border-theme border-dashed">
           <div className="inline-flex items-center gap-3 px-6 py-2 surface-section rounded-full border border-theme opacity-60">
             <Shield className="w-4 h-4 text-primary-light" />
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-theme-muted">
+            <p className="text-[10px] font-black capitalize tracking-[0.25em] text-theme-muted">
               Secure 256-bit AES Encryption Protocol Active
             </p>
           </div>

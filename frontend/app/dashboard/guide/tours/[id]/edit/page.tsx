@@ -6,6 +6,7 @@ import { getGuideTour } from '@/src/lib/api/tours'
 import { TourTemplateResponse } from '@/src/lib/types/tour.types'
 import { RefreshCw, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
+import TourFormSkeleton from './skeleton'
 
 export default function EditTourPage({ params }: { params: Promise<{ id: string }> }) {
  const unwrappedParams = use(params)
@@ -44,12 +45,7 @@ export default function EditTourPage({ params }: { params: Promise<{ id: string 
  }, [id])
 
  if (loading) {
- return (
- <div className="pt-14 sm:pt-16 min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center gap-4">
- <RefreshCw className="w-8 h-8 text-primary-light dark:text-primary-dark animate-spin" />
- <p className="text-sm font-medium text-theme-muted">Loading tour data...</p>
- </div>
- )
+    return <TourFormSkeleton />
  }
 
  if (error || !tour) {
@@ -63,7 +59,7 @@ export default function EditTourPage({ params }: { params: Promise<{ id: string 
  <p className="text-theme-secondary mb-6">{error ||"The tour you're trying to edit doesn't exist or you don't have permission."}</p>
  <button 
  onClick={() => window.location.reload()}
- className="px-8 py-3 bg-primary-light text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-primary-light-hover transition-all shadow-xl shadow-primary-light/20 hover:scale-105 active:scale-95"
+ className="px-8 py-3 bg-primary-light text-white text-xs font-bold capitalize tracking-normal rounded-xl hover:bg-primary-light-hover transition-all shadow-xl shadow-primary-light/20 hover:scale-105 active:scale-95"
  >
  Retry
  </button>

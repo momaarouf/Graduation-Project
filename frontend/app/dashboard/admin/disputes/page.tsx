@@ -577,7 +577,7 @@ const DisputeTypeBadge = ({ type }: { type: DisputeType }) => {
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded border ${styles[type]}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold capitalize tracking-[0.2em] rounded border ${styles[type]}`}>
       {type.includes('no_show') ? <Clock className="w-3 h-3" /> : 
       type === 'quality' ? <Star className="w-3 h-3" /> :
       type === 'payment' ? <DollarSign className="w-3 h-3" /> :
@@ -614,7 +614,7 @@ const DisputeStatusBadge = ({ status }: { status: DisputeStatus }) => {
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded border ${styles[status]}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold capitalize tracking-[0.2em] rounded border ${styles[status]}`}>
       {status.includes('resolved') ? <CheckCircle className="w-3 h-3" /> :
       status === 'escalated' ? <AlertTriangle className="w-3 h-3" /> :
       status === 'under_review' ? <Eye className="w-3 h-3" /> :
@@ -645,7 +645,7 @@ const PriorityBadge = ({ priority }: { priority: DisputePriority }) => {
   const Icon = icons[priority]
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded border ${styles[priority]}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold capitalize tracking-[0.2em] rounded border ${styles[priority]}`}>
       <Icon className="w-3 h-3" />
       {priority}
     </span>
@@ -664,7 +664,7 @@ const TimeRemainingBadge = ({ hours }: { hours: number }) => {
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded border ${getColor()}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold capitalize tracking-[0.2em] rounded border ${getColor()}`}>
       <Clock className="w-3 h-3" />
       {hours}h left
     </span>
@@ -720,7 +720,7 @@ const DisputeDetailsModal = ({ isOpen, onClose, dispute, onResolve }: any) => {
           {/* Quick Info */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 surface-section rounded-xl border border-theme flex flex-col justify-center">
-              <span className="text-[10px] font-bold text-theme-muted uppercase tracking-wider mb-1">Status & Priority</span>
+              <span className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-1">Status & Priority</span>
               <div className="flex items-center gap-2">
                 <PriorityBadge priority={dispute.priority} />
                 <TimeRemainingBadge hours={dispute.timeRemaining} />
@@ -736,7 +736,7 @@ const DisputeDetailsModal = ({ isOpen, onClose, dispute, onResolve }: any) => {
               </div>
               <div className="ml-auto text-right">
                 <span className="text-lg font-black text-primary-light dark:text-primary-dark">${dispute.amount}</span>
-                <p className="text-[10px] text-theme-muted uppercase font-bold tracking-widest">{dispute.currency}</p>
+                <p className="text-[10px] text-theme-muted capitalize font-bold tracking-normal">{dispute.currency}</p>
               </div>
             </div>
           </div>
@@ -746,7 +746,7 @@ const DisputeDetailsModal = ({ isOpen, onClose, dispute, onResolve }: any) => {
             {/* Traveler Claim */}
             <div className="space-y-4">
               <div className="flex items-center justify-between px-1">
-                <h5 className="text-xs font-bold text-theme-primary uppercase tracking-widest flex items-center gap-2">
+                <h5 className="text-xs font-bold text-theme-primary capitalize tracking-normal flex items-center gap-2">
                   <User className="w-4 h-4 text-primary-light" />
                   Traveler Side
                 </h5>
@@ -773,7 +773,7 @@ const DisputeDetailsModal = ({ isOpen, onClose, dispute, onResolve }: any) => {
                   <div className="grid grid-cols-2 gap-2">
                     {dispute.travelerClaim.evidence.map((ev: any) => (
                       <div key={ev.id} className="p-2 surface-card rounded-lg border border-theme text-center">
-                        <span className="text-[10px] font-bold text-theme-muted uppercase">{ev.type}</span>
+                        <span className="text-[10px] font-bold text-theme-muted capitalize">{ev.type}</span>
                       </div>
                     ))}
                   </div>
@@ -784,7 +784,7 @@ const DisputeDetailsModal = ({ isOpen, onClose, dispute, onResolve }: any) => {
             {/* Guide Response */}
             <div className="space-y-4">
               <div className="flex items-center justify-between px-1">
-                <h5 className="text-xs font-bold text-theme-primary uppercase tracking-widest flex items-center gap-2">
+                <h5 className="text-xs font-bold text-theme-primary capitalize tracking-normal flex items-center gap-2">
                   <Shield className="w-4 h-4 text-success-green" />
                   Guide Side
                 </h5>
@@ -829,7 +829,7 @@ const DisputeDetailsModal = ({ isOpen, onClose, dispute, onResolve }: any) => {
                 {!showResolutionForm ? (
                   <button
                     onClick={() => setShowResolutionForm(true)}
-                    className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black uppercase tracking-widest text-xs rounded-2xl shadow-xl shadow-orange-500/20 active:scale-95 transition-all flex items-center justify-center gap-3"
+                    className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-black capitalize tracking-normal text-xs rounded-2xl shadow-xl shadow-orange-500/20 active:scale-95 transition-all flex items-center justify-center gap-3"
                   >
                     <Scale className="w-5 h-5" />
                     Resolve Dispute Now
@@ -839,7 +839,7 @@ const DisputeDetailsModal = ({ isOpen, onClose, dispute, onResolve }: any) => {
                     <h6 className="text-sm font-bold text-theme-primary">Final Resolution</h6>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5">Decision</label>
+                        <label className="block text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1.5">Decision</label>
                         <select
                           value={resolution}
                           onChange={(e) => setResolution(e.target.value as any)}
@@ -851,7 +851,7 @@ const DisputeDetailsModal = ({ isOpen, onClose, dispute, onResolve }: any) => {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5">Resolution Notes</label>
+                        <label className="block text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1.5">Resolution Notes</label>
                         <textarea
                           value={resolutionNotes}
                           onChange={(e) => setResolutionNotes(e.target.value)}
@@ -883,7 +883,7 @@ const MobileCard = ({ dispute, onSelect }: any) => (
   <div className="surface-card border border-theme rounded-2xl p-4 space-y-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
-        <div className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-0.5">#{dispute.disputeId}</div>
+        <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-0.5">#{dispute.disputeId}</div>
         <h4 className="font-bold text-theme-primary truncate leading-tight">{dispute.tourTitle}</h4>
         <p className="text-[11px] text-theme-muted mt-1">{new Date(dispute.tourDate).toLocaleDateString()}</p>
       </div>
@@ -908,7 +908,7 @@ const MobileCard = ({ dispute, onSelect }: any) => (
 
     <button
       onClick={onSelect}
-      className="w-full py-3 bg-primary-light/10 text-primary-light hover:bg-primary-light hover:text-white text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-all border border-primary-light/20"
+      className="w-full py-3 bg-primary-light/10 text-primary-light hover:bg-primary-light hover:text-white text-xs font-bold capitalize tracking-[0.2em] rounded-xl transition-all border border-primary-light/20"
     >
       Review Arbitration
     </button>
@@ -1063,7 +1063,7 @@ export default function AdminDisputeCourtPage() {
      </div>
      <button
        onClick={resetFilters}
-       className="px-5 py-2.5 bg-primary-light hover:bg-blue-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2 self-start active:scale-95"
+       className="px-5 py-2.5 bg-primary-light hover:bg-blue-500 text-white text-[10px] font-bold capitalize tracking-normal rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2 self-start active:scale-95"
      >
        <RefreshCw className="w-3.5 h-3.5" />
        Reset Court
@@ -1097,7 +1097,7 @@ export default function AdminDisputeCourtPage() {
            <div className={`text-2xl sm:text-3xl font-bold text-${c}-600 dark:text-${c}-400 mb-1 sm:mb-2`}>
              {stat.value}
            </div>
-           <div className="text-[9px] sm:text-[10px] text-theme-muted font-bold uppercase tracking-widest leading-tight">{stat.label}</div>
+           <div className="text-[9px] sm:text-[10px] text-theme-muted font-bold capitalize tracking-normal leading-tight">{stat.label}</div>
          </div>
        );
      })}
@@ -1172,14 +1172,14 @@ export default function AdminDisputeCourtPage() {
  <table className="w-full">
  <thead className="surface-section border-b border-theme">
  <tr>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Dispute ID</th>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Tour</th>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Parties</th>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Type</th>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Status</th>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Priority</th>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Deadline</th>
- <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted uppercase tracking-wider">Actions</th>
+ <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Dispute ID</th>
+ <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Tour</th>
+ <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Parties</th>
+ <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Type</th>
+ <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Status</th>
+ <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Priority</th>
+ <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Deadline</th>
+ <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Actions</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-200 dark:divide-gray-800">

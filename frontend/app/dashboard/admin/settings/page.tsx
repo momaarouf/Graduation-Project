@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import { passwordChange, updateNotificationPreferences } from '@/src/lib/api/auth'
+import SettingsSkeleton from '@/src/components/dashboard/SettingsSkeleton'
 import {
  Settings,
  Globe,
@@ -55,8 +56,12 @@ export default function AdminSettingsPage() {
  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
  const [showNewPassword, setShowNewPassword] = useState(false)
  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
- const { user, forgotPassword } = useAuth()
- const router = useRouter()
+  const { user, forgotPassword, isLoading } = useAuth()
+  const router = useRouter()
+
+  if (isLoading || !user) {
+   return <SettingsSkeleton />
+  }
 
  const [emailNotifications, setEmailNotifications] = useState(user?.emailNotificationsEnabled ?? true)
  const [pushNotifications, setPushNotifications] = useState(user?.pushNotificationsEnabled ?? true)
@@ -165,7 +170,7 @@ export default function AdminSettingsPage() {
       <div className="w-10 h-10 bg-primary-light rounded-2xl flex items-center justify-center shadow-xl shadow-primary-light/20 text-white">
        <Settings className="w-5 h-5" />
       </div>
-      <span className="text-[10px] font-black text-primary-light uppercase tracking-[0.2em] bg-primary-light/10 px-3 py-1 rounded-xl border border-primary-light/10">Protocol Control</span>
+      <span className="text-[10px] font-black text-primary-light capitalize tracking-[0.2em] bg-primary-light/10 px-3 py-1 rounded-xl border border-primary-light/10">Protocol Control</span>
      </div>
      <h1 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tighter">
       Platform <span className="text-primary-light">Governance</span>
@@ -181,7 +186,7 @@ export default function AdminSettingsPage() {
      className="h-16 px-8 bg-primary-light hover:bg-primary-light-hover text-white rounded-[1.5rem] shadow-2xl shadow-primary-light/30 transition-all active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50 group"
     >
      {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5 group-hover:scale-110 transition-transform" />}
-     <span className="text-[10px] font-black uppercase tracking-[0.2em]">Commit All Changes</span>
+     <span className="text-[10px] font-black capitalize tracking-[0.2em]">Commit All Changes</span>
     </button>
    </div>
 
@@ -208,7 +213,7 @@ export default function AdminSettingsPage() {
       >
        <div className="flex items-center gap-3">
         <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-white' : tab.color}`} />
-        <span className="text-[10px] font-black uppercase tracking-widest">{tab.label}</span>
+        <span className="text-[10px] font-black capitalize tracking-normal">{tab.label}</span>
        </div>
        {activeTab === tab.id && <ChevronRight className="w-3 h-3" />}
       </button>
@@ -229,13 +234,13 @@ export default function AdminSettingsPage() {
        {activeTab === 'account' && (
         <div className="space-y-10">
          <div className="space-y-6">
-          <h2 className="text-[10px] font-black text-theme-muted uppercase tracking-[0.3em] flex items-center gap-2">
+          <h2 className="text-[10px] font-black text-theme-muted capitalize tracking-[0.3em] flex items-center gap-2">
            <Fingerprint className="w-4 h-4 text-orange-500" /> Security Credentials
           </h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
            <div className="space-y-2">
-            <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest ml-1">Current Protocol Key</label>
+            <label className="text-[10px] font-black text-theme-muted capitalize tracking-normal ml-1">Current Protocol Key</label>
             <div className="relative group">
              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light transition-colors" />
              <input
@@ -250,7 +255,7 @@ export default function AdminSettingsPage() {
            </div>
            
            <div className="space-y-2">
-            <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest ml-1">New Authority Key</label>
+            <label className="text-[10px] font-black text-theme-muted capitalize tracking-normal ml-1">New Authority Key</label>
             <div className="relative group">
              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light transition-colors" />
              <input
@@ -269,16 +274,16 @@ export default function AdminSettingsPage() {
            <button
             onClick={handleSavePassword}
             disabled={isSaving || !currentPassword || !newPassword}
-            className="w-full sm:w-auto h-14 px-10 bg-theme-primary dark:bg-surface-section text-theme-reverse font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl hover:bg-primary-light hover:text-white transition-all disabled:opacity-50"
+            className="w-full sm:w-auto h-14 px-10 bg-theme-primary dark:bg-surface-section text-theme-reverse font-black text-[10px] capitalize tracking-[0.2em] rounded-2xl hover:bg-primary-light hover:text-white transition-all disabled:opacity-50"
            >
             Update Security Profile
            </button>
-           <button onClick={handleForgotPassword} className="text-[10px] font-black text-primary-light uppercase tracking-widest hover:underline">Request Emergency Reset</button>
+           <button onClick={handleForgotPassword} className="text-[10px] font-black text-primary-light capitalize tracking-normal hover:underline">Request Emergency Reset</button>
           </div>
          </div>
 
          <div className="pt-10 border-t border-theme space-y-6">
-          <h2 className="text-[10px] font-black text-theme-muted uppercase tracking-[0.3em] flex items-center gap-2">
+          <h2 className="text-[10px] font-black text-theme-muted capitalize tracking-[0.3em] flex items-center gap-2">
            <Bell className="w-4 h-4 text-primary-light" /> Alert Ecosystem
           </h2>
           
@@ -294,7 +299,7 @@ export default function AdminSettingsPage() {
               </div>
               <div>
                <p className="text-sm font-black text-theme-primary tracking-tight">{item.label}</p>
-               <p className="text-[10px] text-theme-muted font-bold uppercase tracking-widest mt-0.5">{item.desc}</p>
+               <p className="text-[10px] text-theme-muted font-bold capitalize tracking-normal mt-0.5">{item.desc}</p>
               </div>
              </div>
              <button
@@ -315,7 +320,7 @@ export default function AdminSettingsPage() {
         <div className="space-y-10">
          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
           <div className="space-y-3">
-           <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest ml-1">Identity Manifest (Platform Name)</label>
+           <label className="text-[10px] font-black text-theme-muted capitalize tracking-normal ml-1">Identity Manifest (Platform Name)</label>
            <div className="relative group">
             <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light transition-colors" />
             <input
@@ -328,7 +333,7 @@ export default function AdminSettingsPage() {
           </div>
 
           <div className="space-y-3">
-           <label className="text-[10px] font-black text-theme-muted uppercase tracking-widest ml-1">Response Gateway (Support Email)</label>
+           <label className="text-[10px] font-black text-theme-muted capitalize tracking-normal ml-1">Response Gateway (Support Email)</label>
            <div className="relative group">
             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light transition-colors" />
             <input
@@ -349,12 +354,12 @@ export default function AdminSettingsPage() {
             </div>
             <div>
              <h3 className="text-xl font-black text-theme-primary tracking-tighter">Maintenance Protocol</h3>
-             <p className="text-xs text-theme-muted font-bold uppercase tracking-widest mt-1">Suspend all public gateway traffic</p>
+             <p className="text-xs text-theme-muted font-bold capitalize tracking-normal mt-1">Suspend all public gateway traffic</p>
             </div>
            </div>
            <button
             onClick={() => setMaintenanceMode(!maintenanceMode)}
-            className={`h-12 px-10 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${maintenanceMode ? 'bg-amber-500 text-white shadow-xl shadow-amber-500/30' : 'bg-theme-muted/20 text-theme-muted hover:bg-theme-muted/30'}`}
+            className={`h-12 px-10 rounded-2xl text-[10px] font-black capitalize tracking-[0.2em] transition-all duration-500 ${maintenanceMode ? 'bg-amber-500 text-white shadow-xl shadow-amber-500/30' : 'bg-theme-muted/20 text-theme-muted hover:bg-theme-muted/30'}`}
            >
             {maintenanceMode ? 'Protocol Active' : 'Initialize Protocol'}
            </button>
@@ -367,7 +372,7 @@ export default function AdminSettingsPage() {
        {activeTab === 'fees' && (
         <div className="space-y-10">
          <div className="space-y-6">
-          <h2 className="text-[10px] font-black text-theme-muted uppercase tracking-[0.3em] flex items-center gap-2">
+          <h2 className="text-[10px] font-black text-theme-muted capitalize tracking-[0.3em] flex items-center gap-2">
            <Percent className="w-4 h-4 text-emerald-500" /> Revenue Infrastructure
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -378,7 +383,7 @@ export default function AdminSettingsPage() {
             { label: 'Platinum', value: platinumFee, setter: setPlatinumFee, color: 'border-blue-500/30 text-blue-500' }
            ].map((tier) => (
             <div key={tier.label} className={`p-6 surface-section border-2 rounded-[2rem] transition-all group hover:scale-105 ${tier.color}`}>
-             <p className="text-[10px] font-black uppercase tracking-widest mb-3 opacity-60">{tier.label} (%)</p>
+             <p className="text-[10px] font-black capitalize tracking-normal mb-3 opacity-60">{tier.label} (%)</p>
              <div className="relative">
               <input type="number" value={tier.value} onChange={(e) => tier.setter(Number(e.target.value))} className="w-full bg-transparent text-2xl font-black text-theme-primary outline-none" />
               <Percent className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 opacity-20" />
@@ -389,7 +394,7 @@ export default function AdminSettingsPage() {
          </div>
 
          <div className="pt-10 border-t border-theme space-y-6">
-          <h2 className="text-[10px] font-black text-theme-muted uppercase tracking-[0.3em] flex items-center gap-2">
+          <h2 className="text-[10px] font-black text-theme-muted capitalize tracking-[0.3em] flex items-center gap-2">
            <Clock className="w-4 h-4 text-blue-500" /> Temporal Financial Rules
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -400,7 +405,7 @@ export default function AdminSettingsPage() {
             <div key={rule.label} className="p-8 surface-section rounded-[2.5rem] border border-theme flex items-center justify-between group">
              <div>
               <p className="text-lg font-black text-theme-primary tracking-tight">{rule.label}</p>
-              <p className="text-[10px] text-theme-muted font-bold uppercase tracking-widest mt-1">{rule.desc}</p>
+              <p className="text-[10px] text-theme-muted font-bold capitalize tracking-normal mt-1">{rule.desc}</p>
              </div>
              <div className="flex items-center gap-3 h-14 px-6 surface-card border-2 border-theme rounded-2xl group-hover:border-primary-light transition-all">
               <input type="number" value={rule.value} onChange={(e) => rule.setter(Number(e.target.value))} className="w-12 bg-transparent text-xl font-black text-theme-primary outline-none text-center" />
@@ -422,7 +427,7 @@ export default function AdminSettingsPage() {
           { label: 'Settlement Dispatch (Payout)', value: payoutEmail, setter: setPayoutEmail, icon: DollarSign }
          ].map((template) => (
           <div key={template.label} className="space-y-4">
-           <h4 className="text-[10px] font-black text-theme-muted uppercase tracking-[0.3em] flex items-center gap-2 ml-1">
+           <h4 className="text-[10px] font-black text-theme-muted capitalize tracking-[0.3em] flex items-center gap-2 ml-1">
             <template.icon className="w-4 h-4 text-primary-light" /> {template.label}
            </h4>
            <div className="relative group">
@@ -455,12 +460,12 @@ export default function AdminSettingsPage() {
              <div className="w-20 h-20 surface-card rounded-[2rem] shadow-xl border border-theme flex items-center justify-center text-4xl">{region.flag}</div>
              <div>
               <h3 className="text-2xl font-black text-theme-primary tracking-tighter">{region.name}</h3>
-              <p className="text-[10px] font-black text-theme-muted uppercase tracking-[0.2em] mt-1">Sovereign Territory Config</p>
+              <p className="text-[10px] font-black text-theme-muted capitalize tracking-[0.2em] mt-1">Sovereign Territory Config</p>
              </div>
             </div>
             <button
              onClick={() => region.setter(!region.active)}
-             className={`h-12 px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${region.active ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-600/30' : 'bg-theme-muted/20 text-theme-muted'}`}
+             className={`h-12 px-8 rounded-2xl text-[10px] font-black capitalize tracking-normal transition-all ${region.active ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-600/30' : 'bg-theme-muted/20 text-theme-muted'}`}
             >
              {region.active ? 'Protocol Online' : 'Offline'}
             </button>
@@ -468,12 +473,12 @@ export default function AdminSettingsPage() {
            
            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative">
             <div className="p-6 surface-card rounded-[2rem] border border-theme">
-             <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-2">Native Currency</p>
+             <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal mb-2">Native Currency</p>
              <p className="text-2xl font-black text-theme-primary">{region.unit}</p>
             </div>
             <div className="p-6 surface-card rounded-[2rem] border border-theme flex items-center justify-between">
              <div>
-              <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1">Exchange Rate</p>
+              <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1">Exchange Rate</p>
               <div className="flex items-baseline gap-2">
                <span className="text-2xl font-black text-theme-primary">{region.rate.toLocaleString()}</span>
                <span className="text-xs font-black text-theme-muted opacity-40">/ USD</span>

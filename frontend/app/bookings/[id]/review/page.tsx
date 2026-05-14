@@ -33,6 +33,7 @@ import CinematicBackground from '@/src/components/layout/CinematicBackground'
 // Real API functions
 import { getTravelerBooking, submitReview, getTravelerReviews } from '@/src/lib/api/tours'
 import { BookingResponse, BookingStatus } from '@/src/lib/types/tour.types'
+import ReviewSkeleton from './skeleton'
 
 // ============================================================================
 // ANIMATIONS
@@ -186,14 +187,14 @@ export default function ReviewPage() {
  return (
  <motion.div 
  variants={fadeInUp}
- className={`relative group surface-card  border border-theme p-8 rounded-[2.5rem] shadow-2xl shadow-black/10 overflow-hidden transition-all ${isAggregate ? 'ring-2 ring-amber-500/20 bg-amber-500/5' : ''}`}
+ className={`relative group surface-card border border-theme p-8 rounded-[2.5rem] shadow-2xl shadow-black/10 overflow-hidden transition-all ${isAggregate ? 'ring-2 ring-amber-500/20 bg-amber-500/5' : ''}`}
  >
  {/* Glow effect on hover/focus */}
  <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
  
  {isAggregate && (
  <div className="absolute top-4 right-8">
- <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded-full uppercase tracking-widest border border-amber-500/10">
+ <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded-full capitalize tracking-normal border border-amber-500/10">
  Final Score Calculation
  </span>
  </div>
@@ -205,8 +206,8 @@ export default function ReviewPage() {
  {icon}
  </div>
  <div>
- <h3 className="text-lg font-bold text-theme-primary leading-none mb-1 uppercase tracking-tighter">{label}</h3>
- <p className="text-xs font-bold text-theme-muted uppercase tracking-widest">{subtext}</p>
+ <h3 className="text-lg font-bold text-theme-primary leading-none mb-1 capitalize tracking-tighter">{label}</h3>
+ <p className="text-xs font-bold text-theme-muted capitalize tracking-normal">{subtext}</p>
  </div>
  </div>
 
@@ -247,10 +248,7 @@ export default function ReviewPage() {
  if (isLoadingBooking || !booking) {
  return (
  <PageLayout>
- <div className="min-h-screen surface-section flex flex-col items-center justify-center gap-4">
- <Loader2 className="w-10 h-10 animate-spin text-primary-light dark:text-primary-dark" />
- <p className="text-xs font-bold text-theme-muted uppercase tracking-[0.2em] animate-pulse">Reliving your journey...</p>
- </div>
+ <ReviewSkeleton />
  </PageLayout>
  )
  }
@@ -277,7 +275,7 @@ export default function ReviewPage() {
  className="inline-flex items-center gap-2 text-sm font-bold text-theme-muted hover:text-primary-light dark:text-primary-dark transition-colors mb-10 group"
  >
  <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
- <span className="uppercase tracking-widest text-[10px]">Back to Dashboard</span>
+ <span className="capitalize tracking-normal text-[10px]">Back to Dashboard</span>
  </Link>
 
  <div className="flex flex-col lg:flex-row gap-12">
@@ -294,8 +292,8 @@ export default function ReviewPage() {
  )}
  
  {/* Booking Badge Overlay */}
- <div className="absolute bottom-6 left-6 right-6 p-6 bg-black/40  rounded-3xl border border-theme-strong text-white shadow-2xl">
- <div className="flex items-center gap-2 text-[10px] font-bold text-primary-light dark:text-primary-dark uppercase tracking-widest mb-1">
+ <div className="absolute bottom-6 left-6 right-6 p-6 bg-black/40 rounded-3xl border border-theme-strong text-white shadow-2xl">
+ <div className="flex items-center gap-2 text-[10px] font-bold text-primary-light dark:text-primary-dark capitalize tracking-normal mb-1">
  <ShieldCheck className="w-3 h-3" />
  Verified Tour
  </div>
@@ -308,13 +306,13 @@ export default function ReviewPage() {
  </div>
 
  <div className="space-y-4">
- <div className="p-6 surface-card  border border-theme rounded-3xl">
- <h4 className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-3">Guide</h4>
+ <div className="p-6 surface-card border border-theme rounded-3xl">
+ <h4 className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-3">Guide</h4>
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-primary-light/10 flex items-center justify-center text-primary-light dark:text-primary-dark">
  <User className="w-5 h-5" />
  </div>
- <p className="text-sm font-bold text-theme-primary uppercase tracking-tighter">Your Host Guide</p>
+ <p className="text-sm font-bold text-theme-primary capitalize tracking-tighter">Your Host Guide</p>
  </div>
  </div>
  <div className="flex items-center gap-2 p-3 text-xs font-bold text-amber-600 dark:text-amber-500 bg-amber-500/10 rounded-2xl">
@@ -328,14 +326,14 @@ export default function ReviewPage() {
  <div className="lg:w-2/3 space-y-12">
  
  <div>
- <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-[10px] font-bold uppercase tracking-widest mb-4">
+ <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-[10px] font-bold capitalize tracking-normal mb-4">
  <MessageSquare className="w-3 h-3" />
  Traveler Insights
  </div>
  <h1 className="text-4xl sm:text-5xl font-bold text-theme-primary tracking-tighter leading-none mb-4">
  Rate Your <span className="text-orange-500">Journey</span>.
  </h1>
- <p className="text-theme-muted font-bold uppercase tracking-widest text-[10px]">
+ <p className="text-theme-muted font-bold capitalize tracking-normal text-[10px]">
  Your feedback makes the next traveler's experience even better.
  </p>
  </div>
@@ -367,15 +365,15 @@ export default function ReviewPage() {
  'value', 
  'Price for Value', 
  'Was it worth the cost?', 
- <DollarSign className="w-6 h-6" />
+ <DollarSignIcon className="w-6 h-6" />
  )}
  </div>
 
  {/* Written Feedback */}
  <motion.div variants={fadeInUp} className="space-y-4">
  <div className="flex justify-between items-center px-2">
- <label className="text-xs font-bold text-theme-muted uppercase tracking-widest">Share Your Thoughts</label>
- <span className="text-[10px] font-bold text-theme-muted uppercase">{review.length}0</span>
+ <label className="text-xs font-bold text-theme-muted capitalize tracking-normal">Share Your Thoughts</label>
+ <span className="text-[10px] font-bold text-theme-muted capitalize">{review.length}/1000</span>
  </div>
  <div className="relative group">
  <div className="absolute inset-0 bg-primary-light/5 rounded-[2rem] blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity" />
@@ -404,11 +402,11 @@ export default function ReviewPage() {
  ) : (
  <Send className="w-6 h-6" />
  )}
- <span className="uppercase tracking-[0.2em] text-sm">
+ <span className="capitalize tracking-[0.2em] text-sm">
  {isSubmitting ? 'Publishing...' : 'Publish Experience'}
  </span>
  </button>
- <p className="text-center mt-6 text-[10px] font-bold text-theme-muted uppercase tracking-widest flex items-center justify-center gap-2">
+ <p className="text-center mt-6 text-[10px] font-bold text-theme-muted capitalize tracking-normal flex items-center justify-center gap-2">
  <ShieldCheck className="w-3 h-3" />
  Your review will be shared publicly
  </p>
@@ -439,23 +437,23 @@ export default function ReviewPage() {
  Thank You for <br /><span className="text-emerald-500">Sharing</span>.
  </h2>
  
- <p className="text-theme-muted font-bold uppercase tracking-widest text-xs mb-10">
+ <p className="text-theme-muted font-bold capitalize tracking-normal text-xs mb-10">
  Your review has been published. Your insights help the whole community explore better.
  </p>
 
- <div className="flex items-center gap-3 p-4 surface-card  border border-theme rounded-2xl w-full">
+ <div className="flex items-center gap-3 p-4 surface-card border border-theme rounded-2xl w-full">
  <div className="w-12 h-12 surface-card rounded-xl flex items-center justify-center text-emerald-500">
  <Sparkles className="w-6 h-6" />
  </div>
  <div className="text-left">
- <p className="text-[10px] font-bold text-theme-muted uppercase tracking-widest">Rewards Earned</p>
- <p className="text-sm font-bold text-theme-primary uppercase">+50 Bonus Points</p>
+ <p className="text-[10px] font-bold text-theme-muted capitalize tracking-normal">Rewards Earned</p>
+ <p className="text-sm font-bold text-theme-primary capitalize">+50 Bonus Points</p>
  </div>
  </div>
 
  <div className="mt-12 flex items-center gap-3 text-theme-muted group">
  <History className="w-4 h-4 animate-spin-slow" />
- <span className="text-[10px] font-bold uppercase tracking-widest">Returning to dashboard...</span>
+ <span className="text-[10px] font-bold capitalize tracking-normal">Returning to dashboard...</span>
  </div>
  </motion.div>
  )}
@@ -467,7 +465,7 @@ export default function ReviewPage() {
  )
 }
 
-function DollarSign(props: React.SVGProps<SVGSVGElement>) {
+function DollarSignIcon(props: React.SVGProps<SVGSVGElement>) {
  return (
  <svg
  {...props}

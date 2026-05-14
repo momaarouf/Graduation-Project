@@ -244,7 +244,7 @@ export default function NewChatModal({
 
  {/* Footer */}
  <div className="p-4 surface-section border-t border-theme text-center">
- <p className="text-[10px] uppercase tracking-wider font-bold text-theme-muted ">
+ <p className="text-[10px] capitalize tracking-normal font-bold text-theme-muted ">
  Only people with shared bookings are shown
  </p>
  </div>

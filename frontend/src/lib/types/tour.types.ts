@@ -1,4 +1,4 @@
-// src/lib/types/tour.types.ts
+﻿// src/lib/types/tour.types.ts
 
 // ── Enums (must match backend exactly, including case) ──────────────────────
 
@@ -132,7 +132,8 @@ export interface TourTemplateResponse {
  hasGroupDiscount: boolean
  groupDiscountThreshold?: number
  groupDiscountPercent?: number
- dynamicPricing?: string
+ /** Raw JSON string from TourTemplate.dynamicPricing; parse before use. */
+ dynamicPricing?: string | null
  halalDetails?: string
 }
 
@@ -508,7 +509,6 @@ export interface UpdateTourTemplateRequest {
  hasGroupDiscount?: boolean
  groupDiscountThreshold?: number
  groupDiscountPercent?: number
- dynamicPricing?: string
  halalDetails?: string
 }
 
@@ -535,6 +535,46 @@ export interface CreateBookingRequest {
 // Represents one traveler's active waitlist entry for a full occurrence.
 // position is their rank in the queue — lower number = earlier promotion.
 // promoted entries are excluded from the list response (they already have a booking).
+/**
+ * Full price breakdown returned by
+ * GET /api/public/tours/{tourId}/occurrences/{occurrenceId}/price-preview?peopleCount=N
+ *
+ * All monetary amounts are in the tour currency.
+ * Percentage fields are whole-number percents (e.g. 20 = 20%).
+ */
+export interface PricePreviewResponse {
+  /** Per-person base price from the tour template. */
+  basePrice: number
+  /** Number of travelers in the quote. */
+  quantity: number
+  /** ISO-4217 currency code (e.g., "USD"). */
+  currency: string
+  /** basePrice × quantity, before any adjustments. */
+  subtotal: number
+  /** True if the selected date is a Saturday or Sunday. */
+  weekendApplied: boolean
+  /** Surcharge percent (e.g. 20 for +20%). 0 when weekendApplied = false. */
+  weekendPercent: number
+  /** True if the selected date matches a configured holiday. */
+  holidayApplied: boolean
+  /** Surcharge percent (e.g. 25 for +25%). 0 when holidayApplied = false. */
+  holidayPercent: number
+  /** Subtotal after weekend/holiday multiplier, before group/tier discounts. */
+  subtotalAfterDynamic: number
+  /** True if a group discount was applied. */
+  groupDiscountApplied: boolean
+  /** Discount percent (e.g. 5 for 5% off). 0 when not applied. */
+  groupDiscountPercent: number
+  /** Absolute amount saved by group discount. */
+  groupDiscountAmount: number
+  /** Loyalty tier discount percent (0 for guests/BRONZE). */
+  tierDiscountPercent: number
+  /** Absolute amount saved by loyalty discount. */
+  tierDiscountAmount: number
+  /** The amount the traveler will be charged. Always ≥ 0. */
+  finalPrice: number
+}
+
 export interface WaitlistResponse {
  id: number
  occurrenceId: number
@@ -699,3 +739,4 @@ export interface ToggleHelpfulResponse {
  helpfulCount: number
  isHelpful: boolean
 }
+

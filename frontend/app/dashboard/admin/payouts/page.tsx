@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { adminGetPayouts, adminGetPayoutSummary, adminUpdateGuideFeeMultiplier, AdminPayoutResponse, AdminPayoutSummaryResponse } from '@/src/lib/api/admin'
 import toast from 'react-hot-toast'
+import AdminPayoutsSkeleton from './skeleton'
 
 // ============================================================================
 // STATUS BADGE
@@ -38,7 +39,7 @@ const StatusBadge = ({ status }: { status: AdminPayoutResponse['status'] }) => {
  const Icon = icons[status] || Info
 
  return (
-  <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border ${styles[status]}`}>
+  <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold capitalize tracking-normal rounded-full border ${styles[status]}`}>
    <Icon className="w-3 h-3" />
    {status}
   </span>
@@ -90,7 +91,7 @@ const PayoutDetailsModal = ({ isOpen, onClose, payout }: { isOpen: boolean, onCl
     <div className="bg-gradient-to-r from-primary-light to-primary-dark p-6 text-white">
      <div className="flex justify-between items-start">
       <div>
-       <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-1">Transaction Receipt</p>
+       <p className="text-[10px] font-black capitalize tracking-[0.2em] opacity-80 mb-1">Transaction Receipt</p>
        <h3 className="text-2xl font-black">{payout.payoutId}</h3>
       </div>
       <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
@@ -117,15 +118,15 @@ const PayoutDetailsModal = ({ isOpen, onClose, payout }: { isOpen: boolean, onCl
      {/* Financials */}
      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div className="p-4 surface-section rounded-2xl border border-theme">
-       <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1">Gross Amount</p>
+       <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1">Gross Amount</p>
        <p className="text-xl font-black text-theme-primary">{payout.currency} {payout.amount.toLocaleString()}</p>
       </div>
       <div className="p-4 surface-section rounded-2xl border border-theme">
-       <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1">Platform Fee</p>
+       <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1">Platform Fee</p>
        <p className="text-xl font-black text-danger-red">-{payout.currency} {payout.platformFee.toLocaleString()}</p>
       </div>
       <div className="p-4 bg-primary-light/5 border border-primary-light/20 rounded-2xl">
-       <p className="text-[10px] font-black text-primary-light uppercase tracking-widest mb-1">Net Earnings</p>
+       <p className="text-[10px] font-black text-primary-light capitalize tracking-normal mb-1">Net Earnings</p>
        <p className="text-xl font-black text-primary-light">{payout.currency} {payout.guideEarnings.toLocaleString()}</p>
       </div>
      </div>
@@ -133,7 +134,7 @@ const PayoutDetailsModal = ({ isOpen, onClose, payout }: { isOpen: boolean, onCl
      {/* Metadata */}
      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
       <div className="space-y-4">
-       <h5 className="text-[10px] font-black text-theme-muted uppercase tracking-widest">Payout Details</h5>
+       <h5 className="text-[10px] font-black text-theme-muted capitalize tracking-normal">Payout Details</h5>
        <div className="space-y-2">
         <div className="flex justify-between text-xs">
          <span className="text-theme-muted">Method</span>
@@ -151,7 +152,7 @@ const PayoutDetailsModal = ({ isOpen, onClose, payout }: { isOpen: boolean, onCl
       </div>
 
       <div className="space-y-4">
-       <h5 className="text-[10px] font-black text-theme-muted uppercase tracking-widest">Timeline</h5>
+       <h5 className="text-[10px] font-black text-theme-muted capitalize tracking-normal">Timeline</h5>
        <div className="space-y-2 text-xs">
         <div className="flex justify-between">
          <span className="text-theme-muted">Requested</span>
@@ -176,7 +177,7 @@ const PayoutDetailsModal = ({ isOpen, onClose, payout }: { isOpen: boolean, onCl
       <div className="flex items-center gap-3">
        <Globe className="w-5 h-5 text-primary-light" />
        <div>
-        <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest">Linked Tour</p>
+        <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal">Linked Tour</p>
         <p className="text-sm font-bold text-theme-primary truncate max-w-[200px]">{payout.tourTitle || 'Custom Adjustment'}</p>
        </div>
       </div>
@@ -238,18 +239,7 @@ export default function AdminPayoutPage() {
  }, [payouts, searchTerm, statusFilter])
 
  if (isLoading) {
-  return (
-   <div className="flex flex-col items-center justify-center py-32 gap-4">
-    <div className="relative">
-     <div className="w-16 h-16 border-4 border-primary-light/20 border-t-primary-light rounded-full animate-spin" />
-     <DollarSign className="absolute inset-0 m-auto w-6 h-6 text-primary-light/50" />
-    </div>
-    <div className="text-center">
-     <h2 className="text-sm font-black uppercase tracking-widest text-theme-primary">Financial Sync</h2>
-     <p className="text-xs text-theme-muted mt-1">Retrieving latest ledger entries...</p>
-    </div>
-   </div>
-  )
+    return <AdminPayoutsSkeleton />
  }
 
  return (
@@ -257,7 +247,7 @@ export default function AdminPayoutPage() {
    {/* Header */}
    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
-     <h1 className="text-2xl font-black text-theme-primary uppercase tracking-tight flex items-center gap-3">
+     <h1 className="text-2xl font-black text-theme-primary capitalize tracking-tight flex items-center gap-3">
       <Wallet className="w-8 h-8 text-primary-light" />
       Payout Registry
      </h1>
@@ -266,7 +256,7 @@ export default function AdminPayoutPage() {
     <button 
      onClick={fetchData} 
      disabled={isRefreshing}
-     className="px-6 py-3 bg-primary-light hover:bg-primary-light-hover text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-primary-light/20 active:scale-95 flex items-center gap-2"
+     className="px-6 py-3 bg-primary-light hover:bg-primary-light-hover text-white rounded-2xl text-xs font-black capitalize tracking-normal transition-all shadow-lg shadow-primary-light/20 active:scale-95 flex items-center gap-2"
     >
      <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
      {isRefreshing ? 'Syncing...' : 'Sync Data'}
@@ -291,7 +281,7 @@ export default function AdminPayoutPage() {
         <s.icon className={`w-5 h-5 text-${s.color}-600 dark:text-${s.color}-400`} />
        </div>
        <p className="text-2xl font-black text-theme-primary">{s.value}</p>
-       <p className="text-[10px] font-black text-theme-muted uppercase tracking-[0.1em] mt-1">{s.label}</p>
+       <p className="text-[10px] font-black text-theme-muted capitalize tracking-[0.1em] mt-1">{s.label}</p>
       </button>
      ))}
     </div>
@@ -313,7 +303,7 @@ export default function AdminPayoutPage() {
      <select 
       value={statusFilter}
       onChange={e => setStatusFilter(e.target.value)}
-      className="px-4 py-3 surface-section border border-theme rounded-2xl text-xs font-black uppercase tracking-widest text-theme-secondary outline-none cursor-pointer hover:border-primary-light transition-colors"
+      className="px-4 py-3 surface-section border border-theme rounded-2xl text-xs font-black capitalize tracking-normal text-theme-secondary outline-none cursor-pointer hover:border-primary-light transition-colors"
      >
       <option value="ALL">All Status</option>
       <option value="PENDING">Pending</option>
@@ -336,22 +326,22 @@ export default function AdminPayoutPage() {
      <div 
       key={p.id} 
       onClick={() => setSelectedPayout(p)}
-      className="p-5 surface-card border border-theme rounded-3xl shadow-sm space-y-4 active:scale-95 transition-transform"
+      className="p-5 surface-card border border-theme rounded-3xl shadow-sm space-y-4 active:scale-[0.98] transition-transform"
      >
       <div className="flex justify-between items-start">
        <div>
-        <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1">{p.payoutId}</p>
+        <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1">{p.payoutId}</p>
         <h4 className="font-bold text-theme-primary">{p.guideName}</h4>
        </div>
        <StatusBadge status={p.status} />
       </div>
       <div className="flex justify-between items-end">
        <div>
-        <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1">Total Payout</p>
+        <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1">Total Payout</p>
         <p className="text-xl font-black text-primary-light">{p.currency} {p.amount.toLocaleString()}</p>
        </div>
        <div className="text-right">
-        <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1">Method</p>
+        <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1">Method</p>
         <MethodBadge method={p.method} />
        </div>
       </div>
@@ -365,7 +355,7 @@ export default function AdminPayoutPage() {
      <thead>
       <tr className="surface-section border-b border-theme">
        {['ID', 'Guide', 'Amount', 'Earnings', 'Method', 'Status', 'Actions'].map(h => (
-        <th key={h} className="px-6 py-4 text-left text-[10px] font-black text-theme-muted uppercase tracking-[0.2em]">{h}</th>
+        <th key={h} className="px-6 py-4 text-left text-[10px] font-black text-theme-muted capitalize tracking-[0.2em]">{h}</th>
        ))}
       </tr>
      </thead>
@@ -417,11 +407,11 @@ export default function AdminPayoutPage() {
      <div className="w-16 h-16 rounded-full bg-surface-section flex items-center justify-center mb-4">
       <DollarSign className="w-8 h-8 opacity-20" />
      </div>
-     <h3 className="text-lg font-black text-theme-primary uppercase tracking-tight">Ledger Empty</h3>
+     <h3 className="text-lg font-black text-theme-primary capitalize tracking-tight">Ledger Empty</h3>
      <p className="text-sm text-theme-muted mt-1 max-w-xs mx-auto">No financial entries match your current search or status filter criteria.</p>
      <button 
       onClick={() => { setSearchTerm(''); setStatusFilter('ALL'); }}
-      className="mt-6 px-6 py-2 border border-theme rounded-xl text-xs font-bold uppercase tracking-widest hover:surface-section transition-colors"
+      className="mt-6 px-6 py-2 border border-theme rounded-xl text-xs font-bold capitalize tracking-normal hover:surface-section transition-colors"
      >
       Clear All Filters
      </button>

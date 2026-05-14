@@ -183,21 +183,21 @@ const MonthlyCard = ({ row }: { row: MonthlyEarnings }) => (
   <div className="p-4 surface-card border border-theme rounded-xl space-y-3 shadow-sm">
     <div className="flex justify-between items-start">
       <div>
-        <div className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-0.5">Period</div>
+        <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-0.5">Period</div>
         <div className="text-sm font-bold text-theme-primary">{row.month} {row.year}</div>
       </div>
       <div className="text-right">
-        <div className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-0.5">Net Earnings</div>
+        <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-0.5">Net Earnings</div>
         <div className="text-sm font-bold text-success-green dark:text-emerald-400">${row.netEarnings}</div>
       </div>
     </div>
     <div className="grid grid-cols-2 gap-4 py-3 border-t border-b border-theme">
       <div>
-        <div className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-0.5">Tours/Bookings</div>
+        <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-0.5">Tours/Bookings</div>
         <div className="text-xs font-bold text-theme-secondary">{row.tours} tours / {row.bookings} bookings</div>
       </div>
       <div className="text-right">
-        <div className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-0.5">Revenue/Fees</div>
+        <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-0.5">Revenue/Fees</div>
         <div className="text-xs font-bold text-theme-secondary">${row.revenue} / <span className="text-danger-red">-{row.fees}</span></div>
       </div>
     </div>
@@ -272,21 +272,21 @@ const YearlyCard = ({ row }: { row: YearlySummary }) => (
   <div className="p-4 surface-card border border-theme rounded-xl space-y-3 shadow-sm">
     <div className="flex justify-between items-start">
       <div>
-        <div className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-0.5">Year</div>
+        <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-0.5">Year</div>
         <div className="text-sm font-bold text-theme-primary">{row.year}</div>
       </div>
       <div className="text-right">
-        <div className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-0.5">Net Earnings</div>
+        <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-0.5">Net Earnings</div>
         <div className="text-sm font-bold text-success-green dark:text-emerald-400">${row.totalNetEarnings}</div>
       </div>
     </div>
     <div className="grid grid-cols-2 gap-4 py-3 border-t border-b border-theme">
       <div>
-        <div className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-0.5">Tours/Bookings</div>
+        <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-0.5">Tours/Bookings</div>
         <div className="text-xs font-bold text-theme-secondary">{row.totalTours} tours / {row.totalBookings} bookings</div>
       </div>
       <div className="text-right">
-        <div className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-0.5">Revenue/Fees</div>
+        <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-0.5">Revenue/Fees</div>
         <div className="text-xs font-bold text-theme-secondary">${row.totalRevenue} / <span className="text-danger-red">-{row.totalFees}</span></div>
       </div>
     </div>
@@ -361,21 +361,21 @@ const TourCard = ({ row }: { row: EarningsByTour }) => (
   <div className="p-4 surface-card border border-theme rounded-xl space-y-3 shadow-sm">
     <div className="flex justify-between items-start">
       <div className="flex-1 min-w-0">
-        <div className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-0.5">Tour Title</div>
+        <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-0.5">Tour Title</div>
         <div className="text-sm font-bold text-theme-primary truncate">{row.tourTitle}</div>
       </div>
       <div className="text-right ml-4">
-        <div className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-0.5">Net</div>
+        <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-0.5">Net</div>
         <div className="text-sm font-bold text-success-green dark:text-emerald-400">${row.netEarnings}</div>
       </div>
     </div>
     <div className="grid grid-cols-2 gap-4 py-3 border-t border-b border-theme/50">
       <div>
-        <div className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-0.5">Bookings</div>
+        <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-0.5">Bookings</div>
         <div className="text-xs font-bold text-theme-secondary">{row.bookings} bookings</div>
       </div>
       <div className="text-right">
-        <div className="text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-0.5">Revenue/Fees</div>
+        <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-0.5">Revenue/Fees</div>
         <div className="text-xs font-bold text-theme-secondary">${row.revenue} / <span className="text-danger-red">-{row.fees}</span></div>
       </div>
     </div>

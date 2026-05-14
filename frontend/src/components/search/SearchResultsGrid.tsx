@@ -74,6 +74,7 @@ import toast from 'react-hot-toast'
 import { useWishlist } from '@/src/lib/contexts/WishlistContext'
 
 import PublicTourCard from '@/src/components/tours/PublicTourCard'
+import { TourCardSkeleton, GuideHighlightSkeleton } from './SearchSkeleton'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -115,11 +116,11 @@ function GuideHighlight({ guide }: { guide: PublicGuideProfile }) {
 
       <div className="relative z-10 flex-1 text-center sm:text-left">
         <div className="flex flex-wrap justify-center sm:justify-start gap-2 mb-3">
-          <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold text-white uppercase tracking-widest border border-white/10">
+          <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold text-white capitalize tracking-normal border border-white/10">
             Top Match
           </span>
           {guide.expertise.slice(0, 2).map((exp) => (
-            <span key={exp} className="px-3 py-1 bg-primary-light/20 rounded-full text-[10px] font-bold text-white uppercase tracking-widest border border-white/5">
+            <span key={exp} className="px-3 py-1 bg-primary-light/20 rounded-full text-[10px] font-bold text-white capitalize tracking-normal border border-white/5">
               {exp}
             </span>
           ))}
@@ -137,7 +138,7 @@ function GuideHighlight({ guide }: { guide: PublicGuideProfile }) {
               <Sparkles className="w-5 h-5 text-yellow-400" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-blue-200 uppercase tracking-tighter">Rating</span>
+              <span className="text-[10px] font-bold text-blue-200 capitalize tracking-tighter">Rating</span>
               <span className="text-lg font-bold text-white">{guide.averageRating || 'New'}</span>
             </div>
           </div>
@@ -146,7 +147,7 @@ function GuideHighlight({ guide }: { guide: PublicGuideProfile }) {
               <Zap className="w-5 h-5 text-orange-400" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-blue-200 uppercase tracking-tighter">Experiences</span>
+              <span className="text-[10px] font-bold text-blue-200 capitalize tracking-tighter">Experiences</span>
               <span className="text-lg font-bold text-white">{guide.tourCount}</span>
             </div>
           </div>
@@ -154,7 +155,7 @@ function GuideHighlight({ guide }: { guide: PublicGuideProfile }) {
       </div>
 
       <div className="relative z-10 self-center sm:self-end">
-        <div className="px-6 py-3 bg-white text-primary-dark rounded-2xl font-bold text-xs uppercase tracking-widest shadow-xl group-hover:bg-primary-light group-hover:text-white transition-all duration-300 group-hover:scale-105">
+        <div className="px-6 py-3 bg-white text-primary-dark rounded-2xl font-bold text-xs capitalize tracking-normal shadow-xl group-hover:bg-primary-light group-hover:text-white transition-all duration-300 group-hover:scale-105">
           View Profile
         </div>
       </div>
@@ -201,10 +202,7 @@ export default function SearchResultsGrid({
     if (paramsKey === lastParamsRef.current) return
     lastParamsRef.current = paramsKey
 
-    // Only set loading if we don't have existing results to show
-    if (tours.length === 0 && guides.length === 0) {
-      setLoading(true)
-    }
+    setLoading(true)
     
     try {
       // ... (rest of the logic)
@@ -264,7 +262,7 @@ export default function SearchResultsGrid({
         </p>
         <button 
           onClick={() => dispatch({ type: 'CLEAR_FILTERS' })}
-          className="px-8 py-3 bg-primary-light hover:bg-primary-light-hover text-white font-bold text-xs uppercase tracking-widest rounded-xl shadow-xl shadow-primary-light/20 transition-all active:scale-95"
+          className="px-8 py-3 bg-primary-light hover:bg-primary-light-hover text-white font-bold text-xs capitalize tracking-normal rounded-xl shadow-xl shadow-primary-light/20 transition-all active:scale-95"
         >
           Clear All Filters
         </button>
@@ -277,13 +275,13 @@ export default function SearchResultsGrid({
       {/* Header / Sort Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-theme-primary uppercase tracking-widest">
+          <span className="text-sm font-bold text-theme-primary capitalize tracking-normal">
             {filteredTours.length} Experiences
           </span>
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-[10px] font-bold text-theme-muted uppercase tracking-widest whitespace-nowrap">Sort by:</span>
+          <span className="text-[10px] font-bold text-theme-muted capitalize tracking-normal whitespace-nowrap">Sort by:</span>
           
           <div className="relative z-40 w-56">
             <Listbox value={sortBy} onChange={setSortBy}>
@@ -337,11 +335,22 @@ export default function SearchResultsGrid({
       </div>
 
       {/* Segmented Results */}
-      {guides.length > 0 && (
+      {loading && filters.searchQuery ? (
+        <div className="flex flex-col gap-6 mb-10">
+          <div className="flex items-center gap-3">
+            <div className="h-px surface-section flex-1" />
+            <h2 className="text-[10px] font-bold text-theme-muted capitalize tracking-[0.2em] whitespace-nowrap">
+              Searching for Guides...
+            </h2>
+            <div className="h-px surface-section flex-1" />
+          </div>
+          <GuideHighlightSkeleton />
+        </div>
+      ) : guides.length > 0 ? (
         <div className={`flex flex-col gap-6 mb-10 transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}>
           <div className="flex items-center gap-3">
             <div className="h-px surface-section flex-1" />
-            <h2 className="text-[10px] font-bold text-theme-muted uppercase tracking-[0.2em] whitespace-nowrap">
+            <h2 className="text-[10px] font-bold text-theme-muted capitalize tracking-[0.2em] whitespace-nowrap">
               Guide Matching Your Search
             </h2>
             <div className="h-px surface-section flex-1" />
@@ -353,28 +362,29 @@ export default function SearchResultsGrid({
           </div>
           {guides.length > 1 && (
             <div className="flex justify-center -mt-2">
-              <span className="text-[10px] font-bold text-theme-muted uppercase tracking-widest">
+              <span className="text-[10px] font-bold text-theme-muted capitalize tracking-normal">
                 + {guides.length - 1} more guides found
               </span>
             </div>
           )}
         </div>
-      )}
+      ) : null}
 
       {guides.length > 0 && tours.length > 0 && (
         <div className="flex items-center gap-3 mb-2">
           <div className="h-px surface-section flex-1" />
-          <h2 className="text-[10px] font-bold text-theme-muted uppercase tracking-[0.2em] whitespace-nowrap">
+          <h2 className="text-[10px] font-bold text-theme-muted capitalize tracking-[0.2em] whitespace-nowrap">
             Experience Results
           </h2>
           <div className="h-px surface-section flex-1" />
         </div>
       )}
 
-      <div className={`${gridClasses} transition-opacity duration-300 ${loading && filteredTours.length > 0 ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-        {loading && filteredTours.length === 0 ? (
-          [...Array(6)].map((_, i) => (
-            <div key={i} className="aspect-[4/5] surface-section rounded-[2rem] animate-pulse shadow-sm" />
+      <div className={gridClasses}>
+        {loading ? (
+          // Always show skeletons when loading to provide clear feedback
+          [...Array(isCollapsed ? 8 : 6)].map((_, i) => (
+            <TourCardSkeleton key={i} />
           ))
         ) : (
           filteredTours.map((tour, index) => (

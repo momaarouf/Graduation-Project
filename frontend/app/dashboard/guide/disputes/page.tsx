@@ -5,21 +5,24 @@ import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { getMyDisputes, addDisputeResponse, DisputeResponse } from '@/src/lib/api/disputes'
 import { Scale, Clock, CheckCircle, XCircle, AlertCircle, Loader2, MessageSquare, Shield } from 'lucide-react'
+import GuideDisputesSkeleton from './skeleton'
 
 const DisputeStatusBadge = ({ status }: { status: string }) => {
-  const styles: Record<string, string> = {
-    'OPEN': 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-    'UNDER_REVIEW': 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-    'RESOLVED': 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-    'REJECTED': 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
+  const styles: Record<string, { bg: string, text: string, border: string }> = {
+    'OPEN': { bg: 'bg-primary-light/10', text: 'text-primary-light dark:text-primary-dark', border: 'border-primary-light/20' },
+    'UNDER_REVIEW': { bg: 'bg-accent-light/10', text: 'text-accent-light dark:text-amber-400', border: 'border-accent-light/20' },
+    'RESOLVED': { bg: 'bg-success-green/10', text: 'text-success-green dark:text-emerald-400', border: 'border-success-green/20' },
+    'REJECTED': { bg: 'bg-danger-red/10', text: 'text-danger-red', border: 'border-danger-red/20' }
   }
 
+  const config = styles[status] || styles.OPEN
+
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded border ${styles[status]}`}>
-      {status === 'OPEN' && <Clock className="w-3 h-3" />}
-      {status === 'UNDER_REVIEW' && <AlertCircle className="w-3 h-3" />}
-      {status === 'RESOLVED' && <CheckCircle className="w-3 h-3" />}
-      {status === 'REJECTED' && <XCircle className="w-3 h-3" />}
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-black capitalize tracking-[0.2em] rounded-full border ${config.bg} ${config.text} ${config.border} backdrop-blur-md`}>
+      {status === 'OPEN' && <Clock className="w-3.5 h-3.5" />}
+      {status === 'UNDER_REVIEW' && <AlertCircle className="w-3.5 h-3.5" />}
+      {status === 'RESOLVED' && <CheckCircle className="w-3.5 h-3.5" />}
+      {status === 'REJECTED' && <XCircle className="w-3.5 h-3.5" />}
       {status.replace('_', ' ')}
     </span>
   )
@@ -65,14 +68,7 @@ export default function GuideDisputesPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex-1 flex items-center justify-center surface-base">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 animate-spin text-primary-light" />
-          <p className="text-sm font-bold text-theme-muted animate-pulse uppercase tracking-widest">Loading cases...</p>
-        </div>
-      </div>
-    )
+    return <GuideDisputesSkeleton />
   }
 
   return (
@@ -113,20 +109,20 @@ export default function GuideDisputesPage() {
                   <div className="flex flex-col sm:flex-row justify-between gap-6">
                     <div className="w-full">
                       <div className="flex flex-wrap items-center gap-3 mb-6">
-                        <span className="text-xs font-bold uppercase tracking-widest text-emerald-600/60">Case #{dispute.id}</span>
+                        <span className="text-xs font-bold capitalize tracking-normal text-emerald-600/60">Case #{dispute.id}</span>
                         <DisputeStatusBadge status={dispute.status} />
                         {!isDefending && (
-                          <span className="px-2 py-0.5 bg-blue-500/10 text-blue-600 text-[10px] font-bold uppercase tracking-widest rounded border border-blue-500/20">You Opened This</span>
+                          <span className="px-2 py-0.5 bg-blue-500/10 text-blue-600 text-[10px] font-bold capitalize tracking-normal rounded border border-blue-500/20">You Opened This</span>
                         )}
                       </div>
                       
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
                         <div>
-                          <p className="text-[10px] text-theme-muted uppercase font-bold tracking-tighter mb-1">Opened By</p>
+                          <p className="text-[10px] text-theme-muted capitalize font-bold tracking-tighter mb-1">Opened By</p>
                           <p className="text-sm font-bold text-theme-primary">{dispute.openedByFullName} ({dispute.openedByRole})</p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-theme-muted uppercase font-bold tracking-tighter mb-1">Related Booking</p>
+                          <p className="text-[10px] text-theme-muted capitalize font-bold tracking-tighter mb-1">Related Booking</p>
                           <Link href={`/dashboard/guide/tours/bookings/${dispute.bookingId}`} className="text-sm font-bold text-primary-light hover:underline flex items-center gap-1.5">
                             #{dispute.bookingId}
                           </Link>
@@ -134,11 +130,11 @@ export default function GuideDisputesPage() {
                       </div>
 
                       <div className="mb-6">
-                        <p className="text-[10px] text-theme-muted uppercase font-bold tracking-tighter mb-2">Dispute Category</p>
+                        <p className="text-[10px] text-theme-muted capitalize font-bold tracking-tighter mb-2">Dispute Category</p>
                         <p className="text-sm font-bold text-theme-primary mb-4">{dispute.reason.replace(/_/g, ' ')}</p>
                         <div className="p-4 sm:p-6 bg-red-500/5 rounded-2xl border border-red-500/20 relative overflow-hidden">
                           <div className="absolute top-0 left-0 w-1 h-full bg-red-500/20" />
-                          <p className="text-[10px] text-red-600/60 uppercase font-bold tracking-tighter mb-3">The Claim</p>
+                          <p className="text-[10px] text-red-600/60 capitalize font-bold tracking-tighter mb-3">The Claim</p>
                           <p className="text-sm text-theme-secondary leading-relaxed">"{dispute.description}"</p>
                         </div>
                       </div>
@@ -148,14 +144,14 @@ export default function GuideDisputesPage() {
                           {dispute.againstUserResponse ? (
                             <div className="p-4 sm:p-6 bg-emerald-500/5 rounded-2xl border border-emerald-500/20 relative overflow-hidden">
                               <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/20" />
-                              <p className="text-[10px] text-emerald-600/60 uppercase font-bold tracking-tighter mb-3">Your Defense</p>
+                              <p className="text-[10px] text-emerald-600/60 capitalize font-bold tracking-tighter mb-3">Your Defense</p>
                               <p className="text-sm text-theme-secondary leading-relaxed">"{dispute.againstUserResponse}"</p>
                             </div>
                           ) : (
                             dispute.status !== 'RESOLVED' && dispute.status !== 'REJECTED' ? (
                               respondingTo === dispute.id ? (
                                 <div className="mt-4 surface-base p-6 rounded-2xl border border-theme space-y-4">
-                                  <label className="block text-[10px] font-bold uppercase tracking-widest text-theme-muted">Submit Your Defense</label>
+                                  <label className="block text-[10px] font-bold capitalize tracking-normal text-theme-muted">Submit Your Defense</label>
                                   <textarea
                                     value={responseText}
                                     onChange={(e) => setResponseText(e.target.value)}
@@ -167,14 +163,14 @@ export default function GuideDisputesPage() {
                                     <button 
                                       onClick={() => handleSubmitResponse(dispute.id)} 
                                       disabled={isSubmitting}
-                                      className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-widest rounded-xl shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-2 transition-all active:scale-95"
+                                      className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold capitalize tracking-normal rounded-xl shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-2 transition-all active:scale-95"
                                     >
                                       {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
                                       Submit Response
                                     </button>
                                     <button 
                                       onClick={() => { setRespondingTo(null); setResponseText(''); }} 
-                                      className="px-6 py-3 surface-card hover:bg-theme-muted/5 text-theme-primary text-xs font-bold uppercase tracking-widest rounded-xl transition-all border border-theme"
+                                      className="px-6 py-3 surface-card hover:bg-theme-muted/5 text-theme-primary text-xs font-bold capitalize tracking-normal rounded-xl transition-all border border-theme"
                                     >
                                       Cancel
                                     </button>
@@ -184,7 +180,7 @@ export default function GuideDisputesPage() {
                                 <div className="mt-4">
                                   <button
                                     onClick={() => { setRespondingTo(dispute.id); setResponseText(''); }}
-                                    className="w-full sm:w-auto px-6 py-3 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-600 text-xs font-bold uppercase tracking-widest rounded-xl transition-all border border-emerald-500/20 flex items-center justify-center gap-2"
+                                    className="w-full sm:w-auto px-6 py-3 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-600 text-xs font-bold capitalize tracking-normal rounded-xl transition-all border border-emerald-500/20 flex items-center justify-center gap-2"
                                   >
                                     <MessageSquare className="w-4 h-4" />
                                     Respond to Claim
@@ -200,7 +196,7 @@ export default function GuideDisputesPage() {
                         <div className="mt-8 p-4 sm:p-6 bg-blue-500/10 border border-primary-light/20 rounded-2xl">
                           <div className="flex items-center gap-2 mb-4">
                             <Shield className="w-4 h-4 text-primary-light" fill="currentColor" fillOpacity={0.15} />
-                            <h4 className="text-[10px] font-bold text-primary-light uppercase tracking-widest">Admin Resolution</h4>
+                            <h4 className="text-[10px] font-bold text-primary-light capitalize tracking-normal">Admin Resolution</h4>
                           </div>
                           <p className="text-sm text-theme-primary font-medium leading-relaxed mb-4">{dispute.resolutionNote}</p>
                           {dispute.refundAmount !== undefined && dispute.refundAmount > 0 && (

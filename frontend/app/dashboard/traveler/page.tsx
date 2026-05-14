@@ -95,7 +95,7 @@ function StatCard({ icon: Icon, label, value, color }: {
         <Icon className="w-4 h-4 sm:w-5 h-5" />
       </div>
       <div className="text-2xl sm:text-3xl font-black text-theme-primary mb-1 tracking-tight leading-none">{value}</div>
-      <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] text-theme-muted opacity-80">{label}</div>
+      <div className="text-[9px] sm:text-[10px] font-bold capitalize tracking-[0.15em] text-theme-muted opacity-80">{label}</div>
     </GlassCard>
   )
 }
@@ -111,7 +111,7 @@ function LoyaltyStatCard({ loyalty }: { loyalty: LoyaltyStatusResponse | null })
         <div className={`p-2 rounded-xl ${cfg.badge} w-fit group-hover/loyalty:scale-110 transition-transform`}>
           <Trophy className="w-4 h-4 sm:w-5 h-5" />
         </div>
-        <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-widest px-2 py-1 rounded-xl ${cfg.badge}`}>
+        <span className={`text-[10px] sm:text-xs font-bold capitalize tracking-normal px-2 py-1 rounded-xl ${cfg.badge}`}>
           {cfg.icon} {cfg.label}
         </span>
       </div>
@@ -119,16 +119,16 @@ function LoyaltyStatCard({ loyalty }: { loyalty: LoyaltyStatusResponse | null })
         <div className={`text-2xl sm:text-3xl font-black mb-0.5 sm:mb-1 tracking-tight ${cfg.text}`}>
           {loyalty ? `${loyalty.discountPct}% off` : '—'}
         </div>
-        <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-theme-muted">
+        <div className="text-[10px] sm:text-xs font-bold capitalize tracking-normal text-theme-muted">
           Loyalty Tier
         </div>
         {loyalty && loyalty.tripsToNextTier > 0 && (
-          <p className="text-[10px] sm:text-xs text-theme-muted mt-1.5 font-bold uppercase tracking-tighter">
+          <p className="text-[10px] sm:text-xs text-theme-muted mt-1.5 font-bold capitalize tracking-tighter">
             {loyalty.tripsToNextTier} more to {loyalty.nextTier ? loyalty.nextTier.charAt(0) + loyalty.nextTier.slice(1).toLowerCase() : ''}
           </p>
         )}
         {loyalty && loyalty.tripsToNextTier === 0 && (
-          <p className="text-[10px] sm:text-xs text-yellow-500 mt-1.5 font-black uppercase tracking-widest">✨ Top Tier!</p>
+          <p className="text-[10px] sm:text-xs text-yellow-500 mt-1.5 font-black capitalize tracking-normal">✨ Top Tier!</p>
         )}
       </div>
     </GlassCard>
@@ -164,7 +164,7 @@ function LoyaltyProgressCard({ loyalty }: { loyalty: LoyaltyStatusResponse | nul
           <Star className="w-5 h-5 fill-current" />
         </div>
         <div>
-          <h3 className="font-bold text-theme-primary uppercase tracking-wider text-sm">Loyalty Journey</h3>
+          <h3 className="font-bold text-theme-primary capitalize tracking-normal text-sm">Loyalty Journey</h3>
           <p className="text-xs text-theme-muted font-bold mt-0.5">{cfg.icon} {cfg.label} Elite</p>
         </div>
       </div>
@@ -173,8 +173,8 @@ function LoyaltyProgressCard({ loyalty }: { loyalty: LoyaltyStatusResponse | nul
       {loyalty.tripsToNextTier > 0 && loyalty.nextTier && (
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2.5">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-theme-muted">{cfg.label}</span>
-            <span className={`text-[10px] font-black uppercase tracking-widest ${TIER_CONFIG[loyalty.nextTier].text}`}>
+            <span className="text-[10px] font-bold capitalize tracking-normal text-theme-muted">{cfg.label}</span>
+            <span className={`text-[10px] font-black capitalize tracking-normal ${TIER_CONFIG[loyalty.nextTier].text}`}>
               {loyalty.nextTier}
             </span>
           </div>
@@ -196,7 +196,7 @@ function LoyaltyProgressCard({ loyalty }: { loyalty: LoyaltyStatusResponse | nul
 
       {loyalty.tripsToNextTier === 0 && (
         <div className="text-center p-4 rounded-2xl bg-gradient-to-br from-yellow-400/20 to-amber-500/10 border border-yellow-400/20 mb-6">
-          <p className="text-yellow-600 dark:text-yellow-400 font-black text-xs uppercase tracking-widest italic">✨ Legendary Status ✨</p>
+          <p className="text-yellow-600 dark:text-yellow-400 font-black text-xs capitalize tracking-normal italic">✨ Legendary Status ✨</p>
           <p className="text-[10px] text-yellow-600/80 dark:text-yellow-400/80 mt-1 font-medium">You have reached the peak of our loyalty program.</p>
         </div>
       )}
@@ -205,11 +205,11 @@ function LoyaltyProgressCard({ loyalty }: { loyalty: LoyaltyStatusResponse | nul
       <div className="grid grid-cols-2 gap-4">
         <div className="text-center p-4 surface-section rounded-2xl border border-theme shadow-sm group hover:border-theme-strong transition-colors">
           <div className="text-2xl font-black text-theme-primary">{loyalty.completedTrips}</div>
-          <div className="text-[10px] font-bold uppercase tracking-widest text-theme-muted mt-1">Trips</div>
+          <div className="text-[10px] font-bold capitalize tracking-normal text-theme-muted mt-1">Trips</div>
         </div>
         <div className="text-center p-4 surface-section rounded-2xl border border-theme shadow-sm group hover:border-theme-strong transition-colors">
           <div className={`text-2xl font-black ${cfg.text}`}>{loyalty.discountPct}%</div>
-          <div className="text-[10px] font-bold uppercase tracking-widest text-theme-muted mt-1">Discount</div>
+          <div className="text-[10px] font-bold capitalize tracking-normal text-theme-muted mt-1">Discount</div>
         </div>
       </div>
     </GlassCard>
@@ -219,6 +219,8 @@ function LoyaltyProgressCard({ loyalty }: { loyalty: LoyaltyStatusResponse | nul
 // ============================================================================
 // MAIN DASHBOARD PAGE
 // ============================================================================
+
+import TravelerDashboardLoading from './skeleton'
 
 export default function TravelerDashboardPage() {
  const { user } = useAuth()
@@ -248,16 +250,7 @@ export default function TravelerDashboardPage() {
  fetchData()
  }, [])
 
- if (loading) {
- return (
- <div className="min-h-screen flex items-center justify-center surface-section">
- <div className="flex flex-col items-center gap-4">
- <div className="w-12 h-12 border-4 border-primary-light dark:border-primary-dark border-t-transparent rounded-full animate-spin" />
- <p className="text-theme-muted animate-pulse font-medium">Loading your adventure...</p>
- </div>
- </div>
- )
- }
+ if (loading) return <TravelerDashboardLoading />
 
  // Find the first active booking that has a loyalty discount applied
  const discountedBooking = bookings.find(
@@ -288,7 +281,7 @@ export default function TravelerDashboardPage() {
  className="flex flex-col md:flex-row md:items-end justify-between gap-6"
  >
  <div>
- <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+ <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-xs font-bold capitalize tracking-normal mb-4">
  <Sparkles className="w-3 h-3" />
  {getGreeting()}
  </div>
@@ -303,7 +296,7 @@ export default function TravelerDashboardPage() {
  <div className="flex justify-center md:justify-end">
  <Link
  href="/tours"
- className="w-full sm:w-auto px-8 py-3.5 bg-primary-light hover:bg-primary-light-hover text-white rounded-xl font-bold transition-all shadow-lg shadow-primary-light/20 flex items-center justify-center gap-2 text-sm uppercase tracking-widest"
+ className="w-full sm:w-auto px-8 py-3.5 bg-primary-light hover:bg-primary-light-hover text-white rounded-xl font-bold transition-all shadow-lg shadow-primary-light/20 flex items-center justify-center gap-2 text-sm capitalize tracking-normal"
  >
  <Search className="w-4 h-4" />
  Find Tours
@@ -337,13 +330,13 @@ export default function TravelerDashboardPage() {
                   <CreditCard className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-bold mb-0.5 uppercase tracking-wider text-sm">Payment Required</h3>
+                  <h3 className="font-bold mb-0.5 capitalize tracking-normal text-sm">Payment Required</h3>
                   <p className="text-indigo-100 text-xs font-medium">Complete your unpaid booking to secure your spot.</p>
                 </div>
               </div>
               <Link
                 href="/dashboard/traveler/bookings"
-                className="w-full sm:w-auto px-6 py-2.5 bg-white text-indigo-600 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-lg flex-shrink-0 text-center"
+                className="w-full sm:w-auto px-6 py-2.5 bg-white text-indigo-600 rounded-xl font-bold text-xs capitalize tracking-normal hover:bg-indigo-50 transition-all shadow-lg flex-shrink-0 text-center"
               >
                 Pay Now
               </Link>
@@ -357,7 +350,7 @@ export default function TravelerDashboardPage() {
                 <Zap className="w-5 h-5 fill-current" />
               </div>
               <div className="min-w-0">
-                <p className="font-bold text-xs sm:text-sm uppercase tracking-tight truncate pr-2">
+                <p className="font-bold text-xs sm:text-sm capitalize tracking-tight truncate pr-2">
                   🎉 Saved ${discountedBooking.tierDiscountAmount?.toFixed(2)} with {loyalty?.loyaltyTier} status!
                 </p>
                 <p className="text-amber-100 text-[10px] sm:text-xs font-medium mt-0.5">
@@ -371,12 +364,12 @@ export default function TravelerDashboardPage() {
           <GlassCard className="p-5 sm:p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-lg sm:text-xl font-bold text-theme-primary uppercase tracking-wider">Upcoming Trips</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-theme-primary capitalize tracking-normal">Upcoming Trips</h2>
                 <p className="text-xs sm:text-sm text-theme-muted font-medium mt-0.5">Your next adventures await</p>
               </div>
               <Link
                 href="/dashboard/traveler/bookings"
-                className="text-[10px] sm:text-xs font-bold text-primary-light dark:text-primary-dark hover:opacity-80 flex items-center gap-1 group uppercase tracking-widest"
+                className="text-[10px] sm:text-xs font-bold text-primary-light dark:text-primary-dark hover:opacity-80 flex items-center gap-1 group capitalize tracking-normal"
               >
                 View All
                 <ChevronRight className="w-3 h-3 sm:w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -403,7 +396,7 @@ export default function TravelerDashboardPage() {
                               {booking.tourTitle}
                             </h4>
                             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-2">
-                              <span suppressHydrationWarning className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-theme-muted flex items-center gap-2">
+                              <span suppressHydrationWarning className="text-[9px] sm:text-[10px] font-bold capitalize tracking-normal text-theme-muted flex items-center gap-2">
                                 <Clock className="w-3.5 h-3.5 text-orange-500" />{' '}
                                 {new Date(booking.startTimeUtc).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                               </span>
@@ -412,7 +405,7 @@ export default function TravelerDashboardPage() {
                         </div>
                         <div className="flex items-center justify-between sm:justify-end gap-4 pt-4 sm:pt-0 border-t sm:border-0 border-theme">
                           <div
-                            className={`px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] border ${
+                            className={`px-4 py-2 rounded-full text-[9px] font-bold capitalize tracking-[0.2em] border ${
                               booking.status === 'Confirmed'
                                 ? 'bg-success-green/10 text-success-green border-success-green/20'
                                 : booking.status === 'InProgress'
@@ -440,13 +433,13 @@ export default function TravelerDashboardPage() {
                 <div className="w-12 h-12 sm:w-16 sm:h-16 bg-theme-muted/5 rounded-[2rem] flex items-center justify-center mx-auto mb-4">
                   <Compass className="w-6 h-6 sm:w-8 h-8 text-theme-muted" />
                 </div>
-                <h3 className="font-bold text-theme-primary mb-2 text-base sm:text-lg uppercase tracking-wider">No upcoming adventures</h3>
+                <h3 className="font-bold text-theme-primary mb-2 text-base sm:text-lg capitalize tracking-normal">No upcoming adventures</h3>
                 <p className="text-xs sm:text-sm text-theme-muted max-w-xs mx-auto mb-6 leading-relaxed font-medium">
                   The world is waiting! Browse our top-rated tours and start planning your next escape.
                 </p>
                 <Link
                   href="/tours"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary-light text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-primary-light-hover transition-all shadow-lg shadow-primary-light/20 active:scale-95"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary-light text-white rounded-xl text-xs font-bold capitalize tracking-normal hover:bg-primary-light-hover transition-all shadow-lg shadow-primary-light/20 active:scale-95"
                 >
                   Start Exploring
                 </Link>
@@ -460,7 +453,7 @@ export default function TravelerDashboardPage() {
   <div className="p-2 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-xl">
   <Clock className="w-4 h-4 sm:w-5 h-5" />
   </div>
-  <h3 className="font-bold text-theme-primary uppercase tracking-wider text-sm sm:text-base">Recent Activity</h3>
+  <h3 className="font-bold text-theme-primary capitalize tracking-normal text-sm sm:text-base">Recent Activity</h3>
   </div>
   <div className="space-y-4">
   {user?.profileCompleted && (

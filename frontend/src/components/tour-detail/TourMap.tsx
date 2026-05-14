@@ -114,7 +114,7 @@ export default function TourMap({
  <MapPin className="w-6 h-6 animate-pulse" />
  </div>
  <div className="text-center">
- <p className="text-[10px] font-bold text-theme-muted uppercase tracking-[0.2em] mb-1">
+ <p className="text-[10px] font-bold text-theme-muted capitalize tracking-[0.2em] mb-1">
  Map View Unavailable
  </p>
  <p className="text-[11px] font-medium text-theme-muted max-w-[200px] mx-auto leading-relaxed">
@@ -169,7 +169,7 @@ export default function TourMap({
  <Marker key={wp.id} position={[wp.latitude, wp.longitude]} icon={stopIcon}>
  <Popup className="custom-popup">
  <div className="p-1">
- <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest block mb-0.5">
+ <span className="text-[10px] font-bold text-indigo-600 capitalize tracking-normal block mb-0.5">
  Stop {idx + 1}
  </span>
  <p className="font-bold text-theme-primary m-0 leading-tight">
@@ -189,7 +189,7 @@ export default function TourMap({
  <Marker position={[meetingPoint.lat, meetingPoint.lng]} icon={pinIcon}>
  <Popup className="custom-popup">
  <div className="p-1 min-w-[150px]">
- <span className="text-[10px] font-bold text-primary-light dark:text-primary-dark uppercase tracking-widest block mb-0.5">
+ <span className="text-[10px] font-bold text-primary-light dark:text-primary-dark capitalize tracking-normal block mb-0.5">
  Meeting Point
  </span>
  <p className="font-bold text-theme-primary m-0 leading-tight">
@@ -216,7 +216,7 @@ export default function TourMap({
  <Navigation className="w-4 h-4" />
  </div>
  <div>
- <p className="text-[10px] font-bold text-theme-primary uppercase tracking-widest leading-none mb-1">
+ <p className="text-[10px] font-bold text-theme-primary capitalize tracking-normal leading-none mb-1">
  Live Trail View
  </p>
  <p className="text-[9px] text-theme-muted font-medium">

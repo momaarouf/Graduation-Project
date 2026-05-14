@@ -13,7 +13,7 @@ export default function HeroTestPage() {
  {/* NEW HERO SECTION */}
  <section className="relative">
  <div className="bg-orange-600/10 dark:bg-orange-500/5 py-4 px-8 border-b dark:border-theme-strong text-center">
- <span className="text-sm font-bold uppercase tracking-[0.3em] text-orange-600 dark:text-orange-400">
+ <span className="text-sm font-bold capitalize tracking-[0.3em] text-orange-600 dark:text-orange-400">
  Variant A: New Interactive Globe Hero
  </span>
  </div>
@@ -28,7 +28,7 @@ export default function HeroTestPage() {
  {/* OLD HERO SECTION */}
  <section className="relative">
  <div className="bg-primary-light/10 dark:bg-primary-light/5 py-4 px-8 border-y dark:border-theme-strong text-center">
- <span className="text-sm font-bold uppercase tracking-[0.3em] text-primary-light dark:text-primary-dark dark:text-primary-dark ">
+ <span className="text-sm font-bold capitalize tracking-[0.3em] text-primary-light dark:text-primary-dark dark:text-primary-dark ">
  Variant B: Original Cinematic Hero
  </span>
  </div>
@@ -37,7 +37,7 @@ export default function HeroTestPage() {
  </main>
 
  <footer className="py-20 surface-section border-t dark:border-white/5 text-center">
- <p className="text-theme-muted text-sm font-medium uppercase tracking-widest">Hero Comparison Demo • SafariHub</p>
+ <p className="text-theme-muted text-sm font-medium capitalize tracking-normal">Hero Comparison Demo • SafariHub</p>
  </footer>
  </div>
  )

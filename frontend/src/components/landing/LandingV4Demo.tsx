@@ -136,7 +136,7 @@ function PremiumShowcase() {
  <div key={t.id} className="relative h-[500px] rounded-[3rem] overflow-hidden border dark:border-theme-strong shadow-xl">
  <Image src={t.image} alt={t.title} fill className="object-cover" />
  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-10 flex flex-col justify-end">
- <span className="text-orange-400 font-bold mb-2 uppercase text-xs tracking-widest">{t.type}</span>
+ <span className="text-orange-400 font-bold mb-2 capitalize text-xs tracking-normal">{t.type}</span>
  <h3 className="text-3xl font-bold text-white mb-2">{t.title}</h3>
  <p className="text-white/60 text-sm">{t.location} • <span className="text-white">{t.price}</span></p>
  </div>

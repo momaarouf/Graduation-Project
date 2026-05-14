@@ -2,6 +2,7 @@ package com.travelmarket.backend.booking.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.travelmarket.backend.booking.dto.response.PricePreviewResponse;
 import com.travelmarket.backend.booking.enums.LoyaltyTier;
 import com.travelmarket.backend.config.LoyaltyProperties;
 import com.travelmarket.backend.entity.GuideProfile;
@@ -264,11 +265,151 @@ public class PricingService {
         return null; // GOLD is the top tier
     }
 
-    // ── Dynamic pricing (moved verbatim from BookingService) ──────────────────
+    // ── Price preview (unauthenticated — guest-friendly) ──────────────────────
 
     /**
-     * Applies weekend and holiday multipliers from the template's dynamic pricing JSON.
-     * Returns the price unchanged if no dynamic config is present or parseable.
+     * Computes a {@link PricePreviewResponse} for the booking widget on the
+     * public tour detail page.  No authentication is required — traveler may be null.
+     *
+     * Breakdown order:
+     *   1. subtotal = basePrice × peopleCount
+     *   2. Holiday surcharge (takes priority over weekend if both apply)
+     *   3. Weekend surcharge
+     *   4. Group discount (if template has group discount and threshold is met)
+     *   5. Loyalty tier discount (0 for guests / BRONZE travelers)
+     *
+     * Platform fee is intentionally omitted — traveler-facing totals never show commission.
+     *
+     * @param template    the tour being quoted (provides pricing config)
+     * @param tourDate    the start time of the selected occurrence (UTC)
+     * @param peopleCount number of seats being priced
+     * @param traveler    optional — null for guests (no loyalty discount applied)
+     * @return fully-computed {@link PricePreviewResponse}
+     */
+    public PricePreviewResponse previewPrice(TourTemplate template,
+                                             Instant tourDate,
+                                             int peopleCount,
+                                             TravelerProfile traveler) {
+        BigDecimal basePrice = template.getBasePrice() != null
+                ? template.getBasePrice() : BigDecimal.ZERO;
+        String currency = template.getCurrency() != null ? template.getCurrency() : "USD";
+
+        // Step 1 — Raw subtotal
+        BigDecimal subtotal = basePrice.multiply(BigDecimal.valueOf(peopleCount));
+        BigDecimal workingPrice = subtotal;
+
+        // Step 2 — Detect dynamic pricing (holiday takes priority over weekend)
+        DynamicPricingResult dynamic = parseDynamicPricing(template, tourDate);
+
+        if (dynamic.holidayApplied()) {
+            workingPrice = subtotal.multiply(BigDecimal.valueOf(dynamic.safeHolidayMultiplier()));
+        } else if (dynamic.weekendApplied()) {
+            workingPrice = subtotal.multiply(BigDecimal.valueOf(dynamic.safeWeekendMultiplier()));
+        }
+
+        BigDecimal subtotalAfterDynamic = workingPrice.setScale(2, RoundingMode.HALF_UP);
+
+        // Step 3 — Group discount
+        boolean groupApplied = Boolean.TRUE.equals(template.getHasGroupDiscount())
+                && template.getGroupDiscountThreshold() != null
+                && peopleCount >= template.getGroupDiscountThreshold()
+                && template.getGroupDiscountPercent() != null
+                && template.getGroupDiscountPercent().compareTo(BigDecimal.ZERO) > 0;
+
+        BigDecimal groupDiscountPct = groupApplied ? template.getGroupDiscountPercent() : BigDecimal.ZERO;
+        BigDecimal groupDiscountAmount = BigDecimal.ZERO;
+
+        if (groupApplied) {
+            groupDiscountAmount = subtotalAfterDynamic
+                    .multiply(groupDiscountPct.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP));
+            workingPrice = subtotalAfterDynamic.subtract(groupDiscountAmount);
+        } else {
+            workingPrice = subtotalAfterDynamic;
+        }
+
+        // Step 4 — Loyalty tier discount (0 for guests)
+        LoyaltyTier tier = (traveler != null && traveler.getLoyaltyTier() != null)
+                ? traveler.getLoyaltyTier() : LoyaltyTier.BRONZE;
+        BigDecimal tierDiscountPct = getTierDiscountPct(tier);
+        BigDecimal tierDiscountAmount = BigDecimal.ZERO;
+
+        if (tierDiscountPct.compareTo(BigDecimal.ZERO) > 0) {
+            tierDiscountAmount = workingPrice
+                    .multiply(tierDiscountPct.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP));
+            workingPrice = workingPrice.subtract(tierDiscountAmount);
+        }
+
+        BigDecimal finalPrice = workingPrice.max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
+
+        log.debug("[Preview] tour={} date={} qty={} subtotal={} weekend={}% holiday={}% " +
+                        "group={}% tier={}% FINAL={}",
+                template.getId(), tourDate, peopleCount, subtotal,
+                dynamic.weekendPercent(), dynamic.holidayPercent(),
+                groupDiscountPct.intValue(), tierDiscountPct.intValue(), finalPrice);
+
+        return PricePreviewResponse.builder()
+                .basePrice(basePrice)
+                .quantity(peopleCount)
+                .currency(currency)
+                .subtotal(subtotal.setScale(2, RoundingMode.HALF_UP))
+                .weekendApplied(dynamic.weekendApplied())
+                .weekendPercent(dynamic.weekendPercent())
+                .holidayApplied(dynamic.holidayApplied())
+                .holidayPercent(dynamic.holidayPercent())
+                .subtotalAfterDynamic(subtotalAfterDynamic)
+                .groupDiscountApplied(groupApplied)
+                .groupDiscountPercent(groupDiscountPct.intValue())
+                .groupDiscountAmount(groupDiscountAmount.setScale(2, RoundingMode.HALF_UP))
+                .tierDiscountPercent(tierDiscountPct.intValue())
+                .tierDiscountAmount(tierDiscountAmount.setScale(2, RoundingMode.HALF_UP))
+                .finalPrice(finalPrice)
+                .build();
+    }
+
+    // ── Dynamic pricing helpers ───────────────────────────────────────────────
+
+    /**
+     * Result of evaluating the template's dynamic pricing JSON for a specific date.
+     *
+     * Only one of weekendApplied / holidayApplied will be true at a time
+     * (holiday takes priority). Both are false when no dynamic pricing is configured
+     * or neither condition applies for the given date.
+     */
+    private record DynamicPricingResult(
+            boolean weekendApplied,
+            double  rawWeekendMultiplier,   // 1.0 when not applied
+            boolean holidayApplied,
+            double  rawHolidayMultiplier    // 1.0 when not applied
+    ) {
+        /** Weekend multiplier capped at 5.0. */
+        double safeWeekendMultiplier() { return Math.min(rawWeekendMultiplier, 5.0); }
+
+        /** Holiday multiplier capped at 5.0. */
+        double safeHolidayMultiplier() { return Math.min(rawHolidayMultiplier, 5.0); }
+
+        /**
+         * Weekend surcharge as a whole-number percent (e.g. 20 for +20%).
+         * 0 when weekendApplied = false.
+         */
+        int weekendPercent() {
+            if (!weekendApplied) return 0;
+            return (int) Math.round((safeWeekendMultiplier() - 1.0) * 100);
+        }
+
+        /**
+         * Holiday surcharge as a whole-number percent (e.g. 25 for +25%).
+         * 0 when holidayApplied = false.
+         */
+        int holidayPercent() {
+            if (!holidayApplied) return 0;
+            return (int) Math.round((safeHolidayMultiplier() - 1.0) * 100);
+        }
+    }
+
+    /**
+     * Parses the template's dynamic pricing JSON and evaluates which rule applies
+     * for the given tour date.  Returns a result object that callers can inspect
+     * without re-parsing JSON.
      *
      * JSON shape (stored in {@code TourTemplate.dynamicPricing}):
      * <pre>
@@ -278,13 +419,15 @@ public class PricingService {
      * }
      * </pre>
      *
-     * Legacy frontend may send the multiplier as a percent (e.g., 120 = 1.2).
-     * Values > 5 are treated as percentages and divided by 100 before use.
-     * All multipliers are capped at 5.0 as a safety rail.
+     * Legacy support: values > 5 are treated as percent (e.g. 120 → 1.20).
+     * Multipliers are capped at 5.0 as a safety rail.
+     * Holiday takes priority over weekend when both apply on the same date.
      */
-    private BigDecimal applyDynamicPricing(BigDecimal price, TourTemplate template, Instant tourDate) {
+    private DynamicPricingResult parseDynamicPricing(TourTemplate template, Instant tourDate) {
         String json = template.getDynamicPricing();
-        if (json == null || json.isEmpty()) return price;
+        // No-op result when no dynamic pricing configured
+        DynamicPricingResult none = new DynamicPricingResult(false, 1.0, false, 1.0);
+        if (json == null || json.isEmpty()) return none;
 
         try {
             JsonNode root = objectMapper.readTree(json);
@@ -300,15 +443,13 @@ public class PricingService {
             int month = zdt.getMonthValue();
             int day   = zdt.getDayOfMonth();
 
-            // Holidays take priority over weekends
+            // Holiday takes priority over weekend
             if (isFixedLebaneseHoliday(month, day) && holidayMultiplier != 1.0) {
-                double safe = Math.min(holidayMultiplier, 5.0);
-                return price.multiply(BigDecimal.valueOf(safe));
+                return new DynamicPricingResult(false, 1.0, true, holidayMultiplier);
             }
 
             if ((dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY) && weekendMultiplier != 1.0) {
-                double safe = Math.min(weekendMultiplier, 5.0);
-                return price.multiply(BigDecimal.valueOf(safe));
+                return new DynamicPricingResult(true, weekendMultiplier, false, 1.0);
             }
 
         } catch (Exception e) {
@@ -316,6 +457,21 @@ public class PricingService {
                     template.getId(), e.getMessage());
         }
 
+        return none;
+    }
+
+    /**
+     * Applies the dynamic pricing result to a price (used by calculatePrice).
+     * Delegates to parseDynamicPricing to avoid duplicating JSON parsing logic.
+     */
+    private BigDecimal applyDynamicPricing(BigDecimal price, TourTemplate template, Instant tourDate) {
+        DynamicPricingResult result = parseDynamicPricing(template, tourDate);
+        if (result.holidayApplied()) {
+            return price.multiply(BigDecimal.valueOf(result.safeHolidayMultiplier()));
+        }
+        if (result.weekendApplied()) {
+            return price.multiply(BigDecimal.valueOf(result.safeWeekendMultiplier()));
+        }
         return price;
     }
 

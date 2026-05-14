@@ -213,7 +213,7 @@ export default function RouteBuilderMap({
             >
               <Popup>
                 <div className="p-2.5 min-w-[150px]">
-                  <p className="font-bold text-[10px] text-primary-light dark:text-primary-dark uppercase tracking-[0.1em] mb-1.5">STOP {idx + 1}</p>
+                  <p className="font-bold text-[10px] text-primary-light dark:text-primary-dark capitalize tracking-[0.1em] mb-1.5">STOP {idx + 1}</p>
                   <p className="font-semibold text-theme-primary m-0 leading-tight">{stop.title || 'Untitled Stop'}</p>
                   <p className="text-[10px] text-theme-muted mt-1.5 line-clamp-2 leading-relaxed">{stop.location?.name}</p>
                   <button 
@@ -236,7 +236,7 @@ export default function RouteBuilderMap({
             <div className="flex items-center gap-3">
               <div className={`w-2.5 h-2.5 rounded-full ${isGeocoding ? 'bg-amber-500 animate-pulse' : 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]'}`} />
               <div className="flex flex-col">
-                <span className="text-[11px] font-bold text-theme-primary uppercase tracking-wider leading-none mb-1">
+                <span className="text-[11px] font-bold text-theme-primary capitalize tracking-normal leading-none mb-1">
                   {isGeocoding ? 'Capturing Point...' : 'Route Builder Active'}
                 </span>
                 <span className="text-[10px] text-theme-muted font-medium">
@@ -249,7 +249,7 @@ export default function RouteBuilderMap({
 
         <div className="bg-primary-light text-white px-3 py-1.5 rounded-xl shadow-xl border border-primary-light dark:border-primary-dark/50 flex items-center gap-2 pointer-events-auto translate-y-1">
           <Navigation className="w-3.5 h-3.5" />
-          <span className="text-[10px] font-bold uppercase tracking-wider">Live Trail</span>
+          <span className="text-[10px] font-bold capitalize tracking-normal">Live Trail</span>
         </div>
       </div>
 

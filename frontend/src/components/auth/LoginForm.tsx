@@ -385,7 +385,7 @@ export default function LoginForm() {
  <div className="absolute inset-0 flex items-center">
  <div className="w-full border-t border-theme" />
  </div>
- <div className="relative flex justify-center text-[10px] tracking-widest uppercase font-bold">
+ <div className="relative flex justify-center text-[10px] tracking-normal capitalize font-bold">
  <span className="px-4 surface-base sm:surface-card text-theme-muted">
  Or connect with
  </span>

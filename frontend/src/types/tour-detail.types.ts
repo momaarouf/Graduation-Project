@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // TOUR DETAIL TYPES - PHASE 1, CARD 7
 // ============================================================================
 // LOCATION: /frontend/src/types/tour-detail.types.ts
@@ -303,6 +303,7 @@ export interface TourDetail {
 export interface TourHeroProps {
  id: number
  title: string
+ category?: string
  location: string
  country: Country
  mainImage: string

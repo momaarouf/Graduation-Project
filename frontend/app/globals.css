@@ -673,3 +673,7 @@
     padding-bottom: env(safe-area-inset-bottom, 0.5rem);
   }
 
+
+@layer utilities {
+  .italic { font-style: normal !important; }
+}

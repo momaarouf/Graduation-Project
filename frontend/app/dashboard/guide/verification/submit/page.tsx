@@ -161,7 +161,7 @@ export default function GuideVerificationSubmitPage() {
  <Upload className="w-8 h-8 text-theme-muted mb-2" />
  )}
  <p className="text-sm text-theme-muted ">
- {formData.idFrontImage ? <span className="text-success-green font-bold uppercase tracking-widest text-[10px]">Front uploaded</span> : 'Click to upload front'}
+ {formData.idFrontImage ? <span className="text-success-green font-bold capitalize tracking-normal text-[10px]">Front uploaded</span> : 'Click to upload front'}
  </p>
  </div>
  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload('idFrontImage', e)} />
@@ -190,7 +190,7 @@ export default function GuideVerificationSubmitPage() {
  <Upload className="w-8 h-8 text-theme-muted mb-2" />
  )}
  <p className="text-sm text-theme-muted ">
- {formData.idBackImage ? <span className="text-success-green font-bold uppercase tracking-widest text-[10px]">Back uploaded</span> : 'Click to upload back'}
+ {formData.idBackImage ? <span className="text-success-green font-bold capitalize tracking-normal text-[10px]">Back uploaded</span> : 'Click to upload back'}
  </p>
  </div>
  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload('idBackImage', e)} />
@@ -220,7 +220,7 @@ export default function GuideVerificationSubmitPage() {
  <Upload className="w-8 h-8 text-theme-muted mb-2" />
  )}
  <p className="text-sm text-theme-muted ">
- {formData.selfieImage ? <span className="text-success-green font-bold uppercase tracking-widest text-[10px]">Selfie uploaded</span> : 'Click to upload selfie'}
+ {formData.selfieImage ? <span className="text-success-green font-bold capitalize tracking-normal text-[10px]">Selfie uploaded</span> : 'Click to upload selfie'}
  </p>
  </div>
  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload('selfieImage', e)} />

@@ -97,7 +97,7 @@ export default function HowItWorksFlow() {
  <div className="relative p-1.5 surface-section rounded-[2rem] border border-theme flex gap-2 shadow-2xl">
  <button
  onClick={() => setRole("traveler")}
- className={`relative px-10 py-4 rounded-[1.5rem] text-sm font-bold tracking-widest transition-all duration-500 ${
+ className={`relative px-10 py-4 rounded-[1.5rem] text-sm font-bold tracking-normal transition-all duration-500 ${
  role === "traveler" ? "text-white" : "text-theme-secondary hover:text-theme-primary"
  }`}
  >
@@ -108,11 +108,11 @@ export default function HowItWorksFlow() {
  transition={{ type: "spring", bounce: 0.25, duration: 0.6 }}
  />
  )}
- <span className="relative z-10 uppercase">For Travelers</span>
+ <span className="relative z-10 capitalize">For Travelers</span>
  </button>
  <button
  onClick={() => setRole("guide")}
- className={`relative px-10 py-4 rounded-[1.5rem] text-sm font-bold tracking-widest transition-all duration-500 ${
+ className={`relative px-10 py-4 rounded-[1.5rem] text-sm font-bold tracking-normal transition-all duration-500 ${
  role === "guide" ? "text-white" : "text-theme-secondary hover:text-theme-primary"
  }`}
  >
@@ -123,7 +123,7 @@ export default function HowItWorksFlow() {
  transition={{ type: "spring", bounce: 0.25, duration: 0.6 }}
  />
  )}
- <span className="relative z-10 uppercase">For Guides</span>
+ <span className="relative z-10 capitalize">For Guides</span>
  </button>
  </div>
  </div>

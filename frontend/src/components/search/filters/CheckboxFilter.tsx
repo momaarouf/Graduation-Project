@@ -214,7 +214,7 @@ export default function CheckboxFilter<T = string>({
  {hasMore && (
  <button
  onClick={() => setShowAll(!showAll)}
- className="mt-3 px-3 py-1 text-[11px] font-bold uppercase tracking-wider bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark rounded-none hover:text-primary-light transition-all transition-all duration-300"
+ className="mt-3 px-3 py-1 text-[11px] font-bold capitalize tracking-normal bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark rounded-none hover:text-primary-light transition-all transition-all duration-300"
  >
  {showAll ? 'Show less' : `+ ${filteredOptions.length - limit} more`}
  </button>

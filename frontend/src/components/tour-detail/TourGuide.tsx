@@ -129,7 +129,7 @@ export default function TourGuide({ guide, tourId, tourTitle }: any) {
  <Globe className="w-3.5 h-3.5 text-theme-muted" />
  <div className="flex gap-1.5">
  {stats.languages.slice(0, 3).map((lang: any, i: number) => (
- <span key={i} className="text-[10px] uppercase font-bold tracking-widest text-theme-muted surface-section border border-theme px-3 py-1 rounded-lg shadow-sm">
+ <span key={i} className="text-[10px] capitalize font-bold tracking-normal text-theme-muted surface-section border border-theme px-3 py-1 rounded-lg shadow-sm">
  {typeof lang === 'string' ? lang : lang.language}
  </span>
  ))}

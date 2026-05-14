@@ -248,7 +248,7 @@ export default function GuideDashboardLayout({
   <div className="w-8 h-8 bg-primary-light/10 rounded-lg flex items-center justify-center">
   <LayoutDashboard className="w-4 h-4 text-primary-light dark:text-primary-dark" />
   </div>
-  <h1 className="font-bold text-[10px] uppercase tracking-[0.2em] text-theme-primary">Guide Hub</h1>
+  <h1 className="font-bold text-[10px] capitalize tracking-[0.2em] text-theme-primary">Guide Hub</h1>
   </div>
   <div className="flex items-center gap-2">
   <ThemeToggle />
@@ -345,8 +345,8 @@ export default function GuideDashboardLayout({
   <LayoutDashboard className="w-5 h-5" />
   </div>
   <div>
-  <h2 className="font-bold text-xs uppercase tracking-widest text-theme-primary">Guide</h2>
-  <p className="text-[9px] font-bold text-theme-muted uppercase tracking-tighter">Control Center</p>
+  <h2 className="font-bold text-xs capitalize tracking-normal text-theme-primary">Guide</h2>
+  <p className="text-[9px] font-bold text-theme-muted capitalize tracking-tighter">Control Center</p>
   </div>
   </div>
   <button
@@ -363,7 +363,7 @@ export default function GuideDashboardLayout({
   <Link
   href={MARKETPLACE_LINK.href}
   onClick={() => setIsSidebarOpen(false)}
-  className="flex items-center gap-4 px-4 py-2.5 rounded-2xl transition-all active:scale-[0.98] text-primary-light dark:text-primary-dark bg-primary-light/5 font-bold text-[11px] uppercase tracking-wider border border-primary-light/10"
+  className="flex items-center gap-4 px-4 py-2.5 rounded-2xl transition-all active:scale-[0.98] text-primary-light dark:text-primary-dark bg-primary-light/5 font-bold text-[11px] capitalize tracking-normal border border-primary-light/10"
   >
   <Globe className="w-4 h-4" />
   <span>{MARKETPLACE_LINK.label}</span>

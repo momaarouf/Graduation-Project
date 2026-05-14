@@ -107,7 +107,7 @@ export default function TourNotFound() {
  SUGGESTED TOURS
  ======================================== */}
  <div className="space-y-4 pt-4">
- <p className="text-sm font-medium text-theme-muted uppercase tracking-wider">
+ <p className="text-sm font-medium text-theme-muted capitalize tracking-normal">
  Discover instead
  </p>
 

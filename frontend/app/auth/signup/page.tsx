@@ -168,7 +168,7 @@ function SignupContent() {
  <motion.div
  initial={{ opacity: 0, scale: 0.9 }}
  animate={{ opacity: 1, scale: 1 }}
- className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-[10px] font-bold uppercase tracking-widest mb-4"
+ className="inline-flex items-center gap-2 px-3 py-1 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-[10px] font-bold capitalize tracking-normal mb-4"
  >
  <Sparkles className="w-3 h-3" />
  Join our community
@@ -220,7 +220,7 @@ function SignupContent() {
  </Link>
  </p>
 
- <div className="mt-8 flex justify-center gap-6 text-[10px] font-bold uppercase tracking-widest text-theme-muted">
+ <div className="mt-8 flex justify-center gap-6 text-[10px] font-bold capitalize tracking-normal text-theme-muted">
  <span className="flex items-center gap-1.5">
  <Shield className="w-3 h-3" />
  Secure SSL

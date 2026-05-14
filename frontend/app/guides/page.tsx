@@ -83,7 +83,7 @@ export default function GuideDirectoryPage() {
  >
  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100/50 border border-blue-200 dark:border-blue-800/50 mb-6 font-sans">
  <Globe className="w-4 h-4 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
- <span className="text-[10px] font-bold tracking-widest text-blue-700 dark:text-blue-300 uppercase">
+ <span className="text-[10px] font-bold tracking-normal text-blue-700 dark:text-blue-300 capitalize">
  Our Experts
  </span>
  </div>
@@ -204,7 +204,7 @@ export default function GuideDirectoryPage() {
  <div className="relative lg:w-1/3 flex justify-center">
  <div className="p-4 rounded-3xl surface-card  border border-white/20 shadow-2xl rotate-3">
  <ShieldCheck className="w-24 h-24 text-blue-200 mb-4" />
- <div className="text-xs font-bold tracking-widest uppercase opacity-60 mb-2">SafariHub Certified</div>
+ <div className="text-xs font-bold tracking-normal capitalize opacity-60 mb-2">SafariHub Certified</div>
  <div className="text-xl font-bold">Verification Engine</div>
  </div>
  </div>

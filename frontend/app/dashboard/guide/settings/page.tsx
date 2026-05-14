@@ -39,6 +39,7 @@ import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import { passwordChange, updateNotificationPreferences } from '@/src/lib/api/auth'
+import SettingsSkeleton from '@/src/components/dashboard/SettingsSkeleton'
 
 // ============================================================================
 // PASSWORD STRENGTH INDICATOR
@@ -89,7 +90,11 @@ const TIMEZONES = [
 
 export default function GuideSettingsPage() {
  const router = useRouter()
- const { user, forgotPassword } = useAuth()
+ const { user, forgotPassword, isLoading } = useAuth()
+ 
+ if (isLoading || !user) {
+   return <SettingsSkeleton />
+ }
  
  const [activeTab, setActiveTab] = useState<'account' | 'notifications' | 'security'>('account')
  
@@ -189,10 +194,10 @@ export default function GuideSettingsPage() {
  <ChevronLeft className="w-5 h-5" />
  </Link>
  <div>
- <h1 className="text-xl sm:text-3xl font-bold text-theme-primary mb-0.5 tracking-tight uppercase">
+ <h1 className="text-xl sm:text-3xl font-bold text-theme-primary mb-0.5 tracking-tight capitalize">
  Settings
  </h1>
- <p className="text-[10px] sm:text-sm text-theme-secondary font-bold uppercase tracking-widest opacity-70">
+ <p className="text-[10px] sm:text-sm text-theme-secondary font-bold capitalize tracking-normal opacity-70">
  Account & Platform Preferences
  </p>
  </div>
@@ -207,7 +212,7 @@ export default function GuideSettingsPage() {
  <button
  key={tab}
  onClick={() => setActiveTab(tab as any)}
- className={`flex-1 px-2 sm:px-4 py-4 text-[9px] sm:text-xs font-bold uppercase tracking-[0.2em] transition-all relative ${
+ className={`flex-1 px-2 sm:px-4 py-4 text-[9px] sm:text-xs font-bold capitalize tracking-[0.2em] transition-all relative ${
  activeTab === tab
  ? 'text-primary-light dark:text-primary-dark'
  : 'text-theme-muted hover:text-theme-secondary'
@@ -231,14 +236,14 @@ export default function GuideSettingsPage() {
  <div className="space-y-8">
  {/* Password Management */}
  <div>
- <h2 className="text-[9px] sm:text-[10px] font-bold text-theme-secondary uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
+ <h2 className="text-[9px] sm:text-[10px] font-bold text-theme-secondary capitalize tracking-[0.3em] mb-6 flex items-center gap-2">
  <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
  Security Credentials
  </h2>
  
  <div className="space-y-5">
  <div>
- <label className="block text-[10px] font-bold uppercase tracking-widest text-theme-muted mb-2 ml-1">Current Password</label>
+ <label className="block text-[10px] font-bold capitalize tracking-normal text-theme-muted mb-2 ml-1">Current Password</label>
  <div className="relative">
  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
  <input
@@ -256,14 +261,14 @@ export default function GuideSettingsPage() {
  </div>
  <button
  onClick={handleForgotPassword}
- className="mt-2 text-[10px] text-primary-light dark:text-primary-dark hover:opacity-80 font-bold uppercase tracking-widest ml-1"
+ className="mt-2 text-[10px] text-primary-light dark:text-primary-dark hover:opacity-80 font-bold capitalize tracking-normal ml-1"
  >
  Forgot Password?
  </button>
  </div>
 
  <div>
- <label className="block text-[10px] font-bold uppercase tracking-widest text-theme-muted mb-2 ml-1">New Password</label>
+ <label className="block text-[10px] font-bold capitalize tracking-normal text-theme-muted mb-2 ml-1">New Password</label>
  <div className="relative">
  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
  <input
@@ -285,14 +290,14 @@ export default function GuideSettingsPage() {
  <div className="flex-1 h-1.5 surface-section rounded-full overflow-hidden border border-theme">
  <div className={`h-full ${passwordStrength.color} transition-all duration-500`} style={{ width: `${passwordStrength.score}%` }} />
  </div>
- <span className="text-[9px] font-bold uppercase tracking-widest text-theme-secondary whitespace-nowrap">{passwordStrength.label}</span>
+ <span className="text-[9px] font-bold capitalize tracking-normal text-theme-secondary whitespace-nowrap">{passwordStrength.label}</span>
  </div>
  </div>
  )}
  </div>
 
  <div>
- <label className="block text-[10px] font-bold uppercase tracking-widest text-theme-muted mb-2 ml-1">Confirm New Password</label>
+ <label className="block text-[10px] font-bold capitalize tracking-normal text-theme-muted mb-2 ml-1">Confirm New Password</label>
  <div className="relative">
  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
  <input
@@ -318,7 +323,7 @@ export default function GuideSettingsPage() {
  <button
  onClick={handleSavePassword}
  disabled={isSaving || !currentPassword || !newPassword || !passwordsMatch}
- className="w-full sm:w-auto px-8 py-3.5 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
+ className="w-full sm:w-auto px-8 py-3.5 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold capitalize tracking-[0.2em] rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
  >
  {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Updating...</> : <><Save className="w-4 h-4" /> Update Password</>}
  </button>
@@ -327,14 +332,14 @@ export default function GuideSettingsPage() {
 
  {/* Regional Options */}
  <div className="pt-8 border-t border-theme">
- <h2 className="text-[9px] sm:text-[10px] font-bold text-theme-secondary uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
+ <h2 className="text-[9px] sm:text-[10px] font-bold text-theme-secondary capitalize tracking-[0.3em] mb-6 flex items-center gap-2">
  <div className="w-1.5 h-1.5 rounded-full bg-primary-light" />
  Regional Preferences
  </h2>
  
  <div className="space-y-6">
  <div>
- <label className="block text-[10px] font-bold uppercase tracking-widest text-theme-muted mb-3 ml-1">System Language</label>
+ <label className="block text-[10px] font-bold capitalize tracking-normal text-theme-muted mb-3 ml-1">System Language</label>
  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
  {LANGUAGES.map((lang) => (
  <button
@@ -343,14 +348,14 @@ export default function GuideSettingsPage() {
  className={`p-4 rounded-xl border text-center transition-all duration-300 ${language === lang.code ? 'bg-primary-light text-white border-primary-light shadow-xl' : 'surface-section text-theme-secondary border-theme hover:border-primary-light'}`}
  >
  <span className="text-2xl mb-2 block">{lang.flag}</span>
- <span className="text-[9px] font-bold uppercase tracking-widest block">{lang.name}</span>
+ <span className="text-[9px] font-bold capitalize tracking-normal block">{lang.name}</span>
  </button>
  ))}
  </div>
  </div>
 
  <div>
- <label className="block text-[10px] font-bold uppercase tracking-widest text-theme-muted mb-2 ml-1">Local Timezone</label>
+ <label className="block text-[10px] font-bold capitalize tracking-normal text-theme-muted mb-2 ml-1">Local Timezone</label>
  <div className="relative">
  <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
  <select
@@ -366,7 +371,7 @@ export default function GuideSettingsPage() {
  <button
  onClick={handleSavePreferences}
  disabled={isSaving}
- className="w-full sm:w-auto px-8 py-3.5 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
+ className="w-full sm:w-auto px-8 py-3.5 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold capitalize tracking-[0.2em] rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
  >
  {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : <><Save className="w-4 h-4" /> Save Preferences</>}
  </button>
@@ -377,7 +382,7 @@ export default function GuideSettingsPage() {
 
  {activeTab === 'notifications' && (
  <div className="space-y-8">
- <h2 className="text-[9px] sm:text-[10px] font-bold text-theme-secondary uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
+ <h2 className="text-[9px] sm:text-[10px] font-bold text-theme-secondary capitalize tracking-[0.3em] mb-6 flex items-center gap-2">
  <div className="w-1.5 h-1.5 rounded-full bg-accent-light dark:bg-accent-dark" />
  Notification Ecosystem
  </h2>
@@ -409,7 +414,7 @@ export default function GuideSettingsPage() {
  <button
  onClick={handleSavePreferences}
  disabled={isSaving}
- className="w-full sm:w-auto px-8 py-3.5 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 mt-4"
+ className="w-full sm:w-auto px-8 py-3.5 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold capitalize tracking-[0.2em] rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 mt-4"
  >
  {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : <><Save className="w-4 h-4" /> Save Settings</>}
  </button>
@@ -428,23 +433,23 @@ export default function GuideSettingsPage() {
  <div className="min-w-0">
  <h3 className="text-sm sm:text-base font-bold text-theme-primary mb-1 tracking-tight">Two-Factor Authentication</h3>
  <p className="text-[10px] sm:text-xs text-theme-secondary mb-5 leading-relaxed font-bold opacity-80">Add an extra layer of defense. Requires a secure code from your mobile device to sign in.</p>
- <button className="px-5 py-2 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all">Enable 2FA</button>
+ <button className="px-5 py-2 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold capitalize tracking-normal rounded-lg transition-all">Enable 2FA</button>
  </div>
  </div>
  </div>
 
  <div className="p-6 sm:p-8 bg-red-500/5 border border-red-500/20 rounded-2xl sm:rounded-3xl">
- <h3 className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+ <h3 className="text-[10px] font-bold text-red-600 dark:text-red-400 capitalize tracking-[0.3em] mb-4 flex items-center gap-2">
  <Trash2 className="w-4 h-4" />
  Danger Zone
  </h3>
  <p className="text-[10px] sm:text-xs text-theme-secondary mb-6 leading-relaxed font-bold opacity-80">Deleting your account will permanently wipe all tours, bookings, and earnings history. This action cannot be undone.</p>
 
  {!showDeleteConfirm ? (
- <button onClick={() => setShowDeleteConfirm(true)} className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all shadow-md">Delete Account</button>
+ <button onClick={() => setShowDeleteConfirm(true)} className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold capitalize tracking-normal rounded-lg transition-all shadow-md">Delete Account</button>
  ) : (
  <div className="space-y-4">
- <p className="text-[11px] font-bold text-red-600 dark:text-red-400 uppercase tracking-widest">Type <span className="font-mono bg-red-600/10 px-2 py-0.5 rounded text-xs">DELETE</span> to confirm:</p>
+ <p className="text-[11px] font-bold text-red-600 dark:text-red-400 capitalize tracking-normal">Type <span className="font-mono bg-red-600/10 px-2 py-0.5 rounded text-xs">DELETE</span> to confirm:</p>
  <input
  type="text"
  value={deleteText}
@@ -453,10 +458,10 @@ export default function GuideSettingsPage() {
  placeholder="DELETE"
  />
  <div className="flex flex-col sm:flex-row gap-2">
- <button onClick={handleDeleteAccount} disabled={deleteText !== 'DELETE' || isDeleting} className="order-1 sm:order-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg">
+ <button onClick={handleDeleteAccount} disabled={deleteText !== 'DELETE' || isDeleting} className="order-1 sm:order-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold capitalize tracking-normal rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg">
  {isDeleting ? <><Loader2 className="w-4 h-4 animate-spin" /> Deleting...</> : <>Confirm Permanent Deletion</>}
  </button>
- <button onClick={() => { setShowDeleteConfirm(false); setDeleteText(''); }} className="order-2 sm:order-1 px-6 py-3 surface-section text-theme-muted hover:text-theme-primary text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all border border-theme">Cancel</button>
+ <button onClick={() => { setShowDeleteConfirm(false); setDeleteText(''); }} className="order-2 sm:order-1 px-6 py-3 surface-section text-theme-muted hover:text-theme-primary text-[10px] font-bold capitalize tracking-normal rounded-xl transition-all border border-theme">Cancel</button>
  </div>
  </div>
  )}

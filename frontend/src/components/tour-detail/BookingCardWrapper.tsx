@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
@@ -97,14 +97,16 @@ export default function BookingCardWrapper({
  // Map real occurrences to the format BookingCard expects
  // Stabilize with useMemo to avoid redundant effect triggers in child
  const upcomingDates = useMemo(() => {
- return (occurrences || []).map((occ: any) => ({
- id: occ.id || occ.occurrenceId,
- date: occ.startTimeUtc || occ.startTime, // Support both real API and mock
- availableSpots: occ.availableSeats ?? occ.availableSpots,
- priceOverride: occ.priceOverride,
- waitlistCount: occ.waitlistCount || 0
- }))
- }, [occurrences])
+  return (occurrences || []).map((occ: any) => ({
+   id: occ.id || occ.occurrenceId,
+   date: occ.startTimeUtc || occ.startTime, // Support both real API and mock
+   availableSpots: occ.availableSeats ?? occ.availableSpots,
+   priceOverride: occ.priceOverride,
+   waitlistCount: occ.waitlistCount || 0,
+   // Required by BookingCard for the server price-preview API call
+   templateId: occ.templateId || Number(tourId)
+  }))
+ }, [occurrences, tourId])
 
  const handleBookNow = async (date: string, people: number, waiverSigned: boolean) => {
  if (!user) {

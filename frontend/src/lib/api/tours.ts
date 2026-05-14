@@ -1,5 +1,3 @@
-// src/lib/api/tours.ts
-
 import apiClient from '@/src/lib/api/client'
 import { cache } from 'react'
 import {
@@ -25,7 +23,8 @@ import {
  type ToggleHelpfulResponse,
  type TourRouteResponse,
  type GetTourReviewsParams,
- type PaginatedResponse
+ type PaginatedResponse,
+ type PricePreviewResponse
 } from '@/src/lib/types/tour.types'
 
 export type {
@@ -51,7 +50,8 @@ export type {
  ToggleHelpfulResponse,
  TourRouteResponse,
  GetTourReviewsParams,
- PaginatedResponse
+ PaginatedResponse,
+ PricePreviewResponse
 }
 import { GuideProfileResponse } from '@/src/lib/types/guide.types'
 
@@ -167,6 +167,20 @@ export const getPublicTourOccurrences = (id: number) =>
 /** Get ordered waypoints (trail) for a tour's route */
 export const getTourRoute = (id: number | string) =>
  apiClient.get<TourRouteResponse>(`/api/public/tours/${id}/route`).then(r => r.data)
+
+/**
+ * Get a server-computed price breakdown for one occurrence + people count.
+ * No auth required for guests; authenticated travelers get their loyalty discount included.
+ *
+ * @param tourId       - the tour template ID
+ * @param occurrenceId - the specific scheduled run
+ * @param peopleCount  - number of travelers (min 1)
+ */
+export const getPricePreview = (tourId: number | string, occurrenceId: number | string, peopleCount: number) =>
+ apiClient.get<PricePreviewResponse>(
+  `/api/public/tours/${tourId}/occurrences/${occurrenceId}/price-preview`,
+  { params: { peopleCount } }
+ ).then(r => r.data)
 
 /** Radius search (near me) */
 export const getNearbyTours = (lat: number, lng: number, radiusKm: number) =>

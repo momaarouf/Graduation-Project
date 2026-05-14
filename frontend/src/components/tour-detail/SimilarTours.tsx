@@ -83,7 +83,7 @@ export default async function SimilarTours({
         </div>
         <Link 
           href="/tours" 
-          className="flex items-center gap-2 text-[10px] font-bold text-primary-light dark:text-primary-dark uppercase tracking-widest hover:gap-3 transition-all group pb-1"
+          className="flex items-center gap-2 text-[10px] font-bold text-primary-light dark:text-primary-dark capitalize tracking-normal hover:gap-3 transition-all group pb-1"
         >
           View all
           <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -97,7 +97,7 @@ export default async function SimilarTours({
       <div className="sm:hidden mt-2">
         <Link
           href="/tours"
-          className="w-full flex items-center justify-center gap-2 py-4 surface-card rounded-xl text-[10px] font-bold text-theme-primary uppercase tracking-widest border border-theme shadow-sm active:scale-[0.98] transition-all"
+          className="w-full flex items-center justify-center gap-2 py-4 surface-card rounded-xl text-[10px] font-bold text-theme-primary capitalize tracking-normal border border-theme shadow-sm active:scale-[0.98] transition-all"
         >
           View all experiences
           <ChevronRight className="w-4 h-4" />

@@ -57,8 +57,8 @@ public class SecurityConfig {
                         // /me must be authenticated
                         .requestMatchers("/api/auth/me").authenticated()
 
-                        // Public tour browsing — no login required
-                        .requestMatchers("/api/public/**", "/api/reviews/**").permitAll()
+                        // Public tour browsing & support — no login required
+                        .requestMatchers("/api/public/**", "/api/reviews/**", "/api/support/**").permitAll()
 
                         // ── Payment endpoints ─────────────────────────────────
                         // Stripe calls /webhook directly — NO JWT, verified by Stripe-Signature header

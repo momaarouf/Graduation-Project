@@ -52,7 +52,7 @@ const StatusBadge = ({ status }: { status: BookingStatus }) => {
   const Icon = cfg.icon
 
   return (
-    <span className={`badge-base ${cfg.className} gap-1 px-2 py-0.5 text-[10px] uppercase tracking-wider`}>
+    <span className={`badge-base ${cfg.className} gap-1 px-2 py-0.5 text-[10px] capitalize tracking-normal`}>
       <Icon className="w-3 h-3" />
       {cfg.label}
     </span>
@@ -87,7 +87,7 @@ const StatCard = ({ icon: Icon, label, value, color }: StatCardProps) => {
       </div>
       <div className="space-y-0.5 sm:space-y-1">
         <div className="text-lg sm:text-2xl font-bold text-theme-primary leading-tight">{value}</div>
-        <div className="text-[9px] sm:text-[10px] font-bold text-theme-muted uppercase tracking-widest">{label}</div>
+        <div className="text-[9px] sm:text-[10px] font-bold text-theme-muted capitalize tracking-normal">{label}</div>
       </div>
     </div>
   )
@@ -125,14 +125,14 @@ const BookingCard = ({ booking, onConfirm, onReject, isActionLoading }: BookingC
         {/* Row 1: Title & Price */}
         <div className="flex justify-between items-start gap-3 mb-2">
           <div className="min-w-0 flex-1">
-            <h3 className="font-extrabold text-[15px] sm:text-base text-theme-primary truncate uppercase tracking-tight">
+            <h3 className="font-extrabold text-[15px] sm:text-base text-theme-primary truncate capitalize tracking-tight">
               {booking.tourTitle}
             </h3>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-[10px] font-bold text-theme-muted bg-surface-base px-1.5 py-0.5 rounded border border-theme">
                 #{booking.id.toString().padStart(4, '0')}
               </span>
-              <span className="text-[10px] text-theme-muted flex items-center gap-1 font-bold uppercase tracking-widest">
+              <span className="text-[10px] text-theme-muted flex items-center gap-1 font-bold capitalize tracking-normal">
                 <Calendar className="w-3 h-3 text-theme-secondary" />
                 {formatDate(booking.startTimeUtc)}
               </span>
@@ -157,17 +157,17 @@ const BookingCard = ({ booking, onConfirm, onReject, isActionLoading }: BookingC
                   {booking.traveler.fullName?.charAt(0) || 'T'}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-extrabold text-theme-primary truncate max-w-[100px] sm:max-w-none uppercase tracking-tight">
+                  <p className="text-xs font-extrabold text-theme-primary truncate max-w-[100px] sm:max-w-none capitalize tracking-tight">
                     {booking.traveler.fullName}
                   </p>
-                  <div className="flex items-center gap-1.5 text-[9px] text-theme-muted uppercase font-bold tracking-widest">
+                  <div className="flex items-center gap-1.5 text-[9px] text-theme-muted capitalize font-bold tracking-normal">
                     <Users className="w-2.5 h-2.5 text-theme-secondary" />
                     {booking.peopleCount} {booking.peopleCount === 1 ? 'PAX' : 'PAX'}
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="text-[10px] font-bold text-theme-muted uppercase tracking-widest">Traveler Hidden</div>
+              <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal">Traveler Hidden</div>
             )}
           </div>
 
@@ -195,7 +195,7 @@ const BookingCard = ({ booking, onConfirm, onReject, isActionLoading }: BookingC
                 </button>
                 <button
                   onClick={() => onConfirm(booking.id)}
-                  className="h-8 px-4 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-lg text-[10px] font-bold uppercase tracking-widest active:scale-95 shadow-sm shadow-emerald-500/20"
+                  className="h-8 px-4 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-lg text-[10px] font-bold capitalize tracking-normal active:scale-95 shadow-sm shadow-emerald-500/20"
                 >
                   Confirm
                 </button>
@@ -232,14 +232,14 @@ const WaitlistCard = ({ entry }: WaitlistCardProps) => {
       <div className="p-3.5 sm:p-5">
         <div className="flex justify-between items-start gap-3 mb-2">
           <div className="min-w-0 flex-1">
-            <h3 className="font-extrabold text-[15px] sm:text-base text-theme-primary truncate uppercase tracking-tight">
+            <h3 className="font-extrabold text-[15px] sm:text-base text-theme-primary truncate capitalize tracking-tight">
               {entry.tourTitle}
             </h3>
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-[10px] font-bold badge-primary px-2 py-0.5 rounded-full uppercase tracking-widest">
+              <span className="text-[10px] font-bold badge-primary px-2 py-0.5 rounded-full capitalize tracking-normal">
                 POS: {entry.position}
               </span>
-              <span className="text-[10px] text-theme-muted flex items-center gap-1 font-bold uppercase tracking-widest">
+              <span className="text-[10px] text-theme-muted flex items-center gap-1 font-bold capitalize tracking-normal">
                 <Calendar className="w-3 h-3 text-theme-secondary" />
                 {formatDate(entry.startTimeUtc)}
               </span>
@@ -247,10 +247,10 @@ const WaitlistCard = ({ entry }: WaitlistCardProps) => {
           </div>
           <div className="text-right shrink-0">
             <div className="text-base sm:text-lg font-extrabold text-theme-primary leading-none tracking-tight">
-              {entry.peopleCount} <span className="text-[9px] text-theme-muted uppercase font-bold tracking-widest">Seats</span>
+              {entry.peopleCount} <span className="text-[9px] text-theme-muted capitalize font-bold tracking-normal">Seats</span>
             </div>
             <div className="mt-2 flex justify-end">
-              <span className="badge-base badge-neutral gap-1 px-2 py-0.5 text-[10px] uppercase tracking-wider">
+              <span className="badge-base badge-neutral gap-1 px-2 py-0.5 text-[10px] capitalize tracking-normal">
                 Waiting
               </span>
             </div>
@@ -263,7 +263,7 @@ const WaitlistCard = ({ entry }: WaitlistCardProps) => {
               {entry.travelerName?.charAt(0) || 'T'}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-theme-primary truncate max-w-[120px]">
+              <p className="text-xs font-bold text-theme-primary truncate max-w-[120px] capitalize">
                 {entry.travelerName}
               </p>
               <p className="text-[10px] text-theme-muted truncate">{entry.travelerEmail}</p>
@@ -284,6 +284,8 @@ const WaitlistCard = ({ entry }: WaitlistCardProps) => {
 // ============================================================================
 // MAIN PAGE
 // ============================================================================
+
+import GuideBookingsSkeleton from './skeleton'
 
 export default function GuideBookingsPage() {
   const [bookings, setBookings] = React.useState<GuideBookingResponse[]>([])
@@ -391,14 +393,7 @@ export default function GuideBookingsPage() {
   const paginatedBookings = filteredBookings.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
   if (isLoading && bookings.length === 0) {
-    return (
-      <div className="pt-24 flex items-center justify-center min-h-[calc(100vh-4rem)]">
-        <div className="flex flex-col items-center gap-4">
-          <RefreshCw className="w-10 h-10 text-primary-light animate-spin" />
-          <p className="text-theme-secondary font-bold">Synchronizing bookings...</p>
-        </div>
-      </div>
-    )
+    return <GuideBookingsSkeleton />
   }
 
   return (
@@ -416,7 +411,7 @@ export default function GuideBookingsPage() {
             </div>
             <Link
               href="/dashboard/guide"
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 surface-card border border-theme text-theme-secondary font-bold rounded-xl hover:surface-section transition-all shadow-sm active:scale-95 text-[10px] uppercase tracking-widest"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 surface-card border border-theme text-theme-secondary font-bold rounded-xl hover:surface-section transition-all shadow-sm active:scale-95 text-[10px] capitalize tracking-normal"
             >
               <ChevronLeft className="w-4 h-4 text-theme-secondary" />
               Back to Dashboard
@@ -492,7 +487,7 @@ export default function GuideBookingsPage() {
           </div>
 
           <div className="mb-4 flex items-center justify-between">
-            <span className="text-[10px] font-bold text-theme-muted uppercase tracking-widest">
+            <span className="text-[10px] font-bold text-theme-muted capitalize tracking-normal">
               Showing {activeTab === 'bookings' ? filteredBookings.length : waitlistEntries.length} {activeTab}
             </span>
           </div>

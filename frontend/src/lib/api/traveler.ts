@@ -45,7 +45,7 @@ export interface LoyaltyStatusResponse {
 
 /**
  * GET /api/traveler/profile
- * Returns traveler profile stats, loyalty tier (uppercase), and completed trips.
+ * Returns traveler profile stats, loyalty tier (capitalize), and completed trips.
  */
 export const travelerGetProfile = async (): Promise<TravelerProfileResponse> => {
  const response = await apiClient.get('/api/traveler/profile');

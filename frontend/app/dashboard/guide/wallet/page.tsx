@@ -43,7 +43,7 @@ function PayoutCard({ p }: { p: PaymentResponse }) {
           </div>
           <div>
             <div className="text-sm font-bold text-theme-primary">Booking #{p.bookingId}</div>
-            <div className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Tour Settlement</div>
+            <div className="text-[10px] text-theme-muted font-bold capitalize tracking-normal">Tour Settlement</div>
           </div>
         </div>
         <div className="text-right">
@@ -55,7 +55,7 @@ function PayoutCard({ p }: { p: PaymentResponse }) {
       
       <div className="flex items-center justify-between pt-3 border-t border-theme">
         <div className="flex flex-col">
-          <span className="text-[10px] font-bold text-theme-muted uppercase tracking-widest">Date</span>
+          <span className="text-[10px] font-bold text-theme-muted capitalize tracking-normal">Date</span>
           <span className="text-xs font-bold text-theme-secondary">
             {new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit' })}
           </span>
@@ -79,6 +79,8 @@ function PayoutCard({ p }: { p: PaymentResponse }) {
     </div>
   );
 }
+
+import GuideWalletSkeleton from './skeleton'
 
 export default function GuideWalletPage() {
  const [summary, setSummary] = useState<GuideWalletResponse | null>(null)
@@ -129,16 +131,7 @@ export default function GuideWalletPage() {
  }
  }
 
-  if (isLoading && !summary) {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center surface-base">
-        <div className="flex flex-col items-center gap-4">
-          <RefreshCw className="w-10 h-10 text-primary-light animate-spin" />
-          <p className="text-sm font-bold text-theme-muted animate-pulse uppercase tracking-widest">Loading your wallet...</p>
-        </div>
-      </div>
-    )
-  }
+  if (isLoading && !summary) return <GuideWalletSkeleton />
 
   return (
     <div className="flex-1 overflow-y-auto chat-scrollbar">
@@ -217,7 +210,7 @@ export default function GuideWalletPage() {
  <div className="text-3xl font-bold text-theme-primary">
  {summary?.currency || 'USD'} {card.value.toLocaleString(undefined, { minimumFractionDigits: 2 })}
  </div>
- <div className="text-[10px] font-bold text-theme-muted uppercase tracking-widest">
+ <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal">
  {card.label}
  </div>
  </div>
@@ -245,7 +238,7 @@ export default function GuideWalletPage() {
  <h2 className="text-xl font-bold text-theme-primary">Payout Method</h2>
  <div className="flex items-center gap-2 mt-0.5">
  <div className={`w-2 h-2 rounded-full ${summary?.onboardingComplete ? 'bg-success-green' : 'bg-accent-light/10 dark:bg-accent-dark animate-pulse'}`} />
- <span className="text-xs font-bold uppercase text-theme-muted tracking-wider">
+ <span className="text-xs font-bold capitalize text-theme-muted tracking-normal">
  {summary?.onboardingComplete ? 'Connected' : 'Action Required'}
  </span>
  </div>
@@ -260,7 +253,7 @@ export default function GuideWalletPage() {
  <CreditCard className="w-4 h-4 text-success-green" />
  </div>
  <div>
- <div className="text-[10px] font-bold text-success-green uppercase tracking-widest">Connected Card</div>
+ <div className="text-[10px] font-bold text-success-green capitalize tracking-normal">Connected Card</div>
  <div className="text-sm font-bold text-theme-primary">
  {summary.payoutMethodBrand || 'Visa'} •••• {summary.payoutMethodLast4 || '4242'}
  </div>
@@ -271,7 +264,7 @@ export default function GuideWalletPage() {
  </div>
  </div>
  <div className="space-y-4 pt-4 border-t border-theme">
- <div className="flex items-center gap-2 text-[10px] font-bold text-theme-muted uppercase tracking-widest">
+ <div className="flex items-center gap-2 text-[10px] font-bold text-theme-muted capitalize tracking-normal">
  <Info className="w-3 h-3" />
  Payout Security
  </div>
@@ -288,7 +281,7 @@ export default function GuideWalletPage() {
  >
  <div className="p-6 surface-section rounded-3xl border-2 border-dashed border-theme space-y-4">
  <div className="space-y-1">
- <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest ml-1">Mock Card/Account Last 4</label>
+ <label className="text-[10px] font-bold text-theme-muted capitalize tracking-normal ml-1">Mock Card/Account Last 4</label>
  <input 
  type="text" 
  maxLength={4}
@@ -300,7 +293,7 @@ export default function GuideWalletPage() {
  </div>
  <div className="grid grid-cols-2 gap-3">
  <div className="space-y-1">
- <label className="text-[10px] font-bold text-theme-muted uppercase tracking-widest ml-1">Brand</label>
+ <label className="text-[10px] font-bold text-theme-muted capitalize tracking-normal ml-1">Brand</label>
  <select 
  value={onboardingData.brand}
  onChange={(e) => setOnboardingData({...onboardingData, brand: e.target.value})}
@@ -323,7 +316,7 @@ export default function GuideWalletPage() {
  </div>
  <button 
  onClick={() => setIsLinking(false)}
- className="w-full text-[10px] font-bold text-theme-muted uppercase tracking-widest hover:text-theme-secondary"
+ className="w-full text-[10px] font-bold text-theme-muted capitalize tracking-normal hover:text-theme-secondary"
  >
  Cancel
  </button>
@@ -348,7 +341,7 @@ export default function GuideWalletPage() {
  >
  Connect My Card <Plus className="w-6 h-6" />
  </button>
- <p className="text-[10px] text-center text-theme-muted font-bold uppercase tracking-widest">
+ <p className="text-[10px] text-center text-theme-muted font-bold capitalize tracking-normal">
  Linked accounts are protected by bank-level encryption
  </p>
  </div>
@@ -368,7 +361,7 @@ export default function GuideWalletPage() {
  </p>
  <hr className="my-6 border-theme-strong" />
  <div className="flex justify-between items-center text-white/60">
- <span className="text-[10px] font-bold uppercase tracking-widest">Success Factor</span>
+ <span className="text-[10px] font-bold capitalize tracking-normal">Success Factor</span>
  <span className="text-sm font-bold text-emerald-400">EXCELLENT</span>
  </div>
  </motion.div>
@@ -403,10 +396,10 @@ export default function GuideWalletPage() {
   <table className="w-full text-left">
   <thead>
   <tr className="surface-section">
-  <th className="px-8 py-4 text-[10px] font-bold text-theme-muted uppercase tracking-widest">Date</th>
-  <th className="px-8 py-4 text-[10px] font-bold text-theme-muted uppercase tracking-widest">Origin Booking</th>
-  <th className="px-8 py-4 text-[10px] font-bold text-theme-muted uppercase tracking-widest">Amount (Net)</th>
-  <th className="px-8 py-4 text-[10px] font-bold text-theme-muted uppercase tracking-widest text-right">Status</th>
+  <th className="px-8 py-4 text-[10px] font-bold text-theme-muted capitalize tracking-normal">Date</th>
+  <th className="px-8 py-4 text-[10px] font-bold text-theme-muted capitalize tracking-normal">Origin Booking</th>
+  <th className="px-8 py-4 text-[10px] font-bold text-theme-muted capitalize tracking-normal">Amount (Net)</th>
+  <th className="px-8 py-4 text-[10px] font-bold text-theme-muted capitalize tracking-normal text-right">Status</th>
   </tr>
   </thead>
   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -422,7 +415,7 @@ export default function GuideWalletPage() {
   </td>
   <td className="px-8 py-6">
   <div className="text-sm font-bold text-theme-primary">#{p.bookingId}</div>
-  <div className="text-[10px] text-theme-muted font-bold uppercase tracking-wider">Tour Settlement</div>
+  <div className="text-[10px] text-theme-muted font-bold capitalize tracking-normal">Tour Settlement</div>
   </td>
   <td className="px-8 py-6">
   <div className="text-sm font-bold text-theme-primary">

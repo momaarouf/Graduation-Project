@@ -878,7 +878,7 @@ function CustomDatePicker({ label, value, onChange, required, minDate }: CustomD
  {/* Week Days */}
  <div className="grid grid-cols-7 gap-1 mb-2">
  {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d) => (
- <div key={d} className="text-center text-[10px] font-bold text-theme-muted uppercase">
+ <div key={d} className="text-center text-[10px] font-bold text-theme-muted capitalize">
  {d}
  </div>
  ))}

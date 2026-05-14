@@ -16,6 +16,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import GuideOnTourSkeleton from './skeleton'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
@@ -106,7 +107,7 @@ function StatusBadge({ status }: StatusBadgeProps) {
   const { className, icon: Icon, label } = config[status]
 
   return (
-    <span className={`badge-base ${className} gap-1 px-2 py-0.5 text-[10px] uppercase tracking-wider`}>
+    <span className={`badge-base ${className} gap-1 px-2 py-0.5 text-[10px] capitalize tracking-normal`}>
       <Icon className="w-2.5 h-2.5" />
       {label}
     </span>
@@ -143,7 +144,7 @@ function TourStatusBadge({ status }: TourStatusBadgeProps) {
   const { className, icon: Icon, label } = config[status]
 
   return (
-    <span className={`badge-base ${className} gap-1.5 px-3 py-1 text-[11px] uppercase tracking-widest`}>
+    <span className={`badge-base ${className} gap-1.5 px-3 py-1 text-[11px] capitalize tracking-normal`}>
       <Icon className="w-3.5 h-3.5" />
       {label}
     </span>
@@ -167,15 +168,19 @@ function QRScannerModal({ isOpen, onClose, onScan }: QRScannerModalProps) {
   const [scannedData, setScannedData] = useState('')
   const [manualInput, setManualInput] = useState('')
   const [cameraError, setCameraError] = useState<string | null>(null)
+  const [isSecureContext, setIsSecureContext] = useState(true)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const scannerRef = useRef<Html5Qrcode | null>(null)
   const regionId = "reader"
 
   useEffect(() => {
     if (isOpen && !scannerRef.current) {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setCameraError("Your browser doesn't support camera access or you are not using HTTPS.")
+        setIsSecureContext(false)
+        setCameraError("Camera access requires HTTPS on mobile browsers.")
         return
       }
+      setIsSecureContext(true)
 
       const html5QrCode = new Html5Qrcode(regionId)
       scannerRef.current = html5QrCode
@@ -248,6 +253,30 @@ function QRScannerModal({ isOpen, onClose, onScan }: QRScannerModalProps) {
     }
   }
 
+  const [isProcessingFile, setIsProcessingFile] = useState(false)
+
+  const handleFileScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const tempScanner = scannerRef.current || new Html5Qrcode(regionId)
+    
+    setIsProcessingFile(true)
+    try {
+      const result = await tempScanner.scanFile(file, true)
+      setScannedData(result)
+      toast.success('QR Code detected!')
+      setTimeout(() => {
+        onScan(result)
+        onClose()
+      }, 1000)
+    } catch (err) {
+      toast.error('Could not find a QR code in this image.')
+    } finally {
+      setIsProcessingFile(false)
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
       <div className="w-full max-w-md surface-card rounded-3xl shadow-2xl overflow-hidden border border-theme">
@@ -290,6 +319,35 @@ function QRScannerModal({ isOpen, onClose, onScan }: QRScannerModalProps) {
             {scanning && !scannedData && (
               <div className="absolute inset-x-0 top-0 h-1 bg-primary-light shadow-[0_0_15px_rgba(59,130,246,0.8)] animate-[scan_3s_linear_infinite]" />
             )}
+          </div>
+
+          {!isSecureContext && (
+            <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-3">
+              <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="text-[11px] text-amber-800 dark:text-amber-300 font-medium leading-relaxed">
+                <p className="font-bold mb-1">Testing on Mobile WiFi?</p>
+                Browsers block live cameras on HTTP. You can still scan by taking a photo of the QR code below.
+              </div>
+            </div>
+          )}
+
+          <div className="mt-4">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isProcessingFile}
+              className="w-full py-3 surface-section hover:surface-hover border border-theme text-theme-primary font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.98]"
+            >
+              <Smartphone className="w-4 h-4 text-primary-light" />
+              {isProcessingFile ? 'Processing Image...' : 'Take Photo or Upload Image'}
+            </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept="image/*" 
+              capture="environment"
+              onChange={handleFileScan}
+            />
           </div>
 
           <div className="mt-6 space-y-4">
@@ -367,7 +425,7 @@ function TravelerCard({ booking, onNoShow, onContact, now }: TravelerCardProps) 
               <h4 className="font-bold text-sm text-theme-primary truncate max-w-[120px]">
                 {booking.traveler?.fullName || 'Unknown'}
               </h4>
-              <div className="flex items-center gap-1.5 text-[10px] text-theme-muted uppercase font-bold mt-0.5">
+              <div className="flex items-center gap-1.5 text-[10px] text-theme-muted capitalize font-bold mt-0.5">
                 <Users className="w-2.5 h-2.5" />
                 <span>{booking.peopleCount} PAX</span>
                 <span>•</span>
@@ -383,7 +441,7 @@ function TravelerCard({ booking, onNoShow, onContact, now }: TravelerCardProps) 
             <button
               onClick={() => onNoShow(booking.id)}
               disabled={new Date(now) < new Date(booking.startTimeUtc)}
-              className={`flex-1 h-8 px-3 text-[10px] font-extrabold uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+              className={`flex-1 h-8 px-3 text-[10px] font-extrabold capitalize tracking-normal rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                 new Date(now) < new Date(booking.startTimeUtc)
                   ? 'surface-section text-theme-muted cursor-not-allowed opacity-50 border border-theme'
                   : 'badge-danger border border-danger-red/20 shadow-sm active:scale-95'
@@ -395,7 +453,7 @@ function TravelerCard({ booking, onNoShow, onContact, now }: TravelerCardProps) 
           )}
           <button
             onClick={() => onContact(booking)}
-            className="flex-1 h-8 px-3 bg-surface-base hover:bg-surface-hover text-primary-light border border-theme text-[10px] font-extrabold uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
+            className="flex-1 h-8 px-3 bg-surface-base hover:bg-surface-hover text-primary-light border border-theme text-[10px] font-extrabold capitalize tracking-normal rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
           >
             <MessageSquare className="w-3.5 h-3.5" />
             Contact
@@ -425,7 +483,7 @@ function TravelerCard({ booking, onNoShow, onContact, now }: TravelerCardProps) 
 
             {booking.message && (
               <div className="p-3 bg-blue-500/5 border border-blue-500/10 rounded-xl">
-                <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-1">Note</p>
+                <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 capitalize tracking-normal mb-1">Note</p>
                 <p className="text-xs text-theme-secondary leading-relaxed">
                   &ldquo;{booking.message}&rdquo;
                 </p>
@@ -435,13 +493,13 @@ function TravelerCard({ booking, onNoShow, onContact, now }: TravelerCardProps) 
             {(booking.checkedInAtUtc || booking.completedAtUtc) && (
               <div className="space-y-1.5 pt-1">
                 {booking.checkedInAtUtc && (
-                  <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-600 uppercase">
+                  <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-600 capitalize">
                     <CheckCircle className="w-3 h-3" />
                     In: {new Date(booking.checkedInAtUtc).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
                 )}
                 {booking.completedAtUtc && (
-                  <div className="flex items-center gap-2 text-[10px] font-bold text-purple-600 uppercase">
+                  <div className="flex items-center gap-2 text-[10px] font-bold text-purple-600 capitalize">
                     <CheckCircle className="w-3 h-3" />
                     Out: {new Date(booking.completedAtUtc).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
@@ -502,22 +560,22 @@ function TourOverview({ group, tourStatus, onCompleteTour }: TourOverviewProps) 
       <div className="grid grid-cols-3 gap-3 mb-6">
         <div className="surface-section rounded-xl p-3 text-center border border-theme">
           <div className="text-xl font-extrabold text-theme-primary tracking-tight">{checkedInCount}</div>
-          <div className="text-[9px] text-theme-muted font-bold uppercase tracking-widest">Checked In</div>
+          <div className="text-[9px] text-theme-muted font-bold capitalize tracking-normal">Checked In</div>
         </div>
         <div className="surface-section rounded-xl p-3 text-center border border-theme">
           <div className="text-xl font-extrabold text-theme-primary tracking-tight">{totalBookings - checkedInCount}</div>
-          <div className="text-[9px] text-theme-muted font-bold uppercase tracking-widest">Left</div>
+          <div className="text-[9px] text-theme-muted font-bold capitalize tracking-normal">Left</div>
         </div>
         <div className="bg-primary-light/5 rounded-xl p-3 text-center border border-primary-light/20">
           <div className="text-xl font-extrabold text-primary-light tracking-tight">{totalBookings}</div>
-          <div className="text-[9px] text-primary-light/70 font-bold uppercase tracking-widest">Total</div>
+          <div className="text-[9px] text-primary-light/70 font-bold capitalize tracking-normal">Total</div>
         </div>
       </div>
 
       {tourStatus === 'in-progress' && (
         <button
           onClick={onCompleteTour}
-          className="w-full py-3 bg-[#16a34a] hover:bg-[#15803d] text-white font-extrabold rounded-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95 text-[11px] uppercase tracking-widest"
+          className="w-full py-3 bg-[#16a34a] hover:bg-[#15803d] text-white font-extrabold rounded-xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95 text-[11px] capitalize tracking-normal"
         >
           Complete Tour Session
         </button>
@@ -526,7 +584,7 @@ function TourOverview({ group, tourStatus, onCompleteTour }: TourOverviewProps) 
       {tourStatus === 'scheduled' && minutesUntilStart > 0 && minutesUntilStart < 60 && (
         <div className="p-3 bg-amber-500/5 border border-amber-500/10 rounded-xl text-center flex items-center justify-center gap-2">
           <Timer className="w-4 h-4 text-amber-500 animate-pulse" />
-          <span className="text-xs text-amber-700 dark:text-amber-400 font-bold uppercase tracking-wider">
+          <span className="text-xs text-amber-700 dark:text-amber-400 font-bold capitalize tracking-normal">
             Starts in {minutesUntilStart}m
           </span>
         </div>
@@ -664,11 +722,7 @@ export default function GuideOnTourPage() {
   }, [selectedGroup])
 
   if (isLoading) {
-    return (
-      <div className="pt-24 flex items-center justify-center min-h-[calc(100vh-4rem)]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary-light" />
-      </div>
-    )
+    return <GuideOnTourSkeleton />
   }
 
   if (groups.length === 0) {
@@ -690,10 +744,10 @@ export default function GuideOnTourPage() {
       <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 mb-8">
             <div className="text-left">
-              <h1 className="text-2xl sm:text-4xl font-extrabold text-theme-primary mb-1 tracking-tight uppercase">
+              <h1 className="text-2xl sm:text-4xl font-extrabold text-theme-primary mb-1 tracking-tight capitalize">
                 On-Tour <span className="text-primary-light">Toolkit</span>.
               </h1>
-              <p className="text-xs sm:text-sm text-theme-muted font-bold uppercase tracking-widest">
+              <p className="text-xs sm:text-sm text-theme-muted font-bold capitalize tracking-normal">
                 Real-time check-ins and session management
               </p>
             </div>
@@ -712,7 +766,7 @@ export default function GuideOnTourPage() {
                     <ListboxButton className="relative w-full flex items-center justify-between px-4 py-2.5 surface-card border border-theme rounded-xl text-xs font-bold text-theme-primary shadow-sm active:scale-[0.98] transition-all">
                       <span className="flex items-center gap-2 truncate">
                         <Calendar className="w-4 h-4 text-primary-light shrink-0" />
-                        <span className="truncate uppercase tracking-wider">
+                        <span className="truncate capitalize tracking-normal">
                           {selectedGroup
                             ? `${new Date(selectedGroup.startTimeUtc).toLocaleDateString()} - ${selectedGroup.tourTitle}`
                             : 'Select Tour'}
@@ -727,7 +781,7 @@ export default function GuideOnTourPage() {
                           <ListboxOption
                             key={group.occurrenceId}
                             value={group.occurrenceId}
-                            className={({ focus, selected }) => `relative cursor-default select-none py-3 pl-10 pr-4 transition-colors uppercase tracking-wider ${
+                            className={({ focus, selected }) => `relative cursor-default select-none py-3 pl-10 pr-4 transition-colors capitalize tracking-normal ${
                               focus ? 'bg-primary-light/10 text-primary-light' : 'text-theme-primary'
                             } ${selected ? 'bg-primary-light/5' : ''}`}
                           >
@@ -774,7 +828,7 @@ export default function GuideOnTourPage() {
           <div className="flex p-1 bg-theme/5 rounded-xl mb-6">
             <button
               onClick={() => setActiveTab('travelers')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold capitalize tracking-normal transition-all ${
                 activeTab === 'travelers' ? 'bg-white dark:bg-card-dark text-primary-light shadow-sm' : 'text-theme-muted'
               }`}
             >
@@ -783,7 +837,7 @@ export default function GuideOnTourPage() {
             </button>
             <button
               onClick={() => setActiveTab('info')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold capitalize tracking-normal transition-all ${
                 activeTab === 'info' ? 'bg-white dark:bg-card-dark text-purple-600 shadow-sm' : 'text-theme-muted'
               }`}
             >
@@ -813,7 +867,7 @@ export default function GuideOnTourPage() {
                 ) : (
                   <div className="text-center py-12 border border-dashed border-theme rounded-3xl">
                     <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                    <p className="text-xs font-bold text-theme-muted uppercase tracking-widest">No travelers found</p>
+                    <p className="text-xs font-bold text-theme-muted capitalize tracking-normal">No travelers found</p>
                   </div>
                 )}
               </div>

@@ -52,7 +52,7 @@ function StatCard({ icon: Icon, label, value, color }: { icon: any, label: strin
       <div className="text-2xl sm:text-3xl font-bold text-theme-primary mb-1 tracking-tight leading-none">
         {value}
       </div>
-      <div className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] text-theme-muted opacity-80">
+      <div className="text-[9px] sm:text-[10px] font-bold capitalize tracking-[0.15em] text-theme-muted opacity-80">
         {label}
       </div>
     </GlassCard>
@@ -73,7 +73,7 @@ function VerificationBadge({ status }: { status: string }) {
   const { bg, text, icon: Icon, label } = config[normalizedStatus] || config.not_submitted
 
   return (
-    <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ${bg} ${text} text-[10px] font-bold uppercase tracking-widest border border-current/10`}>
+    <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ${bg} ${text} text-[10px] font-bold capitalize tracking-normal border border-current/10`}>
       <Icon className="w-3 h-3" />
       {label}
     </div>
@@ -83,6 +83,8 @@ function VerificationBadge({ status }: { status: string }) {
 // ============================================================================
 // MAIN PAGE
 // ============================================================================
+
+import GuideDashboardLoading from './skeleton'
 
 export default function GuideDashboardPage() {
  const { user } = useAuth()
@@ -107,16 +109,7 @@ export default function GuideDashboardPage() {
    fetchDashboardData()
  }, [])
 
- if (loading) {
-  return (
-    <div className="min-h-screen flex items-center justify-center surface-section">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-primary-light border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-bold uppercase tracking-widest text-theme-muted animate-pulse">Initializing Workspace...</p>
-      </div>
-    </div>
-  )
- }
+ if (loading) return <GuideDashboardLoading />
 
  // Derived stats
  const tourStats = {
@@ -143,13 +136,13 @@ export default function GuideDashboardPage() {
   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col md:flex-row md:items-end justify-between gap-8">
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-[10px] font-bold uppercase tracking-[0.2em]">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-[10px] font-bold capitalize tracking-[0.2em]">
           <Sparkles className="w-3.5 h-3.5" />
           {getGreeting()}
         </div>
         <VerificationBadge status={profile?.verificationStatus || 'not_submitted'} />
       </div>
-      <h1 className="text-3xl sm:text-5xl font-bold text-theme-primary tracking-tight leading-tight uppercase drop-shadow-sm">
+      <h1 className="text-3xl sm:text-5xl font-bold text-theme-primary tracking-tight leading-tight capitalize drop-shadow-sm">
         Hi, {profile?.fullName.split(' ')[0] || 'Guide'}!
       </h1>
     </div>
@@ -157,12 +150,12 @@ export default function GuideDashboardPage() {
     <div className="flex gap-4">
       {(!user?.profileCompleted || !user?.emailVerified || profile?.verificationStatus !== 'approved') ? (
         <div className="relative group w-full sm:w-auto">
-          <button disabled className="w-full px-8 py-4 surface-section text-theme-muted rounded-2xl font-bold uppercase tracking-[0.2em] text-[11px] flex items-center justify-center gap-3 cursor-not-allowed border-2 border-theme shadow-xl">
+          <button disabled className="w-full px-8 py-4 surface-section text-theme-muted rounded-2xl font-bold capitalize tracking-[0.2em] text-[11px] flex items-center justify-center gap-3 cursor-not-allowed border-2 border-theme shadow-xl">
             <PlusCircle className="w-5 h-5" /> Create New Tour
             <Shield className="w-4 h-4 text-accent-light" />
           </button>
           <div className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 w-64 p-5 bg-slate-900 text-white text-[10px] rounded-2xl opacity-0 group-hover:opacity-100 transition-all pointer-events-none shadow-2xl z-50 border border-slate-700">
-            <p className="font-bold mb-2 text-amber-400 flex items-center gap-2 uppercase tracking-widest"><AlertCircle className="w-4 h-4" /> Locked</p>
+            <p className="font-bold mb-2 text-amber-400 flex items-center gap-2 capitalize tracking-normal"><AlertCircle className="w-4 h-4" /> Locked</p>
             <div className="leading-relaxed opacity-90 font-bold">Verification required to publish:
               <ul className="mt-2 list-disc list-inside space-y-1">
                 {!user?.emailVerified && <li>Verify Email</li>}
@@ -173,7 +166,7 @@ export default function GuideDashboardPage() {
           </div>
         </div>
       ) : (
-        <Link href="/dashboard/guide/tours/new" className="w-full sm:w-auto px-8 py-4 bg-primary-light hover:bg-primary-light-hover text-white rounded-2xl font-bold uppercase tracking-[0.2em] text-[11px] transition-all shadow-2xl shadow-primary-light/30 flex items-center justify-center gap-3 active:scale-95">
+        <Link href="/dashboard/guide/tours/new" className="w-full sm:w-auto px-8 py-4 bg-primary-light hover:bg-primary-light-hover text-white rounded-2xl font-bold capitalize tracking-[0.2em] text-[11px] transition-all shadow-2xl shadow-primary-light/30 flex items-center justify-center gap-3 active:scale-95">
           <PlusCircle className="w-5 h-5" /> Create New Tour
         </Link>
       )}
@@ -194,15 +187,15 @@ export default function GuideDashboardPage() {
       <GlassCard className="p-6 sm:p-10 relative group overflow-hidden">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-theme-primary uppercase tracking-tight">Portfolio Status</h2>
-            <p className="text-[10px] sm:text-xs text-theme-muted font-bold uppercase tracking-widest opacity-70 mt-1">Template distribution</p>
+            <h2 className="text-xl sm:text-2xl font-bold text-theme-primary capitalize tracking-tight">Portfolio Status</h2>
+            <p className="text-[10px] sm:text-xs text-theme-muted font-bold capitalize tracking-normal opacity-70 mt-1">Template distribution</p>
           </div>
           <div className="p-4 bg-primary-light/10 rounded-2xl"><LayoutDashboard className="w-6 h-6 text-primary-light" /></div>
         </div>
 
         <div className="space-y-8">
           <div className="space-y-4">
-            <div className="flex justify-between text-[10px] font-bold uppercase tracking-[0.2em] text-theme-muted px-1">
+            <div className="flex justify-between text-[10px] font-bold capitalize tracking-[0.2em] text-theme-muted px-1">
               <span>Performance</span>
               <span className="text-primary-light">{tourStats.total} Total</span>
             </div>
@@ -217,7 +210,7 @@ export default function GuideDashboardPage() {
                 { label: 'Review', val: tourStats.pending, color: 'bg-accent-light', text: 'text-accent-light' },
                 { label: 'Drafts', val: tourStats.drafts, color: 'bg-primary-light', text: 'text-primary-light' }
               ].map(s => (
-                <div key={s.label} className={`flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-widest ${s.text}`}>
+                <div key={s.label} className={`flex items-center gap-2.5 text-[10px] font-bold capitalize tracking-normal ${s.text}`}>
                   <div className={`w-2 h-2 rounded-full ${s.color} shadow-lg`} /> {s.val} {s.label}
                 </div>
               ))}
@@ -230,10 +223,10 @@ export default function GuideDashboardPage() {
       <GlassCard className="p-6 sm:p-10">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-theme-primary uppercase tracking-tight">Upcoming Feed</h2>
-            <p className="text-[10px] sm:text-xs text-theme-muted font-bold uppercase tracking-widest opacity-70 mt-1">Confirmed & Pending trips</p>
+            <h2 className="text-xl sm:text-2xl font-bold text-theme-primary capitalize tracking-tight">Upcoming Feed</h2>
+            <p className="text-[10px] sm:text-xs text-theme-muted font-bold capitalize tracking-normal opacity-70 mt-1">Confirmed & Pending trips</p>
           </div>
-          <Link href="/dashboard/guide/tours" className="text-[10px] font-bold uppercase tracking-widest text-primary-light hover:opacity-70 flex items-center gap-1.5 group">
+          <Link href="/dashboard/guide/tours" className="text-[10px] font-bold capitalize tracking-normal text-primary-light hover:opacity-70 flex items-center gap-1.5 group">
             View Feed <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
@@ -250,17 +243,17 @@ export default function GuideDashboardPage() {
                     <div className="min-w-0">
                       <h4 className="font-bold text-sm sm:text-lg text-theme-primary truncate group-hover/item:text-primary-light transition-colors tracking-tight">{b.tourTitle}</h4>
                       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-2">
-                        <span suppressHydrationWarning className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-theme-muted flex items-center gap-2">
+                        <span suppressHydrationWarning className="text-[9px] sm:text-[10px] font-bold capitalize tracking-normal text-theme-muted flex items-center gap-2">
                           <Clock className="w-3.5 h-3.5 text-orange-500" /> {new Date(b.startTimeUtc).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                         </span>
-                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-primary-light flex items-center gap-2">
+                        <span className="text-[9px] sm:text-[10px] font-bold capitalize tracking-normal text-primary-light flex items-center gap-2">
                           <Users className="w-3.5 h-3.5" /> {b.peopleCount} {b.peopleCount === 1 ? 'Guest' : 'Guests'}
                         </span>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center justify-between sm:justify-end gap-4 pt-4 sm:pt-0 border-t sm:border-0 border-theme">
-                    <div className={`px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] border ${b.status === BookingStatus.Confirmed ? 'bg-success-green/10 text-success-green border-success-green/20' : 'bg-accent-light/10 text-accent-light border-accent-light/20'}`}>
+                    <div className={`px-4 py-2 rounded-full text-[9px] font-bold capitalize tracking-[0.2em] border ${b.status === BookingStatus.Confirmed ? 'bg-success-green/10 text-success-green border-success-green/20' : 'bg-accent-light/10 text-accent-light border-accent-light/20'}`}>
                       {b.status}
                     </div>
                     <ChevronRight className="w-5 h-5 text-theme-muted sm:hidden" />
@@ -274,9 +267,9 @@ export default function GuideDashboardPage() {
             <div className="w-20 h-20 bg-surface-base rounded-full flex items-center justify-center mx-auto mb-6 border border-theme shadow-inner">
               <Calendar className="w-10 h-10 text-theme-muted" />
             </div>
-            <h3 className="text-sm font-bold text-theme-primary mb-3 uppercase tracking-widest">Quiet Horizon</h3>
-            <p className="text-[10px] text-theme-muted max-w-xs mx-auto mb-8 font-bold uppercase tracking-widest opacity-60">Your upcoming schedule is currently clear.</p>
-            <Link href="/dashboard/guide/tours" className="inline-flex items-center gap-3 px-8 py-4 bg-primary-light text-white text-[11px] font-bold uppercase tracking-widest rounded-2xl hover:scale-105 active:scale-95 shadow-2xl transition-all">
+            <h3 className="text-sm font-bold text-theme-primary mb-3 capitalize tracking-normal">Quiet Horizon</h3>
+            <p className="text-[10px] text-theme-muted max-w-xs mx-auto mb-8 font-bold capitalize tracking-normal opacity-60">Your upcoming schedule is currently clear.</p>
+            <Link href="/dashboard/guide/tours" className="inline-flex items-center gap-3 px-8 py-4 bg-primary-light text-white text-[11px] font-bold capitalize tracking-normal rounded-2xl hover:scale-105 active:scale-95 shadow-2xl transition-all">
               Launch New Tour
             </Link>
           </div>

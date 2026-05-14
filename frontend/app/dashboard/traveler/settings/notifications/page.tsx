@@ -18,6 +18,8 @@
 'use client'
 
 import { useState } from 'react'
+import { useAuth } from '@/src/lib/contexts/AuthContext'
+import SettingsSkeleton from '@/src/components/dashboard/SettingsSkeleton'
 import Link from 'next/link'
 import {
  Bell,
@@ -241,7 +243,12 @@ const SettingRow = ({ setting, onToggle }: SettingRowProps) => {
 // ============================================================================
 
 export default function TravelerNotificationSettingsPage() {
+ const { user, isLoading } = useAuth()
  const [settings, setSettings] = useState(MOCK_NOTIFICATION_SETTINGS)
+ 
+ if (isLoading || !user) {
+   return <SettingsSkeleton />
+ }
  const [quietHours, setQuietHours] = useState(MOCK_QUIET_HOURS)
  const [frequencies, setFrequencies] = useState(MOCK_FREQUENCIES)
  const [isSaving, setIsSaving] = useState(false)

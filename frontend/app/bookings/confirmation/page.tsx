@@ -407,11 +407,11 @@ Thank you for choosing TravelMarket!
  <div className="surface-card border border-primary-light/20 dark:border-primary-dark/20 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl shadow-blue-500/10">
  <div className="flex items-center justify-between mb-6">
  <div>
- <h3 className="text-lg font-bold text-theme-primary uppercase tracking-tight">Checkout</h3>
+ <h3 className="text-lg font-bold text-theme-primary capitalize tracking-tight">Checkout</h3>
  <div className="flex items-center gap-2 mt-1">
  {/* Countdown pill — reads from backend paymentDeadlineUtc (15-min window) */}
  {countdown && !countdown.isExpired && (
- <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
+ <div className={`px-3 py-1 rounded-full text-[10px] font-bold capitalize tracking-normal border ${
  countdown.urgency === 'critical'
  ? 'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 animate-pulse'
  : countdown.urgency === 'warning'
@@ -422,7 +422,7 @@ Thank you for choosing TravelMarket!
  </div>
  )}
  {countdown?.isExpired && (
- <div className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
+ <div className="px-3 py-1 rounded-full text-[10px] font-bold capitalize tracking-normal border bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
  Expired
  </div>
  )}
@@ -533,7 +533,7 @@ Thank you for choosing TravelMarket!
  {booking.bookingMode === 'Instant' ? 'Instant Book' : 'Request to Book'}
  </p>
  </div>
- <span className={`px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-full border ${
+ <span className={`px-3 py-1 text-xs font-bold capitalize tracking-normal rounded-full border ${
  booking.status === BookingStatus.PendingPayment
  ? 'bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark border-primary-light/20 dark:border-primary-dark/20'
  : isPending

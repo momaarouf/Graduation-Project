@@ -22,6 +22,7 @@ import {
  CheckCircle,
  Smartphone
 } from 'lucide-react'
+import TravelerTicketSkeleton from './skeleton'
 
 export default function TicketPage({ params }: { params: Promise<{ id: string }> }) {
  const { id } = use(params)
@@ -53,12 +54,7 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
  }
 
   if (isLoading) {
-  return (
-  <div className="min-h-screen pt-24 flex flex-col items-center justify-center gap-4 surface-base">
-  <div className="w-12 h-12 border-4 border-primary-light dark:border-primary-dark/20 border-t-blue-600 rounded-full animate-spin" />
-  <p className="text-theme-muted font-bold animate-pulse">Generating your ticket...</p>
-  </div>
-  )
+    return <TravelerTicketSkeleton />
   }
 
  if (!booking) return null
@@ -117,7 +113,7 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
  <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-indigo-900/40 rounded-full blur-3xl" />
  
  <div className="relative z-10">
- <div className="inline-flex items-center gap-2 px-3 py-1 surface-card  rounded-full text-[10px] font-bold uppercase tracking-widest mb-6 border border-theme">
+ <div className="inline-flex items-center gap-2 px-3 py-1 surface-card  rounded-full text-[10px] font-bold capitalize tracking-normal mb-6 border border-theme">
  Official Digital Ticket
  </div>
  <h1 className="text-2xl md:text-3xl font-bold mb-2 tracking-tight">
@@ -152,7 +148,7 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
  className="dark:p-2 dark:rounded-xl"
  />
  </div>
- <p className="text-[10px] uppercase font-bold text-theme-muted tracking-[0.3em] mb-1">Check-in QR Code</p>
+ <p className="text-[10px] capitalize font-bold text-theme-muted tracking-[0.3em] mb-1">Check-in QR Code</p>
  <button
  onClick={() => {
  navigator.clipboard.writeText(booking.qrCode ||"");
@@ -174,27 +170,27 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
  {/* Details Grid */}
  <div className="grid grid-cols-2 gap-8 mb-10">
  <div className="space-y-1">
- <p className="text-[10px] uppercase font-bold text-theme-muted tracking-wider">Ticket Holder</p>
+ <p className="text-[10px] capitalize font-bold text-theme-muted tracking-normal">Ticket Holder</p>
  <p className="font-bold text-theme-primary flex items-center gap-2">
  <User className="w-4 h-4 text-primary-light dark:text-primary-dark" />
  Me (Traveler)
  </p>
  </div>
  <div className="space-y-1">
- <p className="text-[10px] uppercase font-bold text-theme-muted tracking-wider">Pax Count</p>
+ <p className="text-[10px] capitalize font-bold text-theme-muted tracking-normal">Pax Count</p>
  <p className="font-bold text-theme-primary">
  {booking.peopleCount} {booking.peopleCount === 1 ? 'Person' : 'People'}
  </p>
  </div>
  <div className="space-y-1">
- <p className="text-[10px] uppercase font-bold text-theme-muted tracking-wider">Status</p>
+ <p className="text-[10px] capitalize font-bold text-theme-muted tracking-normal">Status</p>
  <p className="font-bold text-success-green flex items-center gap-2">
  <CheckCircle className="w-4 h-4" />
  Verified
  </p>
  </div>
  <div className="space-y-1">
- <p className="text-[10px] uppercase font-bold text-theme-muted tracking-wider">Meeting Point</p>
+ <p className="text-[10px] capitalize font-bold text-theme-muted tracking-normal">Meeting Point</p>
  <p className="font-bold text-theme-primary truncate">
  {booking.meetingPointName || 'Sultanahmet Square'}
  </p>
@@ -203,7 +199,7 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
 
  {/* Instructions */}
  <div className="p-6 surface-section rounded-3xl border border-theme">
- <h4 className="flex items-center gap-2 text-xs font-bold text-theme-primary mb-3 uppercase tracking-wider">
+ <h4 className="flex items-center gap-2 text-xs font-bold text-theme-primary mb-3 capitalize tracking-normal">
  <Info className="w-4 h-4 text-primary-light dark:text-primary-dark" />
  Instructions
  </h4>
@@ -226,7 +222,7 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
 
  {/* Ticket Footer */}
  <div className="p-6 surface-section border-t border-theme text-center">
- <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-theme-muted uppercase tracking-[0.2em]">
+ <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-theme-muted capitalize tracking-[0.2em]">
  <ShieldCheck className="w-4 h-4 text-success-green" />
  Halal-Friendly Verified
  </div>

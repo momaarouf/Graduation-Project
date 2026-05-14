@@ -51,7 +51,7 @@ export default function CalendarPicker({ selectedDates = [], onToggleDate, highl
  return (
  <div className="p-4 surface-card rounded-2xl border border-theme shadow-sm">
  <div className="flex items-center justify-between mb-4">
- <h4 className="text-sm font-bold text-theme-primary uppercase tracking-wider">
+ <h4 className="text-sm font-bold text-theme-primary capitalize tracking-normal">
  {monthNames[month]} {year}
  </h4>
  <div className="flex gap-1">
@@ -74,7 +74,7 @@ export default function CalendarPicker({ selectedDates = [], onToggleDate, highl
 
  <div className="grid grid-cols-7 gap-1 mb-2">
  {weekDays.map(day => (
- <div key={day} className="text-[10px] font-bold text-theme-muted uppercase text-center py-1">
+ <div key={day} className="text-[10px] font-bold text-theme-muted capitalize text-center py-1">
  {day}
  </div>
  ))}

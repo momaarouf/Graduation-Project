@@ -181,7 +181,7 @@ export default function MapPicker({
       {/* OVERLAYS */}
       <div className="absolute top-4 left-4 z-[1] flex items-center gap-2 surface-card px-3 py-1.5 rounded-full border border-theme shadow-sm">
         <div className={`w-2 h-2 rounded-full ${isGeocoding ? 'bg-orange-500 animate-pulse' : 'bg-primary-light'}`} />
-        <span className="text-[10px] font-bold text-theme-primary uppercase tracking-widest leading-none">
+        <span className="text-[10px] font-bold text-theme-primary capitalize tracking-normal leading-none">
           {isGeocoding ? 'Fetching Address...' : (hasCoords ? 'Location Selected' : 'Click to Pick Location')}
         </span>
       </div>
@@ -189,8 +189,8 @@ export default function MapPicker({
       {hasCoords && (
         <div className="absolute bottom-4 right-4 z-[1] flex items-center gap-3 surface-card px-3 py-2 rounded-2xl border border-theme shadow-lg">
           <div className="text-[9px] font-mono text-theme-muted space-y-0.5">
-            <p className="flex justify-between gap-4"><span className="font-bold text-theme-primary uppercase">Lat:</span> {lat?.toFixed(6)}</p>
-            <p className="flex justify-between gap-4"><span className="font-bold text-theme-primary uppercase">Lng:</span> {lng?.toFixed(6)}</p>
+            <p className="flex justify-between gap-4"><span className="font-bold text-theme-primary capitalize">Lat:</span> {lat?.toFixed(6)}</p>
+            <p className="flex justify-between gap-4"><span className="font-bold text-theme-primary capitalize">Lng:</span> {lng?.toFixed(6)}</p>
           </div>
           <button 
             type="button" 

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
@@ -90,8 +90,7 @@ interface TourFormData {
  // Basic Info
  title: string
  description: string
- category: string // Deprecated, use categories
- categories: string[]
+ category: string
  tags: string[]
 
  // Location
@@ -354,8 +353,7 @@ const MOCK_TOUR_DATA_FOR_EDIT: TourFormData = {
  title: '',
  description: '',
  category: 'historical',
- categories: [],
- tags: [],
+  tags: [],
 
  location: '',
  city: '',
@@ -445,7 +443,7 @@ function FormSection({ title, icon: Icon, children, defaultExpanded = true }: Fo
  <div className="p-2 bg-primary-light/10 rounded-lg">
  <Icon className="w-5 h-5 text-primary-light dark:text-primary-dark" />
  </div>
- <h3 className="font-bold text-theme-primary uppercase tracking-tight">
+ <h3 className="font-bold text-theme-primary capitalize tracking-tight">
  {title}
  </h3>
  </div>
@@ -506,48 +504,19 @@ function BasicInfoSection({ formData, onChange }: BasicInfoSectionProps) {
   />
  </div>
 
- {/* Categories (Multi-select fallback) */}
- <div>
- <label className="block text-sm font-medium text-theme-secondary mb-1">
- Categories (Max 3)
- </label>
- <div className="flex flex-wrap gap-2 mb-3">
- {formData.categories.map((catValue) => {
- const cat = TOUR_CATEGORIES.find(c => c.value === catValue);
- return (
-  <span 
-  key={catValue} 
-  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-light/10 text-primary-light dark:text-primary-dark rounded-full text-xs font-bold uppercase tracking-widest border border-primary-light/20 transition-all"
+ {/* Category */}
+  <div>
+  <label className="block text-sm font-medium text-theme-secondary mb-1">
+  Category <span className="text-danger-red">*</span>
+  </label>
+  <select
+  value={formData.category}
+  onChange={(e) => onChange('category', e.target.value)}
+  className=" w-full px-4 py-3 surface-section border-2 border-theme rounded-2xl text-theme-primary focus:outline-none focus:border-primary-light dark:border-primary-dark focus:ring-4 focus:ring-primary-light/10 dark:ring-primary-dark/5 transition-all shadow-sm hover:surface-card dark:hover:surface-card font-bold"
   >
-  {cat?.label || catValue}
-  <button
-  type="button"
-  onClick={() => {
-  onChange('categories', formData.categories.filter(c => c !== catValue));
-  }}
-  className="hover:opacity-70 transition-colors"
-  >
-  <X className="w-3 h-3" />
-  </button>
-  </span>
- );
- })}
- </div>
- <SearchableSelect
- value=""
- onChange={(val) => {
- if (formData.categories.length >= 3) {
- toast.error('Maximum 3 categories allowed');
- return;
- }
- if (formData.categories.includes(val)) return;
- onChange('categories', [...formData.categories, val]);
- }}
- options={TOUR_CATEGORIES.filter(c => !formData.categories.includes(c.value))}
- placeholder={formData.categories.length >= 3 ?"Limit reached (max 3)" :"Adding categories..."}
- disabled={formData.categories.length >= 3}
- />
- </div>
+  {TOUR_CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+  </select>
+  </div>
 
  {/* Tags */}
  <div>
@@ -640,7 +609,7 @@ function TourLocationSection({ formData, onChange, mapId }: { formData: TourForm
 
  {/* Interactive Map Picker - Meeting Point */}
  <div className="mt-6">
- <label className="block text-[10px] font-bold text-theme-muted uppercase tracking-widest mb-3 flex items-center gap-2">
+ <label className="block text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-3 flex items-center gap-2">
  <Navigation className="w-3 h-3" />
  Pick on Map (Automatically fills name & address)
  </label>
@@ -706,7 +675,7 @@ function CapacitySection({ formData, onChange }: CapacitySectionProps) {
  }}
  className=" w-full px-3 py-2 surface-section border-2 border-theme rounded-lg text-theme-primary focus:outline-none focus:border-primary-light dark:border-primary-dark transition-all"
  />
- <p className="text-[10px] text-theme-muted mt-1 uppercase tracking-tight">Total spots available per tour</p>
+ <p className="text-[10px] text-theme-muted mt-1 capitalize tracking-tight">Total spots available per tour</p>
  </div>
  </div>
 
@@ -730,7 +699,7 @@ function CapacitySection({ formData, onChange }: CapacitySectionProps) {
  }}
  className="sr-only peer"
  />
- <div className=" w-11 h-6 surface-section peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-light dark:ring-primary-dark dark:peer-focus:ring-primary-light dark:ring-primary-dark rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-theme after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:surface-card after:border-theme-strong after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-light"></div>
+ <div className="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-light/30 dark:peer-focus:ring-primary-dark/30 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-light dark:peer-checked:bg-primary-dark"></div>
  </label>
  </div>
  </div>
@@ -908,7 +877,7 @@ function ScheduleSection({ formData, onChange }: ScheduleSectionProps) {
  <div className="mt-6 p-4 bg-primary-light/50 dark:bg-primary-dark/14 rounded-2xl border border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark/20">
  <div className="flex items-center gap-2 mb-4">
  <Calendar className="w-4 h-4 text-primary-light dark:text-primary-dark" />
-  <h4 className="text-xs font-bold text-primary-light dark:text-primary-dark uppercase tracking-widest">
+  <h4 className="text-xs font-bold text-primary-light dark:text-primary-dark capitalize tracking-normal">
   Upcoming Departure Preview
   </h4>
  </div>
@@ -971,7 +940,7 @@ function ScheduleSection({ formData, onChange }: ScheduleSectionProps) {
  }
  }}
  />
- <p className="mt-3 text-[10px] font-bold text-primary-light dark:text-primary-dark/60 uppercase tracking-widest text-center">
+ <p className="mt-3 text-[10px] font-bold text-primary-light dark:text-primary-dark/60 capitalize tracking-normal text-center">
  Check the"Occurrences" page after saving for full schedule management
  </p>
  </div>
@@ -1125,7 +1094,7 @@ function PricingSection({ formData, onChange }: PricingSectionProps) {
  onChange={(e) => onChange('isPremium', e.target.checked)}
  className="sr-only peer"
  />
- <div className=" w-11 h-6 bg-amber-200/50 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-accent-light dark:ring-accent-dark dark:peer-focus:ring-accent-light dark:ring-accent-dark rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-theme after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:surface-card after:border-accent-light dark:border-accent-dark after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-light/10 dark:bg-accent-dark"></div>
+ <div className="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-500/30 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
  </label>
  </div>
 
@@ -1147,7 +1116,7 @@ function PricingSection({ formData, onChange }: PricingSectionProps) {
  onChange={(e) => onChange('dynamicPricing', { ...formData.dynamicPricing, enabled: e.target.checked })}
  className="sr-only peer"
  />
- <div className=" w-11 h-6 surface-section peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-light dark:ring-primary-dark dark:peer-focus:ring-primary-light dark:ring-primary-dark rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-theme after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:surface-card after:border-theme-strong after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-light"></div>
+ <div className="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-light/30 dark:peer-focus:ring-primary-dark/30 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-light dark:peer-checked:bg-primary-dark"></div>
  </label>
  </div>
 
@@ -1156,36 +1125,38 @@ function PricingSection({ formData, onChange }: PricingSectionProps) {
  <div className="space-y-3 pl-4 border-l-2 border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark">
  <div>
  <label className="block text-sm font-medium text-theme-secondary mb-1">
- Weekend Multiplier (%)
+ Weekend Multiplier (x)
  </label>
  <input
  type="number"
- min="0"
+ min="1"
+ step="0.01"
  value={formData?.dynamicPricing?.weekendMultiplier ?? ''}
  onChange={(e) => onChange('dynamicPricing', {
  ...(formData.dynamicPricing || {}),
- weekendMultiplier: e.target.value === '' ? 100 : parseFloat(e.target.value)
+ weekendMultiplier: e.target.value === '' ? 1.0 : parseFloat(e.target.value)
  })}
  className=" w-full px-3 py-2 surface-section border border-theme rounded-lg text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
  />
- <p className="text-xs text-theme-muted mt-1">Example: 120% means 20% extra on weekends</p>
+ <p className="text-xs text-theme-muted mt-1">Example: Enter 1.2 for 20% extra on weekends, or 1.0 for normal price.</p>
  </div>
 
  <div>
  <label className="block text-sm font-medium text-theme-secondary mb-1">
- Holiday Multiplier (%)
+ Holiday Multiplier (x)
  </label>
  <input
  type="number"
- min="0"
+ min="1"
  step="0.01"
  value={formData?.dynamicPricing?.holidayMultiplier ?? ''}
  onChange={(e) => onChange('dynamicPricing', {
  ...(formData.dynamicPricing || {}),
- holidayMultiplier: e.target.value === '' ? 100 : parseFloat(e.target.value)
+ holidayMultiplier: e.target.value === '' ? 1.0 : parseFloat(e.target.value)
  })}
  className=" w-full px-3 py-2 surface-section border border-theme rounded-lg text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark"
  />
+ <p className="text-xs text-theme-muted mt-1">Example: Enter 1.25 for 25% extra on holidays, or 1.0 for normal price.</p>
  </div>
  </div>
  )}
@@ -1208,7 +1179,7 @@ function PricingSection({ formData, onChange }: PricingSectionProps) {
  onChange={(e) => onChange('groupDiscountEnabled', e.target.checked)}
  className="sr-only peer"
  />
- <div className=" w-11 h-6 surface-section peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-light dark:ring-primary-dark dark:peer-focus:ring-primary-light dark:ring-primary-dark rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-theme after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:surface-card after:border-theme-strong after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-light"></div>
+ <div className="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-light/30 dark:peer-focus:ring-primary-dark/30 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-light dark:peer-checked:bg-primary-dark"></div>
  </label>
  </div>
 
@@ -1418,7 +1389,7 @@ function HalalSection({ formData, onChange }: HalalSectionProps) {
  onChange={(e) => onChange('isHalalCertified', e.target.checked)}
  className="sr-only peer"
  />
- <div className=" w-11 h-6 surface-section peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-light dark:ring-primary-dark dark:peer-focus:ring-primary-light dark:ring-primary-dark rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-theme after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:surface-card after:border-theme-strong after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+ <div className="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-500/30 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
  </label>
  </div>
 
@@ -1440,7 +1411,7 @@ function HalalSection({ formData, onChange }: HalalSectionProps) {
  onChange={(e) => onChange('isFamilyFriendly', e.target.checked)}
  className="sr-only peer"
  />
- <div className=" w-11 h-6 surface-section peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-light dark:ring-primary-dark dark:peer-focus:ring-primary-light dark:ring-primary-dark rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-theme after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:surface-card after:border-theme-strong after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"></div>
+ <div className="w-11 h-6 bg-gray-300 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-pink-500/30 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-500"></div>
  </label>
  </div>
 
@@ -1645,7 +1616,7 @@ function ItinerarySection({ formData, onChange, mapId }: ItinerarySectionProps &
  <div className="space-y-6">
  {/* UNIFIED ROUTE BUILDER MAP */}
  <div className="mb-6 sm:mb-8">
- <label className="block text-[10px] sm:text-xs font-bold text-theme-muted uppercase tracking-[0.15em] mb-3 flex items-center gap-2">
+ <label className="block text-[10px] sm:text-xs font-bold text-theme-muted capitalize tracking-[0.15em] mb-3 flex items-center gap-2">
  <Sparkles className="w-3.5 h-3.5 text-primary-light dark:text-primary-dark" />
  Visual Route Builder (A → B → C)
  </label>
@@ -1724,7 +1695,7 @@ function ItinerarySection({ formData, onChange, mapId }: ItinerarySectionProps &
  }}
  className=" w-full px-3 py-2 surface-card border-2 border-theme rounded-lg text-theme-primary focus:outline-none focus:border-primary-light dark:border-primary-dark transition-all text-sm"
  />
- <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-theme-muted font-bold pointer-events-none uppercase">Hr</span>
+ <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-theme-muted font-bold pointer-events-none capitalize">Hr</span>
  </div>
  <div className="flex-1 relative">
  <input
@@ -1744,7 +1715,7 @@ function ItinerarySection({ formData, onChange, mapId }: ItinerarySectionProps &
  }}
  className=" w-full px-3 py-2 surface-card border-2 border-theme rounded-lg text-theme-primary focus:outline-none focus:border-primary-light dark:border-primary-dark transition-all text-sm"
  />
- <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-theme-muted font-bold pointer-events-none uppercase">Min</span>
+ <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-theme-muted font-bold pointer-events-none capitalize">Min</span>
  </div>
  </div>
  <div className="flex-1">
@@ -1768,7 +1739,7 @@ function ItinerarySection({ formData, onChange, mapId }: ItinerarySectionProps &
  items[index] = { ...items[index], showMap: !(items as any)[index].showMap }
  onChange('itinerary', items)
  }}
- className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider transition-colors ${(item as any).showMap ? 'text-primary-light dark:text-primary-dark' : 'text-theme-muted hover:text-theme-secondary'}`}
+ className={`flex items-center gap-2 text-[10px] font-bold capitalize tracking-normal transition-colors ${(item as any).showMap ? 'text-primary-light dark:text-primary-dark' : 'text-theme-muted hover:text-theme-secondary'}`}
  >
  <MapPin className="w-3.5 h-3.5" />
  {(item as any).showMap ? 'Hide Map' : 'Pick stop on Map'}
@@ -2057,12 +2028,12 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  }));
  }
 
- // Initialize categories from singular category field
- if (initialData && initialData.category) {
- base.categories = [initialData.category];
- } else if (!isEditing) {
- base.categories = ['historical'];
- }
+ // Initialize category from backend
+  if (initialData && initialData.category) {
+    base.category = initialData.category;
+  } else if (!isEditing) {
+    base.category = 'historical';
+  }
 
  // Deriving tourType from isRecurring
  if (initialData && (initialData as any).isRecurring !== undefined) {
@@ -2252,7 +2223,7 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  <div className={`w-2 h-2 rounded-full ${profile?.verificationStatus === 'approved' ? 'bg-success-green' : 'surface-section'}`} />
  <span className="text-sm font-medium text-left">
  ID Verification
- {profile?.verificationStatus === 'pending' && <span className="block text-[10px] text-accent-light dark:text-accent-dark font-bold uppercase tracking-widest mt-0.5">Under Review</span>}
+ {profile?.verificationStatus === 'pending' && <span className="block text-[10px] text-accent-light dark:text-accent-dark font-bold capitalize tracking-normal mt-0.5">Under Review</span>}
  </span>
  </div>
  {profile?.verificationStatus === 'not_submitted' && <Link href="/dashboard/guide/verification" className="text-xs font-bold text-primary-light dark:text-primary-dark">Start</Link>}
@@ -2339,7 +2310,7 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  const payload: any = {
  title: formData.title,
  description: formData.description,
- category: formData.categories[0] || 'historical',
+ category: formData.category || 'historical',
  locationName: formData.city, // Backend calls it locationName
  city: formData.city,
  countryCode: formData.country?.toLowerCase() === 'lebanon' ? 'LB' : 'TR',
@@ -2379,7 +2350,7 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  whatToBring: JSON.stringify(formData.whatToBring),
  durationHours: formData.durationHours,
  durationMinutes: formData.durationMinutes,
- tags: JSON.stringify([...formData.tags, ...formData.categories.slice(1)]),
+ tags: JSON.stringify(formData.tags),
  languages: JSON.stringify(formData.availableLanguages)
  }
 
@@ -2434,7 +2405,7 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  const payload: any = {
  title: formData.title,
  description: formData.description,
- category: formData.categories[0] || 'historical',
+ category: formData.category || 'historical',
  locationName: formData.city,
  city: formData.city,
  countryCode: formData.country?.toLowerCase() === 'lebanon' ? 'LB' : 'TR',
@@ -2474,7 +2445,7 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  whatToBring: JSON.stringify(formData.whatToBring),
  durationHours: formData.durationHours,
  durationMinutes: formData.durationMinutes,
- tags: JSON.stringify([...formData.tags, ...formData.categories.slice(1)]),
+ tags: JSON.stringify(formData.tags),
  languages: JSON.stringify(formData.availableLanguages)
  }
 
@@ -2534,7 +2505,7 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
           <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500" />
         </div>
         <div className="min-w-0">
-          <p className="text-base sm:text-lg font-bold text-orange-500 uppercase tracking-tight">
+          <p className="text-base sm:text-lg font-bold text-orange-500 capitalize tracking-tight">
             Tour is Under Review
           </p>
           <p className="text-xs sm:text-sm text-theme-muted mt-1 font-bold leading-relaxed">
@@ -2555,7 +2526,7 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
             toast.error(err.response?.data?.message || 'Failed to withdraw tour');
           }
         }}
-        className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-orange-500/10 text-orange-500 border border-orange-500/20 hover:bg-orange-500/20 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg active:scale-95 shrink-0"
+        className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-orange-500/10 text-orange-500 border border-orange-500/20 hover:bg-orange-500/20 rounded-xl text-[10px] font-bold capitalize tracking-normal transition-all shadow-lg active:scale-95 shrink-0"
       >
         <Undo2 className="w-4 h-4" />
         Withdraw to Edit
@@ -2577,7 +2548,7 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
         <h1 className="text-2xl sm:text-4xl font-bold text-theme-primary tracking-tight leading-tight mb-1">
           {isEditing ? 'Edit' : 'Create'} <span className="text-primary-light">Tour</span>.
         </h1>
-        <p className="text-[10px] sm:text-xs text-theme-muted font-bold uppercase tracking-[0.15em] truncate">
+        <p className="text-[10px] sm:text-xs text-theme-muted font-bold capitalize tracking-[0.15em] truncate">
           {isEditing ? 'Refine your masterpiece' : 'Craft a new legend'}
         </p>
       </div>
@@ -2587,14 +2558,14 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
       <button
         onClick={handleSave}
         disabled={isSaving}
-        className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 surface-card text-theme-secondary text-[10px] font-bold uppercase tracking-widest rounded-xl border border-theme transition-all shadow-xl active:scale-95 disabled:opacity-50"
+        className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 surface-card text-theme-secondary text-[10px] font-bold capitalize tracking-normal rounded-xl border border-theme transition-all shadow-xl active:scale-95 disabled:opacity-50"
       >
         Save Draft
       </button>
       <button
         onClick={handleSendForReview}
         disabled={isSaving || (isEditing && formData.status !== 'draft' && formData.status !== 'rejected')}
-        className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all shadow-xl shadow-primary-light/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold capitalize tracking-normal rounded-xl transition-all shadow-xl shadow-primary-light/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isSaving ? (
           <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -2611,13 +2582,13 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
   <div className="flex gap-2 sm:gap-3 mb-8 sm:mb-10">
     <button
       onClick={() => setActiveTab('edit')}
-      className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg ${activeTab === 'edit' ? 'bg-primary-light text-white shadow-primary-light/20 scale-105' : 'surface-card border border-theme text-theme-secondary hover:surface-section'} `}
+      className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-[10px] font-bold capitalize tracking-normal transition-all shadow-lg ${activeTab === 'edit' ? 'bg-primary-light text-white shadow-primary-light/20 scale-105' : 'surface-card border border-theme text-theme-secondary hover:surface-section'} `}
     >
       Configuration
     </button>
     <button
       onClick={() => setActiveTab('preview')}
-      className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg ${activeTab === 'preview' ? 'bg-primary-light text-white shadow-primary-light/20 scale-105' : 'surface-card border border-theme text-theme-secondary hover:surface-section'} `}
+      className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-[10px] font-bold capitalize tracking-normal transition-all shadow-lg ${activeTab === 'preview' ? 'bg-primary-light text-white shadow-primary-light/20 scale-105' : 'surface-card border border-theme text-theme-secondary hover:surface-section'} `}
     >
       Live Preview
     </button>
@@ -2684,9 +2655,8 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
 export const INITIAL_FORM_DATA: TourFormData = {
  title: '',
  description: '',
- category: 'historical', // Deprecated
- categories: ['historical'],
- tags: [],
+ category: 'historical',
+  tags: [],
 
  location: '',
  city: '',

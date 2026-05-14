@@ -1,360 +1,226 @@
-// ============================================================================
-// CONTACT PAGE
-// ============================================================================
-// LOCATION: /frontend/src/app/contact/page.tsx
-// 
-// PURPOSE: Allow users to contact SafariHub support
-// 
-// FEATURES:
-// - Contact form with validation
-// - Support email, phone, chat options
-// - FAQ preview
-// - Office locations
-// - Social media links
-// ============================================================================
+'use client'
 
-import { Metadata } from 'next'
+import { useState } from 'react'
 import Link from 'next/link'
-import {
- Mail,
- Phone,
- MessageSquare,
- MapPin,
- Clock,
- Shield,
- Send,
- CheckCircle,
- HelpCircle,
- Facebook,
- Twitter,
- Instagram,
- Linkedin,
- ChevronRight
-} from 'lucide-react'
+import { Mail, MessageSquare, Clock, Shield, Send, CheckCircle, ChevronRight, HelpCircle } from 'lucide-react'
 import PageLayout from '@/src/components/layout/PageLayout'
-import ContactForm from '@/src/components/contact/ContactForm'
+import { contactSupport } from '@/src/lib/api/support'
+import toast from 'react-hot-toast'
 
-export const metadata: Metadata = {
- title: 'Contact Us | SafariHub',
- description: 'Get in touch with SafariHub support. We\'re here to help 24/7.',
- openGraph: {
- title: 'Contact SafariHub',
- description: 'We\'re here to help with any questions',
- images: ['/images/og/contact.jpg'],
- }
-}
-
-// ============================================================================
-// CONTACT METHODS
-// ============================================================================
-
-const CONTACT_METHODS = [
- {
- icon: Mail,
- title: 'Email Us',
- description: 'Get a response within 24 hours',
- action: 'support@safaribub.com',
- href: 'mailto:support@safaribub.com',
- color: 'blue'
- },
- {
- icon: Phone,
- title: 'Call Us',
- description: '24/7 phone support',
- action: '+90 555 123 4567',
- href: 'tel:+905551234567',
- color: 'emerald'
- },
- {
- icon: MessageSquare,
- title: 'Live Chat',
- description: 'Chat with our team now',
- action: 'Start live chat',
- href: '#chat',
- color: 'amber'
- }
-]
-
-// ============================================================================
-// OFFICE LOCATIONS
-// ============================================================================
-
-const OFFICES = [
- {
- city: 'Istanbul',
- country: 'Turkey',
- address: 'Sultanahmet Mahallesi, Akbiyik Caddesi No:15',
- district: 'Fatih, Istanbul',
- phone: '+90 555 123 4567',
- email: 'turkey@safaribub.com',
- hours: '9:00 - 18:00 (Mon-Fri)'
- },
- {
- city: 'Beirut',
- country: 'Lebanon',
- address: 'Saifi Village, Rue du Liban',
- district: 'Beirut Central District',
- phone: '+961 70 123 456',
- email: 'lebanon@safaribub.com',
- hours: '9:00 - 17:00 (Mon-Fri)'
- }
-]
-
-// ============================================================================
-// FAQ PREVIEW
-// ============================================================================
-
+// ─── Real contact info only ────────────────────────────────────────────────
 const FAQ_PREVIEW = [
- {
- question: 'How do I become a guide?',
- answer: 'Sign up as a guide, complete your profile, and submit ID verification. Our team reviews within 24-48 hours.'
- },
- {
- question: 'What is your cancellation policy?',
- answer: 'Free cancellation up to 48 hours before the tour. 50% refund between 24-48 hours. No refund within 24 hours.'
- },
- {
- question: 'Is SafariHub available in other countries?',
- answer: 'We currently operate in Lebanon and Turkey, with plans to expand to more countries soon.'
- }
+  {
+    question: 'How do I become a guide?',
+    answer: 'Sign up as a guide, complete your profile, and submit your ID verification. Our team reviews applications within 24–48 hours.'
+  },
+  {
+    question: 'What is your cancellation policy?',
+    answer: 'Free cancellation up to 48 hours before the tour. 50% refund between 24–48 hours. No refund within 24 hours.'
+  },
+  {
+    question: 'Is SafariHub available in other countries?',
+    answer: 'We currently operate in Lebanon and Turkey, with active expansion plans to more destinations soon.'
+  },
+  {
+    question: 'How do I report an issue with a booking?',
+    answer: 'Please fill out the contact form below with your Booking ID. Our team will review your case and get back to you via email within 24 hours.'
+  }
 ]
 
-// ============================================================================
-// CONTACT METHOD CARD
-// ============================================================================
+// ─── Contact Form ──────────────────────────────────────────────────────────
+function ContactForm() {
+  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false)
 
-const ContactMethodCard = ({ method }: { method: typeof CONTACT_METHODS[0] }) => {
- const Icon = method.icon
- 
- const colorClasses = {
- blue: 'bg-primary-light/10 text-primary-light dark:text-primary-dark dark:text-primary-dark border-blue-200 dark:border-blue-800',
- emerald: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
- amber: 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800'
- }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
 
- return (
- <a
- href={method.href}
- className="group block p-6 surface-card border border-theme rounded-xl hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
- >
- <div className={`inline-flex p-3 rounded-xl mb-4 ${colorClasses[method.color as keyof typeof colorClasses]}`}>
- <Icon className="w-6 h-6" />
- </div>
- <h3 className="font-bold text-theme-primary mb-1 group-hover:text-primary-light dark:text-primary-dark dark:group-hover:text-primary-light dark:text-primary-dark transition-colors">
- {method.title}
- </h3>
- <p className="text-sm text-theme-muted mb-3">
- {method.description}
- </p>
- <p className="text-primary-light dark:text-primary-dark dark:text-primary-dark font-medium text-sm group-hover:underline">
- {method.action}
- </p>
- </a>
- )
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!formData.name || !formData.email || !formData.subject || !formData.message) return
+    setIsSubmitting(true)
+    try {
+      await contactSupport(formData)
+      setIsSubmitted(true)
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to send message. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (isSubmitted) {
+    return (
+      <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-10 text-center">
+        <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
+          <CheckCircle className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+        </div>
+        <h3 className="text-xl font-bold text-theme-primary mb-2">Message received!</h3>
+        <p className="text-theme-secondary">We'll get back to you at <strong>{formData.email}</strong> within 24 hours.</p>
+        <button
+          onClick={() => { setIsSubmitted(false); setFormData({ name: '', email: '', subject: '', message: '' }) }}
+          className="mt-6 text-sm text-primary-light hover:underline"
+        >
+          Send another message
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+          <label htmlFor="name" className="block text-sm font-semibold text-theme-secondary mb-1.5">Full Name</label>
+          <input
+            type="text" id="name" name="name" value={formData.name} onChange={handleChange} required
+            placeholder="Your name"
+            className="w-full px-4 py-3 surface-section border border-theme rounded-xl text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light transition-all"
+          />
+        </div>
+        <div>
+          <label htmlFor="email" className="block text-sm font-semibold text-theme-secondary mb-1.5">Email Address</label>
+          <input
+            type="email" id="email" name="email" value={formData.email} onChange={handleChange} required
+            placeholder="you@example.com"
+            className="w-full px-4 py-3 surface-section border border-theme rounded-xl text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light transition-all"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label htmlFor="subject" className="block text-sm font-semibold text-theme-secondary mb-1.5">Subject</label>
+        <select
+          id="subject" name="subject" value={formData.subject} onChange={handleChange} required
+          className="w-full px-4 py-3 surface-section border border-theme rounded-xl text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light transition-all"
+        >
+          <option value="">What is this about?</option>
+          <option value="Booking Issue">Booking Issue</option>
+          <option value="General Inquiry">General Inquiry</option>
+          <option value="Become a Guide">Become a Guide</option>
+          <option value="Payment & Refunds">Payment & Refunds</option>
+          <option value="Feedback">Feedback</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor="message" className="block text-sm font-semibold text-theme-secondary mb-1.5">Message</label>
+        <textarea
+          id="message" name="message" value={formData.message} onChange={handleChange} required
+          rows={5} placeholder="Describe your issue or question in detail..."
+          className="w-full px-4 py-3 surface-section border border-theme rounded-xl text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light transition-all resize-none"
+        />
+      </div>
+
+      <button
+        type="submit" disabled={isSubmitting}
+        className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl transition-all disabled:opacity-60 shadow-lg shadow-blue-500/20"
+      >
+        {isSubmitting ? (
+          <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /><span>Sending...</span></>
+        ) : (
+          <><Send className="w-4 h-4" /><span>Send Message</span></>
+        )}
+      </button>
+    </form>
+  )
 }
 
-// ============================================================================
-// MAIN PAGE
-// ============================================================================
-
+// ─── Page ──────────────────────────────────────────────────────────────────
 export default function ContactPage() {
- return (
- <PageLayout>
- <div className="pt-14 sm:pt-16 surface-card">
- 
- {/* Hero Section */}
- <section className="bg-gradient-to-br from-blue-600 to-indigo-700 dark:from-blue-800 dark:to-indigo-900 text-white py-16 sm:py-20">
- <div className="container-safe mx-auto max-w-7xl text-center">
- <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
- Get in Touch
- </h1>
- <p className="text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto">
- Have questions? We're here to help 24/7. Reach out to our support team.
- </p>
- </div>
- </section>
+  return (
+    <PageLayout>
+      <div className="surface-base">
 
- {/* Contact Methods py-24 for padding */}
- <section className=" surface-card py-24 sm:py-20.5">
- <div className="container-safe mx-auto max-w-7xl">
- <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-20">
- {CONTACT_METHODS.map((method, index) => (
- <ContactMethodCard key={index} method={method} />
- ))}
- </div>
- </div>
- </section>
+        {/* Hero */}
+        <section className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white py-12 sm:py-20">
+          <div className="max-w-4xl mx-auto px-6 text-center">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+              Support team is active
+            </div>
+            <h1 className="text-3xl sm:text-5xl font-bold mb-4">How can we help?</h1>
+            <p className="text-lg text-blue-100 max-w-xl mx-auto">
+              Submit a message below or reach out via email — our team typically responds within 24 hours.
+            </p>
+          </div>
+        </section>
 
- {/* Contact Form + Info */}
- <section className="py-16 sm:py-20 surface-section">
- <div className="container-safe mx-auto max-w-7xl">
- <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
- 
- {/* Left Column - Form */}
- <div>
- <h2 className="text-2xl sm:text-3xl font-bold text-theme-primary mb-4">
- Send us a Message
- </h2>
- <p className="text-theme-secondary mb-8">
- Fill out the form below and we'll get back to you within 24 hours.
- </p>
- <ContactForm />
- </div>
+        {/* Quick options row */}
+        <section className="py-10 border-b border-theme surface-card">
+          <div className="max-w-4xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="flex items-center gap-3 p-4 surface-section rounded-xl border border-theme">
+              <div className="p-2.5 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
+                <HelpCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="font-semibold text-theme-primary text-sm">Help Center</p>
+                <p className="text-xs text-theme-muted">Read our terms and FAQs</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-4 surface-section rounded-xl border border-theme">
+              <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/30 rounded-lg">
+                <Mail className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div>
+                <p className="font-semibold text-theme-primary text-sm">Email</p>
+                <a href="mailto:support@safarihub.com" className="text-xs text-primary-light hover:underline">support@safarihub.com</a>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-4 surface-section rounded-xl border border-theme">
+              <div className="p-2.5 bg-amber-50 dark:bg-amber-950/30 rounded-lg">
+                <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <p className="font-semibold text-theme-primary text-sm">Response Time</p>
+                <p className="text-xs text-theme-muted">Within 24 hours</p>
+              </div>
+            </div>
+          </div>
+        </section>
 
- {/* Right Column - Info */}
- <div className="space-y-8">
- {/* Response Time */}
- <div className="surface-card border border-theme rounded-xl p-6">
- <div className="flex items-start gap-4">
- <div className="p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-lg">
- <Clock className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
- </div>
- <div>
- <h3 className="font-bold text-theme-primary mb-1">
- Fast Response
- </h3>
- <p className="text-sm text-theme-secondary ">
- We typically respond within 24 hours. For urgent matters, use live chat or phone.
- </p>
- </div>
- </div>
- </div>
+        {/* Form + FAQ */}
+        <section className="py-16 surface-card">
+          <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-14 items-start">
 
- {/* Security Note */}
- <div className="surface-card border border-theme rounded-xl p-6">
- <div className="flex items-start gap-4">
- <div className="p-3 bg-primary-light/10 rounded-lg">
- <Shield className="w-6 h-6 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
- </div>
- <div>
- <h3 className="font-bold text-theme-primary mb-1">
- Secure & Private
- </h3>
- <p className="text-sm text-theme-secondary ">
- Your information is encrypted and never shared with third parties.
- </p>
- </div>
- </div>
- </div>
+            {/* Form */}
+            <div>
+              <h2 className="text-2xl font-bold text-theme-primary mb-2">Send us a message</h2>
+              <p className="text-theme-secondary mb-8">Your message creates a support ticket — our team will reply here and by email.</p>
+              <ContactForm />
+              <div className="flex items-center gap-2 mt-4 text-xs text-theme-muted">
+                <Shield className="w-3.5 h-3.5" />
+                <span>Your information is encrypted and never shared with third parties.</span>
+              </div>
+            </div>
 
- {/* Office Locations */}
- <div className="surface-card border border-theme rounded-xl p-6">
- <h3 className="font-bold text-theme-primary mb-4 flex items-center gap-2">
- <MapPin className="w-5 h-5 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
- Our Offices
- </h3>
- <div className="space-y-4">
- {OFFICES.map((office, index) => (
- <div key={index} className="border-b border-theme last:border-0 pb-4 last:pb-0">
- <p className="font-semibold text-theme-primary">
- {office.city}, {office.country}
- </p>
- <p className="text-sm text-theme-secondary mt-1">
- {office.address}
- </p>
- <p className="text-sm text-theme-muted ">
- {office.district}
- </p>
- <div className="mt-2 space-y-1 text-sm">
- <a href={`tel:${office.phone}`} className="text-primary-light dark:text-primary-dark dark:text-primary-dark hover:underline block">
- {office.phone}
- </a>
- <a href={`mailto:${office.email}`} className="text-primary-light dark:text-primary-dark dark:text-primary-dark hover:underline block">
- {office.email}
- </a>
- <p className="text-theme-muted text-xs">
- {office.hours}
- </p>
- </div>
- </div>
- ))}
- </div>
- </div>
- </div>
- </div>
- </div>
- </section>
+            {/* FAQ */}
+            <div>
+              <h2 className="text-2xl font-bold text-theme-primary mb-2">Frequently asked questions</h2>
+              <p className="text-theme-secondary mb-8">Quick answers to common questions.</p>
+              <div className="space-y-3">
+                {FAQ_PREVIEW.map((faq, i) => (
+                  <details key={i} className="group surface-section border border-theme rounded-xl overflow-hidden">
+                    <summary className="flex items-center justify-between gap-4 p-5 cursor-pointer font-semibold text-theme-primary list-none hover:text-primary-light transition-colors">
+                      <span>{faq.question}</span>
+                      <ChevronRight className="w-4 h-4 text-theme-muted flex-shrink-0 group-open:rotate-90 transition-transform" />
+                    </summary>
+                    <div className="px-5 pb-5 text-sm text-theme-secondary leading-relaxed">
+                      {faq.answer}
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </div>
 
- {/* FAQ Preview */}
- <section className="py-16 sm:py-20 surface-card">
- <div className="container-safe mx-auto max-w-4xl">
- <div className="text-center mb-12">
- <h2 className="text-2xl sm:text-3xl font-bold text-theme-primary mb-4">
- Frequently Asked Questions
- </h2>
- <p className="text-theme-secondary ">
- Quick answers to common questions.
- </p>
- </div>
+          </div>
+        </section>
 
- <div className="space-y-4">
- {FAQ_PREVIEW.map((faq, index) => (
- <div key={index} className="p-6 surface-section border border-theme rounded-xl">
- <h3 className="font-bold text-theme-primary mb-2">
- {faq.question}
- </h3>
- <p className="text-theme-secondary ">
- {faq.answer}
- </p>
- </div>
- ))}
- </div>
-
- <div className="text-center mt-8">
- <Link
- href="/faq"
- className="inline-flex items-center gap-1 text-primary-light dark:text-primary-dark dark:text-primary-dark hover:gap-2 transition-all group"
- >
- <span>View all FAQs</span>
- <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
- </Link>
- </div>
- </div>
- </section>
-
- {/* Social Links */}
- <section className="py-12 sm:py-16 surface-section">
- <div className="container-safe mx-auto max-w-7xl text-center">
- <h2 className="text-xl sm:text-2xl font-bold text-theme-primary mb-6">
- Follow Us
- </h2>
- <div className="flex justify-center gap-4">
- <a
- href="https://facebook.com/safaribub"
- target="_blank"
- rel="noopener noreferrer"
- className="p-3 surface-card border border-theme rounded-lg hover:bg-primary-light/10 dark:hover:surface-base hover:text-primary-light dark:text-primary-dark dark:hover:text-primary-dark transition-all group"
- >
- <Facebook className="w-5 h-5" />
- </a>
- <a
- href="https://twitter.com/safaribub"
- target="_blank"
- rel="noopener noreferrer"
- className="p-3 surface-card border border-theme rounded-lg hover:bg-primary-light/10 dark:hover:surface-base hover:text-primary-light dark:text-primary-dark dark:hover:text-primary-dark transition-all group"
- >
- <Twitter className="w-5 h-5" />
- </a>
- <a
- href="https://instagram.com/safaribub"
- target="_blank"
- rel="noopener noreferrer"
- className="p-3 surface-card border border-theme rounded-lg hover:bg-pink-50 dark:hover:bg-pink-950/30 hover:text-pink-600 dark:hover:text-pink-400 transition-all group"
- >
- <Instagram className="w-5 h-5" />
- </a>
- <a
- href="https://linkedin.com/company/safaribub"
- target="_blank"
- rel="noopener noreferrer"
- className="p-3 surface-card border border-theme rounded-lg hover:bg-primary-light/10 dark:hover:surface-base hover:text-primary-light dark:text-primary-dark dark:hover:text-primary-dark transition-all group"
- >
- <Linkedin className="w-5 h-5" />
- </a>
- </div>
- </div>
- </section>
- </div>
- </PageLayout>
- )
+      </div>
+    </PageLayout>
+  )
 }

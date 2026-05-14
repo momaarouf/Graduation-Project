@@ -15,6 +15,7 @@ import {
  AdminUserResponse
 } from '@/src/lib/api/admin'
 import toast from 'react-hot-toast'
+import AdminUsersSkeleton from './skeleton'
 
 // ─── Modal Types ─────────────────────────────────────────────────────────────
 type ModalType = 'suspend' | 'ban' | 'details' | null
@@ -173,7 +174,7 @@ function UserCard({
        ? <CheckCircle className="w-3 h-3 text-green-500" />
        : <AlertCircle className="w-3 h-3 text-amber-500" />
       }
-      <span className="text-[10px] font-bold uppercase tracking-wider text-theme-secondary">
+      <span className="text-[10px] font-bold capitalize tracking-normal text-theme-secondary">
         {u.isEmailVerified ? 'Verified' : 'Unverified'}
       </span>
     </div>
@@ -186,8 +187,8 @@ function UserCard({
       Joined {new Date(u.createdAtUtc).toLocaleDateString()}
     </span>
     {u.profileCompleted
-     ? <span className="text-green-600 dark:text-green-400 font-bold uppercase tracking-tight">Profile Complete</span>
-     : <span className="text-theme-muted uppercase tracking-tight">Profile Incomplete</span>
+     ? <span className="text-green-600 dark:text-green-400 font-bold capitalize tracking-tight">Profile Complete</span>
+     : <span className="text-theme-muted capitalize tracking-tight">Profile Incomplete</span>
     }
    </div>
 
@@ -333,22 +334,9 @@ export default function AdminUsersPage() {
   } finally { setActionLoading(false) }
  }
 
- if (authLoading || isLoading) {
-  return (
-   <div className="flex flex-col items-center justify-center py-24 gap-4">
-    <div className="relative">
-      <Loader2 className="w-12 h-12 animate-spin text-primary-light" />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <Users className="w-5 h-5 text-primary-light/50" />
-      </div>
-    </div>
-    <div className="text-center space-y-1">
-      <p className="text-sm font-bold text-theme-primary uppercase tracking-widest">Synchronizing Registry</p>
-      <p className="text-xs text-theme-muted">Fetching latest administrative data...</p>
-    </div>
-   </div>
-  )
- }
+  if (authLoading || isLoading) {
+    return <AdminUsersSkeleton />
+  }
 
  return (
   <div className="space-y-6 pb-20">
@@ -372,7 +360,7 @@ export default function AdminUsersPage() {
            <ChevronRight className="w-4 h-4 text-theme-muted opacity-0 group-hover:opacity-100 transition-opacity" />
          </div>
          <p className="text-2xl font-black text-theme-primary leading-none">{s.value}</p>
-         <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mt-1">{s.label}</p>
+         <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal mt-1">{s.label}</p>
        </button>
      ))}
    </div>
@@ -380,7 +368,7 @@ export default function AdminUsersPage() {
    {/* ── Header & Search ───────────────────────────────────────────── */}
    <div className="surface-card p-5 rounded-2xl border border-theme shadow-sm space-y-4">
      <div className="flex items-center justify-between">
-       <h1 className="text-xl font-black text-theme-primary uppercase tracking-tight flex items-center gap-2">
+       <h1 className="text-xl font-black text-theme-primary capitalize tracking-tight flex items-center gap-2">
          <Users className="w-6 h-6 text-primary-light" />
          Registry Management
        </h1>
@@ -408,7 +396,7 @@ export default function AdminUsersPage() {
          <select
            value={filterStatus}
            onChange={e => setFilterStatus(e.target.value as any)}
-           className="px-4 py-3 surface-section border border-theme rounded-xl text-xs font-bold uppercase tracking-wider text-theme-secondary outline-none cursor-pointer hover:border-primary-light transition-colors"
+           className="px-4 py-3 surface-section border border-theme rounded-xl text-xs font-bold capitalize tracking-normal text-theme-secondary outline-none cursor-pointer hover:border-primary-light transition-colors"
          >
            <option value="ALL">All Status</option>
            <option value="ACTIVE">Active Only</option>
@@ -420,7 +408,7 @@ export default function AdminUsersPage() {
          <select
            value={filterRole}
            onChange={e => setFilterRole(e.target.value as any)}
-           className="px-4 py-3 surface-section border border-theme rounded-xl text-xs font-bold uppercase tracking-wider text-theme-secondary outline-none cursor-pointer hover:border-primary-light transition-colors"
+           className="px-4 py-3 surface-section border border-theme rounded-xl text-xs font-bold capitalize tracking-normal text-theme-secondary outline-none cursor-pointer hover:border-primary-light transition-colors"
          >
            <option value="ALL">All Roles</option>
            <option value="TRAVELER">Travelers</option>
@@ -445,7 +433,7 @@ export default function AdminUsersPage() {
      <div className="w-16 h-16 rounded-full bg-surface-section flex items-center justify-center mb-4">
        <UserX className="w-8 h-8 opacity-20" />
      </div>
-     <p className="text-sm font-bold uppercase tracking-widest">No matching records found</p>
+     <p className="text-sm font-bold capitalize tracking-normal">No matching records found</p>
      <p className="text-xs mt-1">Try adjusting your filters or search term</p>
     </div>
    )}
@@ -476,7 +464,7 @@ export default function AdminUsersPage() {
         <thead className="surface-section border-b border-theme">
          <tr>
           {['User', 'Role', 'Status', 'Email', 'Profile', 'Joined', 'Actions'].map(h => (
-           <th key={h} className="px-4 py-4 text-left text-[10px] font-black text-theme-muted uppercase tracking-widest">{h}</th>
+           <th key={h} className="px-4 py-4 text-left text-[10px] font-black text-theme-muted capitalize tracking-normal">{h}</th>
           ))}
          </tr>
         </thead>
@@ -507,8 +495,8 @@ export default function AdminUsersPage() {
            </td>
            <td className="px-4 py-4">
             {u.profileCompleted
-             ? <span className="text-[10px] font-black uppercase text-green-600 dark:text-green-400">Complete</span>
-             : <span className="text-[10px] font-black uppercase text-theme-muted">Incomplete</span>}
+             ? <span className="text-[10px] font-black capitalize text-green-600 dark:text-green-400">Complete</span>
+             : <span className="text-[10px] font-black capitalize text-theme-muted">Incomplete</span>}
            </td>
            <td className="px-4 py-4 text-[11px] text-theme-muted whitespace-nowrap">
             {new Date(u.createdAtUtc).toLocaleDateString()}
@@ -542,7 +530,7 @@ export default function AdminUsersPage() {
       <div className="flex items-center justify-between mb-4">
        <div className="flex items-center gap-2">
         <Pause className="w-5 h-5 text-amber-500" />
-        <h3 className="text-lg font-bold text-theme-primary uppercase tracking-tight">Suspend Account</h3>
+        <h3 className="text-lg font-bold text-theme-primary capitalize tracking-tight">Suspend Account</h3>
        </div>
        <button onClick={closeModal} className="p-2 hover:surface-section rounded-lg transition"><X className="w-4 h-4" /></button>
       </div>
@@ -554,7 +542,7 @@ export default function AdminUsersPage() {
 
       <div className="space-y-4">
        <div>
-        <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5">
+        <label className="block text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1.5">
          Reason <span className="text-danger-red">*</span>
         </label>
         <textarea value={suspendReason} onChange={e => setSuspendReason(e.target.value)}
@@ -565,7 +553,7 @@ export default function AdminUsersPage() {
        </div>
 
        <div>
-        <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+        <label className="block text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1.5 flex items-center gap-1.5">
          <Clock className="w-3.5 h-3.5" />
          Expiry (leave blank for indefinite)
         </label>
@@ -580,12 +568,12 @@ export default function AdminUsersPage() {
 
       <div className="flex gap-2 justify-end mt-6">
        <button onClick={closeModal}
-        className="px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-theme-secondary hover:surface-section rounded-xl transition">
+        className="px-4 py-2.5 text-xs font-bold capitalize tracking-normal text-theme-secondary hover:surface-section rounded-xl transition">
         Cancel
        </button>
        <button onClick={handleSuspend}
         disabled={actionLoading || !suspendReason.trim()}
-        className="px-5 py-2.5 text-xs font-black uppercase tracking-widest bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white rounded-xl flex items-center gap-2 transition shadow-lg shadow-amber-500/20">
+        className="px-5 py-2.5 text-xs font-black capitalize tracking-normal bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white rounded-xl flex items-center gap-2 transition shadow-lg shadow-amber-500/20">
         {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
         Confirm Suspension
        </button>
@@ -601,7 +589,7 @@ export default function AdminUsersPage() {
       <div className="flex items-center justify-between mb-4">
        <div className="flex items-center gap-2">
         <Ban className="w-5 h-5 text-danger-red" />
-        <h3 className="text-lg font-bold text-theme-primary uppercase tracking-tight">Permanent Ban</h3>
+        <h3 className="text-lg font-bold text-theme-primary capitalize tracking-tight">Permanent Ban</h3>
        </div>
        <button onClick={closeModal} className="p-2 hover:surface-section rounded-lg transition"><X className="w-4 h-4" /></button>
       </div>
@@ -616,7 +604,7 @@ export default function AdminUsersPage() {
       </p>
 
       <div>
-       <label className="block text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1.5">
+       <label className="block text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1.5">
         Reason <span className="text-danger-red">*</span>
        </label>
        <textarea value={banReason} onChange={e => setBanReason(e.target.value)}
@@ -628,12 +616,12 @@ export default function AdminUsersPage() {
 
       <div className="flex gap-2 justify-end mt-6">
        <button onClick={closeModal}
-        className="px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-theme-secondary hover:surface-section rounded-xl transition">
+        className="px-4 py-2.5 text-xs font-bold capitalize tracking-normal text-theme-secondary hover:surface-section rounded-xl transition">
         Cancel
        </button>
        <button onClick={handleBan}
         disabled={actionLoading || !banReason.trim()}
-        className="px-5 py-2.5 text-xs font-black uppercase tracking-widest bg-danger-red hover:bg-red-700 disabled:opacity-50 text-white rounded-xl flex items-center gap-2 transition shadow-lg shadow-danger-red/20">
+        className="px-5 py-2.5 text-xs font-black capitalize tracking-normal bg-danger-red hover:bg-red-700 disabled:opacity-50 text-white rounded-xl flex items-center gap-2 transition shadow-lg shadow-danger-red/20">
         {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
         Execute Ban
        </button>
@@ -654,7 +642,7 @@ export default function AdminUsersPage() {
                   {modal.user.fullName?.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <h3 className="text-xl font-black uppercase tracking-tight">{modal.user.fullName}</h3>
+                  <h3 className="text-xl font-black capitalize tracking-tight">{modal.user.fullName}</h3>
                   <p className="text-white/80 text-sm font-medium">{modal.user.email}</p>
                   <div className="flex gap-2 mt-2">
                     <RoleBadge role={modal.user.role} />
@@ -673,14 +661,14 @@ export default function AdminUsersPage() {
             {/* Quick Info Grid */}
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 surface-section rounded-2xl border border-theme">
-                <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1 flex items-center gap-1.5">
                   <Calendar className="w-3 h-3" />
                   Registration Date
                 </p>
                 <p className="text-sm font-bold text-theme-primary">{new Date(modal.user.createdAtUtc).toLocaleString()}</p>
               </div>
               <div className="p-4 surface-section rounded-2xl border border-theme">
-                <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1 flex items-center gap-1.5">
                   <Shield className="w-3 h-3" />
                   ID Verification
                 </p>
@@ -693,12 +681,12 @@ export default function AdminUsersPage() {
             {/* Enforcement Section (If Banned/Suspended) */}
             {(modal.user.accountStatus === 'BANNED' || modal.user.accountStatus === 'SUSPENDED') && (
               <div className="p-5 bg-danger-red/5 border-2 border-danger-red/10 rounded-2xl space-y-4">
-                <h4 className="text-xs font-black text-danger-red uppercase tracking-widest flex items-center gap-2">
+                <h4 className="text-xs font-black text-danger-red capitalize tracking-normal flex items-center gap-2">
                   <AlertCircle className="w-4 h-4" />
                   Enforcement Record
                 </h4>
                 <div>
-                  <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-1">Primary Reason</p>
+                  <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1">Primary Reason</p>
                   <p className="text-sm text-theme-primary leading-relaxed bg-white dark:bg-black/20 p-3 rounded-xl border border-theme">
                     {modal.user.statusReason || 'Violation of community guidelines.'}
                   </p>
@@ -707,14 +695,14 @@ export default function AdminUsersPage() {
                   <div className="flex items-center gap-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl">
                     <Clock className="w-4 h-4 text-amber-600" />
                     <div>
-                      <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Suspension Expiry</p>
+                      <p className="text-[10px] font-black text-amber-600 capitalize tracking-normal">Suspension Expiry</p>
                       <p className="text-xs font-bold text-theme-primary">{new Date(modal.user.suspendedUntilUtc).toLocaleString()}</p>
                     </div>
                   </div>
                 )}
                 
                 <div className="pt-2 border-t border-danger-red/10">
-                   <h5 className="text-[10px] font-black text-theme-muted uppercase tracking-widest mb-3 flex items-center gap-2">
+                   <h5 className="text-[10px] font-black text-theme-muted capitalize tracking-normal mb-3 flex items-center gap-2">
                     <History className="w-3 h-3" />
                     Audit Logs
                   </h5>
@@ -722,7 +710,7 @@ export default function AdminUsersPage() {
                     <div className="flex gap-3">
                       <div className="w-1.5 h-1.5 rounded-full bg-danger-red mt-1" />
                       <div>
-                        <p className="text-xs font-bold text-theme-primary uppercase">Manual Account Lock</p>
+                        <p className="text-xs font-bold text-theme-primary capitalize">Manual Account Lock</p>
                         <p className="text-[10px] text-theme-muted">{new Date(modal.user.createdAtUtc).toLocaleDateString()} • System Admin</p>
                       </div>
                     </div>
@@ -733,7 +721,7 @@ export default function AdminUsersPage() {
 
             {/* Actions for this user */}
             <div className="space-y-3 pt-4">
-              <p className="text-[10px] font-black text-theme-muted uppercase tracking-widest">Available Operations</p>
+              <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal">Available Operations</p>
               <div className="grid grid-cols-2 gap-2">
                 {modal.user.accountStatus !== 'ACTIVE' && (
                   <button 

@@ -24,7 +24,7 @@ interface User {
  userId: string;
  email: string;
  fullName?: string;
- role: 'ADMIN' | 'GUIDE' | 'TRAVELER'; // Normalized to uppercase
+ role: 'ADMIN' | 'GUIDE' | 'TRAVELER'; // Normalized to capitalize
  travelerProfileId?: string;
  guideProfileId?: string;
  profileCompleted: boolean;
@@ -64,7 +64,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Backend returns Pascal case: Traveler, Guide, Admin.
-// We normalize to uppercase for consistency in the frontend.
+// We normalize to capitalize for consistency in the frontend.
 const normalizeUser = (raw: MeResponse, avatarUrl?: string): User => ({
  ...raw,
  userId: raw.userId?.toString(),
@@ -112,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  }
  }
 
- // Normalize role to uppercase before storing (backend returns Pascal case)
+ // Normalize role to capitalize before storing (backend returns Pascal case)
  const userRes = await apiAuthMe();
  
  // Fetch profile avatar based on role
@@ -170,7 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  setIsProcessing(true);
 
  setAccessToken(response.token);
- // Fetch full user info after signup; normalize role from Pascal to uppercase
+ // Fetch full user info after signup; normalize role from Pascal to capitalize
  const userRes = await apiAuthMe();
  const normalized = normalizeUser(userRes);
  setUser(normalized);
@@ -200,7 +200,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  setIsProcessing(true);
 
  setAccessToken(response.token);
- // Fetch full user info after login; normalize role from Pascal to uppercase
+ // Fetch full user info after login; normalize role from Pascal to capitalize
  const userRes = await apiAuthMe();
  
  let avatarUrl: string | undefined;
