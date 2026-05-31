@@ -42,7 +42,7 @@ export default function TourFormSkeleton() {
         </div>
 
         {/* Footer Actions Skeleton */}
-        <div className="flex justify-between items-center pt-8 border-t border-theme">
+        <div className="flex justify-between items-center pt-8 border-t border-[#c8d8f8] dark:border-[#1a3566]">
            <div className="h-12 w-32 surface-section rounded-xl" />
            <div className="h-12 w-48 surface-section rounded-xl" />
         </div>

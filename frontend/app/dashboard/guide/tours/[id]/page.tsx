@@ -38,44 +38,38 @@ import GuideTourSummarySkeleton from './skeleton'
 // ============================================================================
 
 const StatusBadge = ({ status }: { status: TourTemplateStatus }) => {
- const styles: Record<TourTemplateStatus, { bg: string, text: string, border: string, icon: any, label: string }> = {
+ const styles: Record<TourTemplateStatus, { text: string, border: string, icon: any, label: string }> = {
  PUBLISHED: {
- bg: 'bg-success-green/10',
- text: 'text-emerald-700 dark:text-emerald-400',
- border: 'border-success-green/20',
+ text: 'text-emerald-600 dark:text-emerald-400',
+ border: 'border-emerald-500/30',
  icon: CheckCircle,
  label: 'Published'
  },
  DRAFT: {
- bg: 'surface-section',
  text: 'text-theme-secondary',
- border: 'border-theme',
+ border: 'border-theme-strong',
  icon: Clock,
  label: 'Draft'
  },
  PENDING_REVIEW: {
- bg: 'bg-primary-light/10',
  text: 'text-blue-700 dark:text-primary-dark',
- border: 'border-primary-light/20',
+ border: 'border-primary-light/30',
  icon: RefreshCw,
  label: 'Pending Review'
  },
  PAUSED: {
- bg: 'bg-accent-light/10',
  text: 'text-accent-light dark:text-amber-400',
- border: 'border-accent-light/20',
+ border: 'border-accent-light/30',
  icon: PauseCircle,
  label: 'Paused'
  },
  REJECTED: {
- bg: 'bg-danger-red/10',
  text: 'text-red-700 dark:text-red-400',
- border: 'border-danger-red/20',
+ border: 'border-danger-red/30',
  icon: AlertCircle,
  label: 'Rejected'
  },
  ARCHIVED: {
- bg: 'surface-section',
  text: 'text-theme-muted',
  border: 'border-theme-strong',
  icon: Trash2,
@@ -86,7 +80,7 @@ const StatusBadge = ({ status }: { status: TourTemplateStatus }) => {
  const config = styles[status] || styles.DRAFT
 
  return (
- <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-black capitalize tracking-normal rounded-full border ${config.bg} ${config.text} ${config.border} shadow-sm backdrop-blur-md`}>
+ <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-black capitalize tracking-normal rounded-full border shadow-md surface-card ${config.text} ${config.border}`}>
  <config.icon className="w-3.5 h-3.5" />
  {config.label}
  </span>
@@ -256,7 +250,7 @@ export default function TourSummaryPage({ params }: { params: Promise<{ id: stri
   <Sparkles className="w-4 h-4" />
   {tour.category} EXPEDITION
   </div>
-  <h1 className="text-4xl sm:text-5xl font-black text-theme-primary mb-6 tracking-tighter leading-none italic">
+  <h1 className="text-2xl sm:text-4xl font-black text-theme-primary mb-6 tracking-tighter leading-none italic">
   {tour.title}
   </h1>
 
@@ -414,7 +408,7 @@ export default function TourSummaryPage({ params }: { params: Promise<{ id: stri
   </p>
   </div>
   
-  <div className="mt-10 pt-8 border-t border-theme flex items-center justify-between">
+  <div className="mt-10 pt-8 border-t border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between">
   <div className="text-[10px] font-black text-theme-muted capitalize tracking-[0.2em]">Base Rate Economy</div>
   <div className="text-xl font-black text-theme-primary italic">
   {tour.basePrice} {tour.currency} <span className="text-[10px] font-black capitalize not-italic opacity-40 ml-1">/ Seat</span>

@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // TRAVELER SETTINGS - GENERAL SETTINGS PAGE
 // ============================================================================
 // LOCATION: /frontend/app/dashboard/traveler/settings/page.tsx
@@ -172,7 +172,7 @@ export default function TravelerSettingsPage() {
  <div className="surface-card border border-theme rounded-2xl sm:rounded-3xl shadow-2xl shadow-primary-light/5 overflow-hidden transition-all duration-500">
  
  {/* Tabs Hub */}
- <div className="flex border-b border-theme bg-surface-section/30">
+ <div className="flex border-b border-[#c8d8f8] dark:border-[#1a3566] bg-surface-section/30">
  {['account', 'notifications', 'security'].map((tab) => (
  <button
  key={tab}

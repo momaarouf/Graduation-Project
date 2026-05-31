@@ -169,6 +169,7 @@ function QRScannerModal({ isOpen, onClose, onScan }: QRScannerModalProps) {
   const [manualInput, setManualInput] = useState('')
   const [cameraError, setCameraError] = useState<string | null>(null)
   const [isSecureContext, setIsSecureContext] = useState(true)
+  const [isProcessingFile, setIsProcessingFile] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const scannerRef = useRef<Html5Qrcode | null>(null)
   const regionId = "reader"
@@ -252,8 +253,6 @@ function QRScannerModal({ isOpen, onClose, onScan }: QRScannerModalProps) {
       toast.error('Clipboard access denied')
     }
   }
-
-  const [isProcessingFile, setIsProcessingFile] = useState(false)
 
   const handleFileScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -467,7 +466,7 @@ function TravelerCard({ booking, onNoShow, onContact, now }: TravelerCardProps) 
         </div>
 
         {expanded && (
-          <div className="mt-4 pt-4 border-t border-theme space-y-3 animate-in slide-in-from-top-2 duration-300">
+          <div className="mt-4 pt-4 border-t border-[#c8d8f8] dark:border-[#1a3566] space-y-3 animate-in slide-in-from-top-2 duration-300">
             <div className="grid grid-cols-1 gap-2.5">
               <a href={`mailto:${booking.traveler?.email}`} className="flex items-center gap-2 text-xs font-medium text-theme-secondary hover:text-primary-light truncate">
                 <Mail className="w-3.5 h-3.5 text-theme-muted" />

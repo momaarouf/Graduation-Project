@@ -33,7 +33,7 @@ export default function BookingDetailLoading() {
                     <div className="h-4 w-20 surface-section rounded" />
                     <div className="h-4 w-16 surface-section rounded" />
                   </div>
-                  <div className="border-t border-theme pt-2 flex justify-between">
+                  <div className="border-t border-[#c8d8f8] dark:border-[#1a3566] pt-2 flex justify-between">
                     <div className="h-5 w-12 surface-section rounded" />
                     <div className="h-6 w-20 surface-section rounded" />
                   </div>

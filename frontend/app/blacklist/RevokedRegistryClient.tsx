@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // ============================================================================
 // REVOKED REGISTRY CLIENT COMPONENT
@@ -280,7 +280,7 @@ export default function RevokedRegistryClient({
  ======================================== */}
  <div className="hidden lg:block surface-card border border-theme rounded-xl overflow-hidden">
  <table className="w-full">
- <thead className="surface-section border-b border-theme">
+ <thead className="surface-section border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <tr>
  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">
  Guide ID
@@ -440,7 +440,7 @@ export default function RevokedRegistryClient({
  {/* ========================================
  DISCLAIMER
  ======================================== */}
- <div className="pt-6 text-center border-t border-theme">
+ <div className="pt-6 text-center border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <p className="text-xs text-theme-muted ">
  This registry is updated daily. If you believe a guide was incorrectly listed,
  please <a href="/contact" className="text-primary-light dark:text-primary-dark dark:text-primary-dark hover:underline">contact support</a>.

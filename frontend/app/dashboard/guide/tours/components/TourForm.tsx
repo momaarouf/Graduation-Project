@@ -1329,7 +1329,7 @@ function MediaSection({ formData, onChange }: MediaSectionProps) {
  placeholder="Add a caption..."
  value={item.caption || ''}
  onChange={(e) => updateMediaCaption(index, e.target.value)}
- className="w-full text-[11px] py-1 bg-transparent border-b border-theme focus:border-primary-light dark:border-primary-dark outline-none text-theme-secondary placeholder:italic transition-colors"
+ className="w-full text-[11px] py-1 bg-transparent border-b border-[#c8d8f8] dark:border-[#1a3566] focus:border-primary-light dark:border-primary-dark outline-none text-theme-secondary placeholder:italic transition-colors"
  />
  </div>
  </div>
@@ -1731,7 +1731,7 @@ function ItinerarySection({ formData, onChange, mapId }: ItinerarySectionProps &
  </div>
 
  {/* Map Picker for Itinerary Stop */}
- <div className="mt-4 border-t border-theme pt-3">
+ <div className="mt-4 border-t border-[#c8d8f8] dark:border-[#1a3566] pt-3">
  <button
  type="button"
  onClick={() => {

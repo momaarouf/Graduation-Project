@@ -78,7 +78,7 @@ export default async function TourReviewsPage({ params }: ReviewsPageProps) {
 
  {/* Pagination Placeholder (Phase 2) */}
  {tourReviews.reviews?.totalPages > 1 && (
- <div className="mt-12 pt-8 border-t border-theme flex items-center justify-between">
+ <div className="mt-12 pt-8 border-t border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between">
  <div className="text-sm text-theme-muted ">
  Showing {tourReviews.reviews.content.length} of {tourReviews.totalReviews} reviews
  </div>

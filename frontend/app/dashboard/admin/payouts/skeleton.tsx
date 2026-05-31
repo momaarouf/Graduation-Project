@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 
 export default function AdminPayoutsSkeleton() {
   return (
@@ -34,7 +34,7 @@ export default function AdminPayoutsSkeleton() {
 
       {/* Desktop Table Skeleton */}
       <div className="hidden lg:block surface-card rounded-3xl border border-theme overflow-hidden">
-        <div className="h-12 surface-section border-b border-theme" />
+        <div className="h-12 surface-section border-b border-[#c8d8f8] dark:border-[#1a3566]" />
         <div className="divide-y divide-theme">
           {[1, 2, 3, 4, 5, 6].map(i => (
             <div key={i} className="px-6 py-6 flex items-center justify-between">

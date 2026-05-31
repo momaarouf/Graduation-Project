@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // WISHLIST CONTENT COMPONENT
 // ============================================================================
 // LOCATION: /frontend/src/components/wishlist/WishlistContent.tsx
@@ -281,7 +281,7 @@ export default function WishlistContent() {
  <motion.div 
  initial={{ opacity: 0, x: -20 }}
  animate={{ opacity: 1, x: 0 }}
- className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8 sm:mb-12 border-b border-theme pb-8 sm:pb-10"
+ className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8 sm:mb-12 border-b border-[#c8d8f8] dark:border-[#1a3566] pb-8 sm:pb-10"
  >
  <div>
  <div className="flex items-center gap-3 mb-4">

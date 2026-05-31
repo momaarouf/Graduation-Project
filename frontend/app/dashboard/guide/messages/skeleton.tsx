@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 
 export default function GuideMessagesSkeleton() {
   return (
@@ -6,7 +6,7 @@ export default function GuideMessagesSkeleton() {
       <div className="h-full flex flex-col overflow-hidden">
         
         {/* Top Header Bar Skeleton */}
-        <div className="flex-none surface-base border-b border-theme px-4 sm:px-6 py-2.5 sm:py-3">
+        <div className="flex-none surface-base border-b border-[#c8d8f8] dark:border-[#1a3566] px-4 sm:px-6 py-2.5 sm:py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-5 h-5 surface-section rounded-md" />
@@ -20,7 +20,7 @@ export default function GuideMessagesSkeleton() {
           </div>
           
           {/* Search bar skeleton */}
-          <div className="relative mt-2 px-4 sm:px-6 pb-2 border-b border-theme">
+          <div className="relative mt-2 px-4 sm:px-6 pb-2 border-b border-[#c8d8f8] dark:border-[#1a3566]">
             <div className="h-9 surface-section rounded-xl w-full" />
           </div>
         </div>
@@ -28,10 +28,10 @@ export default function GuideMessagesSkeleton() {
         {/* Content Area Split Skeleton */}
         <div className="flex-1 flex min-h-0 overflow-hidden surface-base">
           {/* Left Sidebar Skeleton */}
-          <div className="w-full sm:w-80 border-r border-theme flex flex-col min-h-0 overflow-hidden">
+          <div className="w-full sm:w-80 border-r border-[#c8d8f8] dark:border-[#1a3566] flex flex-col min-h-0 overflow-hidden">
             <div className="flex-1 space-y-1 p-2">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="p-3 border-b border-theme flex items-center gap-3">
+                <div key={i} className="p-3 border-b border-[#c8d8f8] dark:border-[#1a3566] flex items-center gap-3">
                   <div className="w-10 h-10 surface-section rounded-full flex-shrink-0" />
                   <div className="flex-1 space-y-2">
                     <div className="h-4 w-24 surface-section rounded" />

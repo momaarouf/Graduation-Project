@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -78,7 +78,7 @@ export default function TourGuide({ guide, tourId, tourTitle }: any) {
  const profileUrl = `/guides/${guide.id}`
 
  return (
- <section className="pt-10 border-t border-theme">
+ <section className="pt-10 border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-6 surface-section p-6 rounded-xl border border-theme shadow-sm">
  {/* Avatar & Basic Info */}
  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">

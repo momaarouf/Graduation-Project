@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // SIGNUP PAGE - LOADING SKELETON
 // ============================================================================
 // LOCATION: /frontend/src/app/auth/signup/loading.tsx
@@ -133,7 +133,7 @@ export default function SignupLoading() {
  {/* ========================================
  FAQ TEASER SKELETON
  ======================================== */}
- <div className="mt-8 pt-8 border-t border-theme">
+ <div className="mt-8 pt-8 border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
  {[1, 2, 3, 4].map((i) => (
  <div key={i} className="space-y-2">

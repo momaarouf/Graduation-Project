@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
@@ -172,7 +172,7 @@ export default function AdminVerificationQueuePage() {
       </div>
       <span className="text-[10px] font-black text-primary-light capitalize tracking-[0.2em] bg-primary-light/10 px-3 py-1 rounded-xl border border-primary-light/10">Security Compliance</span>
      </div>
-     <h1 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tighter">
+     <h1 className="text-2xl sm:text-3xl font-black text-theme-primary tracking-tighter">
       Guide <span className="text-primary-light">Verification</span>
      </h1>
      <p className="text-sm text-theme-muted max-w-lg font-medium">
@@ -238,7 +238,7 @@ export default function AdminVerificationQueuePage() {
          </div>
          <ChevronRight className={`w-5 h-5 transition-transform ${selectedVerification?.id === v.id ? 'translate-x-1 text-primary-light' : 'text-theme-muted group-hover:translate-x-1'}`} />
         </div>
-        <div className="mt-4 flex items-center justify-between pt-4 border-t border-theme/50">
+        <div className="mt-4 flex items-center justify-between pt-4 border-t border-[#c8d8f8] dark:border-[#1a3566]">
          <div className="flex items-center gap-2 text-[9px] font-black text-theme-muted capitalize tracking-[0.15em]">
           <Calendar className="w-3.5 h-3.5" />
           {v.verificationSubmittedAtUtc ? new Date(v.verificationSubmittedAtUtc).toLocaleDateString() : 'Pending'}
@@ -269,7 +269,7 @@ export default function AdminVerificationQueuePage() {
         className="surface-card rounded-[3rem] border border-theme shadow-2xl overflow-hidden flex flex-col h-[calc(100vh-200px)] min-h-[600px] relative"
        >
         {/* Mobile Header */}
-        <div className="lg:hidden p-6 border-b border-theme flex items-center justify-between bg-surface-paper shadow-sm z-20">
+        <div className="lg:hidden p-6 border-b border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between bg-surface-paper shadow-sm z-20">
          <button onClick={() => setSelectedVerification(null)} className="flex items-center gap-2 text-primary-light font-black text-[10px] capitalize tracking-[0.2em] bg-primary-light/10 px-4 py-2 rounded-xl border border-primary-light/20">
           <ChevronLeft className="w-4 h-4" /> Back to Queue
          </button>
@@ -320,7 +320,7 @@ export default function AdminVerificationQueuePage() {
         </div>
 
         {/* Identity Profile & Actions */}
-        <div className="p-8 surface-paper border-t border-theme">
+        <div className="p-8 surface-paper border-t border-[#c8d8f8] dark:border-[#1a3566]">
          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
           <div className="min-w-0">
            <h2 className="text-2xl font-black text-theme-primary tracking-tight truncate">{selectedVerification.user?.fullName}</h2>

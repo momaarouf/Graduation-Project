@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -48,7 +48,7 @@ export default function TravelerDisputesPage() {
   return (
     <div className="surface-base p-4 sm:p-8 min-h-[80vh]">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8 sm:mb-12 border-b border-theme pb-8">
+        <div className="mb-8 sm:mb-12 border-b border-[#c8d8f8] dark:border-[#1a3566] pb-8">
           <div className="flex items-center gap-4 mb-2 sm:mb-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-primary-light flex items-center justify-center shadow-lg shadow-primary-light/20">
               <Scale className="w-5 h-5 sm:w-6 sm:h-6 text-white" />

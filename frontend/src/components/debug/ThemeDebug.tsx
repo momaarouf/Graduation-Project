@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
@@ -92,7 +92,7 @@ export default function ThemeDebug() {
  </span>
  </div>
  
- <div className="pt-2 border-t border-theme">
+ <div className="pt-2 border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="text-theme-secondary mb-1">HTML Classes:</div>
  <div className="surface-section p-2 rounded text-wrap break-all">
  {htmlClass || '(none)'}
@@ -101,7 +101,7 @@ export default function ThemeDebug() {
  </div>
 
  {/* Theme Controls */}
- <div className="pt-2 border-t border-theme">
+ <div className="pt-2 border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="text-xs text-theme-secondary mb-2">
  Force Theme:
  </div>

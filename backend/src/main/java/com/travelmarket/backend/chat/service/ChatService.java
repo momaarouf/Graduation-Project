@@ -96,7 +96,8 @@ public class ChatService {
         message.setContent(request.getContent());
         message = messageRepository.save(message);
 
-        // Touch the conversation to bump it in the Inbox (updatedAtUtc handled by @PreUpdate)
+        // Touch the conversation to bump it in the Inbox (force dirty state)
+        conversation.setUpdatedAtUtc(java.time.Instant.now());
         conversationRepository.save(conversation);
 
         MessageResponse response = mapToMessageResponse(message);

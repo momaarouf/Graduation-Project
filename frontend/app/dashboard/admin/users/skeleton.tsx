@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 
 export default function AdminUsersSkeleton() {
   return (
@@ -33,9 +33,9 @@ export default function AdminUsersSkeleton() {
 
       {/* Table Skeleton */}
       <div className="surface-card rounded-xl border border-theme overflow-hidden">
-        <div className="h-12 surface-section border-b border-theme" />
+        <div className="h-12 surface-section border-b border-[#c8d8f8] dark:border-[#1a3566]" />
         {[1, 2, 3, 4, 5, 6].map(i => (
-          <div key={i} className="p-4 border-b border-theme last:border-0 flex items-center justify-between">
+          <div key={i} className="p-4 border-b border-[#c8d8f8] dark:border-[#1a3566] last:border-0 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-full surface-section" />
               <div className="space-y-2">

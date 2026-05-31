@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { 
@@ -26,6 +26,7 @@ import {
   adminSendSupportMessage,
   AdminSupportTicketResponse 
 } from '@/src/lib/api/admin'
+import { SupportMessageResponse } from '@/src/lib/api/support'
 
 import toast from 'react-hot-toast'
 // Native date formatting replaces date-fns to reduce dependencies
@@ -239,7 +240,7 @@ export default function AdminSupportPage() {
                 className="surface-card border border-theme rounded-2xl overflow-hidden shadow-xl sticky top-24"
               >
                 {/* Header */}
-                <div className="p-4 sm:p-6 border-b border-theme flex items-center justify-between bg-theme-base/50">
+                <div className="p-4 sm:p-6 border-b border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between bg-theme-base/50">
                   <div className="flex items-center gap-3 sm:gap-4">
                     {/* Back button for mobile */}
                     <button 
@@ -322,7 +323,7 @@ export default function AdminSupportPage() {
                   )}
 
                   {/* Admin Actions */}
-                  <div className="space-y-4 pt-6 border-t border-theme">
+                  <div className="space-y-4 pt-6 border-t border-[#c8d8f8] dark:border-[#1a3566]">
                     <div>
                       <label className="text-[10px] font-black text-theme-muted capitalize tracking-normal block mb-2">Resolution Notes</label>
                       <textarea

@@ -72,10 +72,9 @@ apiClient.interceptors.response.use(
  async error => {
  const originalRequest = error.config;
 
- // Special cases: never retry or refresh for login, register, or /me
+ // Special cases: never retry or refresh for login or register
  const isAuthEndpoint = originalRequest.url?.includes('/api/auth/login') || 
- originalRequest.url?.includes('/api/auth/register') ||
- originalRequest.url?.includes('/api/auth/me');
+ originalRequest.url?.includes('/api/auth/register');
 
  if (isAuthEndpoint && error.response?.status === 401) {
  return Promise.reject(error);

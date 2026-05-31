@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -54,6 +54,9 @@ export function NotificationBell() {
  if (permission === 'granted') {
  showNotification(newNotif.title, { body: newNotif.message });
  }
+
+ // Refresh counts so the sidebar updates
+ handleRefresh();
  });
 
  // Close when clicking outside
@@ -197,7 +200,7 @@ export function NotificationBell() {
  className="absolute right-0 mt-2 w-80 md:w-96 surface-card rounded-xl shadow-xl border border-theme overflow-hidden"
  >
  {/* Header */}
- <div className="px-4 py-3 border-b border-theme flex justify-between items-center surface-section">
+ <div className="px-4 py-3 border-b border-[#c8d8f8] dark:border-[#1a3566] flex justify-between items-center surface-section">
  <h3 className="font-semibold text-theme-primary">Notifications</h3>
  <div className="flex gap-2">
  {permission === 'default' && (

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -67,7 +67,7 @@ export default function GuideDirectoryPage() {
  <div className="min-h-screen surface-card">
  
  {/* --- CINEMATIC HERO --- */}
- <section className="relative pt-32 pb-20 overflow-hidden border-b border-theme dark:border-white/5">
+ <section className="relative pt-32 pb-20 overflow-hidden border-b border-[#c8d8f8] dark:border-[#1a3566] dark:border-white/5">
  <div className="absolute inset-0 z-0">
  <div className="absolute inset-0 bg-gradient-to-b from-blue-50/50 via-white to-white dark:from-blue-950/20 dark:via-gray-950 dark:to-gray-950" />
  <div className="absolute top-[-20%] right-[-10%] w-[70%] h-[70%] bg-primary-light/5 dark:bg-primary-light/10 rounded-full blur-[120px]" />
@@ -104,7 +104,7 @@ export default function GuideDirectoryPage() {
  </section>
 
  {/* --- SEARCH & FILTERS --- */}
- <section className="sticky top-14 sm:top-16 z-40 surface-card  border-b border-theme dark:border-white/5 py-6">
+ <section className="sticky top-14 sm:top-16 z-40 surface-card  border-b border-[#c8d8f8] dark:border-[#1a3566] dark:border-white/5 py-6">
  <div className="container-safe px-4">
  <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
  {/* Search Bar */}

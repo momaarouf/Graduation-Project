@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // BOOKING CONFIRMATION PAGE — WIRED TO REAL BACKEND
 // ============================================================================
 // LOCATION: /frontend/app/bookings/confirmation/page.tsx
@@ -15,7 +15,7 @@
 
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
@@ -38,206 +38,80 @@ import {
 } from 'lucide-react'
 import PageLayout from '@/src/components/layout/PageLayout'
 
-import { 
- getTravelerPaymentMethods, 
- saveTravelerPaymentMethod, 
- payWithSavedCard,
- TravelerPaymentMethod 
-} from '@/src/lib/api/traveler-payments'
 import { createPaymentSession } from '@/src/lib/api/payment'
-import MockPaymentSimulator from '@/src/components/payment/MockPaymentSimulator'
+// MockPaymentSimulator replaced by /checkout/mock full-page redirect
+import PaymentCountdownBanner from '@/src/components/booking/PaymentCountdownBanner'
 import { BookingResponse, BookingStatus } from '@/src/lib/types/tour.types'
-import { usePaymentCountdown } from '@/src/hooks/usePaymentCountdown'
 import { useRouter } from 'next/navigation'
 import { getTravelerBooking } from '@/src/lib/api/tours'
 
 // ── Inner component (owns useSearchParams) ────────────────────────────────────
-function BookingConfirmationContent() {
+export default function BookingConfirmationPage() {
 
  const router = useRouter()
  const searchParams = useSearchParams()
  const bookingId = searchParams.get('id')
 
  const [booking, setBooking] = useState<BookingResponse | null>(null)
- const [isLoading, setIsLoading] = useState(true)
  const [showQR, setShowQR] = useState(false)
  const [isPaying, setIsPaying] = useState(false)
-
- // ── Payment countdown — reads paymentDeadlineUtc from booking response ─
- // This is the authoritative deadline set by the backend at booking creation.
- // Do NOT compute from createdAtUtc + 30min — that was the old wrong approach.
- const countdown = usePaymentCountdown(
- booking?.status === BookingStatus.PendingPayment ? booking?.paymentDeadlineUtc : null
- )
-
- // Payment Methods State
- const [savedMethods, setSavedMethods] = useState<TravelerPaymentMethod[]>([])
- const [selectedMethodId, setSelectedMethodId] = useState<number | null>(null)
- const [isAddingNewCard, setIsAddingNewCard] = useState(false)
- const [isRefreshing, setIsRefreshing] = useState(false)
-
- // New Card Form State (if needed)
- const [newCardName, setNewCardName] = useState('')
- const [newCardNumber, setNewCardNumber] = useState('')
- const [newCardExM, setNewCardExM] = useState('01')
- const [newCardExY, setNewCardExY] = useState(new Date().getFullYear().toString())
- const [newCardCvv, setNewCardCvv] = useState('')
- const [saveForFuture, setSaveForFuture] = useState(true)
-
- // Mock Payment Simulator state (retained for Stripe fallback)
- const [showMockDialog, setShowMockDialog] = useState(false)
- const [mockSessionId, setMockSessionId] = useState<string | null>(null)
 
  // ── Fetch the booking created by the booking flow ──────────────────────
  // ?id= is set by the"Book Now" handler after createBooking() succeeds.
  // If the ID is missing or fetch fails, we show a placeholder message.
 
- const fetchPaymentMethods = async (silent = false) => {
- if (!silent) setIsRefreshing(true)
- try {
- const methods = await getTravelerPaymentMethods()
- setSavedMethods(methods)
- if (methods.length > 0) {
- const exists = methods.find(m => m.id === selectedMethodId)
- if (!exists || !selectedMethodId) {
- const def = methods.find(m => m.isDefault) || methods[0]
- setSelectedMethodId(def.id)
- }
- setIsAddingNewCard(false)
- } else {
- setIsAddingNewCard(true)
- }
- } catch (err) {
- console.error('Failed to fetch methods:', err)
- } finally {
- setIsRefreshing(false)
- }
- }
-
  useEffect(() => {
  const fetchBooking = async () => {
  if (!bookingId) {
- setIsLoading(false)
  return
  }
  try {
  const res = await getTravelerBooking(Number(bookingId))
  setBooking(res)
-
- if (res.status === BookingStatus.PendingPayment) {
- await fetchPaymentMethods(true)
- }
  } catch {
  toast.error('Could not load booking details')
- } finally {
- setIsLoading(false)
  }
  }
  fetchBooking()
  }, [bookingId])
-
- // Sync when user returns to tab
- useEffect(() => {
- const onFocus = () => {
- if (booking?.status === BookingStatus.PendingPayment) {
- fetchPaymentMethods(true)
- }
- }
- window.addEventListener('focus', onFocus)
- return () => window.removeEventListener('focus', onFocus)
- }, [booking?.status, selectedMethodId])
-
- // (countdown handled by usePaymentCountdown hook above — no manual interval needed)
-
+ // Real Stripe: backend returns a checkout.stripe.com URL → redirect directly.
+ // Mock mode:   backend returns a MOCK instruction string → redirect to /checkout/mock.
  const handlePayNow = async () => {
- if (!booking) return
- setIsPaying(true)
- try {
- const response = await createPaymentSession(booking.id)
- if (response.checkoutUrl) {
- if (response.checkoutUrl.startsWith('MOCK')) {
- const match = response.checkoutUrl.match(/mock_sess_[a-f0-9]+/i)
- const sessionId = match ? match[0] : null
- if (sessionId) {
- setMockSessionId(sessionId)
- setShowMockDialog(true)
- } else {
- toast.error('Could not parse mock session ID from backend')
+   if (!booking) return
+   setIsPaying(true)
+   try {
+     const response = await createPaymentSession(booking.id)
+     if (response.checkoutUrl) {
+       if (response.checkoutUrl.startsWith('MOCK')) {
+         const match = response.checkoutUrl.match(/mock_sess_[a-f0-9]+/i)
+         const sessionId = match ? match[0] : null
+         if (sessionId) {
+            const p = new URLSearchParams({
+              sessionId,
+              bookingId: String(booking.id),
+              amount:    String(booking.finalPrice),
+              currency:  booking.currency ?? 'USD',
+              title:     booking.tourTitle ?? 'Tour',
+            })
+            if (booking.tourCoverImageUrl && !booking.tourCoverImageUrl.startsWith('data:image')) {
+              p.set('coverImage', booking.tourCoverImageUrl)
+            }
+            router.push(`/checkout/mock?${p.toString()}`)
+         } else {
+           toast.error('Could not parse mock session ID from backend')
+         }
+       } else {
+         window.location.href = response.checkoutUrl
+       }
+     } else {
+       toast.error('Could not initiate payment session')
+     }
+   } catch (err: any) {
+     toast.error(err.response?.data?.message || 'Payment failed to start')
+   } finally {
+     setIsPaying(false)
+   }
  }
- } else {
- window.location.href = response.checkoutUrl
- }
- } else {
- toast.error('Could not initiate payment session')
- }
- } catch (err: any) {
- toast.error(err.response?.data?.message || 'Payment failed to start')
- } finally {
- setIsPaying(false)
- }
- }
-
- const handlePayWithSavedCard = async () => {
- if (!booking || !selectedMethodId) return
- setIsPaying(true)
- try {
- await payWithSavedCard(booking.id, selectedMethodId)
- toast.success('Payment successful!')
- // Refresh booking data
- const res = await getTravelerBooking(Number(bookingId))
- setBooking(res)
- } catch (err: any) {
- toast.error(err.response?.data?.message || 'Payment failed')
- } finally {
- setIsPaying(false)
- }
- }
-
- const handlePayWithNewCard = async () => {
- if (!booking) return
- 
- if (!newCardName.trim() || newCardNumber.replace(/\s/g, '').length < 13 || newCardCvv.length < 3) {
- toast.error('Please fill in all card details correctly')
- return
- }
-
- setIsPaying(true)
- try {
- if (saveForFuture) {
- const saved = await saveTravelerPaymentMethod({
- brand: newCardNumber.startsWith('4') ? 'Visa' : 'Mastercard',
- last4: newCardNumber.replace(/\s/g, '').slice(-4),
- cardholderName: newCardName,
- expiryMonth: parseInt(newCardExM),
- expiryYear: parseInt(newCardExY),
- isDefault: true
- })
- await payWithSavedCard(booking.id, saved.id)
- toast.success('Card saved and payment processed!')
- } else {
- const response = await createPaymentSession(booking.id)
- if (response.checkoutUrl) {
- if (response.checkoutUrl.startsWith('MOCK')) {
- const match = response.checkoutUrl.match(/mock_sess_[a-f0-9]+/i)
- setMockSessionId(match ? match[0] : null)
- setShowMockDialog(true)
- } else {
- window.location.href = response.checkoutUrl
- }
- return
- }
- }
- // Refresh booking data on success
- const res = await getTravelerBooking(Number(bookingId))
- setBooking(res)
- } catch (err: any) {
- toast.error(err.response?.data?.message || 'Failed to process payment')
- } finally {
- setIsPaying(false)
- }
- }
-
- // handleSimulateMockAction removed - logic moved to MockPaymentSimulator component
 
  // ── Calendar download (.ics file) ──────────────────────────────────────
  // Generates a standard iCalendar file from the booking date/time.
@@ -317,18 +191,6 @@ Thank you for choosing TravelMarket!
  }
  }
 
- // ── Loading state ──────────────────────────────────────────────────────
-
- if (isLoading) {
- return (
- <PageLayout>
- <div className="min-h-[60vh] surface-section flex items-center justify-center">
- <Loader2 className="w-8 h-8 animate-spin text-primary-light dark:text-primary-dark" />
- </div>
- </PageLayout>
- )
- }
-
  // ── No booking found ──────────────────────────────────────────────────
 
  if (!booking) {
@@ -402,101 +264,28 @@ Thank you for choosing TravelMarket!
  Reference: <span className="font-mono font-bold text-theme-primary">SH-{booking.id.toString().padStart(4, '0')}</span>
  </p>
 
- {booking.status === BookingStatus.PendingPayment && (
- <div className="mt-8 max-w-xl mx-auto text-left">
- <div className="surface-card border border-primary-light/20 dark:border-primary-dark/20 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl shadow-blue-500/10">
- <div className="flex items-center justify-between mb-6">
- <div>
- <h3 className="text-lg font-bold text-theme-primary capitalize tracking-tight">Checkout</h3>
- <div className="flex items-center gap-2 mt-1">
- {/* Countdown pill — reads from backend paymentDeadlineUtc (15-min window) */}
- {countdown && !countdown.isExpired && (
- <div className={`px-3 py-1 rounded-full text-[10px] font-bold capitalize tracking-normal border ${
- countdown.urgency === 'critical'
- ? 'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 animate-pulse'
- : countdown.urgency === 'warning'
- ? 'bg-orange-50 dark:bg-orange-950/50 border-orange-200 dark:border-orange-800 text-orange-600 dark:text-orange-400 animate-pulse'
- : 'bg-primary-light/10 dark:bg-primary-dark/10 border-primary-light/20 dark:border-primary-dark/20 text-primary-light dark:text-primary-dark'
- }`}>
- Reserved for {countdown.displayString}
- </div>
+ {booking.status === BookingStatus.PendingPayment && booking.paymentDeadlineUtc && (
+  <div className="mt-8 max-w-xl mx-auto text-left">
+    <PaymentCountdownBanner
+      deadlineUtc={booking.paymentDeadlineUtc}
+      tourTitle={booking.tourTitle}
+    />
+  </div>
  )}
- {countdown?.isExpired && (
- <div className="px-3 py-1 rounded-full text-[10px] font-bold capitalize tracking-normal border bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400">
- Expired
- </div>
- )}
- </div>
- </div>
- </div>
 
- {/* 2-State Payment UI */}
- <div className="space-y-3 mt-4">
- {isAddingNewCard ? (
- <div className="space-y-3 p-4 surface-section border border-theme rounded-xl">
- {savedMethods.length > 0 && (
- <button onClick={() => setIsAddingNewCard(false)} className="flex items-center gap-1 text-xs text-primary-light dark:text-primary-dark hover:underline">
- <ChevronLeft className="w-3 h-3" /> Back to saved card
- </button>
- )}
- <h4 className="text-sm font-semibold text-theme-primary">New Payment Method</h4>
- <div className="space-y-2">
- <input type="text" value={newCardName} onChange={(e) => setNewCardName(e.target.value)} placeholder="Cardholder name" className="w-full px-3 py-2.5 surface-card border border-theme rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-light/30 transition-all" />
- <input type="text" value={newCardNumber} onChange={(e) => { const val = e.target.value.replace(/\D/g, '').replace(/(\d{4})(?=\d)/g, '$1 ').trim().slice(0, 19); setNewCardNumber(val) }} placeholder="0000 0000 0000 0000" className="w-full px-3 py-2.5 surface-card border border-theme rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-light/30 transition-all" />
- <div className="grid grid-cols-3 gap-2">
- <select value={newCardExM} onChange={(e) => setNewCardExM(e.target.value)} className="px-2 py-2.5 surface-card border border-theme rounded-lg text-sm outline-none appearance-none cursor-pointer text-center">
- {Array.from({length: 12}, (_, i) => String(i+1).padStart(2, '0')).map(m => (<option key={m} value={m}>{m}</option>))}
- </select>
- <select value={newCardExY} onChange={(e) => setNewCardExY(e.target.value)} className="px-2 py-2.5 surface-card border border-theme rounded-lg text-sm outline-none appearance-none cursor-pointer text-center">
- {Array.from({length: 10}, (_, i) => (new Date().getFullYear() + i).toString()).map(y => (<option key={y} value={y}>{y}</option>))}
- </select>
- <input type="password" value={newCardCvv} onChange={(e) => setNewCardCvv(e.target.value.replace(/\D/g, '').slice(0, 3))} placeholder="CVV" className="px-2 py-2.5 surface-card border border-theme rounded-lg text-sm outline-none text-center" />
- </div>
- <label className="flex items-center gap-2 cursor-pointer">
- <input type="checkbox" checked={saveForFuture} onChange={(e) => setSaveForFuture(e.target.checked)} className="w-4 h-4 rounded border-theme text-primary-light" />
- <span className="text-xs text-theme-muted">Save for future use</span>
- </label>
- </div>
- <button onClick={handlePayWithNewCard} disabled={isPaying} className="w-full py-3 bg-primary-light hover:bg-primary-light-hover text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
- {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : `Pay Now — ${booking.currency} ${booking.finalPrice.toFixed(2)}`}
- </button>
- <button onClick={handlePayNow} disabled={isPaying} className="w-full py-2 text-xs text-theme-muted hover:text-theme-secondary transition-colors">Use Stripe Checkout instead</button>
- </div>
- ) : (
- <div className="space-y-3">
- {selectedMethodId && (
- <div className="flex items-center justify-between p-3 surface-section border border-theme rounded-lg">
- <div className="flex items-center gap-3">
- <CreditCard className="w-4 h-4 text-primary-light dark:text-primary-dark" />
- <div>
- <p className="text-sm font-semibold text-theme-primary">{savedMethods.find(m => m.id === selectedMethodId)?.brand} ···· {savedMethods.find(m => m.id === selectedMethodId)?.last4}</p>
- <p className="text-xs text-theme-muted">{savedMethods.find(m => m.id === selectedMethodId)?.cardholderName}</p>
- </div>
- </div>
- <button onClick={() => fetchPaymentMethods()} disabled={isRefreshing} className="text-theme-muted hover:text-primary-light dark:hover:text-primary-dark transition-colors">
- <Clock className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
- </button>
- </div>
- )}
- {savedMethods.length > 1 && (
- <div className="space-y-1">
- {savedMethods.filter(m => m.id !== selectedMethodId).map(m => (
- <button key={m.id} onClick={() => setSelectedMethodId(m.id)} className="w-full flex items-center gap-2 px-3 py-2 text-xs text-theme-muted hover:text-theme-primary hover:surface-section rounded-lg transition-colors">
- <CreditCard className="w-3.5 h-3.5" />{m.brand} ···· {m.last4}
- </button>
- ))}
- </div>
- )}
- <button onClick={handlePayWithSavedCard} disabled={isPaying || !selectedMethodId} className="w-full py-3 bg-primary-light hover:bg-primary-light-hover text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
- {isPaying ? <><Loader2 className="w-4 h-4 animate-spin" /><span>Processing...</span></> : <span>Pay Now — {booking.currency} {booking.finalPrice.toFixed(2)}</span>}
- </button>
- <button onClick={() => setIsAddingNewCard(true)} className="w-full text-center text-xs text-theme-muted hover:text-theme-secondary transition-colors py-1">Pay with a different card</button>
- </div>
- )}
- </div>
- </div>
- </div>
- )}
+ {booking.status === BookingStatus.PendingPayment && (
+  <div className="mt-4 max-w-xl mx-auto text-left">
+  <div className="surface-card border border-primary-light/20 dark:border-primary-dark/20 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl shadow-blue-500/10">
+  <button
+  onClick={handlePayNow}
+  disabled={isPaying}
+  className="w-full py-4 bg-primary-light hover:bg-primary-light-hover text-white font-bold rounded-2xl transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
+  >
+  {isPaying ? <><Loader2 className="w-4 h-4 animate-spin" /><span>Starting checkout...</span></> : `Pay ${booking.currency} ${booking.finalPrice.toFixed(2)}`}
+  </button>
+  </div>
+  </div>
+  )}
 
  {isPending && booking.status !== BookingStatus.PendingPayment && (
  <p className="text-sm text-amber-600 dark:text-amber-400 mt-2 font-medium">
@@ -515,7 +304,7 @@ Thank you for choosing TravelMarket!
  <div className="surface-card border border-theme rounded-2xl shadow-xl overflow-hidden mb-6">
 
  {/* Tour Header */}
- <div className="p-6 border-b border-theme">
+ <div className="p-6 border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="flex items-start gap-4">
  {/* Cover image placeholder — real tour image URL if backend returns it */}
  <div className="w-20 h-20 rounded-lg surface-section overflow-hidden flex items-center justify-center">
@@ -700,37 +489,7 @@ Thank you for choosing TravelMarket!
  </div>
  </div>
 
- {/* --- MOCK PAYMENT SIMULATOR MODAL --- */}
- {showMockDialog && mockSessionId && booking && (
- <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 ">
- <MockPaymentSimulator 
- sessionId={mockSessionId}
- amount={booking.finalPrice}
- currency={booking.currency}
- isOpen={true}
- onSuccess={async () => {
- // Refresh booking data on success
- const res = await getTravelerBooking(Number(bookingId))
- setBooking(res)
- setShowMockDialog(false)
- }}
- onClose={() => setShowMockDialog(false)}
- />
- </div>
- )}
+  {/* Mock payment is now a full-page redirect to /checkout/mock — no modal needed */}
  </PageLayout>
-  )
-}
-
-// ── Default export: wraps in Suspense (required for useSearchParams in Next 15+) ──
-export default function BookingConfirmationPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-[60vh] surface-section flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary-light" />
-      </div>
-    }>
-      <BookingConfirmationContent />
-    </Suspense>
   )
 }

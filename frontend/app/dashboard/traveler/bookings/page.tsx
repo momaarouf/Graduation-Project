@@ -44,20 +44,20 @@ import { motion, AnimatePresence } from 'framer-motion'
 // ============================================================================
 
 function StatusBadge({ status }: { status: BookingStatus }) {
-  const statusConfig: Record<BookingStatus, { className: string, icon: any, label: string }> = {
-    [BookingStatus.Confirmed]: { className: 'badge-success', icon: CheckCircle, label: 'Confirmed' },
-    [BookingStatus.PendingGuide]: { className: 'badge-warning', icon: Clock, label: 'Pending' },
-    [BookingStatus.Completed]: { className: 'badge-primary', icon: CheckCircle, label: 'Completed' },
-    [BookingStatus.Cancelled]: { className: 'badge-danger', icon: XCircle, label: 'Cancelled' },
-    [BookingStatus.Rejected]: { className: 'badge-neutral', icon: XCircle, label: 'Rejected' },
-    [BookingStatus.PendingPayment]: { className: 'badge-accent', icon: CreditCard, label: 'Awaiting' },
-    [BookingStatus.Expired]: { className: 'badge-neutral', icon: AlertCircle, label: 'Expired' },
-    [BookingStatus.InProgress]: { className: 'badge-success', icon: RefreshCw, label: 'In Progress' },
-    [BookingStatus.Waitlisted]: { className: 'badge-warning', icon: Clock, label: 'Waitlist' }
+  const statusConfig: Record<BookingStatus, { icon: any, label: string, colorClass: string }> = {
+    [BookingStatus.Confirmed]: { icon: CheckCircle, label: 'Confirmed', colorClass: 'text-emerald-600 dark:text-emerald-400' },
+    [BookingStatus.PendingGuide]: { icon: Clock, label: 'Pending', colorClass: 'text-blue-600 dark:text-blue-400' },
+    [BookingStatus.Completed]: { icon: CheckCircle, label: 'Completed', colorClass: 'text-indigo-600 dark:text-indigo-400' },
+    [BookingStatus.Cancelled]: { icon: XCircle, label: 'Cancelled', colorClass: 'text-red-600 dark:text-red-400' },
+    [BookingStatus.Rejected]: { icon: XCircle, label: 'Rejected', colorClass: 'text-gray-600 dark:text-gray-400' },
+    [BookingStatus.PendingPayment]: { icon: CreditCard, label: 'Awaiting', colorClass: 'text-amber-600 dark:text-amber-400' },
+    [BookingStatus.Expired]: { icon: AlertCircle, label: 'Expired', colorClass: 'text-gray-600 dark:text-gray-400' },
+    [BookingStatus.InProgress]: { icon: RefreshCw, label: 'In Progress', colorClass: 'text-emerald-600 dark:text-emerald-400' },
+    [BookingStatus.Waitlisted]: { icon: Clock, label: 'Waitlist', colorClass: 'text-amber-600 dark:text-amber-400' }
   }
   const cfg = statusConfig[status] || statusConfig[BookingStatus.PendingGuide]
   return (
-    <span className={`badge-base ${cfg.className} gap-1.5 shadow-sm transition-all text-[9px] capitalize tracking-normal py-1`}>
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-[9px] font-bold capitalize tracking-normal rounded-full shadow-md border surface-card ${cfg.colorClass} border-current/30`}>
       <cfg.icon className="w-3 h-3" />
       {cfg.label}
     </span>
@@ -212,7 +212,7 @@ export default function TravelerBookingsPage() {
   <motion.div key={b.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }} className="group surface-card border border-theme rounded-2xl sm:rounded-3xl hover:border-primary-light/40 hover:shadow-2xl transition-all duration-500 overflow-hidden">
   <div className="flex flex-row">
   {/* Cover Area */}
-  <div className="relative w-32 sm:w-60 flex-shrink-0 surface-base overflow-hidden border-r border-theme">
+  <div className="relative w-32 sm:w-60 flex-shrink-0 surface-base overflow-hidden border-r border-[#c8d8f8] dark:border-[#1a3566]">
   {b.tourCoverImageUrl ? (
   <Image src={b.tourCoverImageUrl} alt={b.tourTitle} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
   ) : (
@@ -228,7 +228,7 @@ export default function TravelerBookingsPage() {
   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] sm:text-[11px] font-bold capitalize tracking-tight text-theme-muted">
   <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3 text-theme-secondary" /> {new Date(b.startTimeUtc).toLocaleDateString([], { month: 'short', day: 'numeric' })}</span>
   <span className="flex items-center gap-1.5"><Smartphone className="w-3 h-3 text-theme-secondary" /> ID: {b.id}</span>
-  <span className="flex items-center gap-1.5 border-l border-theme pl-3"><User className="w-3 h-3 text-theme-secondary" /> {b.peopleCount} {b.peopleCount === 1 ? 'Guest' : 'Guests'}</span>
+  <span className="flex items-center gap-1.5 border-l border-[#c8d8f8] dark:border-[#1a3566] pl-3"><User className="w-3 h-3 text-theme-secondary" /> {b.peopleCount} {b.peopleCount === 1 ? 'Guest' : 'Guests'}</span>
   </div>
 
   {b.status === BookingStatus.PendingPayment && b.paymentDeadlineUtc && (
@@ -236,7 +236,7 @@ export default function TravelerBookingsPage() {
   )}
   </div>
 
-  <div className="flex items-end justify-between mt-auto pt-3 border-t border-theme">
+  <div className="flex items-end justify-between mt-auto pt-3 border-t border-[#c8d8f8] dark:border-[#1a3566]">
   <div className="flex flex-col">
   <span className="text-[8px] font-bold text-theme-muted capitalize tracking-normal leading-none mb-0.5">Total Amount</span>
   <div className="text-[14px] sm:text-2xl font-extrabold text-price leading-none tracking-tight">{b.currency} {b.finalPrice}</div>

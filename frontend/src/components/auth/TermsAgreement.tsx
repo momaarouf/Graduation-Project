@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // TERMS AGREEMENT FORM - STEP 5 (FINAL STEP)
 // ============================================================================
 // LOCATION: /frontend/src/components/auth/TermsAgreement.tsx
@@ -326,7 +326,7 @@ export default function TermsAgreement({
  </div>
 
  {/* Checkbox Agreements */}
- <div className="space-y-4 pt-6 border-t border-theme-strong">
+ <div className="space-y-4 pt-6 border-t border-[#c8d8f8] dark:border-[#1a3566]-strong">
  {/* Terms of Service */}
  <label className="flex items-start gap-4 p-4 surface-card border border-theme rounded-2xl cursor-pointer group hover:surface-card dark:hover:surface-card transition-all duration-300">
  <div className="relative flex items-center justify-center mt-0.5">

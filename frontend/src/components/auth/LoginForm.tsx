@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // LOGIN FORM COMPONENT
 // ============================================================================
 // LOCATION: /frontend/src/components/auth/LoginForm.tsx
@@ -383,7 +383,7 @@ export default function LoginForm() {
  ======================================== */}
  <div className="relative my-6 sm:my-8">
  <div className="absolute inset-0 flex items-center">
- <div className="w-full border-t border-theme" />
+ <div className="w-full border-t border-[#c8d8f8] dark:border-[#1a3566]" />
  </div>
  <div className="relative flex justify-center text-[10px] tracking-normal capitalize font-bold">
  <span className="px-4 surface-base sm:surface-card text-theme-muted">

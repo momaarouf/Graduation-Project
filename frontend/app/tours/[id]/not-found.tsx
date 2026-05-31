@@ -165,7 +165,7 @@ export default function TourNotFound() {
  {/* ========================================
  SEARCH FORM
  ======================================== */}
- <div className="pt-8 border-t border-theme">
+ <div className="pt-8 border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <form
  action="/tours"
  method="GET"

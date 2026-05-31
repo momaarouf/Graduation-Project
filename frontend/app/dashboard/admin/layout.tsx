@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // ADMIN LAYOUT - WITH SIDEBAR NAVIGATION
 // ============================================================================
 // LOCATION: /frontend/src/app/dashboard/admin/layout.tsx
@@ -62,11 +62,11 @@ const NavItem = ({ item, isActive, isCollapsed, onClick }: NavItemProps) => {
   const Icon = item.icon
   const colorClasses = {
     blue: isActive ? 'bg-primary-light text-white shadow-lg shadow-blue-500/20' : 'text-theme-secondary hover:bg-primary-light/10 hover:text-primary-light',
-    amber: isActive ? 'bg-amber-600 text-white shadow-lg shadow-amber-500/20' : 'text-theme-secondary hover:bg-amber-50 hover:text-amber-600',
-    red: isActive ? 'bg-danger-red text-white shadow-lg shadow-red-500/20' : 'text-theme-secondary hover:bg-red-50 hover:text-danger-red',
-    purple: isActive ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/20' : 'text-theme-secondary hover:bg-purple-50 hover:text-purple-600',
-    emerald: isActive ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' : 'text-theme-secondary hover:bg-emerald-50 hover:text-emerald-600',
-    indigo: isActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-theme-secondary hover:bg-indigo-50 hover:text-indigo-600',
+    amber: isActive ? 'bg-amber-600 text-white shadow-lg shadow-amber-500/20' : 'text-theme-secondary hover:bg-amber-50 dark:hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400',
+    red: isActive ? 'bg-danger-red text-white shadow-lg shadow-red-500/20' : 'text-theme-secondary hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-danger-red dark:hover:text-red-400',
+    purple: isActive ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/20' : 'text-theme-secondary hover:bg-purple-50 dark:hover:bg-purple-500/10 hover:text-purple-600 dark:hover:text-purple-400',
+    emerald: isActive ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' : 'text-theme-secondary hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400',
+    indigo: isActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-theme-secondary hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400',
     gray: isActive ? 'bg-slate-900 dark:bg-slate-800 text-white shadow-lg' : 'text-theme-secondary hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-theme-primary'
   }
 
@@ -152,9 +152,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <Navigation />
       <div className="flex flex-1 relative lg:pt-16">
         {/* Sidebar - Desktop */}
-        <aside className={`hidden lg:block fixed left-0 top-16 h-[calc(100vh-4rem)] surface-base border-r border-theme transition-all duration-300 overflow-x-hidden overflow-y-auto ${isCollapsed ? 'w-20' : 'w-64'} z-40`}>
+        <aside className={`hidden lg:block fixed left-0 top-16 h-[calc(100vh-4rem)] surface-base border-r border-[#c8d8f8] dark:border-[#1a3566] transition-all duration-300 overflow-x-hidden overflow-y-auto ${isCollapsed ? 'w-20' : 'w-64'} z-40`}>
           <div className="h-full flex flex-col">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-theme mb-2">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#c8d8f8] dark:border-[#1a3566] mb-2">
               <button onClick={toggleCollapse} className={`flex items-center justify-center w-8 h-8 rounded-lg hover:surface-section transition-colors ${isCollapsed ? 'mx-auto' : 'ml-auto mr-3'}`}>
                 {isCollapsed ? <ChevronRight className="w-4 h-4 text-theme-muted" /> : <ChevronLeft className="w-4 h-4 text-theme-muted" />}
               </button>
@@ -164,7 +164,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <NavItem key={item.href} item={{ ...item, badge: (item as any).badgeKey ? badges[(item as any).badgeKey] : undefined }} isActive={pathname === item.href} isCollapsed={isCollapsed} />
               ))}
             </nav>
-            <div className={`p-3 border-t border-theme ${isCollapsed ? 'text-center' : ''}`}>
+            <div className={`p-3 border-t border-[#c8d8f8] dark:border-[#1a3566] ${isCollapsed ? 'text-center' : ''}`}>
               <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
                 <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center text-white font-bold flex-shrink-0 shadow-sm">
                   {user?.fullName?.charAt(0) || 'A'}
@@ -201,7 +201,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Main Content */}
         <main className={`flex-1 min-w-0 relative lg:ml-20 ${!isCollapsed ? 'lg:ml-64' : ''}`}>
-          <div className="lg:hidden h-14 glass-theme border-b border-theme flex items-center justify-between px-4 sticky top-0 z-30 shadow-sm">
+          <div className="lg:hidden h-14 glass-theme border-b border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between px-4 sticky top-0 z-30 shadow-sm">
             <button onClick={() => setIsMobileOpen(true)} className="p-2 -ml-2"><Menu className="w-5 h-5" /></button>
             <span className="text-xs font-black capitalize tracking-normal text-theme-primary">Admin Control</span>
             <div className="w-8" />

@@ -285,7 +285,7 @@ export default function TravelerDashboardPage() {
  <Sparkles className="w-3 h-3" />
  {getGreeting()}
  </div>
-  <h1 className="text-3xl sm:text-5xl font-black text-theme-primary tracking-tight leading-[1.1] sm:leading-tight">
+  <h1 className="text-2xl sm:text-4xl font-black text-theme-primary tracking-tight leading-[1.1] sm:leading-tight">
   Hi, {user?.fullName?.split(' ')[0] || 'Traveler'}! <br className="sm:hidden" />
   <span className="text-primary-light dark:text-primary-dark">Explore</span> more.
   </h1>

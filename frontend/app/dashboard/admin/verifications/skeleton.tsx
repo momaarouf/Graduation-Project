@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 
 export default function AdminVerificationsSkeleton() {
   return (
@@ -31,7 +31,7 @@ export default function AdminVerificationsSkeleton() {
                   <div className="h-3 w-48 surface-section rounded" />
                 </div>
               </div>
-              <div className="flex justify-between items-center pt-4 border-t border-theme/50">
+              <div className="flex justify-between items-center pt-4 border-t border-[#c8d8f8] dark:border-[#1a3566]">
                 <div className="h-3 w-24 surface-section rounded" />
                 <div className="h-6 w-20 surface-section rounded-full" />
               </div>
@@ -44,7 +44,7 @@ export default function AdminVerificationsSkeleton() {
           <div className="flex-1 surface-section/50 relative overflow-hidden flex items-center justify-center">
             <div className="w-24 h-24 surface-section rounded-[2rem]" />
           </div>
-          <div className="p-8 surface-paper border-t border-theme space-y-4">
+          <div className="p-8 surface-paper border-t border-[#c8d8f8] dark:border-[#1a3566] space-y-4">
             <div className="flex justify-between items-center">
               <div className="space-y-2">
                 <div className="h-8 w-48 surface-section rounded-lg" />

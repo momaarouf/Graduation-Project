@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 
 export default function GuideWalletSkeleton() {
   return (
@@ -52,13 +52,13 @@ export default function GuideWalletSkeleton() {
           {/* Right Column Skeleton */}
           <div className="lg:col-span-2 space-y-6">
             <div className="surface-card border border-theme rounded-none sm:rounded-[2.5rem] p-6 sm:p-8 space-y-6">
-              <div className="flex items-center gap-3 border-b border-theme pb-6">
+              <div className="flex items-center gap-3 border-b border-[#c8d8f8] dark:border-[#1a3566] pb-6">
                 <div className="w-10 h-10 surface-section rounded-xl flex-shrink-0" />
                 <div className="h-6 w-40 surface-section rounded" />
               </div>
               <div className="space-y-4">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="flex justify-between items-center py-3 border-b border-theme last:border-0">
+                  <div key={i} className="flex justify-between items-center py-3 border-b border-[#c8d8f8] dark:border-[#1a3566] last:border-0">
                     <div className="space-y-2">
                       <div className="h-4 w-32 surface-section rounded" />
                       <div className="h-3 w-20 surface-section rounded" />

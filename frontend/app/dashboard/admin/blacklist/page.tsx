@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // ADMIN BLACKLIST MANAGEMENT - CARD 25
 // ============================================================================
 // LOCATION: /frontend/src/app/dashboard/admin/blacklist/page.tsx
@@ -586,7 +586,7 @@ const BlacklistDetailsModal = ({ isOpen, onClose, entry, onRemove, onUpdate }: a
                       <div className="w-px flex-1 bg-theme-border my-1" />
                     )}
                   </div>
-                  <div className="flex-1 pb-4 border-b border-theme last:border-0 last:pb-0">
+                  <div className="flex-1 pb-4 border-b border-[#c8d8f8] dark:border-[#1a3566] last:border-0 last:pb-0">
                     <div className="flex justify-between items-start mb-1">
                       <p className="text-xs font-bold text-theme-primary capitalize">{item.action}</p>
                       <span className="text-[10px] text-theme-muted">{new Date(item.timestamp).toLocaleString()}</span>
@@ -601,7 +601,7 @@ const BlacklistDetailsModal = ({ isOpen, onClose, entry, onRemove, onUpdate }: a
         </div>
 
         {/* Footer Actions */}
-        <div className="p-6 surface-section border-t border-theme flex-shrink-0">
+        <div className="p-6 surface-section border-t border-[#c8d8f8] dark:border-[#1a3566] flex-shrink-0">
           {!isEditing && (
             <div className="flex gap-3">
               <button
@@ -918,7 +918,7 @@ export default function AdminBlacklistPage() {
           {/* Desktop Table */}
           <div className="hidden lg:block surface-card border border-theme rounded-xl overflow-hidden shadow-sm">
             <table className="w-full">
-              <thead className="surface-section border-b border-theme">
+              <thead className="surface-section border-b border-[#c8d8f8] dark:border-[#1a3566]">
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Guide</th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Reason</th>
@@ -928,7 +928,7 @@ export default function AdminBlacklistPage() {
                   <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+              <tbody className="divide-y divide-theme">
                 {loading ? (
                   [1, 2, 3, 4, 5].map(i => (
                     <tr key={i} className="animate-pulse">

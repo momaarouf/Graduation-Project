@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { 
@@ -156,7 +156,7 @@ function AuditMobileCard({ event }: { event: AuditEventResponse }) {
     </div>
    </div>
    
-   <div className="p-4 surface-section rounded-2xl border border-theme/50 relative overflow-hidden">
+   <div className="p-4 surface-section rounded-2xl border border-theme relative overflow-hidden">
     <div className="absolute top-0 left-0 w-1 h-full bg-primary-light opacity-10" />
     <p className="text-xs font-medium text-theme-secondary leading-relaxed italic">
      "{event.summary}"
@@ -225,7 +225,7 @@ export default function AdminAuditPage() {
       </div>
       <span className="text-[10px] font-black text-primary-light capitalize tracking-[0.2em] bg-primary-light/10 px-3 py-1 rounded-xl border border-primary-light/10">Audit Authority</span>
      </div>
-     <h1 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tighter">
+     <h1 className="text-2xl sm:text-3xl font-black text-theme-primary tracking-tighter">
       System <span className="text-primary-light">Audit Trail</span>
      </h1>
      <p className="text-sm text-theme-muted max-w-lg font-medium">
@@ -274,7 +274,7 @@ export default function AdminAuditPage() {
      <div className="overflow-x-auto">
       <table className="w-full text-left border-collapse">
        <thead>
-        <tr className="surface-section border-b border-theme">
+        <tr className="surface-section border-b border-[#c8d8f8] dark:border-[#1a3566]">
          {['Timestamp', 'Authority', 'Protocol', 'Manifest', 'Subject'].map(h => (
           <th key={h} className="px-8 py-5 text-[10px] font-black text-theme-muted capitalize tracking-[0.2em]">{h}</th>
          ))}
@@ -346,7 +346,7 @@ export default function AdminAuditPage() {
 
      {/* Pagination Footer */}
      {auditPage && (
-      <div className="px-8 py-6 surface-section border-t border-theme flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="px-8 py-6 surface-section border-t border-[#c8d8f8] dark:border-[#1a3566] flex flex-col sm:flex-row items-center justify-between gap-4">
        <div className="text-[10px] font-black text-theme-muted capitalize tracking-[0.2em]">
         Inventory: <span className="text-theme-primary">{filteredEvents.length}</span> / {auditPage.totalElements} Records
        </div>

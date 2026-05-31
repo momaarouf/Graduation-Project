@@ -353,7 +353,7 @@ export default function AdminPayoutPage() {
    <div className="hidden lg:block surface-card rounded-3xl border border-theme overflow-hidden shadow-sm">
     <table className="w-full border-collapse">
      <thead>
-      <tr className="surface-section border-b border-theme">
+      <tr className="surface-section border-b border-[#c8d8f8] dark:border-[#1a3566]">
        {['ID', 'Guide', 'Amount', 'Earnings', 'Method', 'Status', 'Actions'].map(h => (
         <th key={h} className="px-6 py-4 text-left text-[10px] font-black text-theme-muted capitalize tracking-[0.2em]">{h}</th>
        ))}

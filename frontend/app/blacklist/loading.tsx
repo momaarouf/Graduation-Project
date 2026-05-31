@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // BLACKLIST PAGE - LOADING SKELETON
 // ============================================================================
 // LOCATION: /frontend/src/app/blacklist/loading.tsx
@@ -32,9 +32,9 @@ export default function BlacklistLoading() {
 
  {/* Table skeleton */}
  <div className="surface-card border border-theme rounded-xl overflow-hidden animate-pulse">
- <div className="h-14 surface-section border-b border-theme" />
+ <div className="h-14 surface-section border-b border-[#c8d8f8] dark:border-[#1a3566]" />
  {[1,2,3,4,5].map(i => (
- <div key={i} className="h-16 border-b border-theme last:border-0" />
+ <div key={i} className="h-16 border-b border-[#c8d8f8] dark:border-[#1a3566] last:border-0" />
  ))}
  </div>
  </div>

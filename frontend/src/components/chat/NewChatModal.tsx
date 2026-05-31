@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { 
@@ -149,7 +149,7 @@ export default function NewChatModal({
  className="relative w-full max-w-lg surface-paper rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
  >
  {/* Header */}
- <div className="px-6 py-4 border-b border-theme flex items-center justify-between surface-paper sticky top-0 z-10">
+ <div className="px-6 py-4 border-b border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between surface-paper sticky top-0 z-10">
  <div>
  <h2 className="text-xl font-bold text-theme-primary">New Message</h2>
  <p className="text-sm text-theme-muted ">
@@ -165,7 +165,7 @@ export default function NewChatModal({
  </div>
 
  {/* Search */}
- <div className="px-6 py-4 surface-section border-b border-theme">
+ <div className="px-6 py-4 surface-section border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="relative">
  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
  <input
@@ -243,7 +243,7 @@ export default function NewChatModal({
  </div>
 
  {/* Footer */}
- <div className="p-4 surface-section border-t border-theme text-center">
+ <div className="p-4 surface-section border-t border-[#c8d8f8] dark:border-[#1a3566] text-center">
  <p className="text-[10px] capitalize tracking-normal font-bold text-theme-muted ">
  Only people with shared bookings are shown
  </p>

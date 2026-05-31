@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // GUIDE PROFILE EDITOR - CARD 16 - COMPLETE
 // ============================================================================
 // LOCATION: /frontend/src/app/dashboard/guide/profile/page.tsx
@@ -934,7 +934,7 @@ function SocialLinks({ links, isEditing, onChange }: SocialLinksProps) {
 
  {/* Add New Link Form */}
  {isEditing && (
- <div className="pt-4 border-t border-theme space-y-3">
+ <div className="pt-4 border-t border-[#c8d8f8] dark:border-[#1a3566] space-y-3">
  <p className="text-xs font-medium text-theme-muted capitalize tracking-normal">Add New Link</p>
  <div className="grid grid-cols-2 gap-2">
  <input
@@ -1486,7 +1486,7 @@ function PortfolioAddModal({ isOpen, onClose, tours, onToggle }: PortfolioAddMod
  return (
  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 ">
  <div className="surface-card rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl border border-theme">
- <div className="p-6 border-b border-theme flex items-center justify-between">
+ <div className="p-6 border-b border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between">
  <div>
  <h2 className="text-xl font-black text-theme-primary capitalize tracking-tight">Manage Portfolio</h2>
  <p className="text-[10px] text-theme-muted font-black capitalize tracking-[0.2em] mt-1">
@@ -1573,7 +1573,7 @@ function PortfolioAddModal({ isOpen, onClose, tours, onToggle }: PortfolioAddMod
  </div>
  </div>
 
- <div className="p-6 border-t border-theme flex justify-end">
+ <div className="p-6 border-t border-[#c8d8f8] dark:border-[#1a3566] flex justify-end">
  <button
  onClick={onClose}
  className="px-6 py-2 surface-base text-white rounded-xl font-bold hover:opacity-90 transition-opacity shadow-lg"

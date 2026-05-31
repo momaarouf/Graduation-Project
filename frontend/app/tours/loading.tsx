@@ -1,4 +1,4 @@
-import PageLayout from '@/src/components/layout/PageLayout'
+﻿import PageLayout from '@/src/components/layout/PageLayout'
 
 export default function ToursLoading() {
   return (
@@ -6,7 +6,7 @@ export default function ToursLoading() {
       <div className="pt-14 sm:pt-16 min-h-screen surface-base">
         <div className="flex">
           {/* Sidebar skeleton — desktop only */}
-          <div className="hidden lg:block w-80 xl:w-96 flex-shrink-0 border-r border-theme animate-pulse">
+          <div className="hidden lg:block w-80 xl:w-96 flex-shrink-0 border-r border-[#c8d8f8] dark:border-[#1a3566] animate-pulse">
             <div className="p-6 space-y-6">
               <div className="h-5 w-20 surface-section rounded" />
               {[1,2,3,4].map(i => (

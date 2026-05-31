@@ -818,7 +818,7 @@ const DisputeDetailsModal = ({ isOpen, onClose, dispute, onResolve }: any) => {
           </div>
 
           {/* Resolution Footer */}
-          <div className="mt-8 pt-6 border-t border-theme">
+          <div className="mt-8 pt-6 border-t border-[#c8d8f8] dark:border-[#1a3566]">
             {dispute.status === 'resolved_refund' || dispute.status === 'resolved_payment' ? (
               <div className="p-4 bg-theme-muted/10 rounded-xl border border-theme">
                 <h6 className="text-sm font-bold text-theme-primary mb-2">Arbitration Completed</h6>
@@ -1068,39 +1068,48 @@ export default function AdminDisputeCourtPage() {
        <RefreshCw className="w-3.5 h-3.5" />
        Reset Court
      </button>
-   </div>
+     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
+      {[
+        { key: 'total', label: 'Total Cases', value: stats.total, color: 'blue', action: () => setFilterStatus('all') },
+        { key: 'pending', label: 'Awaiting Review', value: stats.pending, color: 'amber', action: () => setFilterStatus('pending') },
+        { key: 'underReview', label: 'In Arbitration', value: stats.underReview, color: 'blue', action: () => setFilterStatus('under_review') },
+        { key: 'highPriority', label: 'Critical Priority', value: stats.highPriority, color: 'red', action: () => setFilterPriority('high') }
+      ].map(stat => {
+        const isActive = (stat.key === 'highPriority' && filterPriority === 'high') ||
+                        (stat.key === 'underReview' && filterStatus === 'under_review') ||
+                        (stat.key === 'pending' && filterStatus === 'pending') ||
+                        (stat.key === 'total' && filterStatus === 'all');
+        
+        const activeStyles = {
+          blue: 'border-blue-500/50 shadow-lg shadow-blue-500/10',
+          amber: 'border-amber-500/50 shadow-lg shadow-amber-500/10',
+          red: 'border-red-500/50 shadow-lg shadow-red-500/10'
+        }
 
-   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
-     {[
-       { key: 'total', label: 'Total Cases', value: stats.total, color: 'blue', action: () => setFilterStatus('all') },
-       { key: 'pending', label: 'Awaiting Review', value: stats.pending, color: 'amber', action: () => setFilterStatus('pending') },
-       { key: 'underReview', label: 'In Arbitration', value: stats.underReview, color: 'blue', action: () => setFilterStatus('under_review') },
-       { key: 'highPriority', label: 'Critical Priority', value: stats.highPriority, color: 'red', action: () => setFilterPriority('high') }
-     ].map(stat => {
-       const isActive = (stat.key === 'highPriority' && filterPriority === 'high') ||
-                       (stat.key === 'underReview' && filterStatus === 'under_review') ||
-                       (stat.key === 'pending' && filterStatus === 'pending') ||
-                       (stat.key === 'total' && filterStatus === 'all');
-       
-       const c = stat.color === 'red' ? 'red' : stat.color === 'amber' ? 'amber' : 'blue';
+        const textStyles = {
+          blue: 'text-blue-600 dark:text-blue-400',
+          amber: 'text-amber-600 dark:text-amber-400',
+          red: 'text-red-600 dark:text-red-400'
+        }
+        
+        const c = stat.color as 'blue' | 'amber' | 'red';
 
-       return (
-         <div
-           key={stat.key}
-           onClick={stat.action}
-           className={`group p-4 sm:p-6 surface-card rounded-2xl cursor-pointer transition-all hover:shadow-xl border-2 relative overflow-hidden ${
-             isActive 
-             ? `border-${c}-500/50 shadow-lg shadow-${c}-500/10` 
-             : 'border-theme'
-           }`}
-         >
-           <div className={`text-2xl sm:text-3xl font-bold text-${c}-600 dark:text-${c}-400 mb-1 sm:mb-2`}>
-             {stat.value}
-           </div>
-           <div className="text-[9px] sm:text-[10px] text-theme-muted font-bold capitalize tracking-normal leading-tight">{stat.label}</div>
-         </div>
-       );
-     })}
+        return (
+          <div
+            key={stat.key}
+            onClick={stat.action}
+            className={`group p-4 sm:p-6 surface-card rounded-2xl cursor-pointer transition-all hover:shadow-xl border-2 relative overflow-hidden ${
+              isActive ? activeStyles[c] : 'border-theme'
+            }`}
+          >
+            <div className={`text-2xl sm:text-3xl font-bold mb-1 sm:mb-2 ${textStyles[c]}`}>
+              {stat.value}
+            </div>
+            <div className="text-[9px] sm:text-[10px] text-theme-muted font-bold capitalize tracking-normal leading-tight">{stat.label}</div>
+          </div>
+        );
+      })}
+    </div>
    </div>
 
  {/* Filters */}
@@ -1170,7 +1179,7 @@ export default function AdminDisputeCourtPage() {
  {/* Desktop Table */}
  <div className="hidden lg:block surface-card border border-theme rounded-xl overflow-hidden shadow-sm">
  <table className="w-full">
- <thead className="surface-section border-b border-theme">
+ <thead className="surface-section border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <tr>
  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Dispute ID</th>
  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Tour</th>
@@ -1182,7 +1191,7 @@ export default function AdminDisputeCourtPage() {
  <th className="px-6 py-4 text-left text-xs font-medium text-theme-muted capitalize tracking-normal">Actions</th>
  </tr>
  </thead>
- <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+ <tbody className="divide-y divide-theme">
  {paginatedDisputes.map((dispute) => (
  <tr key={dispute.id} className="hover:surface-section dark:hover:surface-card transition-colors">
  <td className="px-6 py-4 text-sm font-medium text-theme-primary">

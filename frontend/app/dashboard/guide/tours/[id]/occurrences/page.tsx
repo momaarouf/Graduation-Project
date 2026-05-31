@@ -303,7 +303,7 @@ const OccurrenceModal = ({
       animate={{ scale: 1, opacity: 1 }}
       className="w-full max-w-md surface-card rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl overflow-hidden border border-theme"
     >
-      <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-theme flex items-center justify-between surface-section">
+      <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between surface-section">
         <h3 className="text-lg sm:text-xl font-bold text-theme-primary capitalize tracking-tight">
           {initialData ? 'Update Date' : 'New Departure'}
         </h3>
@@ -456,7 +456,7 @@ const BulkScheduleModal = ({ onClose, onSave, template }: {
       animate={{ scale: 1, opacity: 1 }}
       className="w-full max-w-4xl max-h-[90vh] surface-card rounded-[2rem] sm:rounded-[3rem] shadow-2xl overflow-hidden border border-theme flex flex-col"
     >
-      <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-theme flex items-center justify-between">
+      <div className="px-6 sm:px-8 py-5 sm:py-6 border-b border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between">
         <div className="flex items-center gap-3 sm:gap-4">
           <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary-light/20 rounded-xl flex items-center justify-center text-primary-light">
             <Repeat className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -539,7 +539,7 @@ const BulkScheduleModal = ({ onClose, onSave, template }: {
  </div>
  </div>
 
- <div className="p-8 border-t border-theme flex gap-4">
+ <div className="p-8 border-t border-[#c8d8f8] dark:border-[#1a3566] flex gap-4">
  <button onClick={onClose} className="px-8 h-14 surface-section text-theme-muted font-bold rounded-2xl text-xs capitalize tracking-normal">Cancel</button>
  <button
  onClick={handleSubmit}
@@ -583,7 +583,7 @@ const BulkTimeShiftModal = ({ onClose, onSave, template }: {
  animate={{ scale: 1, opacity: 1 }}
  className="w-full max-w-md surface-card rounded-[2.5rem] shadow-2xl overflow-hidden border border-theme"
  >
- <div className="p-8 border-b border-theme flex items-center justify-between">
+ <div className="p-8 border-b border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between">
  <div className="flex items-center gap-4">
  <div className="w-10 h-10 bg-orange-100 dark:bg-orange-500/20 rounded-xl flex items-center justify-center text-orange-600">
  <Clock className="w-6 h-6" />
@@ -806,7 +806,7 @@ export default function TourOccurrencesPage() {
 
  return (
  <div className="min-h-[calc(100vh-4rem)] pb-20">
-  <header className="sticky top-0 z-40 surface-card border-b border-theme shadow-sm">
+  <header className="sticky top-0 z-40 surface-card border-b border-[#c8d8f8] dark:border-[#1a3566] shadow-sm">
     <div className="max-w-7xl mx-auto px-4 h-20 sm:h-24 flex items-center justify-between gap-4">
       <div className="flex items-center gap-3 sm:gap-6 min-w-0">
         <button onClick={() => router.back()} className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl surface-section border border-theme flex items-center justify-center text-theme-muted hover:text-theme-primary transition-all active:scale-95 shrink-0">
@@ -933,7 +933,7 @@ export default function TourOccurrencesPage() {
  </div>
  </button>
 
- <div className="pt-8 pb-4 border-t border-theme mt-2">
+ <div className="pt-8 pb-4 border-t border-[#c8d8f8] dark:border-[#1a3566] mt-2">
  <div className="flex items-center justify-between text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-4">
  <span>Stats</span>
  <AlertCircle className="w-3 h-3" />

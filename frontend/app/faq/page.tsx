@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // FAQ PAGE - FREQUENTLY ASKED QUESTIONS
 // ============================================================================
 // LOCATION: /frontend/src/app/faq/page.tsx
@@ -289,7 +289,7 @@ export default function FAQPage() {
  </section>
 
  {/* Search and Categories */}
- <section className="py-12 surface-card border-b border-theme">
+ <section className="py-12 surface-card border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="mx-auto max-w-4xl">
  
  {/* Search Bar */}

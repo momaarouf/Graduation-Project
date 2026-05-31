@@ -220,7 +220,7 @@ const handleEmailTicket = () => {
  </div>
 
  {/* Booking Reference */}
- <div className="mt-6 pt-4 border-t border-theme text-center">
+ <div className="mt-6 pt-4 border-t border-[#c8d8f8] dark:border-[#1a3566] text-center">
  <p className="text-xs text-theme-muted ">
  Booking Reference: <span className="font-mono font-medium">{booking.id}</span>
  </p>

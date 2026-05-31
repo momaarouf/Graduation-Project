@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, use, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { QRCodeCanvas } from 'qrcode.react'
@@ -98,9 +98,23 @@ interface BookingDetailPageProps {
  params: Promise<{ id: string }>
 }
 
-export default function BookingDetailPage({ params }: BookingDetailPageProps) {
+ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
+  return (
+    <Suspense fallback={
+      <div className="pt-24 min-h-screen surface-section flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary-light" />
+      </div>
+    }>
+      <BookingDetailContent params={params} />
+    </Suspense>
+  )
+}
+
+function BookingDetailContent({ params }: BookingDetailPageProps) {
  const { id: bookingId } = use(params)
  const router = useRouter()
+ const searchParams = useSearchParams()
+ const paymentResult = searchParams.get('payment')
 
  const [booking, setBooking] = useState<BookingResponse | null>(null)
  const [isLoading, setIsLoading] = useState(true)
@@ -135,6 +149,15 @@ export default function BookingDetailPage({ params }: BookingDetailPageProps) {
  (r: any) => r.bookingId === Number(bookingId)
  )
  setIsReviewed(reviewed)
+  if (paymentResult === 'success') {
+    toast.success('Your payment was successful! Your booking is now confirmed.', { id: `payment-success-${bookingId}` })
+    // Remove query param without triggering navigation
+    window.history.replaceState({}, '', `/dashboard/traveler/bookings/${bookingId}`)
+  } else if (paymentResult === 'cancelled') {
+    toast.error('Payment was cancelled. You can try again whenever you are ready.', { id: `payment-cancel-${bookingId}` })
+    window.history.replaceState({}, '', `/dashboard/traveler/bookings/${bookingId}`)
+  }
+  
  } catch {
  toast.error('Booking not found')
  router.push('/dashboard/traveler/bookings')
@@ -369,7 +392,7 @@ Thank you for choosing TravelMarket!
  <span className="text-theme-muted">Travelers</span>
  <span className="font-bold text-theme-primary">{booking.peopleCount} {booking.peopleCount === 1 ? 'person' : 'people'}</span>
  </div>
- <div className="flex justify-between items-center pt-3 border-t border-theme">
+ <div className="flex justify-between items-center pt-3 border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <span className="text-sm font-medium">Total Paid</span>
  <span className="text-2xl font-black text-primary-light dark:text-primary-dark">{booking.currency} {booking.finalPrice.toFixed(2)}</span>
  </div>
@@ -487,7 +510,7 @@ Thank you for choosing TravelMarket!
  <span className="text-theme-muted">Refund Policy</span>
  <span className="font-bold text-accent-light dark:text-accent-dark">{previewRefund}% Refund</span>
  </div>
- <div className="flex justify-between pt-2 border-t border-theme font-bold">
+ <div className="flex justify-between pt-2 border-t border-[#c8d8f8] dark:border-[#1a3566] font-bold">
  <span>You'll get</span>
  <span className="text-lg text-success-green">{booking.currency} {((booking.finalPrice * previewRefund) / 100).toFixed(2)}</span>
  </div>

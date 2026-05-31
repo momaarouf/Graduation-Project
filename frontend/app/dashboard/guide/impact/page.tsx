@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // GUIDE IMPACT SCORE DETAILS
 // ============================================================================
 // LOCATION: /frontend/app/dashboard/guide/impact/page.tsx
@@ -257,7 +257,7 @@ export default function GuideImpactPage() {
  <div className={`p-3 rounded-xl ${tier.color === 'amber' ? 'bg-accent-light/10 text-accent-light' : tier.color === 'slate' ? 'surface-section text-theme-muted' : 'bg-primary-light/10 text-primary-light'} border border-current/20 shadow-sm`}><Icon className="w-6 h-6" /></div>
  <div className="min-w-0"><h4 className="font-bold text-theme-primary capitalize tracking-tight truncate">{tier.name}</h4><p className="text-[9px] font-bold capitalize tracking-normal text-theme-muted opacity-70">Fee: {tier.fee}%</p></div>
  </div>
- <div className="space-y-3 mb-6 border-t border-theme pt-4">
+ <div className="space-y-3 mb-6 border-t border-[#c8d8f8] dark:border-[#1a3566] pt-4">
  {tier.benefits.map((b: string, i: number) => <div key={i} className="flex items-center gap-2.5 text-[9px] font-bold text-theme-secondary"><CheckCircle className="w-3.5 h-3.5 text-success-green shrink-0" /> {b}</div>)}
  </div>
  <div className="text-[9px] font-bold capitalize tracking-[0.2em] text-center text-theme-muted py-2 bg-surface-section rounded-xl border border-theme">Score: {tier.minScore}{tier.maxScore !== Infinity ? `-${tier.maxScore}` : '+'}</div>

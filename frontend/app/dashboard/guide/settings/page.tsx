@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // GUIDE SETTINGS - GENERAL SETTINGS PAGE
 // ============================================================================
 // LOCATION: /frontend/app/dashboard/guide/settings/page.tsx
@@ -207,7 +207,7 @@ export default function GuideSettingsPage() {
  <div className="surface-card border border-theme rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden transition-all duration-500">
  
  {/* Tabs - Optimized for Mobile Density */}
- <div className="flex border-b border-theme bg-surface-section/30">
+ <div className="flex border-b border-[#c8d8f8] dark:border-[#1a3566] bg-surface-section/30">
  {['account', 'notifications', 'security'].map((tab) => (
  <button
  key={tab}
@@ -331,7 +331,7 @@ export default function GuideSettingsPage() {
  </div>
 
  {/* Regional Options */}
- <div className="pt-8 border-t border-theme">
+ <div className="pt-8 border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <h2 className="text-[9px] sm:text-[10px] font-bold text-theme-secondary capitalize tracking-[0.3em] mb-6 flex items-center gap-2">
  <div className="w-1.5 h-1.5 rounded-full bg-primary-light" />
  Regional Preferences

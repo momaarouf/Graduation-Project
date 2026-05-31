@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { Mail, User, Shield, X, ChevronRight } from 'lucide-react'
@@ -64,7 +64,7 @@ export default function OnboardingBanner({ profileCompleted, emailVerified, veri
 
  return (
  <div className="mb-6 surface-card border border-theme rounded-2xl overflow-hidden">
- <div className="flex items-center justify-between px-5 py-3 border-b border-theme">
+ <div className="flex items-center justify-between px-5 py-3 border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="flex items-center gap-3">
  <div className="flex gap-1">
  {steps.map(s => (

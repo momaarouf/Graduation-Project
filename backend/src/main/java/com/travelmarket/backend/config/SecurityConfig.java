@@ -60,6 +60,9 @@ public class SecurityConfig {
                         // Public tour browsing & support — no login required
                         .requestMatchers("/api/public/**", "/api/reviews/**", "/api/support/**").permitAll()
 
+                        // Websocket handshake must be public (authentication happens via STOMP frame)
+                        .requestMatchers("/ws-chat/**").permitAll()
+
                         // ── Payment endpoints ─────────────────────────────────
                         // Stripe calls /webhook directly — NO JWT, verified by Stripe-Signature header
                         .requestMatchers("/api/payments/webhook").permitAll()

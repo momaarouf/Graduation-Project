@@ -142,7 +142,7 @@ export default function GuideDashboardPage() {
         </div>
         <VerificationBadge status={profile?.verificationStatus || 'not_submitted'} />
       </div>
-      <h1 className="text-3xl sm:text-5xl font-bold text-theme-primary tracking-tight leading-tight capitalize drop-shadow-sm">
+      <h1 className="text-2xl sm:text-4xl font-bold text-theme-primary tracking-tight leading-tight capitalize drop-shadow-sm">
         Hi, {profile?.fullName.split(' ')[0] || 'Guide'}!
       </h1>
     </div>

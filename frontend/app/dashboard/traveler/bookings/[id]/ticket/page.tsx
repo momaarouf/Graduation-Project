@@ -104,7 +104,7 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
  className="surface-card rounded-[2.5rem] shadow-2xl overflow-hidden border border-theme relative"
  >
   {/* Top Notch - Ticket Aesthetic */}
-  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 surface-base rounded-b-3xl border-x border-b border-theme" />
+  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 surface-base rounded-b-3xl border-x border-b border-[#c8d8f8] dark:border-[#1a3566]" />
 
  {/* Ticket Header */}
  <div className="p-8 pb-12 text-center bg-gradient-to-br from-blue-600 to-indigo-700 text-white relative overflow-hidden">
@@ -221,7 +221,7 @@ export default function TicketPage({ params }: { params: Promise<{ id: string }>
  </div>
 
  {/* Ticket Footer */}
- <div className="p-6 surface-section border-t border-theme text-center">
+ <div className="p-6 surface-section border-t border-[#c8d8f8] dark:border-[#1a3566] text-center">
  <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-theme-muted capitalize tracking-[0.2em]">
  <ShieldCheck className="w-4 h-4 text-success-green" />
  Halal-Friendly Verified

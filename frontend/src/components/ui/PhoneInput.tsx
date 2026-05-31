@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef, useEffect } from 'react'
 import { Phone, ChevronDown } from 'lucide-react'
@@ -156,7 +156,7 @@ export default function PhoneInput({ value, onChange, error, disabled }: PhoneIn
  {/* Dropdown */}
  {isOpen && (
  <div className="absolute z-50 mt-1 w-64 max-h-60 overflow-auto surface-card border border-theme rounded-lg shadow-xl">
- <div className="p-2 sticky top-0 surface-card border-b border-theme">
+ <div className="p-2 sticky top-0 surface-card border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <input
  type="text"
  placeholder="Search country..."

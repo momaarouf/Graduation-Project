@@ -483,7 +483,7 @@ export default function BookingCard({
  <div className="relative">
  <button
  onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
- className="w-full flex items-center justify-between px-5 py-3.5 surface-section border border-primary-light/10 dark:border-primary-dark/10 rounded-lg text-left transition-all hover:border-primary-light dark:hover:border-primary-dark shadow-sm"
+ className="w-full flex items-center justify-between px-5 py-3.5 surface-section border border-primary-light/10 dark:border-primary-dark/10 rounded-lg text-left transition-all hover:surface-card hover:border-primary-light dark:hover:border-primary-dark dark:hover:surface-card shadow-sm"
  >
  <div className="flex items-center gap-2">
  <Calendar className="w-4 h-4 text-primary-light" />

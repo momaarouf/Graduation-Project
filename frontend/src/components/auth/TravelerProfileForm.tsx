@@ -540,7 +540,7 @@ export default function TravelerProfileForm({ onSubmit, initialData }: TravelerP
  className="
  w-full
  py-3
- bg-gradient-to-r from-blue-600 to-indigo-600
+ in stripe bg-gradient-to-r from-blue-600 to-indigo-600
  dark:from-blue-700 dark:to-indigo-700
  text-white font-semibold
  rounded-lg

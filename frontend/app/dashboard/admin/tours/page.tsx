@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
 import Image from 'next/image'
@@ -188,7 +188,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
    >
     
     {/* Header */}
-    <div className="px-6 py-4 border-b border-theme flex items-center justify-between surface-card sticky top-0 z-20 shadow-sm">
+    <div className="px-6 py-4 border-b border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between surface-card sticky top-0 z-20 shadow-sm">
      <div className="flex items-center gap-4">
       <div className="hidden md:flex w-12 h-12 bg-primary-light rounded-2xl items-center justify-center shadow-lg shadow-primary-light/20 text-white shrink-0">
        <ShieldCheck className="w-6 h-6" />
@@ -221,7 +221,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
      <div className="grid grid-cols-1 lg:grid-cols-12 h-full">
       
       {/* Content Column */}
-      <div className="lg:col-span-7 p-6 sm:p-10 space-y-10 border-b lg:border-b-0 lg:border-r border-theme">
+      <div className="lg:col-span-7 p-6 sm:p-10 space-y-10 border-b lg:border-b-0 lg:border-r border-[#c8d8f8] dark:border-[#1a3566]">
        
        {/* Hero Section */}
        <div className="space-y-6">
@@ -233,7 +233,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
           {tour.countryCode}
          </span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tight leading-[1.1]">
+        <h1 className="text-xl sm:text-2xl font-black text-theme-primary tracking-tight leading-[1.1]">
          {tour.title}
         </h1>
         <p className="text-lg text-theme-secondary border-l-4 border-primary-light pl-6 italic font-medium leading-relaxed">
@@ -305,7 +305,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
 
        {/* Itinerary */}
        <div className="space-y-8">
-        <div className="flex items-center justify-between border-b border-theme pb-4">
+        <div className="flex items-center justify-between border-b border-[#c8d8f8] dark:border-[#1a3566] pb-4">
          <h4 className="text-[10px] font-black text-theme-muted capitalize tracking-[0.2em]">Chronological Itinerary</h4>
          <span className="text-[10px] font-black text-primary-light capitalize tracking-normal">{itinerary.length} Phases</span>
         </div>
@@ -344,16 +344,16 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
         <div className="p-6 surface-card rounded-3xl border border-theme shadow-sm border-b-4 border-b-primary-light">
          <span className="block text-[10px] font-black text-theme-muted capitalize tracking-[0.15em] mb-2">Base Price</span>
          <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-black text-theme-primary">${tour.basePrice}</span>
+          <span className="text-2xl font-black text-theme-primary">${tour.basePrice}</span>
           <span className="text-xs font-black text-theme-muted capitalize">{tour.currency}</span>
          </div>
         </div>
         <div className="p-6 surface-card rounded-3xl border border-theme shadow-sm border-b-4 border-b-primary-light">
          <span className="block text-[10px] font-black text-theme-muted capitalize tracking-[0.15em] mb-2">Duration</span>
          <div className="flex items-baseline gap-1 text-theme-primary">
-          <span className="text-3xl font-black">{tour.durationHours}</span>
+          <span className="text-2xl font-black">{tour.durationHours}</span>
           <span className="text-sm font-black opacity-40">H</span>
-          <span className="text-3xl font-black ml-1">{tour.durationMinutes}</span>
+          <span className="text-2xl font-black ml-1">{tour.durationMinutes}</span>
           <span className="text-sm font-black opacity-40">M</span>
          </div>
         </div>
@@ -361,7 +361,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
 
        {/* Logistics Block */}
        <div className="surface-card p-8 rounded-[2.5rem] border border-theme shadow-sm space-y-8">
-        <div className="flex items-center justify-between pb-6 border-b border-theme">
+        <div className="flex items-center justify-between pb-6 border-b border-[#c8d8f8] dark:border-[#1a3566]">
          <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-success-green/10 flex items-center justify-center text-success-green">
            <Users className="w-5 h-5" />
@@ -461,7 +461,7 @@ const ReviewModal = ({ tour, onClose, onAction }: ReviewModalProps) => {
     </div>
 
     {/* Action Footer */}
-    <div className="p-6 sm:p-8 border-t border-theme surface-card z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+    <div className="p-6 sm:p-8 border-t border-[#c8d8f8] dark:border-[#1a3566] surface-card z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
      {showRejectForm ? (
       <div className="w-full max-w-2xl mx-auto space-y-6 animate-in slide-in-from-bottom-4">
        <div className="flex items-center justify-between">
@@ -567,7 +567,7 @@ export default function AdminTourModerationPage() {
       </div>
       <span className="text-[10px] font-black text-primary-light capitalize tracking-[0.2em] bg-primary-light/10 px-3 py-1 rounded-xl border border-primary-light/10">Admin Gatekeeper</span>
      </div>
-     <h1 className="text-3xl sm:text-4xl font-black text-theme-primary tracking-tighter">
+     <h1 className="text-2xl sm:text-3xl font-black text-theme-primary tracking-tighter">
       Tour <span className="text-primary-light">Moderation</span>
      </h1>
      <p className="text-sm text-theme-muted max-w-lg font-medium">

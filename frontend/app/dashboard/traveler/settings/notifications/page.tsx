@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // TRAVELER NOTIFICATION SETTINGS
 // ============================================================================
 // LOCATION: /frontend/src/app/dashboard/traveler/settings/notifications/page.tsx
@@ -176,7 +176,7 @@ const SettingRow = ({ setting, onToggle }: SettingRowProps) => {
  const Icon = setting.icon
 
  return (
- <div className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-theme last:border-0">
+ <div className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#c8d8f8] dark:border-[#1a3566] last:border-0">
  <div className="flex items-start gap-3">
  <div className="p-2 bg-primary-light/10 rounded-lg mt-1">
  <Icon className="w-4 h-4 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
@@ -350,7 +350,7 @@ export default function TravelerNotificationSettingsPage() {
  <div className="surface-card border border-theme rounded-xl shadow-sm overflow-hidden">
  
  {/* Booking Notifications */}
- <div className="p-6 border-b border-theme">
+ <div className="p-6 border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <h2 className="font-semibold text-theme-primary mb-1">
  Booking Notifications
  </h2>
@@ -369,7 +369,7 @@ export default function TravelerNotificationSettingsPage() {
  </div>
 
  {/* Reminders */}
- <div className="p-6 border-b border-theme">
+ <div className="p-6 border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <h2 className="font-semibold text-theme-primary mb-1">
  Reminders
  </h2>
@@ -387,7 +387,7 @@ export default function TravelerNotificationSettingsPage() {
  </div>
 
  {/* Review Reminder Frequency */}
- <div className="mt-4 pt-4 border-t border-theme">
+ <div className="mt-4 pt-4 border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <label className="block text-sm font-medium text-theme-secondary mb-2">
  Review Reminder Frequency
  </label>
@@ -408,7 +408,7 @@ export default function TravelerNotificationSettingsPage() {
  </div>
 
  {/* Promotional */}
- <div className="p-6 border-b border-theme">
+ <div className="p-6 border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <h2 className="font-semibold text-theme-primary mb-1">
  Promotional
  </h2>
@@ -426,7 +426,7 @@ export default function TravelerNotificationSettingsPage() {
  </div>
 
  {/* Marketing Frequency */}
- <div className="mt-4 pt-4 border-t border-theme">
+ <div className="mt-4 pt-4 border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <label className="block text-sm font-medium text-theme-secondary mb-2">
  Marketing Email Frequency
  </label>
@@ -447,7 +447,7 @@ export default function TravelerNotificationSettingsPage() {
  </div>
 
  {/* System */}
- <div className="p-6 border-b border-theme">
+ <div className="p-6 border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <h2 className="font-semibold text-theme-primary mb-1">
  System Notifications
  </h2>

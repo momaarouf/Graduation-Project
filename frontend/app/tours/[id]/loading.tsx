@@ -121,7 +121,7 @@ export default function TourDetailLoading() {
  {/* Booking card skeleton */}
  <div className="surface-card border border-theme rounded-xl shadow-lg overflow-hidden animate-pulse">
  {/* Price header */}
- <div className="p-6 border-b border-theme">
+ <div className="p-6 border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="h-8 w-32 surface-section rounded mb-2" />
  <div className="h-4 w-24 surface-section rounded" />
  </div>

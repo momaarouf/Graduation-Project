@@ -177,10 +177,35 @@
 
  /* ── BORDERS ──────────────────────────────────────────────────────────── */
 
- .border-theme {
- border-color: #c8d8f8;
- .dark & { border-color: #1a3566; } /* Deeper blue for dark mode */
- }
+  .border-theme {
+  border-color: #c8d8f8 !important;
+  border-bottom-color: #c8d8f8 !important;
+  border-top-color: #c8d8f8 !important;
+  border-left-color: #c8d8f8 !important;
+  border-right-color: #c8d8f8 !important;
+  .dark & { 
+    border-color: #1a3566 !important;
+    border-bottom-color: #1a3566 !important;
+    border-top-color: #1a3566 !important;
+    border-left-color: #1a3566 !important;
+    border-right-color: #1a3566 !important;
+  }
+  }
+
+  .divide-theme > :not([hidden]) ~ :not([hidden]) {
+  border-color: #c8d8f8 !important;
+  border-bottom-color: #c8d8f8 !important;
+  border-top-color: #c8d8f8 !important;
+  border-left-color: #c8d8f8 !important;
+  border-right-color: #c8d8f8 !important;
+  .dark & { 
+    border-color: #1a3566 !important;
+    border-bottom-color: #1a3566 !important;
+    border-top-color: #1a3566 !important;
+    border-left-color: #1a3566 !important;
+    border-right-color: #1a3566 !important;
+  }
+  }
 
  .border-theme-strong {
  border-color: #a0b8f0;
@@ -357,8 +382,8 @@
 
  /* Blue — primary actions, confirmed, active */
  .badge-primary {
- background-color: rgba(37, 99, 235, 0.1);
- color: #2563eb;
+ background-color: rgba(75, 85, 99, 0.35);
+ color: #1e3a5f;
  display: inline-flex;
  align-items: center;
  padding: 0.125rem 0.625rem;
@@ -368,15 +393,15 @@
  line-height: 1.5;
 
  .dark & {
- background-color: rgba(59, 130, 246, 0.14);
- color: #3b82f6;
+ background-color: rgba(55, 65, 81, 0.7);
+ color: #60a5fa;
  }
  }
 
  /* Orange — featured, urgency */
  .badge-accent {
- background-color: rgba(249, 115, 22, 0.1);
- color: #f97316;
+ background-color: rgba(75, 85, 99, 0.35);
+ color: #92400e;
  display: inline-flex;
  align-items: center;
  padding: 0.125rem 0.625rem;
@@ -386,15 +411,15 @@
  line-height: 1.5;
 
  .dark & {
- background-color: rgba(251, 146, 60, 0.14);
+ background-color: rgba(55, 65, 81, 0.7);
  color: #fb923c;
  }
  }
 
  /* Neutral — drafts, inactive */
  .badge-neutral {
- background-color: rgba(122, 150, 192, 0.12);
- color: #3d5a8a;
+ background-color: rgba(75, 85, 99, 0.35);
+ color: #1f2937;
  display: inline-flex;
  align-items: center;
  padding: 0.125rem 0.625rem;
@@ -404,15 +429,15 @@
  line-height: 1.5;
 
  .dark & {
- background-color: rgba(45, 90, 150, 0.2);
- color: #6ea6e8;
+ background-color: rgba(55, 65, 81, 0.7);
+ color: #d1d5db;
  }
  }
 
  /* Success — completed, verified, paid */
  .badge-success {
- background-color: rgba(22, 163, 74, 0.1);
- color: #16a34a;
+ background-color: rgba(75, 85, 99, 0.35);
+ color: #0d3b1d;
  display: inline-flex;
  align-items: center;
  padding: 0.125rem 0.625rem;
@@ -422,15 +447,15 @@
  line-height: 1.5;
 
  .dark & {
- background-color: rgba(34, 197, 94, 0.14);
+ background-color: rgba(55, 65, 81, 0.7);
  color: #22c55e;
  }
  }
 
  /* Warning — pending, caution */
  .badge-warning {
- background-color: rgba(245, 158, 11, 0.1);
- color: #d97706;
+ background-color: rgba(75, 85, 99, 0.35);
+ color: #78350f;
  display: inline-flex;
  align-items: center;
  padding: 0.125rem 0.625rem;
@@ -440,15 +465,15 @@
  line-height: 1.5;
 
  .dark & {
- background-color: rgba(251, 191, 36, 0.14);
+ background-color: rgba(55, 65, 81, 0.7);
  color: #fbbf24;
  }
  }
 
  /* Danger — errors, bans, cancelled */
  .badge-danger {
- background-color: rgba(239, 68, 68, 0.1);
- color: #ef4444;
+ background-color: rgba(75, 85, 99, 0.35);
+ color: #7f1d1d;
  display: inline-flex;
  align-items: center;
  padding: 0.125rem 0.625rem;
@@ -458,7 +483,7 @@
  line-height: 1.5;
 
  .dark & {
- background-color: rgba(248, 113, 113, 0.14);
+ background-color: rgba(55, 65, 81, 0.7);
  color: #f87171;
  }
  }
@@ -676,4 +701,57 @@
 
 @layer utilities {
   .italic { font-style: normal !important; }
+}
+
+/* ============================================================================
+   BORDER THEME OVERRIDES — outside @layer for maximum cascade priority
+   These flat rules ensure .border-theme and .divide-theme always win over
+   Tailwind's directional border-color resolution in both light and dark modes.
+   ============================================================================ */
+
+/* Light mode */
+.border-theme,
+.border-theme * {
+  border-color: #c8d8f8 !important;
+}
+
+.divide-theme > :not([hidden]) ~ :not([hidden]) {
+  border-color: #c8d8f8 !important;
+  border-top-color: #c8d8f8 !important;
+  border-bottom-color: #c8d8f8 !important;
+}
+
+/* Dark mode — flat selectors, no nesting */
+.dark .border-theme,
+.dark .border-theme * {
+  border-color: #1a3566 !important;
+}
+
+.dark .divide-theme > :not([hidden]) ~ :not([hidden]) {
+  border-color: #1a3566 !important;
+  border-top-color: #1a3566 !important;
+  border-bottom-color: #1a3566 !important;
+}
+
+
+/* Also target any element that has border-b/t/x/l/r alongside border-theme */
+.dark [class*="border-[#c8d8f8]"] {
+  border-color: #1a3566 !important;
+}
+
+/* ── CRITICAL: First-child fix ─────────────────────────────────────────────
+   divide-y only puts border-top on 2nd+ children. The line between child 1
+   and child 2 is the border-BOTTOM of child 1. In border-separate tables the
+   table background bleeds through this gap, making it appear white/black.
+   We explicitly set border-bottom on the first child to close this gap.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.divide-theme > :first-child {
+  border-bottom-width: 1px !important;
+  border-bottom-style: solid !important;
+  border-bottom-color: #c8d8f8 !important;
+}
+
+.dark .divide-theme > :first-child {
+  border-bottom-color: #1a3566 !important;
 }

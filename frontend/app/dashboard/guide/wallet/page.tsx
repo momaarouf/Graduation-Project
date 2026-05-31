@@ -53,7 +53,7 @@ function PayoutCard({ p }: { p: PaymentResponse }) {
         </div>
       </div>
       
-      <div className="flex items-center justify-between pt-3 border-t border-theme">
+      <div className="flex items-center justify-between pt-3 border-t border-[#c8d8f8] dark:border-[#1a3566]">
         <div className="flex flex-col">
           <span className="text-[10px] font-bold text-theme-muted capitalize tracking-normal">Date</span>
           <span className="text-xs font-bold text-theme-secondary">
@@ -158,18 +158,18 @@ export default function GuideWalletPage() {
  label: 'Available Balance', 
  value: summary?.availableBalance || 0, 
  icon: CheckCircle2, 
- color: 'text-success-green dark:text-emerald-400',
- bg: 'bg-success-green/10 dark:bg-emerald-950/20',
- border: 'border-success-green dark:border-success-green/50',
+ color: 'text-emerald-600 dark:text-emerald-400',
+ bg: 'bg-emerald-500/10 dark:bg-emerald-900/20',
+ border: 'border-emerald-500/30 dark:border-emerald-500/30',
  subtext: 'Already transferred to your account'
  },
  { 
  label: 'Pending (Escrow)', 
  value: summary?.pendingBalance || 0, 
  icon: Clock, 
- color: 'text-primary-light dark:text-primary-dark dark:text-primary-dark ',
- bg: 'bg-primary-light/10 ',
- border: 'border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark/50',
+ color: 'text-primary-light dark:text-primary-dark',
+ bg: 'bg-primary-light/10 dark:bg-primary-dark/10',
+ border: 'border-primary-light/30 dark:border-primary-dark/30',
  subtext: 'Held for 48h after tour completion',
  info: 'We hold funds briefly to ensure traveler satisfaction before releasing them to your account.'
  },
@@ -177,9 +177,9 @@ export default function GuideWalletPage() {
  label: 'Lifetime Earnings', 
  value: summary?.totalEarned || 0, 
  icon: ShieldCheck, 
- color: 'text-accent-light dark:text-accent-dark dark:text-amber-400',
- bg: 'bg-accent-light/10 dark:bg-accent-dark/10 dark:bg-amber-950/20',
- border: 'border-accent-light dark:border-accent-dark dark:border-accent-light dark:border-accent-dark/50',
+ color: 'text-accent-light dark:text-amber-400',
+ bg: 'bg-accent-light/10 dark:bg-amber-900/20',
+ border: 'border-accent-light/30 dark:border-amber-500/30',
  subtext: 'Total net income on SafariBub'
  }
  ].map((card, i) => (
@@ -263,7 +263,7 @@ export default function GuideWalletPage() {
  ID: {summary.stripeAccountId}
  </div>
  </div>
- <div className="space-y-4 pt-4 border-t border-theme">
+ <div className="space-y-4 pt-4 border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="flex items-center gap-2 text-[10px] font-bold text-theme-muted capitalize tracking-normal">
  <Info className="w-3 h-3" />
  Payout Security
@@ -370,7 +370,7 @@ export default function GuideWalletPage() {
  {/* Payout History Table */}
   <div className="lg:col-span-2 space-y-6">
   <div className="surface-card border-x-0 sm:border border-theme rounded-none sm:rounded-[2.5rem] shadow-none sm:shadow-sm overflow-hidden min-h-[500px] flex flex-col">
-  <div className="p-6 sm:p-8 border-b border-theme flex items-center justify-between">
+  <div className="p-6 sm:p-8 border-b border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between">
   <div className="flex items-center gap-3">
   <div className="w-10 h-10 surface-section rounded-xl flex items-center justify-center">
   <History className="w-5 h-5 text-theme-muted" />
@@ -402,7 +402,7 @@ export default function GuideWalletPage() {
   <th className="px-8 py-4 text-[10px] font-bold text-theme-muted capitalize tracking-normal text-right">Status</th>
   </tr>
   </thead>
-  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+  <tbody className="divide-y divide-theme">
   {payouts.map((p, idx) => (
   <tr key={idx} className="group hover:surface-section dark:hover:surface-card transition-colors">
   <td className="px-8 py-6">

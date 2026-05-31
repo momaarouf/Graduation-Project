@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 
 export default function TravelerWishlistSkeleton() {
   return (
@@ -6,7 +6,7 @@ export default function TravelerWishlistSkeleton() {
       <div className="container-safe mx-auto max-w-5xl py-4 sm:py-12">
         
         {/* Header Skeleton */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8 sm:mb-12 border-b border-theme pb-8 sm:pb-10">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8 sm:mb-12 border-b border-[#c8d8f8] dark:border-[#1a3566] pb-8 sm:pb-10">
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl surface-section shadow-lg" />

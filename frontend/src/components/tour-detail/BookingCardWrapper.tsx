@@ -494,7 +494,7 @@ function CancellationModal({ booking, isOpen, onClose, onConfirm, isLoading = fa
  <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 ">
  <div className="w-full max-w-md surface-card rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 border border-theme">
  {/* Header */}
- <div className="p-6 border-b border-theme">
+ <div className="p-6 border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
  <AlertCircle className="w-5 h-5" />
  <h3 className="text-lg font-bold text-primary-light dark:text-primary-dark">
@@ -523,7 +523,7 @@ function CancellationModal({ booking, isOpen, onClose, onConfirm, isLoading = fa
  {refundPercent}%
  </span>
  </div>
- <div className="flex justify-between text-sm pt-2 border-t border-theme">
+ <div className="flex justify-between text-sm pt-2 border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <span className="font-medium text-theme-primary">Estimated refund</span>
  <span className="text-lg font-bold text-success-green dark:text-emerald-400">
  {booking.currency} {refundAmount.toFixed(2)}
@@ -540,7 +540,7 @@ function CancellationModal({ booking, isOpen, onClose, onConfirm, isLoading = fa
  </div>
 
  {/* Footer */}
- <div className="p-6 surface-section flex gap-3 border-t border-theme">
+ <div className="p-6 surface-section flex gap-3 border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <button
  onClick={onClose}
  disabled={isLoading}

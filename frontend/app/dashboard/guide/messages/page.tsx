@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // GUIDE MESSAGING INBOX - CARD 19 (FULLY FIXED LAYOUT)
 // ============================================================================
 // LOCATION: /frontend/src/app/dashboard/guide/messages/page.tsx
@@ -591,7 +591,7 @@ function ConversationItem({ conversation, isActive, onClick }: ConversationItemP
  w-full
  p-3 sm:p-4
  text-left
- border-b border-theme
+ border-b border-[#c8d8f8] dark:border-[#1a3566]
  hover:surface-section dark:hover:surface-card
  transition-colors
  ${isActive ? 'bg-primary-light/10 ' : ''}
@@ -964,6 +964,7 @@ function QuickReplyTemplates({ onSelect }: QuickReplyTemplatesProps) {
  return (
  <div className="relative">
  <button
+ type="button"
  onClick={() => setIsOpen(!isOpen)}
  className="
  p-2
@@ -1140,6 +1141,27 @@ function GuideMessagingContent() {
 
  loadConversations()
  }, [user, initialConvoId, initialTourId, initialBookingId])
+
+  React.useEffect(() => {
+  const handleNotificationSync = () => {
+  if (user) {
+  chatApi.getConversations()
+  .then(data => setRealConvs(data))
+  .catch(console.error)
+
+  if (selectedConversation) {
+  chatApi.getMessages(parseInt(selectedConversation))
+  .then(msgs => {
+  const unique = Array.from(new Map(msgs.map(m => [String(m.id), m])).values())
+  setRealMsgs(unique)
+  })
+  .catch(console.error)
+  }
+  }
+  }
+  window.addEventListener('notification-sync', handleNotificationSync)
+  return () => window.removeEventListener('notification-sync', handleNotificationSync)
+  }, [user, selectedConversation])
 
  React.useEffect(() => {
     if (selectedConversation && user) {
@@ -1377,13 +1399,28 @@ function GuideMessagingContent() {
  
  setIsSending(true)
  try {
- await chatApi.sendMessage({
- conversationId: parseInt(selectedConversation),
- content: newMessage
- })
- setNewMessage('')
- } catch (error: any) {
- console.error('Failed to send:', error)
+  const sentMsg = await chatApi.sendMessage({
+  conversationId: parseInt(selectedConversation),
+  content: newMessage
+  })
+  setNewMessage('')
+  
+  // Manually add the sent message to the list immediately
+  setRealMsgs(prev => {
+  const exists = prev.some(m => String(m.id) === String(sentMsg.id))
+  if (exists) return prev
+  return [...prev, sentMsg]
+  })
+
+  // Update conversations list metadata
+  setRealConvs(prev => prev.map(c => 
+  String(c.id) === selectedConversation 
+  ? { ...c, updatedAtUtc: sentMsg.createdAtUtc, lastMessageContent: sentMsg.content, lastMessageRead: true } 
+  : c
+  ).sort((a, b) => new Date(b.updatedAtUtc).getTime() - new Date(a.updatedAtUtc).getTime()))
+
+  } catch (error: any) {
+  console.error('Failed to send:', error)
  const errorMsg = error.response?.data?.message || error.message || 'Unknown error'
  alert(`Failed to send message: ${errorMsg}. Please try refreshing or check your internet connection.`)
  } finally {
@@ -1402,7 +1439,7 @@ function GuideMessagingContent() {
  return (
   <div className="flex-1 h-full surface-base overflow-hidden relative">
  <div className="h-full flex flex-col overflow-hidden">
- <div className="flex-none surface-base border-b border-theme px-4 sm:px-6 py-2.5 sm:py-3">
+ <div className="flex-none surface-base border-b border-[#c8d8f8] dark:border-[#1a3566] px-4 sm:px-6 py-2.5 sm:py-3">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
  <MessageSquare className="w-5 h-5 text-primary-light dark:text-primary-dark dark:text-primary-dark " />
@@ -1488,7 +1525,7 @@ function GuideMessagingContent() {
  </div>
  </div>
  </div>
-                <div className="relative mt-2 px-4 sm:px-6 pb-2 border-b border-theme dark:border-primary-dark/10">
+                <div className="relative mt-2 px-4 sm:px-6 pb-2 border-b border-[#c8d8f8] dark:border-[#1a3566] dark:border-primary-dark/10">
  <Search className="absolute left-7 sm:left-9 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-theme-muted" />
  <input
  type="text"
@@ -1501,11 +1538,11 @@ function GuideMessagingContent() {
  </div>
 
   <div className="flex-1 flex min-h-0 overflow-hidden surface-base">
- <div className={`w-full sm:w-80 border-r border-theme dark:border-primary-dark/10 flex flex-col min-h-0 overflow-hidden ${showSidebar ? 'block' : 'hidden'}`}>
+ <div className={`w-full sm:w-80 border-r border-[#c8d8f8] dark:border-[#1a3566] dark:border-primary-dark/10 flex flex-col min-h-0 overflow-hidden ${showSidebar ? 'block' : 'hidden'}`}>
  <div className="flex-1 overflow-y-auto chat-scrollbar">
  {isLoadingConvs ? (
  Array.from({ length: 5 }).map((_, i) => (
- <div key={i} className="p-4 border-b border-theme animate-pulse">
+ <div key={i} className="p-4 border-b border-[#c8d8f8] dark:border-[#1a3566] animate-pulse">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 surface-section rounded-full" />
  <div className="flex-1">
@@ -1541,7 +1578,7 @@ function GuideMessagingContent() {
  <div className={`flex-1 flex flex-col min-h-0 overflow-hidden ${!showSidebar ? 'relative surface-base' : 'hidden sm:flex'}`}>
   {currentConversation ? (
   <>
-  <div className="flex-none h-14 sm:h-16 px-4 sm:px-6 border-b border-theme dark:border-primary-dark/10 flex items-center justify-between surface-base sticky top-0 z-20 shadow-sm">
+  <div className="flex-none h-14 sm:h-16 px-4 sm:px-6 border-b border-[#c8d8f8] dark:border-[#1a3566] dark:border-primary-dark/10 flex items-center justify-between surface-base sticky top-0 z-20 shadow-sm">
  <div className="flex items-center gap-3">
  <button 
  onClick={() => {
@@ -1622,7 +1659,7 @@ function GuideMessagingContent() {
  <div ref={messagesEndRef} />
  </div>
 
- <div className="flex-none p-4 border-t border-theme dark:border-primary-dark/10">
+ <div className="flex-none p-4 border-t border-[#c8d8f8] dark:border-[#1a3566] dark:border-primary-dark/10">
  <form onSubmit={handleSendMessage} className="flex gap-2">
  <QuickReplyTemplates onSelect={handleQuickReply} />
  <button

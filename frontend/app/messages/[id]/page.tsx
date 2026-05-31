@@ -334,7 +334,7 @@ export default function MessageThreadPage() {
  <div className="h-full flex flex-col">
  
  {/* Header */}
- <div className="surface-card border-b border-theme px-4 py-3">
+ <div className="surface-card border-b border-[#c8d8f8] dark:border-[#1a3566] px-4 py-3">
  <div className="flex items-center gap-3">
  <button
  onClick={() => router.back()}
@@ -401,7 +401,7 @@ export default function MessageThreadPage() {
  </div>
 
  {/* Message Input */}
- <form onSubmit={handleSendMessage} className="p-4 border-t border-theme">
+ <form onSubmit={handleSendMessage} className="p-4 border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="flex gap-2">
  <button
  type="button"
@@ -437,7 +437,7 @@ export default function MessageThreadPage() {
  {/* Booking Info Sidebar */}
  {conversation.booking && (
  <div className={`
- w-80 border-l border-theme surface-section p-4 overflow-y-auto
+ w-80 border-l border-[#c8d8f8] dark:border-[#1a3566] surface-section p-4 overflow-y-auto
  ${showBookingInfo ? 'block' : 'hidden lg:block'}
  `}>
  <div className="space-y-4">
@@ -471,7 +471,7 @@ export default function MessageThreadPage() {
  )}
  </div>
 
- <div className="mt-3 pt-3 border-t border-theme">
+ <div className="mt-3 pt-3 border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="flex items-center justify-between mb-2">
  <span className="text-xs text-theme-muted ">Status</span>
  <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${

@@ -54,17 +54,17 @@ import GuideToursLoading from './skeleton'
 // ============================================================================
 
 function StatusBadge({ status }: { status: TourTemplateStatus }) {
-  const styles: Record<TourTemplateStatus, { bg: string, text: string, icon: any, label: string }> = {
-  PUBLISHED: { bg: 'bg-success-green/10', text: 'text-success-green', icon: CheckCircle, label: 'Live' },
-  DRAFT: { bg: 'bg-surface-section', text: 'text-theme-muted', icon: Clock, label: 'Draft' },
-  PENDING_REVIEW: { bg: 'bg-primary-light/10', text: 'text-primary-light dark:text-primary-dark', icon: RefreshCw, label: 'Review' },
-  PAUSED: { bg: 'bg-accent-light/10', text: 'text-accent-light dark:text-accent-dark', icon: PauseCircle, label: 'Paused' },
-  REJECTED: { bg: 'bg-danger-red/10', text: 'text-danger-red', icon: AlertCircle, label: 'Failed' },
-  ARCHIVED: { bg: 'bg-surface-section', text: 'text-theme-muted', icon: Trash2, label: 'Archived' }
+  const styles: Record<TourTemplateStatus, { text: string, border: string, icon: any, label: string }> = {
+  PUBLISHED: { text: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-500/30', icon: CheckCircle, label: 'Live' },
+  DRAFT: { text: 'text-theme-muted', border: 'border-theme-strong', icon: Clock, label: 'Draft' },
+  PENDING_REVIEW: { text: 'text-primary-light dark:text-primary-dark', border: 'border-primary-light/30', icon: RefreshCw, label: 'Review' },
+  PAUSED: { text: 'text-accent-light dark:text-accent-dark', border: 'border-accent-light/30', icon: PauseCircle, label: 'Paused' },
+  REJECTED: { text: 'text-danger-red', border: 'border-danger-red/30', icon: AlertCircle, label: 'Failed' },
+  ARCHIVED: { text: 'text-theme-muted', border: 'border-theme-strong', icon: Trash2, label: 'Archived' }
   }
  const config = styles[status] || styles.DRAFT
  return (
- <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-[9px] font-black capitalize tracking-normal rounded-full border border-current/10 ${config.bg} ${config.text} backdrop-blur-md`}>
+ <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-[9px] font-black capitalize tracking-normal rounded-full border shadow-md surface-card ${config.text} ${config.border}`}>
  <config.icon className="w-3 h-3" />
  {config.label}
  </span>
@@ -155,7 +155,7 @@ export default function GuideToursPage() {
   {/* Header Hub */}
   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
   <div className="space-y-2">
-  <h1 className="text-3xl sm:text-5xl font-black text-theme-primary tracking-tight leading-tight capitalize italic">
+  <h1 className="text-2xl sm:text-4xl font-black text-theme-primary tracking-tight leading-tight capitalize italic">
   My <span className="text-primary-light">Tours</span>.
   </h1>
   <p className="text-[10px] sm:text-xs text-theme-secondary font-black capitalize tracking-normal opacity-70">
@@ -216,16 +216,16 @@ export default function GuideToursPage() {
     {paginatedTours.map((tour, idx) => (
     <motion.div key={tour.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }} className={`group surface-card border border-theme rounded-[2.5rem] hover:border-primary-light/40 hover:shadow-2xl transition-all duration-500 relative flex flex-col ${activeMenuId === tour.id ? 'z-50' : 'z-10'}`}>
     {/* Media Area */}
-    <div className="relative aspect-[4/3] surface-base overflow-hidden rounded-t-[2.5rem] border-b border-theme">
+    <div className="relative aspect-[4/3] surface-base overflow-hidden rounded-t-[2.5rem] border-b border-[#c8d8f8] dark:border-[#1a3566]">
     {tour.media && tour.media[0] ? (
     <Image src={tour.media[0].url} alt={tour.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
     ) : (
     <div className="flex flex-col items-center justify-center h-full text-theme-muted opacity-30"><MapPin className="w-8 h-8 mb-2" /><span className="text-[10px] font-black capitalize tracking-normal">No Media</span></div>
     )}
     <div className="absolute top-4 left-4"><StatusBadge status={tour.status} /></div>
-    {tour.halalFriendly && <div className="absolute top-4 right-4 px-3 py-1.5 bg-success-green/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black capitalize tracking-normal rounded-full backdrop-blur-md border border-emerald-500/30 shadow-lg">Halal</div>}
+    {tour.halalFriendly && <div className="absolute top-4 right-4 px-3 py-1 text-emerald-600 dark:text-emerald-400 text-[9px] font-black capitalize tracking-normal rounded-full surface-card border border-emerald-500/30 shadow-md">Halal</div>}
     <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
-       <div className="px-4 py-2 surface-card/80 backdrop-blur-md rounded-2xl border border-theme shadow-lg">
+       <div className="px-4 py-2 surface-card rounded-2xl border border-theme shadow-md">
           <div className="text-lg font-black text-theme-primary leading-none">${tour.basePrice}</div>
           <div className="text-[8px] font-black capitalize tracking-normal text-theme-muted mt-0.5">/ Seat</div>
        </div>
@@ -251,7 +251,7 @@ export default function GuideToursPage() {
     )}
     </div>
 
-    <div className="flex items-center justify-between pt-6 mt-6 border-t border-theme">
+    <div className="flex items-center justify-between pt-6 mt-6 border-t border-[#c8d8f8] dark:border-[#1a3566]">
     <div className="flex items-center gap-6">
     {[
     { label: 'Seats', val: `${tour.minCapacity}-${tour.maxCapacity}` },
@@ -305,7 +305,7 @@ export default function GuideToursPage() {
 
   {/* Pagination Feed */}
   {!loading && filteredTours.length > itemsPerPage && (
-  <div className="flex items-center justify-between mt-12 pt-8 border-t border-theme">
+  <div className="flex items-center justify-between mt-12 pt-8 border-t border-[#c8d8f8] dark:border-[#1a3566]">
   <p className="text-[9px] font-black capitalize tracking-[0.3em] text-theme-muted opacity-60">Page {currentPage} of {totalPages}</p>
   <div className="flex gap-4">
   <button onClick={() => { setCurrentPage(p => Math.max(1, p - 1)); window.scrollTo(0, 0); }} disabled={currentPage === 1} className="w-12 h-12 flex items-center justify-center surface-card border border-theme rounded-2xl text-theme-muted hover:text-primary-light disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"><ChevronLeft className="w-6 h-6" /></button>

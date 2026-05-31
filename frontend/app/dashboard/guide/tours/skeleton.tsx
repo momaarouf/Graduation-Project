@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 
 export default function GuideToursSkeleton() {
   return (
@@ -45,7 +45,7 @@ export default function GuideToursSkeleton() {
                   <div className="h-3 w-20 surface-section rounded" />
                   <div className="h-3 w-20 surface-section rounded" />
                 </div>
-                <div className="pt-4 border-t border-theme flex justify-between items-center">
+                <div className="pt-4 border-t border-[#c8d8f8] dark:border-[#1a3566] flex justify-between items-center">
                    <div className="flex gap-4">
                       <div className="h-8 w-12 surface-section rounded-lg" />
                       <div className="h-8 w-12 surface-section rounded-lg" />

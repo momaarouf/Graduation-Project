@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import { MapPin, Star, Calendar, Heart, Shield, Sparkles, Zap, User } from 'lucide-react'
 
 // ============================================================================
@@ -32,7 +32,7 @@ export function TourCardSkeleton() {
         </div>
 
         {/* Footer with price and button */}
-        <div className="pt-4 border-t border-theme flex items-center justify-between">
+        <div className="pt-4 border-t border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between">
           <div className="space-y-1">
             <div className="h-2 w-12 bg-slate-200 dark:bg-slate-800 rounded-full" />
             <div className="h-6 w-20 bg-slate-200 dark:bg-slate-800 rounded-lg" />

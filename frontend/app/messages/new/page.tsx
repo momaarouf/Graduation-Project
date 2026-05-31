@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // START NEW MESSAGE
 // ============================================================================
 // LOCATION: /frontend/src/app/messages/new/page.tsx
@@ -195,7 +195,7 @@ function NewMessageContent() {
  <div className="surface-card border border-theme rounded-xl shadow-sm overflow-hidden">
  
  {/* Recipient Info */}
- <div className="p-6 border-b border-theme surface-section">
+ <div className="p-6 border-b border-[#c8d8f8] dark:border-[#1a3566] surface-section">
  <div className="flex items-center gap-4">
  <div className="relative">
  <div className="w-16 h-16 rounded-full surface-section overflow-hidden">
@@ -349,7 +349,7 @@ function NewMessageContent() {
  </div>
 
  {/* Actions */}
- <div className="p-6 surface-section border-t border-theme flex justify-end gap-3">
+ <div className="p-6 surface-section border-t border-[#c8d8f8] dark:border-[#1a3566] flex justify-end gap-3">
  <Link
  href="/messages"
  className="px-6 py-2 surface-section text-theme-secondary rounded-lg hover:surface-section dark:hover:surface-section transition-colors"

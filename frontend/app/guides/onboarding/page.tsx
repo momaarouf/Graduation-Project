@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // GUIDE ONBOARDING INFO PAGE - CARD 10
 // ============================================================================
 // LOCATION: /frontend/src/app/guide/onboarding/page.tsx
@@ -481,7 +481,7 @@ export default function GuideOnboardingPage() {
  {/* ========================================
  STATISTICS BAR
  ======================================== */}
- <section className="py-12 surface-card border-b border-theme">
+ <section className="py-12 surface-card border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="container-safe mx-auto max-w-7xl">
  <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
  {STATISTICS.map((stat, index) => {

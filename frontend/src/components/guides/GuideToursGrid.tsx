@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -112,7 +112,7 @@ export default function GuideToursGrid({ guideId }: { guideId: string }) {
  <span>{tour.region || tour.locationName}</span>
  </div>
 
- <div className="mt-auto pt-6 border-t border-theme dark:border-theme flex items-end justify-between">
+ <div className="mt-auto pt-6 border-t border-[#c8d8f8] dark:border-[#1a3566] dark:border-theme flex items-end justify-between">
  <div className="flex flex-col">
  <span className="text-[10px] font-bold text-theme-muted capitalize tracking-[0.2em] mb-1">Impact</span>
  <div className="flex items-center gap-2">

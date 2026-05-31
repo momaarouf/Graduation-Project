@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { useBadgeReset } from '@/src/lib/hooks/useBadgeReset'
@@ -149,7 +149,7 @@ const BookingCard = ({ booking, onConfirm, onReject, isActionLoading }: BookingC
         </div>
 
         {/* Row 2: Traveler & Actions */}
-        <div className="flex items-center justify-between pt-3 border-t border-theme">
+        <div className="flex items-center justify-between pt-3 border-t border-[#c8d8f8] dark:border-[#1a3566]">
           <div className="flex items-center gap-2 min-w-0">
             {booking.traveler ? (
               <div className="flex items-center gap-2 min-w-0">
@@ -257,7 +257,7 @@ const WaitlistCard = ({ entry }: WaitlistCardProps) => {
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-theme">
+        <div className="flex items-center justify-between pt-3 border-t border-[#c8d8f8] dark:border-[#1a3566]">
           <div className="flex items-center gap-2 min-w-0">
             <div className="w-8 h-8 rounded-full bg-primary-light/10 flex items-center justify-center text-primary-light text-xs font-bold shrink-0">
               {entry.travelerName?.charAt(0) || 'T'}

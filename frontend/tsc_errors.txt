@@ -1,3 +1,0 @@
-﻿app/dashboard/guide/complete-profile/page.tsx(115,8): error TS17008: JSX element 'div' has no corresponding closing tag.
-app/dashboard/guide/complete-profile/page.tsx(196,11): error TS17015: Expected corresponding closing tag for JSX fragment.
-app/dashboard/guide/complete-profile/page.tsx(196,14): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import { motion } from 'framer-motion'
@@ -110,7 +110,7 @@ export default function GuideCard({ guide }: GuideCardProps) {
  </div>
 
  {/* Bottom Bar: Stats & Link */}
- <div className="mt-auto pt-6 border-t border-theme dark:border-theme flex items-center justify-between">
+ <div className="mt-auto pt-6 border-t border-[#c8d8f8] dark:border-[#1a3566] dark:border-theme flex items-center justify-between">
  <div className="flex items-center gap-4">
  <div className="text-center">
  <div className="text-lg font-bold text-theme-primary leading-none mb-1">

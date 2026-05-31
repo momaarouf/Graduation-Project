@@ -239,7 +239,7 @@ export default async function TourDetailPage({ params}:PageProps ) {
   </div>
 
   {/* Similar Tours - STREAMED */}
-  <div className="mt-8 pt-8 border-t border-theme ">
+  <div className="mt-8 pt-8 border-t border-[#c8d8f8] dark:border-[#1a3566] ">
   <Suspense fallback={<div className="h-60 flex items-center justify-center font-bold animate-pulse text-theme-muted">FINDING SIMILAR EXPERIENCES...</div>}>
   <SimilarTours
   currentTourId={tour.id.toString()}

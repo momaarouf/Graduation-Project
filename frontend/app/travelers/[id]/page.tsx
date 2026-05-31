@@ -153,7 +153,7 @@ export default function TravelerProfilePage({ params }: { params: Promise<{ id: 
  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
  
  {/* Identity & Actions Container */}
- <div className="-mt-6 md:-mt-10 flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-10 pb-12 mb-8 border-b border-theme">
+ <div className="-mt-6 md:-mt-10 flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-10 pb-12 mb-8 border-b border-[#c8d8f8] dark:border-[#1a3566]">
  
  {/* Traveler Avatar */}
  <div className="relative shrink-0">

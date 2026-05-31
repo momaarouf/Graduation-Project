@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // ============================================================================
 // AUTH FORM FOOTER - Login Link & Terms Agreement
@@ -164,7 +164,7 @@ export default function AuthFormFooter({
  ======================================== */}
  <div className="relative">
  <div className="absolute inset-0 flex items-center">
- <div className="w-full border-t border-theme" />
+ <div className="w-full border-t border-[#c8d8f8] dark:border-[#1a3566]" />
  </div>
  <div className="relative flex justify-center text-xs capitalize">
  <span className="px-2 surface-card text-theme-muted ">

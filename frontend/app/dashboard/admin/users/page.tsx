@@ -120,7 +120,7 @@ function ActionMenu({
      )}
      {!isBanned && (
       <button onClick={() => act(onBan)}
-       className="w-full text-left px-4 py-2.5 text-sm text-danger-red dark:text-red-400 hover:bg-danger-red/10 dark:hover:bg-red-900/20 flex items-center gap-2.5 transition border-t border-theme mt-1 pt-2.5">
+       className="w-full text-left px-4 py-2.5 text-sm text-danger-red dark:text-red-400 hover:bg-danger-red/10 dark:hover:bg-red-900/20 flex items-center gap-2.5 transition border-t border-[#c8d8f8] dark:border-[#1a3566] mt-1 pt-2.5">
        <Ban className="w-4 h-4" /> Permanent Ban
       </button>
      )}
@@ -181,7 +181,7 @@ function UserCard({
    </div>
 
    {/* Profile Status */}
-   <div className="flex items-center justify-between text-[11px] border-t border-theme pt-3 mt-1">
+   <div className="flex items-center justify-between text-[11px] border-t border-[#c8d8f8] dark:border-[#1a3566] pt-3 mt-1">
     <span className="text-theme-muted flex items-center gap-1.5">
       <Clock className="w-3 h-3" />
       Joined {new Date(u.createdAtUtc).toLocaleDateString()}
@@ -460,8 +460,8 @@ export default function AdminUsersPage() {
      {/* ── Desktop: Table (md+) ──────────────────────────────────────── */}
      <div className="hidden md:block surface-card rounded-xl border border-theme overflow-hidden shadow-sm">
       <div className="overflow-x-auto">
-       <table className="w-full">
-        <thead className="surface-section border-b border-theme">
+       <table className="w-full border-collapse">
+        <thead className="surface-section border-b border-[#c8d8f8] dark:border-[#1a3566]">
          <tr>
           {['User', 'Role', 'Status', 'Email', 'Profile', 'Joined', 'Actions'].map(h => (
            <th key={h} className="px-4 py-4 text-left text-[10px] font-black text-theme-muted capitalize tracking-normal">{h}</th>
@@ -687,7 +687,7 @@ export default function AdminUsersPage() {
                 </h4>
                 <div>
                   <p className="text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1">Primary Reason</p>
-                  <p className="text-sm text-theme-primary leading-relaxed bg-white dark:bg-black/20 p-3 rounded-xl border border-theme">
+                  <p className="text-sm text-theme-primary leading-relaxed surface-card p-3 rounded-xl border border-theme">
                     {modal.user.statusReason || 'Violation of community guidelines.'}
                   </p>
                 </div>

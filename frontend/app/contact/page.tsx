@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -151,7 +151,7 @@ export default function ContactPage() {
         </section>
 
         {/* Quick options row */}
-        <section className="py-10 border-b border-theme surface-card">
+        <section className="py-10 border-b border-[#c8d8f8] dark:border-[#1a3566] surface-card">
           <div className="max-w-4xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="flex items-center gap-3 p-4 surface-section rounded-xl border border-theme">
               <div className="p-2.5 bg-blue-50 dark:bg-blue-950/30 rounded-lg">

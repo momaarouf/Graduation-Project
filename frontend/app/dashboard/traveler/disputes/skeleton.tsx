@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 
 export default function TravelerDisputesSkeleton() {
   return (
@@ -6,7 +6,7 @@ export default function TravelerDisputesSkeleton() {
       <div className="max-w-4xl mx-auto space-y-12">
         
         {/* Header Skeleton */}
-        <div className="border-b border-theme pb-8 space-y-4">
+        <div className="border-b border-[#c8d8f8] dark:border-[#1a3566] pb-8 space-y-4">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl surface-section" />
             <div className="h-10 w-64 surface-section rounded-xl" />

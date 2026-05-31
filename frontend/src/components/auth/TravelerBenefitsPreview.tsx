@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // ============================================================================
 // TRAVELER BENEFITS PREVIEW - ENHANCED TO MATCH GUIDE WIDTH
@@ -249,7 +249,7 @@ export default function TravelerBenefitsPreview({
  {/* ========================================
  HEADER - Enhanced with more content
  ======================================== */}
- <div className="p-6 sm:p-8 border-b border-theme bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30">
+ <div className="p-6 sm:p-8 border-b border-[#c8d8f8] dark:border-[#1a3566] bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30">
  <div className="flex items-start justify-between mb-4">
  <div>
  {/* Pre-header */}
@@ -306,7 +306,7 @@ export default function TravelerBenefitsPreview({
  {/* ========================================
  FEATURES GRID - With safe color mapping
  ======================================== */}
- <div className="p-6 sm:p-8 border-b border-theme">
+ <div className="p-6 sm:p-8 border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <h4 className="font-bold text-theme-primary mb-6 flex items-center gap-2">
  <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
  What You Get
@@ -354,7 +354,7 @@ export default function TravelerBenefitsPreview({
  {/* ========================================
  LOYALTY TIERS - Enhanced layout
  ======================================== */}
- <div className="p-6 sm:p-8 border-b border-theme">
+ <div className="p-6 sm:p-8 border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="flex items-center justify-between mb-6">
  <h4 className="font-bold text-theme-primary flex items-center gap-2">
  <Award className="w-4 h-4 text-amber-600 dark:text-amber-400" />
@@ -421,7 +421,7 @@ export default function TravelerBenefitsPreview({
  {/* ========================================
  ADDITIONAL SECTION - How It Works
  ======================================== */}
- <div className="p-6 sm:p-8 border-b border-theme surface-section">
+ <div className="p-6 sm:p-8 border-b border-[#c8d8f8] dark:border-[#1a3566] surface-section">
  <h4 className="font-bold text-theme-primary mb-4 flex items-center gap-2">
  <Zap className="w-4 h-4 text-amber-600 dark:text-amber-400" />
  How Traveler Benefits Work
@@ -449,7 +449,7 @@ export default function TravelerBenefitsPreview({
  {/* ========================================
  GROUP DISCOUNT HIGHLIGHT - Enhanced
  ======================================== */}
- <div className="p-6 sm:p-8 border-b border-theme">
+ <div className="p-6 sm:p-8 border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="flex items-start gap-4">
  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
  <Users className="w-6 h-6 text-white" />
@@ -477,7 +477,7 @@ export default function TravelerBenefitsPreview({
  {/* ========================================
  TESTIMONIAL SNIPPET - Adds visual weight
  ======================================== */}
- <div className="p-6 sm:p-8 border-b border-theme">
+ <div className="p-6 sm:p-8 border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="relative">
  <div className="absolute -top-2 -left-2 text-6xl text-gray-200 font-serif">"</div>
  <div className="relative pl-6">

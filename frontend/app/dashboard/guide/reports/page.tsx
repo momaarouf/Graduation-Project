@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // GUIDE EARNINGS REPORTS
 // ============================================================================
 // LOCATION: /frontend/src/app/dashboard/guide/reports/page.tsx
@@ -191,7 +191,7 @@ const MonthlyCard = ({ row }: { row: MonthlyEarnings }) => (
         <div className="text-sm font-bold text-success-green dark:text-emerald-400">${row.netEarnings}</div>
       </div>
     </div>
-    <div className="grid grid-cols-2 gap-4 py-3 border-t border-b border-theme">
+    <div className="grid grid-cols-2 gap-4 py-3 border-t border-b border-[#c8d8f8] dark:border-[#1a3566]">
       <div>
         <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-0.5">Tours/Bookings</div>
         <div className="text-xs font-bold text-theme-secondary">{row.tours} tours / {row.bookings} bookings</div>
@@ -224,7 +224,7 @@ const MonthlyTable = ({ data }: { data: MonthlyEarnings[] }) => {
       {/* Desktop Table */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
-          <thead className="surface-section border-b border-theme">
+          <thead className="surface-section border-b border-[#c8d8f8] dark:border-[#1a3566]">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-theme-muted ">Month</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-theme-muted ">Tours</th>
@@ -236,7 +236,7 @@ const MonthlyTable = ({ data }: { data: MonthlyEarnings[] }) => {
               <th className="px-4 py-3 text-left text-xs font-medium text-theme-muted ">Top Tour</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+          <tbody className="divide-y divide-theme">
             {data.map((row, index) => (
               <tr key={index} className="hover:surface-section dark:hover:surface-card transition-colors">
                 <td className="px-4 py-3 text-sm font-medium text-theme-primary">
@@ -280,7 +280,7 @@ const YearlyCard = ({ row }: { row: YearlySummary }) => (
         <div className="text-sm font-bold text-success-green dark:text-emerald-400">${row.totalNetEarnings}</div>
       </div>
     </div>
-    <div className="grid grid-cols-2 gap-4 py-3 border-t border-b border-theme">
+    <div className="grid grid-cols-2 gap-4 py-3 border-t border-b border-[#c8d8f8] dark:border-[#1a3566]">
       <div>
         <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-0.5">Tours/Bookings</div>
         <div className="text-xs font-bold text-theme-secondary">{row.totalTours} tours / {row.totalBookings} bookings</div>
@@ -313,7 +313,7 @@ const YearlyTable = ({ data }: { data: YearlySummary[] }) => {
       {/* Desktop Table */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
-          <thead className="surface-section border-b border-theme">
+          <thead className="surface-section border-b border-[#c8d8f8] dark:border-[#1a3566]">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-theme-muted ">Year</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-theme-muted ">Tours</th>
@@ -325,7 +325,7 @@ const YearlyTable = ({ data }: { data: YearlySummary[] }) => {
               <th className="px-4 py-3 text-left text-xs font-medium text-theme-muted ">Best Month</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+          <tbody className="divide-y divide-theme">
             {data.map((row, index) => (
               <tr key={index} className="hover:surface-section dark:hover:surface-card transition-colors">
                 <td className="px-4 py-3 text-sm font-medium text-theme-primary">{row.year}</td>
@@ -369,7 +369,7 @@ const TourCard = ({ row }: { row: EarningsByTour }) => (
         <div className="text-sm font-bold text-success-green dark:text-emerald-400">${row.netEarnings}</div>
       </div>
     </div>
-    <div className="grid grid-cols-2 gap-4 py-3 border-t border-b border-theme/50">
+    <div className="grid grid-cols-2 gap-4 py-3 border-t border-b border-[#c8d8f8] dark:border-[#1a3566]">
       <div>
         <div className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-0.5">Bookings</div>
         <div className="text-xs font-bold text-theme-secondary">{row.bookings} bookings</div>
@@ -399,7 +399,7 @@ const TourBreakdownTable = ({ data }: { data: EarningsByTour[] }) => {
       {/* Desktop Table */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
-          <thead className="surface-section border-b border-theme">
+          <thead className="surface-section border-b border-[#c8d8f8] dark:border-[#1a3566]">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-theme-muted ">Tour</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-theme-muted ">Bookings</th>
@@ -409,7 +409,7 @@ const TourBreakdownTable = ({ data }: { data: EarningsByTour[] }) => {
               <th className="px-4 py-3 text-left text-xs font-medium text-theme-muted ">Rating</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+          <tbody className="divide-y divide-theme">
             {data.map((row, index) => (
               <tr key={index} className="hover:surface-section dark:hover:surface-card transition-colors">
                 <td className="px-4 py-3 text-sm font-medium text-theme-primary">{row.tourTitle}</td>

@@ -18,7 +18,7 @@ export default function TourOccurrencesSkeleton() {
         </div>
 
         {/* Tabs Skeleton */}
-        <div className="flex border-b border-theme gap-8">
+        <div className="flex border-b border-[#c8d8f8] dark:border-[#1a3566] gap-8">
           <div className="h-10 w-24 surface-section rounded-t-xl" />
           <div className="h-10 w-24 surface-section rounded-t-xl" />
         </div>

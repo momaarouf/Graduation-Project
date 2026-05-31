@@ -326,7 +326,7 @@ export default function BookingDetailsPage({ params }: BookingDetailsPageProps) 
 
  {/* Action buttons — only show check-in when booking is Confirmed */}
  {booking.status === BookingStatus.Confirmed && (
- <div className="flex gap-3 mt-6 pt-4 border-t border-theme">
+ <div className="flex gap-3 mt-6 pt-4 border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <button
  onClick={handleCheckIn}
  disabled={isProcessing}
@@ -388,7 +388,7 @@ export default function BookingDetailsPage({ params }: BookingDetailsPageProps) 
 
  {/* Check-in and completion timestamps — proves the new fields are rendered */}
  {(booking.checkedInAtUtc || booking.completedAtUtc) && (
- <div className="mt-4 pt-4 border-t border-theme space-y-2">
+ <div className="mt-4 pt-4 border-t border-[#c8d8f8] dark:border-[#1a3566] space-y-2">
  {booking.checkedInAtUtc && (
  <div className="flex items-center gap-2 text-sm text-success-green dark:text-emerald-400">
  <CheckCircle className="w-4 h-4" />
@@ -453,7 +453,7 @@ export default function BookingDetailsPage({ params }: BookingDetailsPageProps) 
  </div>
 
  {/* Pricing info for the guide */}
- <div className="pt-3 border-t border-theme">
+ <div className="pt-3 border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="flex items-center justify-between">
  <span className="text-sm text-theme-muted ">Total</span>
  <span className="text-sm font-semibold text-theme-primary">

@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // GUIDE PAYOUT HISTORY - ALL PAST PAYOUTS
 // ============================================================================
 // LOCATION: /frontend/src/app/dashboard/guide/wallet/payouts/page.tsx
@@ -359,7 +359,7 @@ Thank you for being a SafariHub guide!
 
  {/* Expanded details */}
  {expanded && (
- <div className="mt-4 pt-4 border-t border-theme grid grid-cols-1 sm:grid-cols-3 gap-4">
+ <div className="mt-4 pt-4 border-t border-[#c8d8f8] dark:border-[#1a3566] grid grid-cols-1 sm:grid-cols-3 gap-4">
  <div>
  <p className="text-xs text-theme-muted ">Requested</p>
  <p className="text-sm font-medium text-theme-primary">

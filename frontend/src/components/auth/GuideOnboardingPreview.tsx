@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 // ============================================================================
 // GUIDE ONBOARDING PREVIEW - SHOW VERIFICATION STEPS & BENEFITS
@@ -232,7 +232,7 @@ export default function GuideOnboardingPreview({
  {/* ========================================
  HEADER
  ======================================== */}
- <div className="p-6 sm:p-8 border-b border-theme bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
+ <div className="p-6 sm:p-8 border-b border-[#c8d8f8] dark:border-[#1a3566] bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
  <div className="flex items-start justify-between mb-4">
  <div>
  {/* Pre-header */}
@@ -276,7 +276,7 @@ export default function GuideOnboardingPreview({
  {/* ========================================
  ONBOARDING STEPS
  ======================================== */}
- <div className="p-6 sm:p-8 border-b border-theme">
+ <div className="p-6 sm:p-8 border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <h4 className="font-bold text-theme-primary mb-6 flex items-center gap-2">
  <CheckCircle className="w-4 h-4 text-success-green dark:text-emerald-400" />
  Your 4-Step Journey
@@ -408,7 +408,7 @@ export default function GuideOnboardingPreview({
  {/* ========================================
  FAQ LINK
  ======================================== */}
- <div className="px-6 sm:px-8 py-4 surface-section border-t border-theme flex items-center justify-between">
+ <div className="px-6 sm:px-8 py-4 surface-section border-t border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between">
  <div className="flex items-center gap-2 text-sm text-theme-secondary ">
  <HelpCircle className="w-4 h-4" />
  <span>Have questions about becoming a guide?</span>

@@ -1,4 +1,4 @@
-import PageLayout from '@/src/components/layout/PageLayout'
+﻿import PageLayout from '@/src/components/layout/PageLayout'
 
 export default function MessagesInboxLoading() {
   return (
@@ -11,7 +11,7 @@ export default function MessagesInboxLoading() {
           </div>
           <div className="surface-card border border-theme rounded-xl overflow-hidden">
             {[1,2,3,4,5].map(i => (
-              <div key={i} className="p-4 border-b border-theme last:border-0 flex items-center gap-3">
+              <div key={i} className="p-4 border-b border-[#c8d8f8] dark:border-[#1a3566] last:border-0 flex items-center gap-3">
                 <div className="w-10 h-10 surface-section rounded-full flex-shrink-0" />
                 <div className="flex-1 space-y-1">
                   <div className="h-4 w-36 surface-section rounded" />

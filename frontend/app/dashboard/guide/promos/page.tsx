@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // GUIDE PROMO CODE FACTORY - CARD 20
 // ============================================================================
 // LOCATION: /frontend/src/app/dashboard/guide/promos/page.tsx
@@ -505,7 +505,7 @@ function PromoCard({ promo, onEdit, onDuplicate, onDelete }: PromoCardProps) {
  transition-shadow
 ">
  {/* Header */}
- <div className="p-5 border-b border-theme">
+ <div className="p-5 border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="flex items-start justify-between mb-3">
  <div className="flex items-center gap-3">
  <div className="
@@ -656,7 +656,7 @@ function PromoCard({ promo, onEdit, onDuplicate, onDelete }: PromoCardProps) {
  </div>
 
  {/* Performance Stats */}
- <div className="pt-3 border-t border-theme">
+ <div className="pt-3 border-t border-[#c8d8f8] dark:border-[#1a3566]">
  <h4 className="text-xs font-semibold text-theme-secondary mb-2">
  Performance
  </h4>
@@ -966,7 +966,7 @@ function CreatePromoModal({ isOpen, onClose, onCreate }: CreatePromoModalProps) 
  overflow-y-auto
 ">
  {/* Header */}
- <div className="p-6 border-b border-theme">
+ <div className="p-6 border-b border-[#c8d8f8] dark:border-[#1a3566]">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
  <Gift className="w-5 h-5 text-primary-light dark:text-primary-dark dark:text-primary-dark " />

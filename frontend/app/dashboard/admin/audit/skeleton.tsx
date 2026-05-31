@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 
 export default function AdminAuditSkeleton() {
   return (
@@ -25,9 +25,9 @@ export default function AdminAuditSkeleton() {
 
       {/* Listing View Skeleton */}
       <div className="surface-card rounded-[2.5rem] border border-theme overflow-hidden shadow-sm">
-        <div className="h-14 surface-section border-b border-theme" />
+        <div className="h-14 surface-section border-b border-[#c8d8f8] dark:border-[#1a3566]" />
         {[1, 2, 3, 4, 5].map(i => (
-          <div key={i} className="p-8 border-b border-theme last:border-0 flex gap-8">
+          <div key={i} className="p-8 border-b border-[#c8d8f8] dark:border-[#1a3566] last:border-0 flex gap-8">
             <div className="space-y-2 w-24">
               <div className="h-4 w-20 surface-section rounded" />
               <div className="h-3 w-16 surface-section rounded" />

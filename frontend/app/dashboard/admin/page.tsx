@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { 
@@ -189,7 +189,7 @@ export default function AdminDashboardPage() {
           {/* Recent Activity */}
           <div className="lg:col-span-2 space-y-4">
             <div className="surface-card rounded-2xl border border-theme overflow-hidden shadow-sm">
-              <div className="p-4 sm:p-5 border-b border-theme flex items-center justify-between bg-surface-section/30">
+              <div className="p-4 sm:p-5 border-b border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between bg-surface-section/30">
                 <h2 className="font-bold text-sm sm:text-base text-theme-primary flex items-center gap-2">
                   <History className="w-4 h-4 text-theme-muted" />
                   System Audit Trail
@@ -252,7 +252,7 @@ export default function AdminDashboardPage() {
           {/* Pending Verifications */}
           <div className="space-y-4">
             <div className="surface-card rounded-2xl border border-theme overflow-hidden shadow-sm">
-              <div className="p-4 sm:p-5 border-b border-theme flex items-center justify-between bg-surface-section/30">
+              <div className="p-4 sm:p-5 border-b border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between bg-surface-section/30">
                 <h2 className="font-bold text-sm sm:text-base text-theme-primary flex items-center gap-2">
                   <Shield className="w-4 h-4 text-accent-light" />
                   Guide Reviews
@@ -277,7 +277,7 @@ export default function AdminDashboardPage() {
                   ))
                 ) : pendingVerifs.length > 0 ? (
                   pendingVerifs.map((verif) => (
-                    <div key={verif.id} className="flex items-center justify-between group p-2 hover:surface-section rounded-xl transition-colors">
+                    <div key={verif.id} className="p-4 flex items-center justify-between hover:surface-section transition-colors group border-b border-[#c8d8f8] dark:border-[#1a3566] last:border-0">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-9 h-9 rounded-full bg-primary-light/10 text-primary-light dark:text-primary-dark flex items-center justify-center font-bold text-xs shrink-0 border border-primary-light/10">
                           {verif.user.fullName?.[0] || 'G'}

@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // LIVE IMPACT MAP COMPONENT - DUAL THEME
 // ============================================================================
 // LOCATION: /frontend/src/components/landing/ImpactMap.tsx
@@ -667,7 +667,7 @@ export default function ImpactMap() {
  initial={{ opacity: 0 }}
  whileInView={{ opacity: 1 }}
  viewport={{ once: true }}
- className="flex flex-wrap justify-center items-center gap-8 mt-24 pt-12 border-t border-theme-strong"
+ className="flex flex-wrap justify-center items-center gap-8 mt-24 pt-12 border-t border-[#c8d8f8] dark:border-[#1a3566]-strong"
  >
  <div className="flex items-center gap-4">
  <div className="flex -space-x-3">

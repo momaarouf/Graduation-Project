@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 
 export default function SettingsSkeleton() {
   return (
@@ -17,9 +17,9 @@ export default function SettingsSkeleton() {
         {/* Console Skeleton */}
         <div className="surface-card border border-theme rounded-[2.5rem] overflow-hidden shadow-xl">
           {/* Tabs Skeleton */}
-          <div className="flex border-b border-theme bg-surface-section/30 h-14">
+          <div className="flex border-b border-[#c8d8f8] dark:border-[#1a3566] bg-surface-section/30 h-14">
             {[1, 2, 3].map(i => (
-              <div key={i} className="flex-1 border-r border-theme last:border-0 flex items-center justify-center">
+              <div key={i} className="flex-1 border-r border-[#c8d8f8] dark:border-[#1a3566] last:border-0 flex items-center justify-center">
                 <div className="h-3 w-20 surface-section rounded" />
               </div>
             ))}

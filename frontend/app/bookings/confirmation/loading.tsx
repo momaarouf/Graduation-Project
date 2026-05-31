@@ -1,4 +1,4 @@
-import PageLayout from '@/src/components/layout/PageLayout'
+﻿import PageLayout from '@/src/components/layout/PageLayout'
 
 export default function BookingConfirmationLoading() {
   return (
@@ -11,7 +11,7 @@ export default function BookingConfirmationLoading() {
               <div className="h-8 w-64 surface-section rounded mx-auto" />
               <div className="h-4 w-48 surface-section rounded mx-auto" />
             </div>
-            <div className="border-t border-theme pt-5 grid grid-cols-2 gap-4">
+            <div className="border-t border-[#c8d8f8] dark:border-[#1a3566] pt-5 grid grid-cols-2 gap-4">
               {[1,2,3,4].map(i => (
                 <div key={i} className="space-y-1">
                   <div className="h-3 w-20 surface-section rounded" />
