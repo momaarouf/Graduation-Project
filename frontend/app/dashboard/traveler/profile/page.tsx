@@ -219,7 +219,7 @@ export default function TravelerDashboardProfilePage() {
  <div className="max-w-6xl mx-auto py-8 sm:py-10 px-4 sm:px-6 lg:px-8 space-y-10">
   
   {/* Premium Header Replicated */}
-  <div className="relative mb-36">
+  <div className="relative mb-48 sm:mb-36">
   <div className="relative h-48 sm:h-64 rounded-3xl sm:rounded-[2rem] overflow-hidden surface-section border border-theme shadow-xl group">
   <Image
   src={formData.coverImageUrl || '/images/travelers/default-cover.jpg'}
@@ -237,7 +237,7 @@ export default function TravelerDashboardProfilePage() {
   </button>
   </div>
 
-  <div className="absolute -bottom-24 sm:-bottom-28 left-4 sm:left-8 flex flex-col sm:flex-row items-start sm:items-end gap-3 sm:gap-6">
+  <div className="absolute -bottom-36 sm:-bottom-28 left-4 sm:left-8 flex flex-col sm:flex-row items-start sm:items-end gap-3 sm:gap-6">
     <div className="relative group/avatar">
       <div className="relative w-28 h-28 sm:w-40 sm:h-40 rounded-3xl border-4 border-theme surface-card overflow-hidden shadow-2xl ring-2 ring-primary-light dark:ring-primary-dark/10 transition-all duration-700 hover:scale-105 group-hover/avatar:ring-4 group-hover/avatar:ring-primary-light dark:ring-primary-dark/30">
         <Image

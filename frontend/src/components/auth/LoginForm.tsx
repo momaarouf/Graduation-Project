@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // LOGIN FORM COMPONENT
 // ============================================================================
 // LOCATION: /frontend/src/components/auth/LoginForm.tsx
@@ -393,13 +393,13 @@ export default function LoginForm() {
  </div>
 
  {/* ========================================
- SOCIAL LOGIN BUTTONS - Minimalist Icons
+ SOCIAL LOGIN BUTTON - Full Width
  ======================================== */}
- <div className="flex justify-center gap-6">
+ <div className="mt-6">
  <button
  onClick={() => handleSocialLogin('Google')}
  disabled={isLoading || isSocialLoading !== null}
- className="w-12 h-12 rounded-2xl surface-card border border-theme flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-sm hover:shadow-blue-500/10"
+ className="w-full py-3 rounded-lg surface-card border border-theme flex items-center justify-center gap-3 hover:bg-gray-50 dark:hover:bg-white/5 active:scale-[0.98] transition-all shadow-sm hover:shadow-md text-sm font-semibold text-theme-primary"
  aria-label="Sign in with Google"
  >
  {isSocialLoading === 'Google' ? (
@@ -407,22 +407,7 @@ export default function LoginForm() {
  ) : (
  <Chrome className="w-5 h-5 text-theme-secondary " />
  )}
- </button>
- <button
- onClick={() => handleSocialLogin('Apple')}
- disabled={isLoading}
- className="w-12 h-12 rounded-2xl surface-card border border-theme flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-sm hover:shadow-gray-500/10"
- aria-label="Sign in with Apple"
- >
- <Apple className="w-5 h-5 text-theme-secondary " />
- </button>
- <button
- onClick={() => handleSocialLogin('GitHub')}
- disabled={isLoading}
- className="w-12 h-12 rounded-2xl surface-card border border-theme flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-sm hover:shadow-gray-500/10"
- aria-label="Sign in with GitHub"
- >
- <Github className="w-5 h-5 text-theme-secondary " />
+ <span>Continue with Google</span>
  </button>
  </div>
  </div>

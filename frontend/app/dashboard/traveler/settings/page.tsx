@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // TRAVELER SETTINGS - GENERAL SETTINGS PAGE
 // ============================================================================
 // LOCATION: /frontend/app/dashboard/traveler/settings/page.tsx
@@ -31,6 +31,7 @@ import { useAuth } from '@/src/lib/contexts/AuthContext'
 import { passwordChange, updateNotificationPreferences } from '@/src/lib/api/auth'
 import { motion, AnimatePresence } from 'framer-motion'
 import SettingsSkeleton from '@/src/components/dashboard/SettingsSkeleton'
+import SetPasswordForm from '@/src/components/auth/SetPasswordForm'
 
 // ============================================================================
 // CONFIGS
@@ -198,50 +199,69 @@ export default function TravelerSettingsPage() {
  </h2>
  
  <div className="space-y-5">
- <div>
- <label className="block text-[10px] font-black capitalize tracking-normal text-theme-muted mb-2 ml-1">Access Token</label>
- <div className="relative group">
- <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light transition-colors" />
- <input type={showCurrentPassword ? 'text' : 'password'} value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="w-full pl-11 pr-11 py-3.5 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:ring-2 focus:ring-primary-light transition-all font-black" placeholder="CURRENT PASSWORD" />
- <button onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-primary">{showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
- </div>
- <button onClick={handleForgotPassword} className="mt-3 text-[10px] text-primary-light hover:opacity-80 font-black capitalize tracking-normal ml-1 transition-all">Emergency Recovery Code</button>
- </div>
+  {/* Conditionally show Set Password (OAuth) or Change Password (normal) */}
+  {!user.hasPassword ? (
+  <div className="space-y-3">
+  <div className="flex items-center gap-2 mb-2">
+  <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+  <h3 className="text-[9px] sm:text-[10px] font-black text-theme-secondary capitalize tracking-[0.3em]">Secure Your Account</h3>
+  </div>
+  <SetPasswordForm />
+  </div>
+  ) : (
+  <div>
+  <div className="flex items-center gap-2 mb-5">
+  <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+  <h3 className="text-[9px] sm:text-[10px] font-black text-theme-secondary capitalize tracking-[0.3em]">Change Password</h3>
+  </div>
+  <div className="space-y-5">
+  <div>
+  <label className="block text-[10px] font-black capitalize tracking-normal text-theme-muted mb-2 ml-1">Access Token</label>
+  <div className="relative group">
+  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light transition-colors" />
+  <input type={showCurrentPassword ? 'text' : 'password'} value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="w-full pl-11 pr-11 py-3.5 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:ring-2 focus:ring-primary-light transition-all font-black" placeholder="CURRENT PASSWORD" />
+  <button onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-primary">{showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
+  </div>
+  <button onClick={handleForgotPassword} className="mt-3 text-[10px] text-primary-light hover:opacity-80 font-black capitalize tracking-normal ml-1 transition-all">Emergency Recovery Code</button>
+  </div>
 
- <div>
- <label className="block text-[10px] font-black capitalize tracking-normal text-theme-muted mb-2 ml-1">New Signature</label>
- <div className="relative group">
- <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light transition-colors" />
- <input type={showNewPassword ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full pl-11 pr-11 py-3.5 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:ring-2 focus:ring-primary-light transition-all font-black" placeholder="NEW PASSWORD" />
- <button onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-primary">{showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
- </div>
- {newPassword && (
- <div className="mt-4 px-1 space-y-2">
- <div className="flex justify-between items-center text-[8px] font-black capitalize tracking-normal text-theme-muted"><span>Entropy Strength</span><span>{passwordStrength.label}</span></div>
- <div className="h-1.5 surface-section rounded-full overflow-hidden p-0.5 border border-theme">
- <div className={`h-full ${passwordStrength.color} rounded-full transition-all duration-500`} style={{ width: `${passwordStrength.score}%` }} />
- </div>
- </div>
- )}
- </div>
+  <div>
+  <label className="block text-[10px] font-black capitalize tracking-normal text-theme-muted mb-2 ml-1">New Signature</label>
+  <div className="relative group">
+  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light transition-colors" />
+  <input type={showNewPassword ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full pl-11 pr-11 py-3.5 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:ring-2 focus:ring-primary-light transition-all font-black" placeholder="NEW PASSWORD" />
+  <button onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-primary">{showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
+  </div>
+  {newPassword && (
+  <div className="mt-4 px-1 space-y-2">
+  <div className="flex justify-between items-center text-[8px] font-black capitalize tracking-normal text-theme-muted"><span>Entropy Strength</span><span>{passwordStrength.label}</span></div>
+  <div className="h-1.5 surface-section rounded-full overflow-hidden p-0.5 border border-theme">
+  <div className={`h-full ${passwordStrength.color} rounded-full transition-all duration-500`} style={{ width: `${passwordStrength.score}%` }} />
+  </div>
+  </div>
+  )}
+  </div>
 
- <div>
- <label className="block text-[10px] font-black capitalize tracking-normal text-theme-muted mb-2 ml-1">Confirm Signature</label>
- <div className="relative group">
- <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light transition-colors" />
- <input type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full pl-11 pr-11 py-3.5 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:ring-2 focus:ring-primary-light transition-all font-black" placeholder="CONFIRM PASSWORD" />
- <button onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-primary">{showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
- </div>
- {confirmPassword && (
- <p className={`mt-3 text-[10px] font-black flex items-center gap-1.5 ml-1 capitalize tracking-normal ${passwordsMatch ? 'text-success-green' : 'text-danger-red'}`}>
- {passwordsMatch ? <><CheckCircle className="w-3.5 h-3.5" /> Identity Match</> : <><AlertCircle className="w-3.5 h-3.5" /> Identity Mismatch</>}
- </p>
- )}
- </div>
+  <div>
+  <label className="block text-[10px] font-black capitalize tracking-normal text-theme-muted mb-2 ml-1">Confirm Signature</label>
+  <div className="relative group">
+  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light transition-colors" />
+  <input type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full pl-11 pr-11 py-3.5 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:ring-2 focus:ring-primary-light transition-all font-black" placeholder="CONFIRM PASSWORD" />
+  <button onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-primary">{showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
+  </div>
+  {confirmPassword && (
+  <p className={`mt-3 text-[10px] font-black flex items-center gap-1.5 ml-1 capitalize tracking-normal ${passwordsMatch ? 'text-success-green' : 'text-danger-red'}`}>
+  {passwordsMatch ? <><CheckCircle className="w-3.5 h-3.5" /> Identity Match</> : <><AlertCircle className="w-3.5 h-3.5" /> Identity Mismatch</>}
+  </p>
+  )}
+  </div>
 
- <button onClick={handleSavePassword} disabled={isSaving || !currentPassword || !newPassword || !passwordsMatch} className="w-full sm:w-auto px-8 py-4 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-black capitalize tracking-[0.2em] rounded-xl transition-all shadow-xl shadow-primary-light/20 disabled:opacity-50 flex items-center justify-center gap-3 active:scale-95">
- {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Committing...</> : <><Save className="w-4 h-4" /> Commit Changes</>}
- </button>
+  <button onClick={handleSavePassword} disabled={isSaving || !currentPassword || !newPassword || !passwordsMatch} className="w-full sm:w-auto px-8 py-4 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-black capitalize tracking-[0.2em] rounded-xl transition-all shadow-xl shadow-primary-light/20 disabled:opacity-50 flex items-center justify-center gap-3 active:scale-95">
+  {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Committing...</> : <><Save className="w-4 h-4" /> Commit Changes</>}
+  </button>
+  </div>
+  </div>
+  )}
  </div>
  </div>
  </motion.div>

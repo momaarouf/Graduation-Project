@@ -442,20 +442,20 @@ export default function PowerSearch({
 
  // Initialize from URL params on mount
  useEffect(() => {
- const q = searchParams.get('q')
- const country = searchParams.get('country') as Country
- const city = searchParams.get('city') as City
- const rating = searchParams.get('rating') as MinRating
- const minPrice = searchParams.get('minPrice')
- const maxPrice = searchParams.get('maxPrice')
- const halalParam = searchParams.get('halal')
- const instantBookParam = searchParams.get('instantBook')
- const groupDiscountParam = searchParams.get('groupDiscount')
- const verifiedParam = searchParams.get('verifiedGuides')
- const familyParam = searchParams.get('familyFriendly')
- const premiumParam = searchParams.get('premium')
- const languages = searchParams.getAll('language') as Language[]
- const durations = searchParams.getAll('duration') as Duration[]
+ const q = searchParams?.get('q')
+ const country = searchParams?.get('country') as Country
+ const city = searchParams?.get('city') as City
+ const rating = searchParams?.get('rating') as MinRating
+ const minPrice = searchParams?.get('minPrice')
+ const maxPrice = searchParams?.get('maxPrice')
+ const halalParam = searchParams?.get('halal')
+ const instantBookParam = searchParams?.get('instantBook')
+ const groupDiscountParam = searchParams?.get('groupDiscount')
+ const verifiedParam = searchParams?.get('verifiedGuides')
+ const familyParam = searchParams?.get('familyFriendly')
+ const premiumParam = searchParams?.get('premium')
+ const languages = (searchParams?.getAll('language') || []) as Language[]
+ const durations = (searchParams?.getAll('duration') || []) as Duration[]
 
  if (q) setSearchQuery(q)
  if (country) setSelectedCountry(country)

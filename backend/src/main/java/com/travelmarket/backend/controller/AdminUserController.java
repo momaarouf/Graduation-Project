@@ -2,11 +2,13 @@ package com.travelmarket.backend.controller;
 
 import com.travelmarket.backend.dto.AdminBanUserRequest;
 import com.travelmarket.backend.dto.AdminSuspendUserRequest;
+import com.travelmarket.backend.dto.AdminSendEmailRequest;
 import com.travelmarket.backend.dto.AdminUserListResponse;
 import com.travelmarket.backend.dto.AdminUserResponse;
 import com.travelmarket.backend.entity.User;
 import com.travelmarket.backend.repository.UserRepository;
 import com.travelmarket.backend.service.AdminAuditService;
+import com.travelmarket.backend.service.EmailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -24,6 +26,7 @@ public class AdminUserController {
 
     private final UserRepository userRepository;
     private final AdminAuditService adminAuditService;
+    private final EmailService emailService;
 
     private User currentAdmin(Authentication auth) {
         if (auth == null || auth.getName() == null) {
@@ -262,6 +265,68 @@ public class AdminUserController {
         );
 
         return toDto(user);
+    }
+
+    /**
+     * Broadcast an email to all active users.
+     */
+    @PostMapping("/email/broadcast")
+    public void broadcastEmail(@Valid @RequestBody AdminSendEmailRequest req, Authentication auth) {
+        User admin = currentAdmin(auth);
+
+        List<User> users = userRepository.findAll();
+        int sentCount = 0;
+
+        for (User u : users) {
+            // Only send to users who have an email, are not deleted, and not banned.
+            if (u.getEmail() != null && u.getDeletedAtUtc() == null && !"BANNED".equals(u.getAccountStatus())) {
+                emailService.sendHtml(u.getEmail(), req.subject(), req.body());
+                sentCount++;
+            }
+        }
+
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("subject", req.subject());
+        details.put("sentCount", sentCount);
+
+        adminAuditService.log(
+                admin,
+                "ADMIN_BROADCAST_EMAIL",
+                "SYSTEM",
+                null,
+                "Broadcasted email to " + sentCount + " users",
+                details
+        );
+    }
+
+    /**
+     * Send an email to a specific user.
+     */
+    @PostMapping("/{id}/email")
+    public void sendEmailToUser(@PathVariable Long id, @Valid @RequestBody AdminSendEmailRequest req, Authentication auth) {
+        User admin = currentAdmin(auth);
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getEmail() == null) {
+            throw new RuntimeException("User does not have an email address");
+        }
+
+        emailService.sendHtml(user.getEmail(), req.subject(), req.body());
+
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("subject", req.subject());
+        details.put("targetEmail", user.getEmail());
+
+        adminAuditService.log(
+                admin,
+                "ADMIN_USER_EMAIL",
+                "USER",
+                user.getId(),
+                "Sent email to user: " + user.getEmail(),
+                details
+        );
     }
 
     /**

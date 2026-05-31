@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // GUIDE SETTINGS - GENERAL SETTINGS PAGE
 // ============================================================================
 // LOCATION: /frontend/app/dashboard/guide/settings/page.tsx
@@ -40,6 +40,7 @@ import toast from 'react-hot-toast'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import { passwordChange, updateNotificationPreferences } from '@/src/lib/api/auth'
 import SettingsSkeleton from '@/src/components/dashboard/SettingsSkeleton'
+import SetPasswordForm from '@/src/components/auth/SetPasswordForm'
 
 // ============================================================================
 // PASSWORD STRENGTH INDICATOR
@@ -242,91 +243,104 @@ export default function GuideSettingsPage() {
  </h2>
  
  <div className="space-y-5">
- <div>
- <label className="block text-[10px] font-bold capitalize tracking-normal text-theme-muted mb-2 ml-1">Current Password</label>
- <div className="relative">
- <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
- <input
- type={showCurrentPassword ? 'text' : 'password'}
- value={currentPassword}
- onChange={(e) => setCurrentPassword(e.target.value)}
- className="w-full pl-11 pr-11 py-3 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark transition-all font-bold"
- />
- <button
- onClick={() => setShowCurrentPassword(!showCurrentPassword)}
- className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted"
- >
- {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
- </button>
- </div>
- <button
- onClick={handleForgotPassword}
- className="mt-2 text-[10px] text-primary-light dark:text-primary-dark hover:opacity-80 font-bold capitalize tracking-normal ml-1"
- >
- Forgot Password?
- </button>
- </div>
+  {/* Conditionally show Set Password (OAuth) or Change Password (normal) */}
+  {!user.hasPassword ? (
+  <div>
+  <div className="flex items-center gap-2 mb-4">
+  <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+  <span className="text-[9px] sm:text-[10px] font-bold text-theme-secondary capitalize tracking-[0.3em]">Secure Your Account</span>
+  </div>
+  <SetPasswordForm />
+  </div>
+  ) : (
+  <>
+  <div>
+  <label className="block text-[10px] font-bold capitalize tracking-normal text-theme-muted mb-2 ml-1">Current Password</label>
+  <div className="relative">
+  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
+  <input
+  type={showCurrentPassword ? 'text' : 'password'}
+  value={currentPassword}
+  onChange={(e) => setCurrentPassword(e.target.value)}
+  className="w-full pl-11 pr-11 py-3 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark transition-all font-bold"
+  />
+  <button
+  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+  className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted"
+  >
+  {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+  </button>
+  </div>
+  <button
+  onClick={handleForgotPassword}
+  className="mt-2 text-[10px] text-primary-light dark:text-primary-dark hover:opacity-80 font-bold capitalize tracking-normal ml-1"
+  >
+  Forgot Password?
+  </button>
+  </div>
 
- <div>
- <label className="block text-[10px] font-bold capitalize tracking-normal text-theme-muted mb-2 ml-1">New Password</label>
- <div className="relative">
- <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
- <input
- type={showNewPassword ? 'text' : 'password'}
- value={newPassword}
- onChange={(e) => setNewPassword(e.target.value)}
- className="w-full pl-11 pr-11 py-3 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark transition-all font-bold"
- />
- <button
- onClick={() => setShowNewPassword(!showNewPassword)}
- className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted"
- >
- {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
- </button>
- </div>
- {newPassword && (
- <div className="mt-3 px-1">
- <div className="flex items-center gap-3">
- <div className="flex-1 h-1.5 surface-section rounded-full overflow-hidden border border-theme">
- <div className={`h-full ${passwordStrength.color} transition-all duration-500`} style={{ width: `${passwordStrength.score}%` }} />
- </div>
- <span className="text-[9px] font-bold capitalize tracking-normal text-theme-secondary whitespace-nowrap">{passwordStrength.label}</span>
- </div>
- </div>
- )}
- </div>
+  <div>
+  <label className="block text-[10px] font-bold capitalize tracking-normal text-theme-muted mb-2 ml-1">New Password</label>
+  <div className="relative">
+  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
+  <input
+  type={showNewPassword ? 'text' : 'password'}
+  value={newPassword}
+  onChange={(e) => setNewPassword(e.target.value)}
+  className="w-full pl-11 pr-11 py-3 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark transition-all font-bold"
+  />
+  <button
+  onClick={() => setShowNewPassword(!showNewPassword)}
+  className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted"
+  >
+  {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+  </button>
+  </div>
+  {newPassword && (
+  <div className="mt-3 px-1">
+  <div className="flex items-center gap-3">
+  <div className="flex-1 h-1.5 surface-section rounded-full overflow-hidden border border-theme">
+  <div className={`h-full ${passwordStrength.color} transition-all duration-500`} style={{ width: `${passwordStrength.score}%` }} />
+  </div>
+  <span className="text-[9px] font-bold capitalize tracking-normal text-theme-secondary whitespace-nowrap">{passwordStrength.label}</span>
+  </div>
+  </div>
+  )}
+  </div>
 
- <div>
- <label className="block text-[10px] font-bold capitalize tracking-normal text-theme-muted mb-2 ml-1">Confirm New Password</label>
- <div className="relative">
- <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
- <input
- type={showConfirmPassword ? 'text' : 'password'}
- value={confirmPassword}
- onChange={(e) => setConfirmPassword(e.target.value)}
- className="w-full pl-11 pr-11 py-3 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark transition-all font-bold"
- />
- <button
- onClick={() => setShowConfirmPassword(!showConfirmPassword)}
- className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted"
- >
- {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
- </button>
- </div>
- {confirmPassword && (
- <p className={`mt-2 text-[10px] font-bold flex items-center gap-1.5 ml-1 ${passwordsMatch ? 'text-success-green' : 'text-danger-red'}`}>
- {passwordsMatch ? <><CheckCircle className="w-3.5 h-3.5" /> Passwords match</> : <><AlertCircle className="w-3.5 h-3.5" /> Passwords do not match</>}
- </p>
- )}
- </div>
+  <div>
+  <label className="block text-[10px] font-bold capitalize tracking-normal text-theme-muted mb-2 ml-1">Confirm New Password</label>
+  <div className="relative">
+  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
+  <input
+  type={showConfirmPassword ? 'text' : 'password'}
+  value={confirmPassword}
+  onChange={(e) => setConfirmPassword(e.target.value)}
+  className="w-full pl-11 pr-11 py-3 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark transition-all font-bold"
+  />
+  <button
+  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+  className="absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted"
+  >
+  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+  </button>
+  </div>
+  {confirmPassword && (
+  <p className={`mt-2 text-[10px] font-bold flex items-center gap-1.5 ml-1 ${passwordsMatch ? 'text-success-green' : 'text-danger-red'}`}>
+  {passwordsMatch ? <><CheckCircle className="w-3.5 h-3.5" /> Passwords match</> : <><AlertCircle className="w-3.5 h-3.5" /> Passwords do not match</>}
+  </p>
+  )}
+  </div>
 
- <button
- onClick={handleSavePassword}
- disabled={isSaving || !currentPassword || !newPassword || !passwordsMatch}
- className="w-full sm:w-auto px-8 py-3.5 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold capitalize tracking-[0.2em] rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
- >
- {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Updating...</> : <><Save className="w-4 h-4" /> Update Password</>}
- </button>
+  <button
+  onClick={handleSavePassword}
+  disabled={isSaving || !currentPassword || !newPassword || !passwordsMatch}
+  className="w-full sm:w-auto px-8 py-3.5 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold capitalize tracking-[0.2em] rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
+  >
+  {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Updating...</> : <><Save className="w-4 h-4" /> Update Password</>}
+  </button>
+  </>
+  )}
  </div>
  </div>
 

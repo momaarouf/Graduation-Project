@@ -1068,6 +1068,7 @@ export default function AdminDisputeCourtPage() {
        <RefreshCw className="w-3.5 h-3.5" />
        Reset Court
      </button>
+   </div>
      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
       {[
         { key: 'total', label: 'Total Cases', value: stats.total, color: 'blue', action: () => setFilterStatus('all') },
@@ -1110,7 +1111,6 @@ export default function AdminDisputeCourtPage() {
         );
       })}
     </div>
-   </div>
 
  {/* Filters */}
  <div className="flex flex-col sm:flex-row gap-4 mb-6">

@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // GUIDE PROFILE EDITOR - CARD 16 - COMPLETE
 // ============================================================================
 // LOCATION: /frontend/src/app/dashboard/guide/profile/page.tsx
@@ -278,7 +278,7 @@ interface ProfileHeaderProps {
 
 function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarChange, onCoverChange }: ProfileHeaderProps) {
  return (
- <div className="relative mb-16">
+ <div className="relative mb-48 sm:mb-28">
  {/* Cover image */}
  <div className="relative h-48 sm:h-64 rounded-3xl sm:rounded-[2.5rem] overflow-hidden surface-section mb-6 group border border-theme shadow-xl">
  {profile.coverImage ? (
@@ -304,7 +304,7 @@ function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarC
  </div>
 
   {/* Profile info overlay */}
-  <div className="absolute -bottom-24 sm:-bottom-28 left-4 sm:left-8 flex flex-col sm:flex-row items-start sm:items-end gap-3 sm:gap-6">
+  <div className="absolute -bottom-36 sm:-bottom-28 left-4 sm:left-8 flex flex-col sm:flex-row items-start sm:items-end gap-3 sm:gap-6">
     {/* Avatar with edit button */}
     <div className="relative group/avatar">
       <div className="relative w-28 h-28 sm:w-40 sm:h-40 rounded-3xl border-4 border-theme surface-card overflow-hidden shadow-2xl ring-2 ring-primary-light dark:ring-primary-dark/10 transition-all duration-700 hover:scale-105 group-hover/avatar:ring-4 group-hover/avatar:ring-primary-light dark:ring-primary-dark/30">

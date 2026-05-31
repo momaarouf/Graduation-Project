@@ -18,7 +18,7 @@ import toast from 'react-hot-toast'
 import AdminUsersSkeleton from './skeleton'
 
 // ─── Modal Types ─────────────────────────────────────────────────────────────
-type ModalType = 'suspend' | 'ban' | 'details' | null
+type ModalType = 'suspend' | 'ban' | 'details' | 'email' | 'broadcast' | null
 
 interface ModalState {
  type: ModalType
@@ -54,7 +54,7 @@ function RoleBadge({ role }: { role: string }) {
 
 // ─── Action Menu ──────────────────────────────────────────────────────────────
 function ActionMenu({
- u, onSuspend, onBan, onActivate, onDeactivate, onReactivate, loading
+ u, onSuspend, onBan, onActivate, onDeactivate, onReactivate, onEmail, loading
 }: {
  u: AdminUserResponse
  onSuspend: () => void
@@ -62,6 +62,7 @@ function ActionMenu({
  onActivate: () => void
  onDeactivate: () => void
  onReactivate: () => void
+ onEmail: () => void
  loading: boolean
 }) {
  const [open, setOpen] = useState(false)
@@ -95,10 +96,16 @@ function ActionMenu({
    {open && (
     <div className="absolute right-0 mt-1 w-52 surface-card border border-theme rounded-xl shadow-xl z-20 py-1 overflow-hidden">
      {isActive && (
-      <button onClick={() => act(onSuspend)}
-       className="w-full text-left px-4 py-2.5 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 flex items-center gap-2.5 transition">
-       <Pause className="w-4 h-4" /> Suspend
-      </button>
+       <>
+        <button onClick={() => act(onEmail)}
+         className="w-full text-left px-4 py-2.5 text-sm text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center gap-2.5 transition">
+         <Mail className="w-4 h-4" /> Send Email
+        </button>
+        <button onClick={() => act(onSuspend)}
+         className="w-full text-left px-4 py-2.5 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 flex items-center gap-2.5 transition">
+         <Pause className="w-4 h-4" /> Suspend
+        </button>
+       </>
      )}
      {isSuspended && (
       <button onClick={() => act(onActivate)}
@@ -132,7 +139,7 @@ function ActionMenu({
 
 // ─── Mobile User Card ─────────────────────────────────────────────────────────
 function UserCard({
- u, loading, onSuspend, onBan, onActivate, onDeactivate, onReactivate, onDetails
+ u, loading, onSuspend, onBan, onActivate, onDeactivate, onReactivate, onDetails, onEmail
 }: {
  u: AdminUserResponse
  loading: boolean
@@ -142,6 +149,7 @@ function UserCard({
  onDeactivate: () => void
  onReactivate: () => void
  onDetails: () => void
+ onEmail: () => void
 }) {
  return (
   <div onClick={onDetails} className="surface-card rounded-2xl border border-theme p-4 space-y-4 shadow-sm cursor-pointer hover:border-primary-light transition-colors group">
@@ -161,6 +169,7 @@ function UserCard({
        u={u} loading={loading}
        onSuspend={onSuspend} onBan={onBan} onActivate={onActivate}
        onDeactivate={onDeactivate} onReactivate={onReactivate}
+       onEmail={onEmail}
       />
     </div>
    </div>
@@ -223,6 +232,8 @@ export default function AdminUsersPage() {
  const [suspendReason, setSuspendReason] = useState('')
  const [suspendUntil, setSuspendUntil] = useState('')
  const [banReason, setBanReason] = useState('')
+ const [emailSubject, setEmailSubject] = useState('')
+ const [emailBody, setEmailBody] = useState('')
 
  useEffect(() => {
   if (!authLoading && (!user || user.role !== 'ADMIN')) router.push('/dashboard')
@@ -273,6 +284,7 @@ export default function AdminUsersPage() {
  const closeModal = () => {
   setModal({ type: null, user: null })
   setSuspendReason(''); setSuspendUntil(''); setBanReason('')
+  setEmailSubject(''); setEmailBody('')
  }
 
  // ── Actions ────────────────────────────────────────────────────────────────
@@ -286,6 +298,24 @@ export default function AdminUsersPage() {
    closeModal(); loadUsers()
   } catch (e: any) {
    toast.error(e.response?.data?.message || 'Failed to suspend user')
+  } finally { setActionLoading(false) }
+ }
+
+ const handleSendEmail = async () => {
+  if (!emailSubject.trim() || !emailBody.trim()) { toast.error('Subject and Body are required'); return }
+  setActionLoading(true)
+  try {
+   const { sendAdminEmailBroadcast, sendAdminEmailToUser } = await import('@/src/lib/api/admin')
+   if (modal.type === 'broadcast') {
+    await sendAdminEmailBroadcast(emailSubject.trim(), emailBody.trim())
+    toast.success('Broadcast email sent successfully')
+   } else if (modal.type === 'email' && modal.user) {
+    await sendAdminEmailToUser(modal.user.id, emailSubject.trim(), emailBody.trim())
+    toast.success(`Email sent to ${modal.user.email}`)
+   }
+   closeModal()
+  } catch (e: any) {
+   toast.error(e.response?.data?.message || 'Failed to send email')
   } finally { setActionLoading(false) }
  }
 
@@ -372,9 +402,14 @@ export default function AdminUsersPage() {
          <Users className="w-6 h-6 text-primary-light" />
          Registry Management
        </h1>
-       <button onClick={loadUsers} disabled={isLoading} className="p-2 hover:surface-section rounded-lg transition group">
-         <RefreshCw className={`w-5 h-5 text-theme-muted group-hover:text-primary-light ${isLoading ? 'animate-spin' : ''}`} />
-       </button>
+       <div className="flex items-center gap-2">
+         <button onClick={() => setModal({ type: 'broadcast', user: null })} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-2 shadow-sm">
+           <Mail className="w-4 h-4" /> Broadcast
+         </button>
+         <button onClick={loadUsers} disabled={isLoading} className="p-2 hover:surface-section rounded-lg transition group">
+           <RefreshCw className={`w-5 h-5 text-theme-muted group-hover:text-primary-light ${isLoading ? 'animate-spin' : ''}`} />
+         </button>
+       </div>
      </div>
 
      <div className="flex flex-col lg:flex-row gap-3">
@@ -453,6 +488,7 @@ export default function AdminUsersPage() {
         onDeactivate={() => handleDeactivate(u)}
         onReactivate={() => handleReactivate(u)}
         onDetails={() => setModal({ type: 'details', user: u })}
+        onEmail={() => setModal({ type: 'email', user: u })}
        />
       ))}
      </div>
@@ -511,6 +547,7 @@ export default function AdminUsersPage() {
                onActivate={() => handleActivate(u)}
                onDeactivate={() => handleDeactivate(u)}
                onReactivate={() => handleReactivate(u)}
+               onEmail={() => setModal({ type: 'email', user: u })}
               />
             </div>
            </td>
@@ -521,6 +558,60 @@ export default function AdminUsersPage() {
       </div>
      </div>
     </>
+   )}
+
+   {/* ── Email / Broadcast Modal ─────────────────────────────────────── */}
+   {(modal.type === 'email' || modal.type === 'broadcast') && (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-[60] p-0 sm:p-4">
+     <div className="surface-card rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-md shadow-2xl border border-theme">
+      <div className="flex items-center justify-between mb-4">
+       <div className="flex items-center gap-2">
+        <Mail className="w-5 h-5 text-indigo-500" />
+        <h3 className="text-lg font-bold text-theme-primary capitalize tracking-tight">
+          {modal.type === 'broadcast' ? 'Broadcast Email' : 'Send Email'}
+        </h3>
+       </div>
+       <button onClick={closeModal} className="p-2 hover:surface-section rounded-lg transition"><X className="w-4 h-4" /></button>
+      </div>
+
+      <p className="text-sm text-theme-secondary mb-5">
+       {modal.type === 'broadcast' 
+         ? 'Send an email to all active users.' 
+         : <>Sending to <strong className="text-theme-primary">{modal.user?.email}</strong></>
+       }
+      </p>
+
+      <div className="space-y-4">
+       <div>
+        <label className="block text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1.5">
+         Subject <span className="text-danger-red">*</span>
+        </label>
+        <input type="text" value={emailSubject} onChange={e => setEmailSubject(e.target.value)}
+         placeholder="Email Subject"
+         className="w-full px-3 py-2.5 border border-theme rounded-xl surface-section text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+       </div>
+
+       <div>
+        <label className="block text-[10px] font-black text-theme-muted capitalize tracking-normal mb-1.5">
+         Message Body (HTML supported) <span className="text-danger-red">*</span>
+        </label>
+        <textarea value={emailBody} onChange={e => setEmailBody(e.target.value)}
+         placeholder="<p>Hello...</p>"
+         rows={5}
+         className="w-full px-3 py-2.5 border border-theme rounded-xl surface-section text-sm outline-none focus:ring-2 focus:ring-indigo-500 resize-none font-mono"
+        />
+       </div>
+
+       <div className="flex gap-2 pt-2">
+        <button onClick={closeModal} className="flex-1 py-3 surface-section hover:brightness-95 border border-theme rounded-xl text-sm font-bold transition-all">Cancel</button>
+        <button onClick={handleSendEmail} disabled={actionLoading || !emailSubject.trim() || !emailBody.trim()} className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+         {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send Email'}
+        </button>
+       </div>
+      </div>
+     </div>
+    </div>
    )}
 
    {/* ── Suspend Modal ─────────────────────────────────────────────── */}

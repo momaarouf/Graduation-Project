@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Mail, CheckCircle, AlertCircle, ArrowRight, Loader2, RefreshCw } from 'lucide-react'
@@ -36,9 +36,12 @@ export default function EmailVerificationForm({ emailPrefill, onSuccess }: Props
  const code = digits.join('')
  const codeComplete = code.length === 6
 
+ const hasAutoSent = useRef(false)
+
  // Auto-send code if email was prefilled
  useEffect(() => {
- if (emailFromUrl && step === 'code') {
+ if (emailFromUrl && step === 'code' && !hasAutoSent.current) {
+ hasAutoSent.current = true
  sendCode(emailFromUrl)
  }
  }, [])

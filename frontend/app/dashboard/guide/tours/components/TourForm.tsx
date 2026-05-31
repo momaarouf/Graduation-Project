@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
@@ -770,8 +770,11 @@ function ScheduleSection({ formData, onChange }: ScheduleSectionProps) {
  type="number"
  min="0"
  max="24"
- value={formData.durationHours || ''}
- onChange={(e) => onChange('durationHours', e.target.value === '' ? 0 : parseInt(e.target.value))}
+ value={formData.durationHours === undefined ? '' : formData.durationHours}
+ onChange={(e) => {
+ const parsed = parseInt(e.target.value, 10);
+ onChange('durationHours', isNaN(parsed) ? 0 : Math.max(0, parsed));
+ }}
  className=" w-full px-4 py-3 surface-section border-2 border-theme rounded-2xl text-theme-primary focus:outline-none focus:border-primary-light dark:border-primary-dark focus:ring-4 focus:ring-primary-light/10 dark:ring-primary-dark/5 transition-all font-bold shadow-sm hover:surface-card"
  />
  </div>
@@ -783,10 +786,10 @@ function ScheduleSection({ formData, onChange }: ScheduleSectionProps) {
  type="number"
  min="0"
  max="59"
- value={formData.durationMinutes ?? 0}
+ value={formData.durationMinutes === undefined ? '' : formData.durationMinutes}
  onChange={(e) => {
- const val = parseInt(e.target.value) || 0
- onChange('durationMinutes', Math.min(59, Math.max(0, val)))
+ const parsed = parseInt(e.target.value, 10);
+ onChange('durationMinutes', isNaN(parsed) ? 0 : Math.min(59, Math.max(0, parsed)));
  }}
  className=" w-full px-4 py-3 surface-section border-2 border-theme rounded-2xl text-theme-primary focus:outline-none focus:border-primary-light dark:border-primary-dark focus:ring-4 focus:ring-primary-light/10 dark:ring-primary-dark/5 transition-all font-bold shadow-sm hover:surface-card"
  />
@@ -2045,16 +2048,24 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  base.isHalalCertified = (initialData as any).halalFriendly;
  }
 
- // Map locationName to city (backend uses locationName as a general field)
- if (initialData && (initialData as any).locationName) {
+ // Map city and locationName
+ if (initialData && (initialData as any).city) {
+ base.city = (initialData as any).city;
+ } else if (initialData && (initialData as any).locationName) {
  base.city = (initialData as any).locationName;
  }
 
  // Map countryCode to country name
  if (initialData && (initialData as any).countryCode) {
  const code = (initialData as any).countryCode.toUpperCase();
- if (code === 'LB') base.country = 'Lebanon';
- else if (code === 'TR') base.country = 'Turkey';
+ const countryObj = Country.getCountryByCode(code);
+ if (countryObj) {
+ base.country = countryObj.name;
+ } else if (code === 'LB') {
+ base.country = 'Lebanon';
+ } else if (code === 'TR') {
+ base.country = 'Turkey';
+ }
  }
 
  // Map instantBook to bookingMode
@@ -2081,17 +2092,9 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  base[field] = val;
  }
 
- // Normalize dynamic pricing: scale decimals to percentages for UI
+ // Keep dynamic pricing as stored
  if (field === 'dynamicPricing' && base[field]) {
- // Clone to prevent double-normalization if React re-runs this initializer
- const dp = { ...base[field] };
- if (dp.weekendMultiplier !== undefined && dp.weekendMultiplier <= 10) {
- dp.weekendMultiplier = Math.round(dp.weekendMultiplier * 100);
- }
- if (dp.holidayMultiplier !== undefined && dp.holidayMultiplier <= 10) {
- dp.holidayMultiplier = Math.round(dp.holidayMultiplier * 100);
- }
- base[field] = dp;
+ base[field] = { ...base[field] };
  }
 
  // Normalize itinerary durations to Xh Ym format
@@ -2307,13 +2310,16 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  setIsSaving(true)
  try {
  // 1. Align field names for backend
+ const countryObj = Country.getAllCountries().find(c => c.name === formData.country);
+ const selectedCountryCode = countryObj ? countryObj.isoCode : 'LB';
+
  const payload: any = {
  title: formData.title,
  description: formData.description,
  category: formData.category || 'historical',
  locationName: formData.city, // Backend calls it locationName
  city: formData.city,
- countryCode: formData.country?.toLowerCase() === 'lebanon' ? 'LB' : 'TR',
+ countryCode: selectedCountryCode,
  basePrice: formData.basePrice,
  currency: formData.currency,
  isPremium: formData.isPremium || false,
@@ -2330,11 +2336,7 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  halalFriendly: formData.isHalalCertified,
  halalDetails: JSON.stringify(formData.halalDetails),
  isFamilyFriendly: formData.isFamilyFriendly !== undefined ? formData.isFamilyFriendly : false,
- dynamicPricing: JSON.stringify({
- ...formData.dynamicPricing,
- weekendMultiplier: (formData.dynamicPricing.weekendMultiplier || 100) / 100,
- holidayMultiplier: (formData.dynamicPricing.holidayMultiplier || 100) / 100
- }),
+ dynamicPricing: JSON.stringify(formData.dynamicPricing),
  hasGroupDiscount: formData.groupDiscountEnabled,
  groupDiscountThreshold: formData.groupDiscountThreshold,
  groupDiscountPercent: formData.groupDiscountPercent,
@@ -2402,13 +2404,16 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  setIsSaving(true)
  try {
  // 1. Save the tour first
+ const countryObj = Country.getAllCountries().find(c => c.name === formData.country);
+ const selectedCountryCode = countryObj ? countryObj.isoCode : 'LB';
+
  const payload: any = {
  title: formData.title,
  description: formData.description,
  category: formData.category || 'historical',
  locationName: formData.city,
  city: formData.city,
- countryCode: formData.country?.toLowerCase() === 'lebanon' ? 'LB' : 'TR',
+ countryCode: selectedCountryCode,
  basePrice: formData.basePrice,
  currency: formData.currency,
  isPremium: formData.isPremium || false,
@@ -2425,11 +2430,7 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  halalFriendly: formData.isHalalCertified,
  halalDetails: JSON.stringify(formData.halalDetails),
  isFamilyFriendly: formData.isFamilyFriendly !== undefined ? formData.isFamilyFriendly : false,
- dynamicPricing: JSON.stringify({
- ...formData.dynamicPricing,
- weekendMultiplier: (formData.dynamicPricing.weekendMultiplier || 100) / 100,
- holidayMultiplier: (formData.dynamicPricing.holidayMultiplier || 100) / 100
- }),
+ dynamicPricing: JSON.stringify(formData.dynamicPricing),
  hasGroupDiscount: formData.groupDiscountEnabled,
  groupDiscountThreshold: formData.groupDiscountThreshold,
  groupDiscountPercent: formData.groupDiscountPercent,

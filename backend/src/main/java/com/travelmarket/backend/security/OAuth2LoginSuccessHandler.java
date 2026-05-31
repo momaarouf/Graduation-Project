@@ -22,6 +22,9 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.travelmarket.backend.notification.service.NotificationService;
+import com.travelmarket.backend.notification.enums.NotificationType;
+import com.travelmarket.backend.service.EmailService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -50,6 +53,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final NotificationService notificationService;
+    private final EmailService emailService;
 
     private static final String REFRESH_COOKIE = "refresh_token";
     private static final Duration REFRESH_TTL_DEFAULT = Duration.ofDays(7);
@@ -127,6 +132,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                     user = new User();
                     user.setEmail(email);
                     user.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString()));
+                    user.setHasPassword(false); // OAuth users have no real password
                     user.setRole(User.Role.valueOf(roleCookie));
                     user.setAccountStatus("ACTIVE");
                     user.setAgreedToTerms(false);
@@ -149,6 +155,17 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                         gp.setUser(user);
                         guideProfileRepository.save(gp);
                     }
+
+                    // Trigger notifications for new OAuth users
+                    notificationService.createNotification(
+                            user.getId(),
+                            NotificationType.SETUP_PASSWORD_REMINDER,
+                            "Secure your account",
+                            "You signed up with Google. Please set a password in your settings to secure your account.",
+                            null,
+                            "/dashboard/" + user.getRole().name().toLowerCase() + "/settings"
+                    );
+                    emailService.sendSetupPasswordReminder(user.getEmail(), name);
                 }
 
                 // 4) Link identity to user (provider + providerUserId)

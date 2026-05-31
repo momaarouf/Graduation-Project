@@ -53,15 +53,19 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
                     List<String> authorization = accessor.getNativeHeader("Authorization");
                     if (authorization != null && !authorization.isEmpty()) {
-                        String token = authorization.get(0).substring(7); // Remove "Bearer "
-                        String username = jwtUtil.extractUsername(token);
-                        if (username != null) {
-                            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                            if (jwtUtil.validateToken(token, userDetails)) {
-                                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                                        userDetails, null, userDetails.getAuthorities());
-                                accessor.setUser(auth);
+                        try {
+                            String token = authorization.get(0).substring(7); // Remove "Bearer "
+                            String username = jwtUtil.extractUsername(token);
+                            if (username != null) {
+                                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                                if (jwtUtil.validateToken(token, userDetails)) {
+                                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                                            userDetails, null, userDetails.getAuthorities());
+                                    accessor.setUser(auth);
+                                }
                             }
+                        } catch (Exception e) {
+                            // Token is expired or invalid. Ignore and remain unauthenticated.
                         }
                     }
                 }

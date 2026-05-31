@@ -15,8 +15,11 @@ import {
  passwordForgotRequest as apiPasswordForgotRequest,
  passwordReset as apiPasswordReset,
  passwordChange as apiPasswordChange,
+ passwordSetupRequest as apiPasswordSetupRequest,
+ passwordSetupConfirm as apiPasswordSetupConfirm,
  MeResponse,
  authMe,
+ ResetPasswordRequest,
 } from '@/src/lib/api/auth';
 import LoadingOverlay from '@/src/components/ui/LoadingOverlay';
 
@@ -33,6 +36,7 @@ interface User {
  avatarUrl?: string;
  emailNotificationsEnabled: boolean;
  pushNotificationsEnabled: boolean;
+ hasPassword: boolean;
 }
 
 interface AuthContextType {
@@ -55,6 +59,10 @@ interface AuthContextType {
  forgotPassword: (email: string) => Promise<{ message: string; token: string; code?: string }>;
  resetPassword: (token: string, newPassword: string) => Promise<void>;
  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+ /** Request email code to securely set a password for OAuth-only accounts */
+ requestPasswordSetup: () => Promise<void>;
+ /** Confirm password setup with the emailed code and a new password */
+ confirmPasswordSetup: (code: string, newPassword: string) => Promise<void>;
  /** Used by OAuth callback to authenticate from a JWT without a form login */
  loginWithToken: (token: string) => Promise<void>;
  /** Re-fetch user data from /api/auth/me to refresh client state */
@@ -308,6 +316,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  await apiPasswordChange({ currentPassword, newPassword });
  };
 
+ // Request a setup-password code (for OAuth users without a real password)
+ const requestPasswordSetup = async () => {
+ await apiPasswordSetupRequest();
+ };
+
+ // Confirm password setup with code + new password
+ const confirmPasswordSetup = async (code: string, newPassword: string) => {
+ await apiPasswordSetupConfirm({ token: code, newPassword });
+ // All sessions are invalidated by backend — force logout
+ clearAccessToken();
+ setUser(null);
+ };
+
  /**
  * loginWithToken — used by the OAuth callback page.
  * Receives the short-lived JWT from the backend redirect, stores it,
@@ -361,6 +382,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  forgotPassword: requestPasswordReset,
  resetPassword,
  changePassword,
+ requestPasswordSetup,
+ confirmPasswordSetup,
  loginWithToken,
  refetchUser,
  isProcessing,

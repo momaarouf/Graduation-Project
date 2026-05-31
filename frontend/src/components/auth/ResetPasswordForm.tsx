@@ -45,7 +45,7 @@ export default function ResetPasswordForm({ token: propToken }: Props) {
  const [step, setStep] = useState<'code' | 'password'>(propToken ? 'password' : 'code')
  const [direction, setDirection] = useState(1) // 1 for next, -1 for back
  
- const [digits, setDigits] = useState<string[]>(Array(8).fill(''))
+ const [digits, setDigits] = useState<string[]>(Array(6).fill(''))
  const [password, setPassword] = useState('')
  const [confirm, setConfirm] = useState('')
  const [showPw, setShowPw] = useState(false)
@@ -56,13 +56,13 @@ export default function ResetPasswordForm({ token: propToken }: Props) {
  const [touched, setTouched] = useState<Record<string, boolean>>({})
 
  const code = propToken || digits.join('')
- const codeComplete = code.length === 8 && /^\d{8}$/.test(code)
+ const codeComplete = code.length === 6 && /^\d{6}$/.test(code)
  const strength = getPasswordStrength(password)
  const passwordsMatch = password === confirm
  const isFormValid = codeComplete && password.length >= 8 && passwordsMatch && confirm.length > 0
 
  const handleNextStep = () => {
- if (!codeComplete) { toast.error('Enter all 8 digits'); return }
+ if (!codeComplete) { toast.error('Enter all 6 digits'); return }
  setDirection(1)
  setStep('password')
  }
@@ -100,7 +100,7 @@ export default function ResetPasswordForm({ token: propToken }: Props) {
  if (err?.response?.status === 400 || err?.response?.status === 401 || err?.response?.status === 404) {
  setDirection(-1)
  setStep('code')
- setDigits(Array(8).fill(''))
+ setDigits(Array(6).fill(''))
  setErrors({ general: 'The code you entered is invalid or expired. Please check your email and try again.' })
  } else {
  setErrors({ general: msg })
@@ -160,9 +160,9 @@ export default function ResetPasswordForm({ token: propToken }: Props) {
  )}
 
  <div className="space-y-4">
- <OtpInput length={8} value={digits} onChange={setDigits} autoFocus />
+ <OtpInput length={6} value={digits} onChange={setDigits} autoFocus />
  <p className="text-center text-xs text-theme-muted">
- 8-digit code from your email · Expires in 15 min
+ 6-digit code from your email · Expires in 15 min
  </p>
  </div>
 
@@ -176,7 +176,7 @@ export default function ResetPasswordForm({ token: propToken }: Props) {
  </button>
 
  <div className="text-center space-y-3 pt-2">
- <Link href="/auth/forgot-password" onClick={() => setDigits(Array(8).fill(''))} className="text-sm text-primary-light dark:text-primary-dark dark:text-primary-dark hover:underline font-medium">
+ <Link href="/auth/forgot-password" onClick={() => setDigits(Array(6).fill(''))} className="text-sm text-primary-light dark:text-primary-dark dark:text-primary-dark hover:underline font-medium">
  Resend code
  </Link>
  <p className="text-sm text-theme-muted ">

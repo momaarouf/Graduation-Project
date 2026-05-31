@@ -56,7 +56,7 @@ export default function TourSearch({
   
   // Sync with URL params
   useEffect(() => {
-    const urlQuery = searchParams.get('q') || ''
+    const urlQuery = searchParams?.get('q') || ''
     if (urlQuery !== searchValue) {
       setSearchValue(urlQuery)
       prevSearchRef.current = urlQuery
@@ -84,7 +84,7 @@ export default function TourSearch({
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParams?.toString() || '')
     
     if (searchValue.trim()) {
       params.set('q', searchValue.trim())
@@ -98,7 +98,7 @@ export default function TourSearch({
   const handleClear = () => {
     setSearchValue('')
     prevSearchRef.current = ''
-    const params = new URLSearchParams(searchParams.toString())
+    const params = new URLSearchParams(searchParams?.toString() || '')
     params.delete('q')
     router.push(`/tours?${params.toString()}`, { scroll: false })
     
@@ -107,7 +107,7 @@ export default function TourSearch({
     }
   }
 
-  const hasSearch = searchValue.length > 0 || (searchParams.get('q') && searchParams.get('q') !== '')
+  const hasSearch = searchValue.length > 0 || (searchParams?.get('q') && searchParams?.get('q') !== '')
 
   return (
     <div className={`w-full ${className} relative z-30`}>

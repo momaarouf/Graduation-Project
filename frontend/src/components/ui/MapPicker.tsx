@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useId, useRef } from 'react'
-import { MapContainer, TileLayer, Marker, useMapEvents, Polyline, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, useMapEvents, Polyline, useMap, ZoomControl } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { MapPin, Search, Navigation, Loader2 } from 'lucide-react'
@@ -93,10 +93,16 @@ export default function MapPicker({
   className = '',
   defaultCenter = [33.8938, 35.5018],
   trail = [],
-  zoom = 13
+  zoom = 13,
+  mapId
 }: MapPickerProps) {
   const [isGeocoding, setIsGeocoding] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const pinIcon = useMemo(() => createCustomIcon('#2563eb'), [])
+
+  // Generate a unique key for the MapContainer to prevent Leaflet "Map container is being reused" errors
+  // during React strict-mode remounts or component toggles.
+  const [mapKey] = useState(() => `${mapId || 'map'}-${Math.random().toString(36).substr(2, 9)}`)
 
   // Robust validation
   const hasCoords = typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
@@ -124,6 +130,28 @@ export default function MapPicker({
     }
   }
 
+  const handleSearchSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    if (!searchQuery.trim()) return
+
+    setIsGeocoding(true)
+    try {
+      const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1`)
+      const data = await resp.json()
+      if (data && data.length > 0) {
+        const newLat = parseFloat(data[0].lat)
+        const newLng = parseFloat(data[0].lon)
+        const address = data[0].display_name || ''
+        const name = data[0].name || address.split(',')[0] || 'Searched Location'
+        onChange(newLat, newLng, address, name)
+      }
+    } catch (error) {
+      console.error('Search error:', error)
+    } finally {
+      setIsGeocoding(false)
+    }
+  }
+
   // Pre-process trail for Polyline
   const trailPath = useMemo(() => {
     const points = trail?.filter(t => t.lat && t.lng).map(t => [t.lat, t.lng] as [number, number]) || []
@@ -137,11 +165,14 @@ export default function MapPicker({
     <div className={`relative overflow-hidden rounded-xl border border-theme shadow-inner group ${className}`} style={{ height }}>
       {/* We remove the ID to let React-Leaflet manage the container lifecycle more reliably */}
       <MapContainer 
+        key={mapKey}
         center={center} 
         zoom={zoom} 
-        scrollWheelZoom={false}
+        scrollWheelZoom={true}
+        zoomControl={false}
         className="w-full h-full z-0"
       >
+        <ZoomControl position="bottomleft" />
         <MapUpdater center={center} zoom={zoom} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -179,11 +210,27 @@ export default function MapPicker({
       </MapContainer>
 
       {/* OVERLAYS */}
-      <div className="absolute top-4 left-4 z-[1] flex items-center gap-2 surface-card px-3 py-1.5 rounded-full border border-theme shadow-sm">
+      <div className="absolute top-4 left-4 z-[1000] flex items-center gap-2 surface-card px-3 py-1.5 rounded-full border border-theme shadow-sm">
         <div className={`w-2 h-2 rounded-full ${isGeocoding ? 'bg-orange-500 animate-pulse' : 'bg-primary-light'}`} />
         <span className="text-[10px] font-bold text-theme-primary capitalize tracking-normal leading-none">
-          {isGeocoding ? 'Fetching Address...' : (hasCoords ? 'Location Selected' : 'Click to Pick Location')}
+          {isGeocoding ? 'Fetching...' : (hasCoords ? 'Location Selected' : 'Click to Pick Location')}
         </span>
+      </div>
+
+      {/* SEARCH BAR */}
+      <div className="absolute top-4 right-4 z-[1000] w-[200px] sm:w-[250px]">
+        <form onSubmit={handleSearchSubmit} className="flex items-center bg-white dark:bg-[#1a2333] rounded-xl border border-theme shadow-md overflow-hidden">
+          <input 
+            type="text" 
+            placeholder="Search location..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1 bg-transparent px-3 py-2 text-xs text-gray-800 dark:text-gray-200 focus:outline-none"
+          />
+          <button type="submit" disabled={isGeocoding} className="p-2 text-gray-500 hover:text-primary-light transition-colors">
+            {isGeocoding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+          </button>
+        </form>
       </div>
 
       {hasCoords && (
@@ -204,7 +251,6 @@ export default function MapPicker({
       
       <style dangerouslySetInnerHTML={{ __html: `
         .leaflet-container { background-color: #f8fafc; }
-        .dark .leaflet-container { filter: brightness(0.8) contrast(1.1); }
         .leaflet-div-icon { background: transparent; border: none; }
         .animate-bounce-slow { animation: bounce-slow 2s infinite; }
         @keyframes bounce-slow {

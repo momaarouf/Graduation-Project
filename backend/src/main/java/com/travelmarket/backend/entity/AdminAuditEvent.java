@@ -27,7 +27,7 @@ public class AdminAuditEvent {
     @Column(name = "target_type", nullable = false, length = 40)
     private String targetType;
 
-    @Column(name = "target_id", nullable = false)
+    @Column(name = "target_id")
     private Long targetId;
 
     @Column(nullable = false, length = 255)

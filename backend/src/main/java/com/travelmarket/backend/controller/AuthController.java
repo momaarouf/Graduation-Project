@@ -92,10 +92,6 @@ public class AuthController {
         int n = (int)(Math.random() * 900000) + 100000;
         return String.valueOf(n);
     }
-    private String generate8DigitCode() {
-        int n = (int) (Math.random() * 90000000) + 10000000;
-        return String.valueOf(n);
-    }
 
     private String sha256Hex(String raw) {
         try {
@@ -310,7 +306,8 @@ public class AuthController {
                 Boolean.TRUE.equals(user.getIsEmailVerified()),
                 Boolean.TRUE.equals(user.getAgreedToTerms()),
                 user.getEmailNotificationsEnabled(),
-                user.getPushNotificationsEnabled());
+                user.getPushNotificationsEnabled(),
+                Boolean.TRUE.equals(user.getHasPassword()));
     }
 
     @PostMapping("/refresh")
@@ -444,13 +441,13 @@ public class AuthController {
         //String rawToken = UUID.randomUUID().toString() + "-" + UUID.randomUUID();
         // Numeric reset code is more convenient while frontend is not deployed.
         // Still treated as the "token" in the reset endpoint.
-        String rawToken = generate8DigitCode();
+        String rawToken = generate6DigitCode();
         String hash = sha256Hex(rawToken);
 
         // Optional: retry a few times if collision happens (unique token_hash)
         for (int i = 0; i < 3; i++) {
             if (passwordResetTokenRepository.findByTokenHash(hash).isEmpty()) break;
-            rawToken = generate8DigitCode();
+            rawToken = generate6DigitCode();
             hash = sha256Hex(rawToken);
         }
 
@@ -572,6 +569,119 @@ public class AuthController {
                 NotificationType.PASSWORD_CHANGED,
                 "Password Changed",
                 "Your password has been successfully changed. If this was not you, please contact support immediately.",
+                null,
+                null
+        );
+    }
+
+    /**
+     * POST /api/auth/password/setup/request
+     * For OAuth-only users who have no real password.
+     * Sends a 6-digit verification code to their email so they can securely set a password.
+     * Requires a valid JWT (must be authenticated).
+     */
+    @PostMapping("/password/setup/request")
+    public void requestPasswordSetup(@AuthenticationPrincipal UserDetails principal, HttpServletRequest httpRequest) {
+        String ip = getClientIp(httpRequest);
+        User user = userRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        if (Boolean.TRUE.equals(user.getHasPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Account already has a password. Use /password/change instead.");
+        }
+
+        // Rate-limit: 3 per 15 min per user
+        rateLimiterService.check(
+                "auth:setup-pw:user:" + user.getId(),
+                3,
+                Duration.ofMinutes(15),
+                "Too many requests. Try again later."
+        );
+        rateLimiterService.check(
+                "auth:setup-pw:ip:" + ip,
+                5,
+                Duration.ofMinutes(15),
+                "Too many requests. Try again later."
+        );
+
+        String rawCode = generate6DigitCode();
+        String hash = sha256Hex(rawCode);
+
+        // Reuse PasswordResetToken table — same mechanism
+        PasswordResetToken prt = new PasswordResetToken();
+        prt.setUser(user);
+        prt.setTokenHash(hash);
+        prt.setCreatedAtUtc(Instant.now());
+        prt.setExpiresAtUtc(Instant.now().plus(RESET_TTL));
+        prt.setUsedAtUtc(null);
+        passwordResetTokenRepository.save(prt);
+
+        String subject = "Set up your password";
+        String body = "Your password setup code is:\n\n"
+                + rawCode + "\n\n"
+                + "This code expires in 15 minutes.\n\n"
+                + "Security note:\n"
+                + "- Do not share this code with anyone.\n"
+                + "- Our team will never ask you for this code.\n\n"
+                + "If you did not request this, please contact support.\n";
+        emailService.send(user.getEmail(), subject, body);
+    }
+
+    /**
+     * POST /api/auth/password/setup/confirm
+     * Accepts the 6-digit code + new password, verifies the code, sets the password,
+     * marks hasPassword=true, and invalidates all existing sessions for security.
+     */
+    @PostMapping("/password/setup/confirm")
+    public void confirmPasswordSetup(
+            @Valid @RequestBody ResetPasswordRequest req,
+            @AuthenticationPrincipal UserDetails principal
+    ) {
+        User user = userRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        if (Boolean.TRUE.equals(user.getHasPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Account already has a password.");
+        }
+
+        String raw = req.getToken().trim();
+        String hash = sha256Hex(raw);
+
+        PasswordResetToken prt = passwordResetTokenRepository.findByTokenHash(hash)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid code"));
+
+        // Ensure this code belongs to this logged-in user
+        if (!prt.getUser().getId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid code");
+        }
+
+        if (prt.getUsedAtUtc() != null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Code already used");
+        }
+
+        if (prt.getExpiresAtUtc().isBefore(Instant.now())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Code expired");
+        }
+
+        // Set the real password and mark account as having a password
+        user.setPasswordHash(passwordEncoder.encode(req.getNewPassword()));
+        user.setHasPassword(true);
+
+        // Invalidate all existing sessions for security (force re-login)
+        int current = (user.getTokenVersion() == null) ? 0 : user.getTokenVersion();
+        user.setTokenVersion(current + 1);
+        userRepository.save(user);
+
+        prt.setUsedAtUtc(Instant.now());
+        passwordResetTokenRepository.save(prt);
+
+        refreshTokenRepository.revokeAllForUser(user.getId(), Instant.now());
+
+        notificationService.createNotification(
+                user.getId(),
+                NotificationType.PASSWORD_CHANGED,
+                "Password Set Successfully",
+                "You have successfully set a password for your account. You can now sign in with email and password.",
                 null,
                 null
         );

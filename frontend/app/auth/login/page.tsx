@@ -26,8 +26,6 @@ import {
  Lock, 
  Shield, 
  Chrome, 
- Apple, 
- Github,
  ChevronLeft,
  Sparkles
 } from 'lucide-react'

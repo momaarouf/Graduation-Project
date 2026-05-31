@@ -100,6 +100,9 @@ public class User {
     @Column(name = "token_version", nullable = false)
     private Integer tokenVersion = 0;
 
+    @Column(name = "has_password", nullable = false)
+    private Boolean hasPassword = true;
+
 
     @PrePersist
     protected void onCreate() {

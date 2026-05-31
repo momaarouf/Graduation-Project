@@ -19,5 +19,6 @@ public record MeResponse(
         boolean emailVerified,
         boolean agreedToTerms,
         boolean emailNotificationsEnabled,
-        boolean pushNotificationsEnabled
+        boolean pushNotificationsEnabled,
+        boolean hasPassword
 ) {}

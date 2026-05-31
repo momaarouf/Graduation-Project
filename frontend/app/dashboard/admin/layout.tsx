@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // ADMIN LAYOUT - WITH SIDEBAR NAVIGATION
 // ============================================================================
 // LOCATION: /frontend/src/app/dashboard/admin/layout.tsx
@@ -27,6 +27,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Navigation from '@/src/components/layout/Navigation'
+import { NotificationBell } from '@/src/components/NotificationBell'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
 import { adminGetPendingVerifications } from '@/src/lib/api/admin'
 import { getAdminPendingTours } from '@/src/lib/api/tours'
@@ -40,7 +41,7 @@ const NAV_ITEMS = [
   { name: 'Verifications', href: '/dashboard/admin/verifications', icon: Shield, color: 'amber', badgeKey: 'admin-verifications' },
   { name: 'Users', href: '/dashboard/admin/users', icon: Users, color: 'blue' },
   { name: 'Disputes', href: '/dashboard/admin/disputes', icon: Scale, color: 'red' },
-  { name: 'Support', href: '/dashboard/admin/support', icon: MessageSquare, color: 'blue' },
+  { name: 'Support', href: '/dashboard/admin/support', icon: MessageSquare, color: 'blue', badgeKey: 'admin-messages' },
   { name: 'Payouts', href: '/dashboard/admin/payouts', icon: DollarSign, color: 'emerald' },
   { name: 'Tours', href: '/dashboard/admin/tours', icon: Globe, color: 'indigo', badgeKey: 'admin-tours' },
   { name: 'Audit', href: '/dashboard/admin/audit', icon: History, color: 'gray' },
@@ -119,7 +120,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (mounted) fetchBadges()
     const handleRefresh = () => fetchBadges()
     window.addEventListener('badge-refresh', handleRefresh)
-    return () => window.removeEventListener('badge-refresh', handleRefresh)
+    
+    // Listen for notification sync events (from NotificationBell)
+    const handleNotificationSync = (e: any) => {
+      const { categories } = e.detail
+      setBadges(prev => ({
+        ...prev,
+        'admin-messages': categories?.messages || 0
+      }))
+    }
+    window.addEventListener('notification-sync', handleNotificationSync)
+    
+    return () => {
+      window.removeEventListener('badge-refresh', handleRefresh)
+      window.removeEventListener('notification-sync', handleNotificationSync)
+    }
   }, [mounted])
 
   useEffect(() => {
@@ -204,7 +219,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="lg:hidden h-14 glass-theme border-b border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between px-4 sticky top-0 z-30 shadow-sm">
             <button onClick={() => setIsMobileOpen(true)} className="p-2 -ml-2"><Menu className="w-5 h-5" /></button>
             <span className="text-xs font-black capitalize tracking-normal text-theme-primary">Admin Control</span>
-            <div className="w-8" />
+            <div className="flex items-center">
+              <NotificationBell />
+            </div>
           </div>
           <div className="p-3 sm:p-6 lg:p-8">{children}</div>
         </main>

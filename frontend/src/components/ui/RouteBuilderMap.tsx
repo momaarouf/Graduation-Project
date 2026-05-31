@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useId, useRef } from 'react'
-import { MapContainer, TileLayer, Marker, useMapEvents, Polyline, Popup, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, useMapEvents, Polyline, Popup, useMap, ZoomControl } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { MapPin, Navigation, Trash2, GripVertical, Plus, Search } from 'lucide-react'
@@ -92,6 +92,9 @@ export default function RouteBuilderMap({
   const [searchQuery, setSearchQuery] = useState('')
   const [map, setMap] = useState<L.Map | null>(null)
 
+  // Generate a unique key for the MapContainer to prevent Leaflet "Map container is being reused" errors
+  const [mapKey] = useState(() => `route-builder-${Math.random().toString(36).substr(2, 9)}`)
+
   // Reverse Geocoding helper
   const reverseGeocode = async (lat: number, lng: number) => {
     try {
@@ -175,11 +178,15 @@ export default function RouteBuilderMap({
       </div>
 
       <MapContainer 
+        key={mapKey}
         center={centerPoint} 
         zoom={12} 
+        scrollWheelZoom={true}
+        zoomControl={false}
         className="w-full h-full z-0"
         ref={setMap}
       >
+        <ZoomControl position="bottomleft" />
         <MapUpdater center={centerPoint} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -254,9 +261,6 @@ export default function RouteBuilderMap({
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
-        .dark .leaflet-container {
-          filter: grayscale(1) invert(0.9) hue-rotate(180deg) brightness(1.1);
-        }
         .leaflet-div-icon { background: none; border: none; }
         .animate-bounce-slow { animation: bounce 2s infinite; }
         @keyframes bounce {

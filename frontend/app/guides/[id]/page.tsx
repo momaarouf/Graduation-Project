@@ -130,7 +130,7 @@ export default function GuideProfilePage({ params }: { params: Promise<{ id: str
  <main className="flex-1 w-full surface-card pb-20 relative">
  
  {/* Immersive Cover Image Area */}
- <div className="relative w-full h-[350px] md:h-[450px] overflow-hidden group">
+ <div className="relative w-full h-[160px] md:h-[200px] overflow-hidden group">
  <Image
  src={guide.coverImageUrl || '/images/guides/default-cover.jpg'}
  alt={`${guide.name} cover`}

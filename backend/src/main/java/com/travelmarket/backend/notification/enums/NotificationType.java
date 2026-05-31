@@ -5,6 +5,7 @@ public enum NotificationType {
     EMAIL_VERIFIED,
     PASSWORD_CHANGED,
     PROFILE_COMPLETED,
+    SETUP_PASSWORD_REMINDER,
     
     // Guide Verification
     VERIFICATION_SUBMITTED,

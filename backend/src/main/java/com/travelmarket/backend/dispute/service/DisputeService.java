@@ -15,6 +15,7 @@ import com.travelmarket.backend.notification.enums.NotificationType;
 import com.travelmarket.backend.notification.service.NotificationService;
 import com.travelmarket.backend.payment.service.StripePaymentService;
 import com.travelmarket.backend.repository.UserRepository;
+import com.travelmarket.backend.service.EmailService;
 import com.travelmarket.backend.service.TimeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,7 @@ public class DisputeService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final StripePaymentService paymentService;
+    private final EmailService emailService;
     private final TimeService timeService;
 
     // A dispute can only be opened within 7 days of the booking being created/completed.
@@ -100,8 +102,7 @@ public class DisputeService {
 
         Dispute saved = disputeRepository.save(dispute);
 
-        // 6. Notifications
-        // Notify the user it was opened against
+        // 6. Notifications — notify the user it was opened against
         notificationService.createNotification(
             against.getId(),
             NotificationType.DISPUTE_OPENED,
@@ -109,6 +110,13 @@ public class DisputeService {
             "A dispute has been opened regarding your booking for " + booking.getOccurrence().getTemplate().getTitle(),
             String.valueOf(saved.getId()),
             "DISPUTE"
+        );
+        // Email the defendant
+        emailService.sendDisputeOpenedEmail(
+            against.getEmail(),
+            against.getFullName() != null ? against.getFullName() : against.getEmail(),
+            booking.getOccurrence().getTemplate().getTitle(),
+            saved.getId()
         );
 
         return mapToResponse(saved);
@@ -160,8 +168,7 @@ public class DisputeService {
         dispute.setAgainstUserResponse(request.getResponse());
         Dispute saved = disputeRepository.save(dispute);
 
-        // Notify Admins (For now we don't have a direct admin notifier, but we could)
-        // Let's just log it or we can notify the opener that the other party responded
+        // Notify opener that the other party responded
         notificationService.createNotification(
             dispute.getOpenedByUser().getId(),
             NotificationType.DISPUTE_STATUS_CHANGED,
@@ -169,6 +176,15 @@ public class DisputeService {
             "The other party has submitted a response to your dispute.",
             String.valueOf(dispute.getId()),
             "DISPUTE"
+        );
+        // Email the opener
+        String tourTitle = dispute.getBooking().getOccurrence().getTemplate().getTitle();
+        User opener = dispute.getOpenedByUser();
+        emailService.sendDisputeResponseSubmittedEmail(
+            opener.getEmail(),
+            opener.getFullName() != null ? opener.getFullName() : opener.getEmail(),
+            tourTitle,
+            dispute.getId()
         );
 
         return mapToResponse(saved);
@@ -193,8 +209,12 @@ public class DisputeService {
         dispute.setStatus(DisputeStatus.UNDER_REVIEW);
         Dispute saved = disputeRepository.save(dispute);
 
-        notifyParties(saved, NotificationType.DISPUTE_STATUS_CHANGED, "Dispute Under Review", 
+        notifyParties(saved, NotificationType.DISPUTE_STATUS_CHANGED, "Dispute Under Review",
             "Your dispute is now under review by an administrator.");
+        // Email both parties
+        String tourTitle = saved.getBooking().getOccurrence().getTemplate().getTitle();
+        emailBothParties(saved, tourTitle, (email, name) ->
+            emailService.sendDisputeUnderReviewEmail(email, name, tourTitle, saved.getId()));
 
         return mapToResponse(saved);
     }
@@ -212,8 +232,12 @@ public class DisputeService {
         dispute.setResolutionNote(reason);
         Dispute saved = disputeRepository.save(dispute);
 
-        notifyParties(saved, NotificationType.DISPUTE_REJECTED, "Dispute Rejected", 
+        notifyParties(saved, NotificationType.DISPUTE_REJECTED, "Dispute Rejected",
             "The dispute has been rejected. Reason: " + reason);
+        // Email both parties
+        String tourTitle = saved.getBooking().getOccurrence().getTemplate().getTitle();
+        emailBothParties(saved, tourTitle, (email, name) ->
+            emailService.sendDisputeRejectedEmail(email, name, tourTitle, saved.getId(), reason));
 
         return mapToResponse(saved);
     }
@@ -238,17 +262,35 @@ public class DisputeService {
 
         Dispute saved = disputeRepository.save(dispute);
 
-        notifyParties(saved, NotificationType.DISPUTE_RESOLVED, "Dispute Resolved", 
+        notifyParties(saved, NotificationType.DISPUTE_RESOLVED, "Dispute Resolved",
             "Your dispute has been resolved. Please check the details.");
+        // Email both parties with resolution note and optional refund
+        String tourTitle = saved.getBooking().getOccurrence().getTemplate().getTitle();
+        String refundInfo = (request.getRefundAmount() != null && request.getRefundAmount().signum() > 0)
+            ? request.getRefundAmount().toPlainString() + " USD" : null;
+        emailBothParties(saved, tourTitle, (email, name) ->
+            emailService.sendDisputeResolvedEmail(email, name, tourTitle, saved.getId(),
+                request.getResolutionNote(), refundInfo));
 
         return mapToResponse(saved);
     }
 
     private void notifyParties(Dispute dispute, NotificationType type, String title, String message) {
         String refId = String.valueOf(dispute.getId());
-        
         notificationService.createNotification(dispute.getOpenedByUser().getId(), type, title, message, refId, "DISPUTE");
         notificationService.createNotification(dispute.getAgainstUser().getId(), type, title, message, refId, "DISPUTE");
+    }
+
+    @FunctionalInterface
+    private interface EmailSender {
+        void send(String email, String name);
+    }
+
+    private void emailBothParties(Dispute dispute, String tourTitle, EmailSender sender) {
+        User opener = dispute.getOpenedByUser();
+        User against = dispute.getAgainstUser();
+        sender.send(opener.getEmail(), opener.getFullName() != null ? opener.getFullName() : opener.getEmail());
+        sender.send(against.getEmail(), against.getFullName() != null ? against.getFullName() : against.getEmail());
     }
 
     private DisputeResponse mapToResponse(Dispute dispute) {

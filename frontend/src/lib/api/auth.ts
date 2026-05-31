@@ -1,4 +1,4 @@
-﻿import apiClient from './client';
+import apiClient from './client';
 
 // ==================== AUTH TYPES ====================
 export interface RegisterRequest {
@@ -36,6 +36,7 @@ export interface MeResponse {
  agreedToTerms: boolean;
  emailNotificationsEnabled: boolean;
  pushNotificationsEnabled: boolean;
+ hasPassword: boolean;
 }
 
 /** POST /api/auth/accept-terms — called after OAuth signup */
@@ -248,6 +249,22 @@ export const passwordChange = async (data: ChangePasswordRequest): Promise<void>
  */
 export const updateNotificationPreferences = async (data: UpdateNotificationPreferencesRequest): Promise<void> => {
  await apiClient.post('/api/auth/me/notifications', data);
+};
+
+/**
+ * Request a password setup code (for OAuth users without a password).
+ * Backend sends a 6-digit code to the user's email.
+ */
+export const passwordSetupRequest = async (): Promise<void> => {
+ await apiClient.post('/api/auth/password/setup/request');
+};
+
+/**
+ * Confirm password setup with the emailed code and a new password.
+ * After success, all existing sessions are invalidated and the user must log in again.
+ */
+export const passwordSetupConfirm = async (data: ResetPasswordRequest): Promise<void> => {
+ await apiClient.post('/api/auth/password/setup/confirm', data);
 };
 
 // ==================== PROFILE COMPLETION ENDPOINTS ====================

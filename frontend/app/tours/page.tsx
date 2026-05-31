@@ -109,7 +109,7 @@ function ToursPageContent() {
  const { filters } = useFilterState()
  const dispatch = useFilterDispatch()
 
- const searchQueryFromUrl = searchParams.get('q') || ''
+ const searchQueryFromUrl = searchParams?.get('q') || ''
 
  const handleOpenMobileFilters = useCallback(() => setShowMobileFilters(true), [])
  const handleCloseMobileFilters = useCallback(() => setShowMobileFilters(false), [])
@@ -178,7 +178,7 @@ function ToursPageInner() {
  
  // Initialize context with filters from URL synchronously
  const initialFilters = useMemo(() => 
- getFiltersFromParams(new URLSearchParams(searchParams.toString())),
+ getFiltersFromParams(new URLSearchParams(searchParams?.toString() || '')),
  [searchParams]
  )
 

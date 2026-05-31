@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -88,6 +88,7 @@ export function NotificationBell() {
 
  const getNotificationUrl = (notification: NotificationResponse) => {
  const role = user?.role?.toLowerCase() || 'traveler';
+ const isAdmin = role === 'admin';
  
  switch (notification.type) {
  case 'NEW_MESSAGE':
@@ -95,23 +96,29 @@ export function NotificationBell() {
  case 'BOOKING_CREATED':
  case 'BOOKING_CONFIRMED':
  case 'BOOKING_CANCELLED':
+ if (isAdmin) return `/dashboard/admin`;
  return notification.referenceId 
  ? `/dashboard/${role}/bookings/${notification.referenceId}` 
  : `/dashboard/${role}/bookings`;
  case 'VERIFICATION_SUBMITTED':
+ if (isAdmin) return `/dashboard/admin/verifications`;
+ return `/dashboard/guide/verification`;
  case 'VERIFICATION_APPROVED':
  case 'VERIFICATION_REJECTED':
  return `/dashboard/guide/verification`;
  case 'PAYMENT_SUCCESS':
  case 'PAYMENT_FAILED':
+ if (isAdmin) return `/dashboard/admin/payouts`;
  return notification.referenceId 
  ? `/dashboard/${role}/bookings/${notification.referenceId}`
  : `/dashboard/${role}/bookings`;
+ case 'ACCOUNT_SUSPENDED':
+ case 'ACCOUNT_REACTIVATED':
+ if (isAdmin) return `/dashboard/admin/users`;
+ return `/dashboard/${role}/settings`;
  case 'ACCOUNT_CREATED':
  case 'EMAIL_VERIFIED':
  case 'PASSWORD_CHANGED':
- case 'ACCOUNT_SUSPENDED':
- case 'ACCOUNT_REACTIVATED':
  return `/dashboard/${role}/settings`;
  case 'PROFILE_COMPLETED':
  return `/dashboard/${role}/profile`;

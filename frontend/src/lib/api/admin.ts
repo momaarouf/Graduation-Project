@@ -291,3 +291,13 @@ export const adminSendSupportMessage = async (ticketId: number, content: string)
   const response = await apiClient.post(`/api/admin/support/tickets/${ticketId}/messages`, { content });
   return response.data;
 };
+
+// ==================== EMAIL ENDPOINTS ====================
+
+export const sendAdminEmailBroadcast = async (subject: string, body: string): Promise<void> => {
+  await apiClient.post('/api/admin/users/email/broadcast', { subject, body });
+};
+
+export const sendAdminEmailToUser = async (userId: number, subject: string, body: string): Promise<void> => {
+  await apiClient.post(`/api/admin/users/${userId}/email`, { subject, body });
+};
