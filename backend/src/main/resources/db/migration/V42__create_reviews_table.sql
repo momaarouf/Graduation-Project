@@ -28,22 +28,6 @@ ALTER TABLE reviews
     ADD COLUMN IF NOT EXISTS report_count      INT NOT NULL DEFAULT 0;
 
 -- ── Indexes (safe to run even if already present) ────────────────────────
--- These cover the four most common query patterns.
-
--- Guide public profile page: "show all reviews for guide X" (excluding hidden)
-CREATE INDEX IF NOT EXISTS idx_reviews_guide_id
-    ON reviews (guide_id)
-    WHERE is_hidden = FALSE;
-
--- Tour detail page: "show all reviews for tour Y" (excluding hidden)
-CREATE INDEX IF NOT EXISTS idx_reviews_tour_template_id
-    ON reviews (tour_template_id)
-    WHERE is_hidden = FALSE;
-
--- Traveler dashboard: "show my reviews"
-CREATE INDEX IF NOT EXISTS idx_reviews_traveler_id
-    ON reviews (traveler_id);
-
 -- Admin moderation queue: "show all hidden reviews"
 CREATE INDEX IF NOT EXISTS idx_reviews_is_hidden
     ON reviews (is_hidden)
