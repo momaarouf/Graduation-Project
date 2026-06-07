@@ -15,7 +15,4 @@
 ALTER TABLE reviews
     ADD COLUMN IF NOT EXISTS deleted_at_utc TIMESTAMPTZ;
 
--- Partial index for the common filtered queries (guide/tour review lists).
-CREATE INDEX IF NOT EXISTS idx_reviews_not_deleted
-    ON reviews (guide_id, created_at)
-    WHERE deleted_at_utc IS NULL AND is_hidden = FALSE;
+-- Index removed because guide_id and created_at do not exist on the reviews table directly.
