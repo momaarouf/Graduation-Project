@@ -167,9 +167,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <Navigation />
       <div className="flex flex-1 relative lg:pt-16">
         {/* Sidebar - Desktop */}
-        <aside className={`hidden lg:block fixed left-0 top-16 h-[calc(100vh-4rem)] surface-base border-r border-[#c8d8f8] dark:border-[#1a3566] transition-all duration-300 overflow-x-hidden overflow-y-auto ${isCollapsed ? 'w-20' : 'w-64'} z-40`}>
+        <aside className={`hidden lg:block fixed left-0 top-16 h-[calc(100vh-4rem)] surface-base border-r border-[#f0f5ff] dark:border-[#040d1e] transition-all duration-300 overflow-x-hidden overflow-y-auto ${isCollapsed ? 'w-20' : 'w-64'} z-40`}>
           <div className="h-full flex flex-col">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#c8d8f8] dark:border-[#1a3566] mb-2">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#f0f5ff] dark:border-[#040d1e] mb-2">
               <button onClick={toggleCollapse} className={`flex items-center justify-center w-8 h-8 rounded-lg hover:surface-section transition-colors ${isCollapsed ? 'mx-auto' : 'ml-auto mr-3'}`}>
                 {isCollapsed ? <ChevronRight className="w-4 h-4 text-theme-muted" /> : <ChevronLeft className="w-4 h-4 text-theme-muted" />}
               </button>
@@ -179,7 +179,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <NavItem key={item.href} item={{ ...item, badge: (item as any).badgeKey ? badges[(item as any).badgeKey] : undefined }} isActive={pathname === item.href} isCollapsed={isCollapsed} />
               ))}
             </nav>
-            <div className={`p-3 border-t border-[#c8d8f8] dark:border-[#1a3566] ${isCollapsed ? 'text-center' : ''}`}>
+            <div className={`p-3 border-t border-[#f0f5ff] dark:border-[#040d1e] ${isCollapsed ? 'text-center' : ''}`}>
               <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
                 <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center text-white font-bold flex-shrink-0 shadow-sm">
                   {user?.fullName?.charAt(0) || 'A'}
@@ -216,7 +216,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Main Content */}
         <main className={`flex-1 min-w-0 relative lg:ml-20 ${!isCollapsed ? 'lg:ml-64' : ''}`}>
-          <div className="lg:hidden h-14 glass-theme border-b border-[#c8d8f8] dark:border-[#1a3566] flex items-center justify-between px-4 sticky top-0 z-30 shadow-sm">
+          <div className="lg:hidden h-14 glass-theme border-b border-[rgba(240,245,255,0.8)] dark:border-[rgba(4,13,30,0.85)] flex items-center justify-between px-4 sticky top-0 z-30 shadow-sm">
             <button onClick={() => setIsMobileOpen(true)} className="p-2 -ml-2"><Menu className="w-5 h-5" /></button>
             <span className="text-xs font-black capitalize tracking-normal text-theme-primary">Admin Control</span>
             <div className="flex items-center">

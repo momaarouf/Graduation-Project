@@ -219,7 +219,7 @@ export default function TravelerDashboardLayout({
  {/* ========================================
  MOBILE HEADER
  ======================================== */}
-  <div className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 h-14 surface-card/80 backdrop-blur-md border-b border-[#c8d8f8] dark:border-[#1a3566] shadow-sm">
+  <div className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 h-14 surface-card/80 backdrop-blur-md border-b border-white/80 dark:border-[#0c1f3d]/80 shadow-sm">
   <div className="flex items-center gap-3">
   <div className="w-8 h-8 bg-primary-light/10 rounded-lg flex items-center justify-center">
   <LayoutDashboard className="w-4 h-4 text-primary-light dark:text-primary-dark" />
@@ -243,13 +243,13 @@ export default function TravelerDashboardLayout({
  ======================================== */}
  <aside className={`
  hidden lg:block fixed left-0 top-16 h-[calc(100vh-4rem)]
- surface-base border-r border-[#c8d8f8] dark:border-[#1a3566]
+ surface-base border-r border-[#f0f5ff] dark:border-[#040d1e]
  transition-all duration-300 overflow-x-hidden overflow-y-auto z-30
  `} style={{ width: isCollapsed ? '5rem' : '16rem' }}>
  <div className="h-full flex flex-col">
  
  {/* Toggle Button */}
-  <div className="flex items-center justify-between px-4 py-3 bg-transparent border-b border-[#c8d8f8] dark:border-[#1a3566] mb-2">
+  <div className="flex items-center justify-between px-4 py-3 bg-transparent border-b border-[#f0f5ff] dark:border-[#040d1e] mb-2">
  <button
  onClick={toggleCollapse}
  className={`flex items-center justify-center w-8 h-8 rounded-lg hover:surface-section dark:hover:surface-card transition-colors ${isCollapsed ? 'mx-auto' : 'ml-auto mr-3'}`}
@@ -268,7 +268,7 @@ export default function TravelerDashboardLayout({
  {NAV_ITEMS.map((item, index) => {
  if ('type' in item && item.type === 'divider') {
  return (
- <div key={`divider-${index}`} className="my-2 border-t border-[#c8d8f8] dark:border-[#1a3566]" />
+ <div key={`divider-${index}`} className="my-2 border-t border-[#f0f5ff] dark:border-[#040d1e]" />
  )
  }
  const navItem = item as NavItem
@@ -315,7 +315,7 @@ export default function TravelerDashboardLayout({
   transition={{ type: 'spring', damping: 30, stiffness: 300 }}
   className="relative w-[280px] surface-card h-full overflow-y-auto shadow-2xl flex flex-col"
   >
-  <div className="p-5 border-b border-[#c8d8f8] dark:border-[#1a3566] surface-section flex items-center justify-between">
+  <div className="p-5 border-b border-[#e4ecff] dark:border-[#071428] surface-section flex items-center justify-between">
   <div className="flex items-center gap-3">
   <div className="w-10 h-10 bg-primary-light rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary-light/20">
   <LayoutDashboard className="w-5 h-5" />
@@ -350,7 +350,7 @@ export default function TravelerDashboardLayout({
   {NAV_ITEMS.map((item, index) => {
   if ('type' in item && item.type === 'divider') {
   return (
-  <div key={`mobile-divider-${index}`} className="my-3 border-t border-[#c8d8f8] dark:border-[#1a3566] opacity-50" />
+  <div key={`mobile-divider-${index}`} className="my-3 border-t border-white dark:border-[#0c1f3d] opacity-50" />
   )
   }
   const navItem = item as NavItem
@@ -385,7 +385,7 @@ export default function TravelerDashboardLayout({
   </nav>
   </div>
 
-  <div className="p-4 border-t border-[#c8d8f8] dark:border-[#1a3566] surface-section pb-[calc(1rem+env(safe-area-inset-bottom))]">
+  <div className="p-4 border-t border-[#e4ecff] dark:border-[#071428] surface-section pb-[calc(1rem+env(safe-area-inset-bottom))]">
   <button 
   onClick={() => logout()}
   className="w-full flex items-center gap-4 px-4 py-3 rounded-2xl text-danger-red hover:bg-danger-red/10 transition-all font-bold text-sm"
