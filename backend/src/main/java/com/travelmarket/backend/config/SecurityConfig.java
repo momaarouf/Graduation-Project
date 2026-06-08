@@ -116,17 +116,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         // Allow localhost and any local network IP for mobile testing
-        config.setAllowedOriginPatterns(List.of(
-                "http://localhost:[*]",
-                "http://127.0.0.1:[*]",
-                "http://192.168.*:[*]",
-                "http://172.*:[*]",
-                "http://10.*:[*]",
-                "https://*.trycloudflare.com",
-                "https://*.loca.lt",
-                "https://tourongo.vercel.app",
-                "https://*.vercel.app"
-        ));
+        config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
