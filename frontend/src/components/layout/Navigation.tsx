@@ -88,7 +88,7 @@ export default function Navigation() {
   ]
 
   return (
-    <nav suppressHydrationWarning className="fixed top-0 w-full z-50 glass-theme border-b border-[rgba(240,245,255,0.8)] dark:border-[rgba(4,13,30,0.85)]">
+    <nav suppressHydrationWarning className="fixed top-0 w-full z-50 glass-theme">
       <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16">
 
@@ -178,7 +178,7 @@ export default function Navigation() {
 
                   {isUserMenuOpen && (
                     <div className="absolute right-0 top-full mt-1 w-56 sm:w-64 surface-card border border-theme rounded-xl shadow-xl py-2 z-50">
-                      <div className="px-4 py-3 border-b border-[#f5f8ff] dark:border-[#0c1f3d] overflow-hidden">
+                      <div className="px-4 py-3 overflow-hidden">
                         <p className="font-medium text-theme-primary truncate" title={user.email}>{user.email}</p>
                         <p className="text-xs text-theme-secondary capitalize">{user.role}</p>
                       </div>
@@ -257,7 +257,7 @@ export default function Navigation() {
                         </div>
                       </div>
 
-                      <div className="border-t border-[#f5f8ff] dark:border-[#0c1f3d] pt-2">
+                      <div className="pt-2">
                         <button
                           onClick={() => {
                             logout();

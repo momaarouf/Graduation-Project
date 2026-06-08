@@ -251,12 +251,9 @@
  .glass-theme {
     backdrop-filter: blur(12px);
  background: rgba(240, 245, 255, 0.80);
- 
- border: 1px solid #c8d8f8;
 
  .dark & {
  background: rgba(4, 13, 30, 0.85);
- border: 1px solid #112240;
  }
  }
 

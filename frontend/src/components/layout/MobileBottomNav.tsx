@@ -73,7 +73,7 @@ export default function MobileBottomNav() {
       ]
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-theme border-t border-[rgba(240,245,255,0.8)] dark:border-[rgba(4,13,30,0.85)] pb-[env(safe-area-inset-bottom)]">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-theme pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center justify-around h-16 px-2">
         {navItems.map((item) => {
           const Icon = item.icon
