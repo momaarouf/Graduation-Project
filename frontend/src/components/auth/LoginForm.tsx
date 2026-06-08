@@ -170,8 +170,7 @@ export default function LoginForm() {
  const handleSocialLogin = (provider: string) => {
  if (provider === 'Google') {
  setIsSocialLoading('Google');
-    // Use the same hostname as the frontend but port 8081 for the backend
-    const backendUrl = `${window.location.protocol}//${window.location.hostname}:8081`;
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
     window.location.href = `${backendUrl}/api/auth/oauth2/google/start?role=Traveler`;
 
  } else {

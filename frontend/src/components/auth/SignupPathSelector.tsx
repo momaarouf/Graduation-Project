@@ -119,7 +119,7 @@ function PathCard({
  w-full py-4 px-6 rounded-2xl font-bold text-[10px] capitalize tracking-normal transition-all duration-300 flex items-center justify-center gap-2
  ${isSelected 
  ? 'bg-primary-light text-white shadow-lg' 
- : 'surface-base text-white hover:opacity-90'
+ : 'bg-gray-900 dark:bg-gray-800 text-white hover:opacity-90'
  }
  `}
  >
