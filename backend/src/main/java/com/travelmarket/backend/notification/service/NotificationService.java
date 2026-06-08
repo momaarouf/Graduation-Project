@@ -32,6 +32,9 @@ public class NotificationService {
     // Centralized time service — use this instead of LocalDateTime.now() or Instant.now() inline
     private final TimeService timeService;
 
+    @org.springframework.beans.factory.annotation.Value("${app.frontend.base-url:https://tourongo.vercel.app}")
+    private String frontendBaseUrl;
+
     /**
      * Creates or updates an in-app notification and sends an email.
      */
@@ -96,15 +99,15 @@ public class NotificationService {
                     "    <p>Hello %s,</p>" +
                     "    <p>%s</p>" +
                     "    <div style='margin-top: 25px;'>" +
-                    "       <a href='http://localhost:3000/dashboard/messages' style='background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;'>View Message</a>" +
+                    "       <a href='%s/dashboard/messages' style='background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;'>View Message</a>" +
                     "    </div>" +
                     "    <div style='margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #777;'>" +
-                    "      This is an automated notification from Travel Marketplace. Please do not reply to this email." +
+                    "      This is an automated notification from Tourongo. Please do not reply to this email." +
                     "    </div>" +
                     "  </div>" +
                     "</body>" +
                     "</html>",
-                    title, user.getFullName(), message
+                    title, user.getFullName(), message, frontendBaseUrl
                 );
                 
                 emailService.sendHtml(user.getEmail(), "New Message: " + title, htmlBody);

@@ -245,7 +245,7 @@ public class ReviewReminderService {
                // ── Footer ─────────────────────────────────────────────────────
                "<tr><td style='background:#f1f5f9;padding:20px 40px;text-align:center;'>" +
                "<p style='color:#9ca3af;font-size:12px;margin:0;line-height:1.6;'>" +
-               "You're receiving this because you completed a booking on Travel Marketplace.<br/>" +
+               "You're receiving this because you completed a booking on Tourongo.<br/>" +
                "To stop receiving review reminders, update your " +
                "<a href='" + frontendBaseUrl + "/dashboard/traveler/settings' " +
                "style='color:#2563eb;text-decoration:none;'>notification preferences</a>." +
