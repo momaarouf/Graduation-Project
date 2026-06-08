@@ -90,18 +90,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
             email = email.toLowerCase().trim();
 
-            // Role must come from your role selector step (stored in short-lived cookie).
-            String roleCookie = readCookie(request, "oauth_role");
-            System.out.println("DEBUG: OAuth2 - roleCookie: " + roleCookie);
-
-            if (!"Traveler".equals(roleCookie) && !"Guide".equals(roleCookie)) {
-                System.out.println("DEBUG: OAuth2 - Missing role cookie");
-                // Instead of sendError, redirect with error param to frontend so user sees it
-                response.sendRedirect(frontendRedirect + "?error=" + url("missing_role"));
-                return;
-            }
-
-            // 1) If identity already exists, trust it (user is already linked)
+            // 1) If identity already exists, trust it — existing users skip role check
             Optional<UserIdentity> existingIdentity =
                     userIdentityRepository.findByProviderAndProviderUserId(provider, providerUserId);
 
@@ -109,9 +98,19 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             boolean isNewUser = false;
 
             if (existingIdentity.isPresent()) {
+                // ✅ Returning user — no role cookie needed, just log them in
                 user = existingIdentity.get().getUser();
                 System.out.println("DEBUG: OAuth2 - Existing identity found for user: " + user.getEmail());
             } else {
+                // Role cookie is only required for NEW signups
+                String roleCookie = readCookie(request, "oauth_role");
+                System.out.println("DEBUG: OAuth2 - roleCookie: " + roleCookie);
+
+                if (!"Traveler".equals(roleCookie) && !"Guide".equals(roleCookie)) {
+                    System.out.println("DEBUG: OAuth2 - Missing role cookie for new user");
+                    response.sendRedirect(frontendRedirect + "?error=" + url("missing_role"));
+                    return;
+                }
                 // 2) No identity yet: try to find user by email
                 user = userRepository.findByEmail(email).orElse(null);
 
@@ -125,6 +124,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                         return;
                     }
                 }
+                final String roleCookieFinal = roleCookie; // for use in lambda below
 
                 // 3) If user doesn't exist, create user + create the correct role profile row
                 if (user == null) {
@@ -133,7 +133,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                     user.setEmail(email);
                     user.setPasswordHash(passwordEncoder.encode(UUID.randomUUID().toString()));
                     user.setHasPassword(false); // OAuth users have no real password
-                    user.setRole(User.Role.valueOf(roleCookie));
+                    user.setRole(User.Role.valueOf(roleCookieFinal));
                     user.setAccountStatus("ACTIVE");
                     user.setAgreedToTerms(false);
                     user.setAgreedToPrivacy(false);
@@ -228,9 +228,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private ResponseCookie buildRefreshCookie(String rawToken, Duration ttl) {
         return ResponseCookie.from(REFRESH_COOKIE, rawToken)
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/api/auth")
-                .sameSite("Lax")
+                .sameSite("None")
                 .maxAge(ttl)
                 .build();
     }
