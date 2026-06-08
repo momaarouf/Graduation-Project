@@ -123,7 +123,9 @@ public class SecurityConfig {
                 "http://172.*:[*]",
                 "http://10.*:[*]",
                 "https://*.trycloudflare.com",
-                "https://*.loca.lt"
+                "https://*.loca.lt",
+                "https://tourongo.vercel.app",
+                "https://*.vercel.app"
         ));
         config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

@@ -104,12 +104,12 @@ public class AuthController {
     }
 
     private ResponseCookie buildRefreshCookie(String rawToken, Duration ttl) {
-        // For production on HTTPS set secure(true).
+        // For production on HTTPS set secure(true) and sameSite("None") for cross-domain cookies
         return ResponseCookie.from(REFRESH_COOKIE, rawToken)
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/api/auth")
-                .sameSite("Lax")
+                .sameSite("None")
                 .maxAge(ttl)
                 .build();
     }
@@ -117,9 +117,9 @@ public class AuthController {
     private ResponseCookie clearRefreshCookie() {
         return ResponseCookie.from(REFRESH_COOKIE, "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/api/auth")
-                .sameSite("Lax")
+                .sameSite("None")
                 .maxAge(0)
                 .build();
     }
