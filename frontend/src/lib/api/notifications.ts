@@ -1,4 +1,4 @@
-﻿import apiClient from './client';
+import apiClient from './client';
 
 export type NotificationType = 
  | 'ACCOUNT_CREATED'
@@ -16,6 +16,7 @@ export type NotificationType =
  | 'ACCOUNT_SUSPENDED'
  | 'ACCOUNT_REACTIVATED'
  | 'PROFILE_COMPLETED'
+ | 'SETUP_PASSWORD_REMINDER'
  | 'SYSTEM_ALERT';
 
 export interface NotificationResponse {
