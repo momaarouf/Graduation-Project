@@ -167,10 +167,20 @@ export default function LoginForm() {
 
  const [isSocialLoading, setIsSocialLoading] = useState<string | null>(null);
 
- const handleSocialLogin = (provider: string) => {
+ const handleSocialLogin = async (provider: string) => {
  if (provider === 'Google') {
  setIsSocialLoading('Google');
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
+    
+    try {
+      // Ping the backend to wake it up (e.g., if on Render free tier)
+      // We use mode: 'no-cors' so it doesn't fail on CORS preflight, we just want to hit it.
+      // The await will block until the backend responds (wakes up).
+      await fetch(`${backendUrl}/api/health`, { mode: 'no-cors' });
+    } catch (err) {
+      // Ignore network errors, proceed to redirect anyway
+    }
+
     window.location.href = `${backendUrl}/api/auth/oauth2/google/start?role=Traveler`;
 
  } else {

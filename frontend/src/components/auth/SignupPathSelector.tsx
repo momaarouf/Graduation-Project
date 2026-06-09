@@ -180,10 +180,14 @@ export const SignupPathSelector = ({
 }) => {
  const [googleLoadingRole, setGoogleLoadingRole] = useState<UserRole | null>(null);
 
- const handleGoogleSelect = (role: UserRole) => {
- setGoogleLoadingRole(role);
- window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/oauth2/google/start?role=${role === UserRole.GUIDE ? 'Guide' : 'Traveler'}`;
- };
+  const handleGoogleSelect = async (role: UserRole) => {
+  setGoogleLoadingRole(role);
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
+  try {
+    await fetch(`${backendUrl}/api/health`, { mode: 'no-cors' });
+  } catch (err) {}
+  window.location.href = `${backendUrl}/api/auth/oauth2/google/start?role=${role === UserRole.GUIDE ? 'Guide' : 'Traveler'}`;
+  };
 
  return (
  <div className={`w-full ${className}`}>
