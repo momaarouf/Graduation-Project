@@ -122,14 +122,21 @@ apiClient.interceptors.response.use(
  apiClient.defaults.headers.common.Authorization = `Bearer ${newToken}`;
  processQueue(null, newToken);
  return apiClient(originalRequest);
- } catch (refreshError) {
- processQueue(refreshError, null);
- clearAccessToken();
- return Promise.reject(refreshError);
- } finally {
- isRefreshing = false;
- }
- }
+  } catch (refreshError: any) {
+    processQueue(refreshError, null);
+    // Only wipe the stored token when the refresh server definitively rejects it
+    // (HTTP 401 or 403). Do NOT clear on transient failures (network errors,
+    // cold-start timeouts, 5xx, etc.) — the access token is likely still valid
+    // and clearing it would log the user out spuriously.
+    const status = refreshError?.response?.status;
+    if (status === 401 || status === 403) {
+      clearAccessToken();
+    }
+    return Promise.reject(refreshError);
+  } finally {
+  isRefreshing = false;
+  }
+  }
 );
 
 // Helper functions to manage the access token (in memory)
@@ -158,4 +165,4 @@ export const clearAccessToken = () => {
  }
 };
 
-export default apiClient;apiClient;
+export default apiClient;

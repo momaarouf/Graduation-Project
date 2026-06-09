@@ -26,25 +26,38 @@ export function NotificationBell() {
  }, [unreadCount, notifications]);
 
  const handleRefresh = async () => {
- try {
- const count = await notificationsApi.getUnreadCount();
- setUnreadCount(count);
- 
- const categoryCounts = await notificationsApi.getUnreadCountsByCategory();
- window.dispatchEvent(new CustomEvent('notification-sync', { 
- detail: { unreadCount: count, categories: categoryCounts } 
- }));
+  // Run all three calls in parallel. Use allSettled so a failure in one
+  // doesn't abort the others or trigger the 401-refresh interceptor chain
+  // for every call in the batch.
+  const [countRes, categoriesRes, notifRes] = await Promise.allSettled([
+    notificationsApi.getUnreadCount(),
+    notificationsApi.getUnreadCountsByCategory(),
+    notificationsApi.getNotifications(0, 10),
+  ]);
 
- const data = await notificationsApi.getNotifications(0, 10);
- setNotifications(data.content || []);
- } catch (err) {
- console.error('Failed to sync notifications', err);
- }
+  const count = countRes.status === 'fulfilled' ? countRes.value : unreadCount;
+  if (countRes.status === 'fulfilled') setUnreadCount(count);
+
+  if (categoriesRes.status === 'fulfilled') {
+    window.dispatchEvent(new CustomEvent('notification-sync', {
+      detail: { unreadCount: count, categories: categoriesRes.value },
+    }));
+  }
+
+  if (notifRes.status === 'fulfilled') {
+    setNotifications(notifRes.value.content || []);
+  }
+
+  // Log failures quietly — don't surface errors to the user for background polling
+  if (countRes.status === 'rejected') console.debug('Notification count unavailable', countRes.reason);
+  if (categoriesRes.status === 'rejected') console.debug('Notification categories unavailable', categoriesRes.reason);
+  if (notifRes.status === 'rejected') console.debug('Notifications list unavailable', notifRes.reason);
  };
 
  useEffect(() => {
- handleRefresh();
- }, []);
+  // Only poll when the user is logged in — avoids spurious 401s during bootstrap
+  if (user) handleRefresh();
+ }, [user?.userId]); // re-fetch when user changes (login/logout)
 
  useNotificationSocket((newNotif) => {
  setNotifications((prev) => [newNotif, ...prev]);
