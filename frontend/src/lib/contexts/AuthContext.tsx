@@ -109,11 +109,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  setAccessToken(newToken);
  } else {
  // Invalid token response – treat as no session
+ if (getAccessToken()) return;
  setUser(null);
  setIsLoading(false);
  return;
  }
  } catch {
+ // RACE CONDITION FIX: if a concurrent loginWithToken succeeded, getAccessToken() won't be null anymore.
+ if (getAccessToken()) {
+ console.debug('Bootstrap: aborted wiping session because a token was found (likely from concurrent oauth login)');
+ return;
+ }
  setUser(null);
  setIsLoading(false);
  return;
@@ -140,6 +146,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  setUser(normalizeUser(userRes, avatarUrl));
  } catch (error) {
  console.debug('Bootstrap: no active session');
+ // RACE CONDITION FIX: if a concurrent loginWithToken succeeded, getAccessToken() won't be null anymore.
+ if (getAccessToken()) {
+ console.debug('Bootstrap: aborted wiping session because a token was found (likely from concurrent oauth login)');
+ return;
+ }
  clearAccessToken();
  setUser(null);
  } finally {
