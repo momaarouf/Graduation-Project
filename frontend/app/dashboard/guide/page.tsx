@@ -98,7 +98,11 @@ export default function GuideDashboardPage() {
    async function fetchDashboardData() {
      try {
        setLoading(true)
-       const [p, b, t] = await Promise.all([getGuideProfile(), getGuideBookings(), getGuideTours()])
+       const [p, b, t] = await Promise.all([
+         getGuideProfile(), 
+         getGuideBookings().catch(() => []), 
+         getGuideTours().catch(() => [])
+       ])
        setProfile(p); setBookings(b); setTours(t)
      } catch (err) {
        toast.error('Could not load some stats')

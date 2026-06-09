@@ -235,7 +235,7 @@ export default function TravelerDashboardPage() {
  const [profileData, loyaltyData, bookingsData] = await Promise.all([
  travelerGetProfile(),
  travelerGetLoyaltyStatus().catch(() => null), // non-critical — don't fail whole page
- getTravelerBookings(),
+ getTravelerBookings().catch(() => []), // Not built yet
  ])
  setProfile(profileData)
  setLoyalty(loyaltyData)

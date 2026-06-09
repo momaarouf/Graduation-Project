@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import React, { useState, useEffect } from 'react'
 import { 
@@ -111,7 +111,7 @@ export default function AdminDashboardPage() {
           adminGetUsers(),
           adminGetPendingVerifications(),
           adminGetAuditEvents(0, 5),
-          getAdminPendingTours()
+          getAdminPendingTours().catch(() => [])
         ])
 
         setStats(prev => ({
