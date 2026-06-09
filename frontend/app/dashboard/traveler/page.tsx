@@ -222,13 +222,18 @@ function LoyaltyProgressCard({ loyalty }: { loyalty: LoyaltyStatusResponse | nul
 import TravelerDashboardLoading from './skeleton'
 
 export default function TravelerDashboardPage() {
- const { user } = useAuth()
+ const { user, isLoading: authLoading } = useAuth()
  const [profile, setProfile] = useState<TravelerProfileResponse | null>(null)
  const [loyalty, setLoyalty] = useState<LoyaltyStatusResponse | null>(null)
  const [bookings, setBookings] = useState<BookingResponse[]>([])
  const [loading, setLoading] = useState(true)
 
  useEffect(() => {
+ // Guard: don't fire during the auth bootstrap window when user is still null
+ if (!user) {
+   if (!authLoading) setLoading(false) // auth finished, no user = redirect handled by layout
+   return;
+ }
  async function fetchData() {
  try {
  const [profileData, loyaltyData, bookingsData] = await Promise.all([
@@ -246,9 +251,9 @@ export default function TravelerDashboardPage() {
  }
  }
  fetchData()
- }, [])
+ }, [user?.userId])
 
- if (loading) return <TravelerDashboardLoading />
+ if (authLoading || loading) return <TravelerDashboardLoading />
 
  // Find the first active booking that has a loyalty discount applied
  const discountedBooking = bookings.find(

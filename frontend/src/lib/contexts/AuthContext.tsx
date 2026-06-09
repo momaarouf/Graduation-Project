@@ -108,22 +108,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  token = newToken;
  setAccessToken(newToken);
  } else {
- // Invalid token response – treat as no session
- if (getAccessToken()) return;
+ // Refresh returned a bad/empty token — no valid session.
+ // Clear any stale localStorage token and bail out.
+ clearAccessToken();
  setUser(null);
  setIsLoading(false);
  return;
  }
  } catch {
- // RACE CONDITION FIX: if a concurrent loginWithToken succeeded, getAccessToken() won't be null anymore.
+ // Refresh call failed entirely (network error, 401, etc.)
+ // RACE CONDITION GUARD: a concurrent OAuth loginWithToken() may have
+ // already set a fresh token — if so, don't wipe it.
  if (getAccessToken()) {
- console.debug('Bootstrap: aborted wiping session because a token was found (likely from concurrent oauth login)');
- return;
- }
+ console.debug('Bootstrap: skipping session wipe — token arrived from concurrent OAuth login.');
+ // Fall through so we still call /api/auth/me with the new token.
+ token = getAccessToken();
+ } else {
+ // Genuinely no session.
  setUser(null);
  setIsLoading(false);
  return;
  }
+ }
+ }
+
+ if (!token) {
+ clearAccessToken();
+ setUser(null);
+ setIsLoading(false);
+ return;
  }
 
  // Normalize role to capitalize before storing (backend returns Pascal case)
@@ -145,12 +158,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
  setUser(normalizeUser(userRes, avatarUrl));
  } catch (error) {
- console.debug('Bootstrap: no active session');
- // RACE CONDITION FIX: if a concurrent loginWithToken succeeded, getAccessToken() won't be null anymore.
- if (getAccessToken()) {
- console.debug('Bootstrap: aborted wiping session because a token was found (likely from concurrent oauth login)');
- return;
- }
+ // /api/auth/me failed even with a token — the token is invalid/expired
+ // and the refresh interceptor couldn't recover. Clear everything.
+ console.debug('Bootstrap: session validation failed, clearing session.');
  clearAccessToken();
  setUser(null);
  } finally {

@@ -30,6 +30,7 @@ import {
 import { getAdminPendingTours } from '@/src/lib/api/tours'
 import { getGreeting } from '@/src/lib/greeting'
 import AdminDashboardSkeleton from './skeleton'
+import { useAuth } from '@/src/lib/contexts/AuthContext'
 
 // ==================== STAT CARD COMPONENT ====================
 
@@ -92,6 +93,7 @@ const StatCard = ({ title, value, direction, trend, icon: Icon, color, isLoading
 // ==================== MAIN DASHBOARD PAGE ====================
 
 export default function AdminDashboardPage() {
+  const { user, isLoading: authLoading } = useAuth()
   const [stats, setStats] = useState({
     totalUsers: 0,
     pendingVerifications: 0,
@@ -103,6 +105,11 @@ export default function AdminDashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    // Guard: don't fire during the auth bootstrap window when user is still null
+    if (!user) {
+      if (!authLoading) setIsLoading(false) // auth done, no user = layout handles redirect
+      return;
+    }
     const fetchData = async () => {
       try {
         setIsLoading(true)
@@ -130,9 +137,9 @@ export default function AdminDashboardPage() {
     }
 
     fetchData()
-  }, [])
+  }, [user?.userId])
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return <AdminDashboardSkeleton />
   }
 

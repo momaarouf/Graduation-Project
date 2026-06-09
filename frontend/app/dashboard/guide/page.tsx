@@ -86,7 +86,7 @@ function VerificationBadge({ status }: { status: string }) {
 import GuideDashboardLoading from './skeleton'
 
 export default function GuideDashboardPage() {
- const { user } = useAuth()
+ const { user, isLoading: authLoading } = useAuth()
  const router = useRouter()
  const [loading, setLoading] = useState(true)
  const [profile, setProfile] = useState<GuideProfileResponse | null>(null)
@@ -94,6 +94,11 @@ export default function GuideDashboardPage() {
  const [tours, setTours] = useState<TourTemplateResponse[]>([])
  
  useEffect(() => {
+   // Guard: don't fire during the auth bootstrap window when user is still null
+   if (!user) {
+     if (!authLoading) setLoading(false) // auth finished, no user = redirect handled by layout
+     return;
+   }
    async function fetchDashboardData() {
      try {
        setLoading(true)
@@ -110,9 +115,9 @@ export default function GuideDashboardPage() {
      }
    }
    fetchDashboardData()
- }, [])
+ }, [user?.userId])
 
- if (loading) return <GuideDashboardLoading />
+ if (authLoading || loading) return <GuideDashboardLoading />
 
  // Derived stats
  const tourStats = {
