@@ -99,80 +99,102 @@ export function NotificationBell() {
  return () => window.removeEventListener('notification-mark-read', handleMarkRead);
  }, []);
 
- const getNotificationUrl = (notification: NotificationResponse) => {
- const role = user?.role?.toLowerCase() || 'traveler';
- const isAdmin = role === 'admin';
- 
- switch (notification.type) {
- case 'NEW_MESSAGE':
- return `/dashboard/${role}/messages${notification.referenceId ? `?id=${notification.referenceId}` : ''}`;
- case 'BOOKING_CREATED':
- case 'BOOKING_CONFIRMED':
- case 'BOOKING_CANCELLED':
- if (isAdmin) return `/dashboard/admin`;
- return notification.referenceId 
- ? `/dashboard/${role}/bookings/${notification.referenceId}` 
- : `/dashboard/${role}/bookings`;
- case 'VERIFICATION_SUBMITTED':
- if (isAdmin) return `/dashboard/admin/verifications`;
- return `/dashboard/guide/verification`;
- case 'VERIFICATION_APPROVED':
- case 'VERIFICATION_REJECTED':
- return `/dashboard/guide/verification`;
- case 'PAYMENT_SUCCESS':
- case 'PAYMENT_FAILED':
- if (isAdmin) return `/dashboard/admin/payouts`;
- return notification.referenceId 
- ? `/dashboard/${role}/bookings/${notification.referenceId}`
- : `/dashboard/${role}/bookings`;
- case 'ACCOUNT_SUSPENDED':
- case 'ACCOUNT_REACTIVATED':
- if (isAdmin) return `/dashboard/admin/users`;
- return `/dashboard/${role}/settings`;
- case 'ACCOUNT_CREATED':
- case 'EMAIL_VERIFIED':
- case 'PASSWORD_CHANGED':
- return `/dashboard/${role}/settings`;
- case 'PROFILE_COMPLETED':
- return `/dashboard/${role}/profile`;
- case 'SETUP_PASSWORD_REMINDER':
- return `/dashboard/${role}/settings`;
- default:
- return null;
- }
- };
+  const getNotificationUrl = (notification: NotificationResponse) => {
+    const role = user?.role?.toLowerCase() || 'traveler';
+    const isAdmin = role === 'admin';
+    
+    switch (notification.type) {
+      case 'NEW_MESSAGE':
+        return `/dashboard/${role}/messages${notification.referenceId ? `?id=${notification.referenceId}` : ''}`;
+      case 'BOOKING_CREATED':
+      case 'BOOKING_CONFIRMED':
+      case 'BOOKING_CANCELLED':
+      case 'BOOKING_EXPIRED':
+        if (isAdmin) return `/dashboard/admin`;
+        return notification.referenceId 
+          ? `/dashboard/${role}/bookings/${notification.referenceId}` 
+          : `/dashboard/${role}/bookings`;
+      case 'VERIFICATION_SUBMITTED':
+        if (isAdmin) return `/dashboard/admin/verifications`;
+        return `/dashboard/guide/verification`;
+      case 'VERIFICATION_APPROVED':
+      case 'VERIFICATION_REJECTED':
+        return `/dashboard/guide/verification`;
+      case 'PAYMENT_SUCCESS':
+      case 'PAYMENT_FAILED':
+      case 'PAYOUT_PROCESSED':
+        if (isAdmin) return `/dashboard/admin/payouts`;
+        return notification.referenceId 
+          ? `/dashboard/${role}/bookings/${notification.referenceId}`
+          : `/dashboard/${role}/bookings`;
+      case 'ACCOUNT_SUSPENDED':
+      case 'ACCOUNT_REACTIVATED':
+        if (isAdmin) return `/dashboard/admin/users`;
+        return `/dashboard/${role}/settings`;
+      case 'ACCOUNT_CREATED':
+      case 'EMAIL_VERIFIED':
+      case 'PASSWORD_CHANGED':
+      case 'SETUP_PASSWORD_REMINDER':
+        return `/dashboard/${role}/settings`;
+      case 'PROFILE_COMPLETED':
+        return `/dashboard/${role}/profile`;
+      case 'TOUR_APPROVED':
+      case 'TOUR_REJECTED':
+        if (isAdmin) return `/dashboard/admin/tours`;
+        return `/dashboard/guide/tours`;
+      case 'REVIEW_REMINDER':
+        return `/dashboard/${role}/bookings`;
+      case 'DISPUTE_OPENED':
+      case 'DISPUTE_STATUS_CHANGED':
+      case 'DISPUTE_RESOLVED':
+      case 'DISPUTE_REJECTED':
+        if (isAdmin) return `/dashboard/admin/disputes`;
+        return `/dashboard/${role}/disputes`;
+      case 'SYSTEM_ALERT':
+        return `/dashboard/${role}`;
+      default:
+        // Fallback to dashboard home instead of getting stuck
+        return `/dashboard/${role}`;
+    }
+  };
 
  const handleNotificationClick = async (notification: NotificationResponse) => {
  if (!notification.isRead) {
- try {
- // If it's a message or booking, mark the whole group (reference) as read
- if (notification.type === 'NEW_MESSAGE' && notification.referenceId) {
- await notificationsApi.markByReference('NEW_MESSAGE', notification.referenceId);
- 
- // Surgical local state update
- setNotifications(prev => prev.map(n => 
- (n.type === 'NEW_MESSAGE' && n.referenceId && n.referenceId === notification.referenceId) 
- ? { ...n, isRead: true } 
- : n
- ));
- } 
- else if (notification.type.startsWith('BOOKING_') && notification.referenceId) {
- await notificationsApi.markByReference(notification.type, notification.referenceId);
- 
- // Surgical local state update
- setNotifications(prev => prev.map(n => 
- (n.type.startsWith('BOOKING_') && n.referenceId && n.referenceId === notification.referenceId) 
- ? { ...n, isRead: true } 
- : n
- ));
- }
- else {
- await notificationsApi.markAsRead(notification.id);
- setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n));
- }
- } catch (err) {
- console.error('Failed to mark read', err);
- }
+  try {
+        // If it's a message or booking, mark the whole group (reference) as read
+        if (notification.type === 'NEW_MESSAGE' && notification.referenceId) {
+          await notificationsApi.markByReference('NEW_MESSAGE', notification.referenceId);
+          
+          // Surgical local state update
+          setNotifications(prev => prev.map(n => 
+            (n.type === 'NEW_MESSAGE' && n.referenceId && n.referenceId === notification.referenceId) 
+            ? { ...n, isRead: true } 
+            : n
+          ));
+        } 
+        else if (notification.type.startsWith('BOOKING_') && notification.referenceId) {
+          await notificationsApi.markByReference(notification.type, notification.referenceId);
+          
+          // Surgical local state update
+          setNotifications(prev => prev.map(n => 
+            (n.type.startsWith('BOOKING_') && n.referenceId && n.referenceId === notification.referenceId) 
+            ? { ...n, isRead: true } 
+            : n
+          ));
+        }
+        else {
+          await notificationsApi.markAsRead(notification.id);
+          setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n));
+        }
+        
+        // Optimistically update unread count
+        setUnreadCount(prev => Math.max(0, prev - 1));
+        
+        // Dispatch event so other components (like Sidebar) know to refresh/update
+        window.dispatchEvent(new CustomEvent('notification-mark-read'));
+      } catch (err) {
+        console.error('Failed to mark read', err);
+      }
  }
 
  const url = getNotificationUrl(notification);
