@@ -116,6 +116,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(List.of(
+                "https://tourongo.com",
+                "https://www.tourongo.com",
                 "https://*.vercel.app",
                 "https://tourongo.vercel.app",
                 "http://localhost:3000",
