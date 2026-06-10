@@ -35,7 +35,13 @@ public class SecurityConfig {
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, org.springframework.security.oauth2.client.registration.ClientRegistrationRepository clientRegistrationRepository) throws Exception {
+        var resolver = new org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver(
+                clientRegistrationRepository, "/oauth2/authorization");
+        resolver.setAuthorizationRequestCustomizer(customizer -> {
+            customizer.additionalParameters(params -> params.put("prompt", "select_account"));
+        });
+
         http
                 .csrf(csrf -> csrf.disable())
                 // OAuth2 login needs a short-lived session during the redirect handshake.
@@ -96,6 +102,7 @@ public class SecurityConfig {
 
                 // OAuth2 login wiring
                 .oauth2Login(oauth -> oauth
+                        .authorizationEndpoint(auth -> auth.authorizationRequestResolver(resolver))
                         .successHandler((request, response, authentication) ->
                                 oAuth2LoginSuccessHandler.onAuthenticationSuccess(request, response, authentication))
                         .failureHandler((request, response, exception) ->
