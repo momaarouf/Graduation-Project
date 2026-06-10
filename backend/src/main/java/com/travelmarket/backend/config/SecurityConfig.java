@@ -115,8 +115,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        // Allow localhost and any local network IP for mobile testing
-        config.setAllowedOriginPatterns(List.of("*"));
+        config.setAllowedOriginPatterns(List.of(
+                "https://*.vercel.app",
+                "https://tourongo.vercel.app",
+                "http://localhost:3000",
+                "http://localhost:8081",
+                "http://127.0.0.1:[*]",
+                "http://192.168.*:[*]",
+                "http://10.*:[*]"
+        ));
         config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

@@ -129,9 +129,13 @@ apiClient.interceptors.response.use(
     // cold-start timeouts, 5xx, etc.) — the access token is likely still valid
     // and clearing it would log the user out spuriously.
     const status = refreshError?.response?.status;
-    if (status === 401 || status === 403) {
-      clearAccessToken();
-    }
+    // We NO LONGER clear the access token here because some endpoints (like missing or 
+    // misconfigured notification endpoints) might return 401 spuriously.
+    // If the token is truly expired, the next page refresh or route change will trigger
+    // bootstrap's apiAuthMe(), which WILL correctly clear the session and log them out.
+    // if (status === 401 || status === 403) {
+    //   clearAccessToken();
+    // }
     return Promise.reject(refreshError);
   } finally {
   isRefreshing = false;
