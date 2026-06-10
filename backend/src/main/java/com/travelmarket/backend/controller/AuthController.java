@@ -16,6 +16,9 @@ import com.travelmarket.backend.entity.PasswordResetToken;
 import com.travelmarket.backend.repository.PasswordResetTokenRepository;
 import com.travelmarket.backend.entity.EmailVerificationToken;
 import com.travelmarket.backend.repository.EmailVerificationTokenRepository;
+import com.travelmarket.backend.entity.TwoFactorAuthToken;
+import com.travelmarket.backend.repository.TwoFactorAuthTokenRepository;
+import com.travelmarket.backend.security.TwoFactorAuthService;
 import com.travelmarket.backend.service.EmailService;
 import com.travelmarket.backend.security.RateLimiterService;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,6 +59,8 @@ public class AuthController {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
+    private final TwoFactorAuthTokenRepository twoFactorAuthTokenRepository;
+    private final TwoFactorAuthService twoFactorAuthService;
     private final RateLimiterService rateLimiterService;
     private final NotificationService notificationService;
 
@@ -266,6 +271,68 @@ public class AuthController {
         String token = jwtUtil.generateToken(userDetails, user.getTokenVersion() == null ? 0 : user.getTokenVersion());
 
         // Remember-me affects refresh token lifetime
+        Duration ttl = Boolean.TRUE.equals(request.getRememberMe())
+                ? REFRESH_TTL_REMEMBER
+                : REFRESH_TTL_DEFAULT;
+
+        if (Boolean.TRUE.equals(user.getIsTwoFactorEnabled())) {
+            // Require 2FA instead of issuing JWTs immediately
+            String tempTokenRaw = UUID.randomUUID().toString();
+            String tempTokenHash = sha256Hex(tempTokenRaw);
+
+            TwoFactorAuthToken tfToken = new TwoFactorAuthToken();
+            tfToken.setUser(user);
+            tfToken.setTokenHash(tempTokenHash);
+            tfToken.setCreatedAtUtc(Instant.now());
+            tfToken.setExpiresAtUtc(Instant.now().plus(Duration.ofMinutes(5))); // 5 minute window for 2FA
+            twoFactorAuthTokenRepository.save(tfToken);
+
+            return new AuthResponse(true, tempTokenRaw);
+        }
+
+        String refreshRaw = issueRefreshToken(user, ttl);
+        response.addHeader(HttpHeaders.SET_COOKIE, buildRefreshCookie(refreshRaw, ttl).toString());
+
+        return new AuthResponse(token, user.getEmail(), user.getRole().name());
+    }
+
+    @PostMapping("/login/2fa")
+    public AuthResponse loginWith2FA(@Valid @RequestBody TwoFactorLoginRequest request, HttpServletResponse response, HttpServletRequest httpRequest) {
+        String ip = getClientIp(httpRequest);
+        rateLimiterService.check(
+                "auth:login2fa:ip:" + ip,
+                20,
+                Duration.ofMinutes(10),
+                "Too many 2FA attempts. Try again later."
+        );
+
+        String tempTokenHash = sha256Hex(request.getTempToken());
+        TwoFactorAuthToken tfToken = twoFactorAuthTokenRepository.findByTokenHash(tempTokenHash)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired temporary token"));
+
+        if (tfToken.getUsedAtUtc() != null || tfToken.getExpiresAtUtc().isBefore(Instant.now())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Temporary token expired");
+        }
+
+        User user = tfToken.getUser();
+        boolean isValid = twoFactorAuthService.isOtpValid(user.getTwoFactorSecret(), request.getCode());
+        
+        if (!isValid) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid 2FA code");
+        }
+
+        // Mark temporary token as used
+        tfToken.setUsedAtUtc(Instant.now());
+        twoFactorAuthTokenRepository.save(tfToken);
+
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                .username(user.getEmail())
+                .password(user.getPasswordHash())
+                .roles(user.getRole().name())
+                .build();
+
+        String token = jwtUtil.generateToken(userDetails, user.getTokenVersion() == null ? 0 : user.getTokenVersion());
+
         Duration ttl = Boolean.TRUE.equals(request.getRememberMe())
                 ? REFRESH_TTL_REMEMBER
                 : REFRESH_TTL_DEFAULT;

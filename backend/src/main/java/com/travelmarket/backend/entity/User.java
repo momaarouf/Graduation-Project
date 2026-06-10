@@ -103,6 +103,11 @@ public class User {
     @Column(name = "has_password", nullable = false)
     private Boolean hasPassword = true;
 
+    @Column(name = "two_factor_secret")
+    private String twoFactorSecret;
+
+    @Column(name = "is_two_factor_enabled", nullable = false)
+    private Boolean isTwoFactorEnabled = false;
 
     @PrePersist
     protected void onCreate() {

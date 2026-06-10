@@ -70,9 +70,9 @@ const validatePassword = (password: string): boolean => {
 // MAIN COMPONENT
 // ============================================================================
 
-export default function LoginForm() {
+ export default function LoginForm() {
  const router = useRouter();
- const { login, isLoading: authLoading, user } = useAuth();
+ const { login, login2FA, isLoading: authLoading, user } = useAuth();
  
  // Redirect if already logged in (check user role and redirect to appropriate dashboard)
  useEffect(() => {
@@ -96,6 +96,11 @@ export default function LoginForm() {
  const [showPassword, setShowPassword] = useState(false);
  const [isLoading, setIsLoading] = useState(false); // local loading for button state
  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+ // 2FA states
+ const [requires2fa, setRequires2fa] = useState(false);
+ const [tempToken, setTempToken] = useState('');
+ const [twoFactorCode, setTwoFactorCode] = useState('');
 
  // ========================================
  // HANDLERS
@@ -140,6 +145,25 @@ export default function LoginForm() {
  const handleSubmit = async (e: React.FormEvent) => {
  e.preventDefault();
 
+ if (requires2fa) {
+ if (!twoFactorCode || twoFactorCode.length < 6) {
+ setErrors({ general: 'Please enter a valid 6-digit code' });
+ return;
+ }
+ setIsLoading(true);
+ setErrors({});
+ try {
+ await login2FA(tempToken, twoFactorCode, formData.rememberMe);
+ } catch (error: any) {
+ let message = 'Invalid 2FA code. Please try again.';
+ if (error.response?.data?.message) message = error.response.data.message;
+ setErrors({ general: message });
+ } finally {
+ setIsLoading(false);
+ }
+ return;
+ }
+
  if (!validateForm()) {
  return;
  }
@@ -148,8 +172,11 @@ export default function LoginForm() {
  setErrors({}); // clear general errors
 
  try {
- await login(formData.email, formData.password, formData.rememberMe);
- // login will redirect based on role – no further action needed
+ const response = await login(formData.email, formData.password, formData.rememberMe);
+ if (response && response.requires2fa) {
+ setRequires2fa(true);
+ setTempToken(response.tempToken || '');
+ }
  } catch (error: any) {
  // Try to extract error message from backend response
  let message = 'Invalid email or password. Please try again.';
@@ -216,7 +243,60 @@ export default function LoginForm() {
  FORM
  ======================================== */}
  <form onSubmit={handleSubmit} className="space-y-5">
-
+ {requires2fa ? (
+ <div className="space-y-4">
+ <div className="text-center mb-6">
+ <p className="text-sm text-theme-muted mb-2">Two-Factor Authentication is enabled.</p>
+ <p className="text-xs text-theme-secondary font-medium">Open your Authenticator app and enter the 6-digit code below.</p>
+ </div>
+ <div className="space-y-1.5">
+ <label htmlFor="twoFactorCode" className="block text-sm font-medium text-theme-secondary">
+ Authentication Code
+ </label>
+ <div className="relative">
+ <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
+ <input
+ type="text"
+ id="twoFactorCode"
+ value={twoFactorCode}
+ onChange={(e) => {
+ setTwoFactorCode(e.target.value);
+ if (errors.general) setErrors({});
+ }}
+ disabled={isLoading}
+ placeholder="000000"
+ maxLength={6}
+ className="w-full pl-9 pr-3 py-3 md:py-2.5 surface-section border border-theme-strong focus:ring-primary-light focus:border-primary-light rounded-lg text-sm text-theme-primary transition-all disabled:opacity-50 tracking-widest text-center text-lg"
+ />
+ </div>
+ </div>
+ <button
+ type="submit"
+ disabled={isLoading || twoFactorCode.length < 6}
+ className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
+ >
+ {isLoading ? (
+ <>
+ <div className="w-4 h-4 border-2 border-theme border-t-transparent rounded-full animate-spin" />
+ <span>Verifying...</span>
+ </>
+ ) : (
+ <>
+ <Shield className="w-4 h-4" />
+ <span>Verify Code</span>
+ </>
+ )}
+ </button>
+ <button
+ type="button"
+ onClick={() => { setRequires2fa(false); setTwoFactorCode(''); }}
+ className="w-full text-sm font-medium text-theme-muted hover:text-theme-secondary mt-2"
+ >
+ Cancel
+ </button>
+ </div>
+ ) : (
+ <>
  {/* Email Field */}
  <div className="space-y-1.5">
  <label htmlFor="email" className="block text-sm font-medium text-theme-secondary">
@@ -264,7 +344,7 @@ export default function LoginForm() {
  </label>
  <Link
  href="/auth/forgot-password"
- className="text-xs font-medium text-primary-light dark:text-primary-dark dark:text-primary-dark hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+ className="text-xs font-medium text-primary-light dark:text-primary-dark hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
  >
  Forgot password?
  </Link>
@@ -326,8 +406,8 @@ export default function LoginForm() {
  <div className={`
  w-4 h-4 border rounded transition-all duration-200 flex items-center justify-center
  ${formData.rememberMe
- ? 'bg-primary-light dark:bg-primary-light border-primary-light dark:border-primary-dark dark:border-primary-light dark:border-primary-dark'
- : 'surface-card border-theme-strong group-hover:border-theme-strong dark:group-hover:border-theme-strong'
+ ? 'bg-primary-light border-primary-light'
+ : 'surface-card border-theme-strong group-hover:border-theme-strong'
  }
  `}>
  {formData.rememberMe && (
@@ -353,19 +433,9 @@ export default function LoginForm() {
  type="submit"
  disabled={isLoading}
  className="
- w-full
- py-3
- bg-gradient-to-r from-blue-600 to-indigo-600
- dark:from-blue-700 dark:to-indigo-700
- text-white font-semibold
- rounded-lg
- hover:from-blue-700 hover:to-indigo-700
- dark:hover:from-blue-800 dark:hover:to-indigo-800
- transition-all
- disabled:opacity-50 disabled:cursor-not-allowed
- flex items-center justify-center gap-2
- shadow-lg hover:shadow-xl
-"
+ w-full py-3
+ bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg
+ "
  >
  {isLoading ? (
  <>
@@ -379,6 +449,8 @@ export default function LoginForm() {
  </>
  )}
  </button>
+ </>
+ )}
  </form>
 
  {/* ========================================
@@ -398,6 +470,7 @@ export default function LoginForm() {
  {/* ========================================
  SOCIAL LOGIN BUTTON - Full Width
  ======================================== */}
+ {!requires2fa && (
  <div className="mt-6">
  <button
  onClick={() => handleSocialLogin('Google')}
@@ -413,6 +486,7 @@ export default function LoginForm() {
  <span>Continue with Google</span>
  </button>
  </div>
+ )}
  </div>
  </motion.div>
  );

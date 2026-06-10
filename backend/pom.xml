@@ -161,6 +161,13 @@
 			<version>26.3.0</version>
 		</dependency>
 
+		<!-- TOTP for Google Authenticator 2FA -->
+		<dependency>
+			<groupId>dev.samstevens.totp</groupId>
+			<artifactId>totp-spring-boot-starter</artifactId>
+			<version>1.7.1</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

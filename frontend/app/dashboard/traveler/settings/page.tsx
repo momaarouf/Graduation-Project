@@ -28,7 +28,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '@/src/lib/contexts/AuthContext'
-import { passwordChange, updateNotificationPreferences, deleteAccount } from '@/src/lib/api/auth'
+import { passwordChange, updateNotificationPreferences, deleteAccount, generate2FA, enable2FA, disable2FA } from '@/src/lib/api/auth'
 import { motion, AnimatePresence } from 'framer-motion'
 import SettingsSkeleton from '@/src/components/dashboard/SettingsSkeleton'
 import SetPasswordForm from '@/src/components/auth/SetPasswordForm'
@@ -98,6 +98,13 @@ export default function TravelerSettingsPage() {
  const [deleteConfirmText, setDeleteConfirmText] = useState('')
  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
+ // 2FA states
+ const [twoFaStatus, setTwoFaStatus] = useState<'idle' | 'scanning' | 'confirming' | 'disabling'>('idle')
+ const [qrCodeUri, setQrCodeUri] = useState('')
+ const [twoFaCode, setTwoFaCode] = useState('')
+ const [is2FaEnabled, setIs2FaEnabled] = useState(false)
+ const [is2FaLoading, setIs2FaLoading] = useState(false)
+
  const passwordStrength = getPasswordStrength(newPassword)
  const passwordsMatch = newPassword === confirmPassword
 
@@ -128,6 +135,52 @@ export default function TravelerSettingsPage() {
  setIsSaving(false)
  }
  }
+
+ const handleGenerate2FA = async () => {
+    setIs2FaLoading(true)
+    try {
+      const data = await generate2FA()
+      setQrCodeUri(data.qrCodeUri)
+      setTwoFaStatus('scanning')
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to generate 2FA setup')
+    } finally {
+      setIs2FaLoading(false)
+    }
+  }
+
+  const handleEnable2FA = async () => {
+    if (twoFaCode.length < 6) return
+    setIs2FaLoading(true)
+    try {
+      await enable2FA(twoFaCode)
+      setIs2FaEnabled(true)
+      setTwoFaStatus('idle')
+      setTwoFaCode('')
+      setQrCodeUri('')
+      toast.success('Two-Factor Authentication enabled!')
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Invalid code. Please try again.')
+    } finally {
+      setIs2FaLoading(false)
+    }
+  }
+
+  const handleDisable2FA = async () => {
+    if (twoFaCode.length < 6) return
+    setIs2FaLoading(true)
+    try {
+      await disable2FA(twoFaCode)
+      setIs2FaEnabled(false)
+      setTwoFaStatus('idle')
+      setTwoFaCode('')
+      toast.success('Two-Factor Authentication disabled.')
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Invalid code. Please try again.')
+    } finally {
+      setIs2FaLoading(false)
+    }
+  }
 
  const handleSavePreferences = async () => {
  setIsSaving(true)
@@ -333,16 +386,95 @@ export default function TravelerSettingsPage() {
  {activeTab === 'security' && (
  <motion.div key="security" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8">
  <div className="p-6 sm:p-10 bg-primary-light/5 border border-primary-light/20 rounded-[2rem] sm:rounded-[3rem] relative overflow-hidden group">
- <div className="absolute top-0 right-0 w-32 h-32 bg-primary-light/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-primary-light/10 transition-colors" />
- <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10 text-center sm:text-left">
- <div className="w-14 h-14 flex items-center justify-center bg-primary-light text-white rounded-2xl shadow-2xl shadow-primary-light/30 border border-white/20 flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform"><Shield className="w-7 h-7" /></div>
- <div className="min-w-0 flex-1">
- <h3 className="text-sm font-black text-theme-primary mb-2 capitalize italic tracking-tight">Two-Factor Authentication</h3>
- <p className="text-[10px] sm:text-xs text-theme-secondary mb-6 leading-relaxed font-bold capitalize tracking-normal opacity-80">Inject a secondary validation layer into your login sequence for maximum account integrity.</p>
- <button className="px-6 py-3 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-black capitalize tracking-normal rounded-xl transition-all shadow-lg active:scale-95">Initialize 2FA</button>
- </div>
- </div>
- </div>
+    <div className="absolute top-0 right-0 w-32 h-32 bg-primary-light/5 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-primary-light/10 transition-colors" />
+    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 relative z-10 text-center sm:text-left">
+      <div className="w-14 h-14 flex items-center justify-center bg-primary-light text-white rounded-2xl shadow-2xl shadow-primary-light/30 border border-white/20 flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-transform"><Shield className="w-7 h-7" /></div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-3 mb-2">
+          <h3 className="text-sm font-black text-theme-primary capitalize italic tracking-tight">Two-Factor Authentication</h3>
+          {is2FaEnabled && (
+            <span className="px-2 py-0.5 bg-success-green/10 text-success-green text-[9px] font-black uppercase tracking-widest rounded-full border border-success-green/20">Active</span>
+          )}
+        </div>
+        <p className="text-[10px] sm:text-xs text-theme-secondary mb-6 leading-relaxed font-bold capitalize tracking-normal opacity-80">Inject a secondary validation layer into your login sequence for maximum account integrity.</p>
+
+        {twoFaStatus === 'idle' && !is2FaEnabled && (
+          <button
+            onClick={handleGenerate2FA}
+            disabled={is2FaLoading}
+            className="px-6 py-3 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-black capitalize tracking-normal rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-2 disabled:opacity-50"
+          >
+            {is2FaLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
+            Initialize 2FA
+          </button>
+        )}
+
+        {twoFaStatus === 'idle' && is2FaEnabled && (
+          <button
+            onClick={() => { setTwoFaStatus('disabling'); setTwoFaCode('') }}
+            className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black capitalize tracking-normal rounded-xl transition-all active:scale-95 flex items-center gap-2"
+          >
+            <Shield className="w-4 h-4" /> Disable 2FA
+          </button>
+        )}
+
+        {twoFaStatus === 'scanning' && qrCodeUri && (
+          <div className="space-y-4">
+            <p className="text-xs text-theme-secondary font-bold">1. Open <span className="text-primary-light font-black">Google Authenticator</span> or Authy on your phone.</p>
+            <p className="text-xs text-theme-secondary font-bold">2. Tap <span className="font-black">+</span> → <span className="font-black">Scan a QR code</span> and scan the code below:</p>
+            <div className="inline-block p-3 bg-white rounded-2xl border border-theme shadow-lg">
+              <img src={qrCodeUri} alt="2FA QR Code" className="w-44 h-44 rounded-lg" />
+            </div>
+            <p className="text-xs text-theme-secondary font-bold">3. Enter the 6-digit code shown in your app to confirm setup:</p>
+            <div className="flex gap-3 items-center">
+              <input
+                type="text"
+                value={twoFaCode}
+                onChange={e => setTwoFaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                placeholder="000000"
+                maxLength={6}
+                className="w-40 px-4 py-3 surface-section border border-theme rounded-xl text-lg font-black tracking-widest text-center text-theme-primary focus:ring-2 focus:ring-primary-light outline-none"
+              />
+              <button
+                onClick={handleEnable2FA}
+                disabled={is2FaLoading || twoFaCode.length < 6}
+                className="px-6 py-3 bg-success-green hover:opacity-90 text-white text-[10px] font-black capitalize tracking-normal rounded-xl transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50"
+              >
+                {is2FaLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                Verify & Enable
+              </button>
+            </div>
+            <button onClick={() => { setTwoFaStatus('idle'); setQrCodeUri(''); setTwoFaCode('') }} className="text-[10px] text-theme-muted hover:text-theme-secondary font-black">Cancel</button>
+          </div>
+        )}
+
+        {twoFaStatus === 'disabling' && (
+          <div className="space-y-4">
+            <p className="text-xs text-theme-secondary font-bold">Enter the current code from your Authenticator app to confirm disabling 2FA:</p>
+            <div className="flex gap-3 items-center">
+              <input
+                type="text"
+                value={twoFaCode}
+                onChange={e => setTwoFaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                placeholder="000000"
+                maxLength={6}
+                className="w-40 px-4 py-3 surface-section border border-theme rounded-xl text-lg font-black tracking-widest text-center text-theme-primary focus:ring-2 focus:ring-primary-light outline-none"
+              />
+              <button
+                onClick={handleDisable2FA}
+                disabled={is2FaLoading || twoFaCode.length < 6}
+                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-[10px] font-black capitalize tracking-normal rounded-xl transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50"
+              >
+                {is2FaLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
+                Confirm Disable
+              </button>
+            </div>
+            <button onClick={() => { setTwoFaStatus('idle'); setTwoFaCode('') }} className="text-[10px] text-theme-muted hover:text-theme-secondary font-black">Cancel</button>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
 
  <div className="p-6 sm:p-10 bg-red-500/5 border border-red-500/20 rounded-[2rem] sm:rounded-[3rem]">
  <h3 className="text-[10px] font-black text-red-600 dark:text-red-400 capitalize tracking-[0.3em] mb-4 flex items-center gap-2"><Trash2 className="w-4 h-4" /> Termination Protocol</h3>

@@ -6,6 +6,7 @@ import apiClient, { setAccessToken, clearAccessToken, getAccessToken } from '@/s
 import {
  authRegister,
  authLogin as apiAuthLogin,
+ authLogin2FA as apiAuthLogin2FA,
  authLogout as apiAuthLogout,
  authLogoutAll as apiAuthLogoutAll,
  authMe as apiAuthMe,
@@ -46,7 +47,8 @@ interface AuthContextType {
  processingMessage: string;
  // Authentication methods
  register: (email: string, password: string, role: 'Traveler' | 'Guide', fullName: string, agreedToTerms: boolean, agreedToPrivacy: boolean, newsletterOptIn: boolean, marketingOptIn: boolean) => Promise<void>;
- login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
+ login: (email: string, password: string, rememberMe?: boolean) => Promise<{ requires2fa?: boolean; tempToken?: string }>;
+ login2FA: (tempToken: string, code: string, rememberMe?: boolean) => Promise<void>;
  logout: () => Promise<void>;
  logoutAll: () => Promise<void>;
  refresh: () => Promise<void>;
@@ -224,11 +226,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  try {
  const response = await apiAuthLogin({ email, password, rememberMe });
  
+ if (response.requires2fa) {
+  return { requires2fa: true, tempToken: response.tempToken };
+ }
+
  // Only show full-screen overlay AFTER the login is accepted by the server
  setProcessingMessage('Securing your session...');
  setIsProcessing(true);
 
- setAccessToken(response.token);
+ setAccessToken(response.token!);
  // Fetch full user info after login; normalize role from Pascal to capitalize
  const userRes = await apiAuthMe();
  
@@ -246,6 +252,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  const normalized = normalizeUser(userRes, avatarUrl);
  setUser(normalized);
  // Redirect based on role
+ if (normalized.role === 'ADMIN') router.push('/dashboard/admin');
+ else if (normalized.role === 'GUIDE') router.push('/dashboard/guide');
+ else router.push('/dashboard/traveler');
+ 
+ return {};
+ } finally {
+ setTimeout(() => setIsProcessing(false), 2000);
+ }
+ };
+
+ // 2FA Login
+ const login2FA = async (tempToken: string, code: string, rememberMe = false) => {
+ try {
+ const response = await apiAuthLogin2FA({ tempToken, code, rememberMe });
+ 
+ setProcessingMessage('Verifying code...');
+ setIsProcessing(true);
+
+ setAccessToken(response.token!);
+ const userRes = await apiAuthMe();
+ 
+ let avatarUrl: string | undefined;
+ try {
+ if (userRes.role === 'Traveler') {
+ const profile = await apiClient.get('/api/traveler/profile');
+ avatarUrl = profile.data.avatarUrl;
+ } else if (userRes.role === 'Guide') {
+ const profile = await apiClient.get('/api/guide/profile');
+ avatarUrl = profile.data.avatarUrl;
+ }
+ } catch (e) {}
+
+ const normalized = normalizeUser(userRes, avatarUrl);
+ setUser(normalized);
  if (normalized.role === 'ADMIN') router.push('/dashboard/admin');
  else if (normalized.role === 'GUIDE') router.push('/dashboard/guide');
  else router.push('/dashboard/traveler');
@@ -396,6 +436,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  isLoading,
  register,
  login,
+ login2FA,
  logout,
  logoutAll,
  refresh,

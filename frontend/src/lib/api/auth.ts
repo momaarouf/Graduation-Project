@@ -18,10 +18,23 @@ export interface LoginRequest {
  rememberMe?: boolean;
 }
 
+export interface TwoFactorLoginRequest {
+ tempToken: string;
+ code: string;
+ rememberMe?: boolean;
+}
+
 export interface AuthResponse {
- token: string;
- email: string;
- role: string;
+ token?: string;
+ email?: string;
+ role?: string;
+ requires2fa?: boolean;
+ tempToken?: string;
+}
+
+export interface TwoFactorSetupResponse {
+ qrCodeUri: string;
+ secret: string;
 }
 
 export interface MeResponse {
@@ -148,6 +161,24 @@ export const authRegister = async (data: RegisterRequest): Promise<AuthResponse>
 export const authLogin = async (data: LoginRequest): Promise<AuthResponse> => {
  const response = await apiClient.post('/api/auth/login', data);
  return response.data;
+};
+
+export const authLogin2FA = async (data: TwoFactorLoginRequest): Promise<AuthResponse> => {
+ const response = await apiClient.post('/api/auth/login/2fa', data);
+ return response.data;
+};
+
+export const generate2FA = async (): Promise<TwoFactorSetupResponse> => {
+ const response = await apiClient.post('/api/auth/2fa/generate');
+ return response.data;
+};
+
+export const enable2FA = async (code: string): Promise<void> => {
+ await apiClient.post('/api/auth/2fa/enable', { code });
+};
+
+export const disable2FA = async (code: string): Promise<void> => {
+ await apiClient.post('/api/auth/2fa/disable', { code });
 };
 
 /**
