@@ -200,7 +200,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
  setProcessingMessage('Creating your adventure...');
  setIsProcessing(true);
 
- setAccessToken(response.token);
+ setAccessToken(response.token!);
  // Fetch full user info after signup; normalize role from Pascal to capitalize
  const userRes = await apiAuthMe();
  const normalized = normalizeUser(userRes);
