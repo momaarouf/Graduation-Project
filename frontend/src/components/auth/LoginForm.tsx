@@ -33,7 +33,8 @@ import {
  Github,
  AlertCircle,
  CheckCircle,
- Loader2
+ Loader2,
+ Shield
 } from 'lucide-react';
 import { useAuth } from '@/src/lib/contexts/AuthContext';
 
