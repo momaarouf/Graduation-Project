@@ -10,39 +10,71 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
+import java.util.Map;
+
 @Service
-@RequiredArgsConstructor
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Value("${app.mail.from}")
-    private String from;
+    private String fromEmail;
+
+    // Use BREVO_API_KEY if provided, otherwise fallback to BREVO_PASSWORD
+    @Value("${brevo.api.key:${spring.mail.password}}")
+    private String apiKey;
 
     @Async
     public void send(String to, String subject, String text) {
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setFrom(from);
-        msg.setTo(to);
-        msg.setSubject(subject);
-        msg.setText(text);
-        mailSender.send(msg);
+        sendEmail(to, subject, text, null);
     }
     
     @Async
     public void sendHtml(String to, String subject, String htmlBody) {
+        sendEmail(to, subject, null, htmlBody);
+    }
+
+    private void sendEmail(String to, String subject, String textContent, String htmlContent) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            String url = "https://api.brevo.com/v3/smtp/email";
             
-            helper.setFrom(from);
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(htmlBody, true); // true indicates HTML
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("api-key", apiKey);
+            headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+
+            Map<String, Object> sender = Map.of("email", fromEmail, "name", "Tourongo");
+            Map<String, Object> recipient = Map.of("email", to);
+
+            java.util.HashMap<String, Object> body = new java.util.HashMap<>();
+            body.put("sender", sender);
+            body.put("to", List.of(recipient));
+            body.put("subject", subject);
             
-            mailSender.send(message);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send HTML email", e);
+            if (htmlContent != null) {
+                body.put("htmlContent", htmlContent);
+            }
+            if (textContent != null) {
+                body.put("textContent", textContent);
+            }
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+            
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                System.err.println("Failed to send email via Brevo API: " + response.getBody());
+            }
+        } catch (Exception e) {
+            System.err.println("Exception sending email via Brevo API: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
