@@ -57,13 +57,12 @@ app.email-verification.ttl-minutes=30
 app.email-verification.dev-return=false
 app.password-reset.dev-return=false
 
-# ─── Brevo SMTP (Transactional Email) ────────────────────────────────────────
-spring.mail.host=smtp-relay.brevo.com
-spring.mail.port=587
-spring.mail.username=YOUR_BREVO_LOGIN_EMAIL
-spring.mail.password=YOUR_BREVO_SMTP_KEY
-spring.mail.properties.mail.smtp.auth=true
-spring.mail.properties.mail.smtp.starttls.enable=true
+# ─── Brevo REST API (Transactional Email) ────────────────────────────────────
+# We bypassed standard SMTP to avoid cloud provider port blocks.
+# EmailService.java now uses the Brevo HTTP API instead.
+# It looks for 'brevo.api.key' but falls back to 'spring.mail.password' for backward compatibility.
+brevo.api.key=YOUR_BREVO_API_KEY
+# (If using Docker Compose, passing BREVO_PASSWORD to spring.mail.password still works)
 app.mail.from=noreply@Tourongo.com
 app.frontend.base-url=http://localhost:3000
 

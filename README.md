@@ -58,13 +58,16 @@ Built from the ground up as a graduation project (scored 95/100) and now live on
 
 ---
 
-## 💻 Frontend & Infrastructure
+## 💻 Enterprise Infrastructure & DevOps
 
-- **Next.js 16 / React 19:** Server-side rendered frontend deployed on Vercel with automatic preview deployments.
-- **Interactive UI:** Leaflet.js itinerary builder with click-to-place stops and live route rendering.
-- **Infrastructure:** Oracle Cloud backend VMs with Docker Compose, Nginx, Certbot SSL, and Cloudflare WAF.
-- **CI/CD:** GitHub Actions pipeline with automated SSH deploy on push to main.
-- **Migrations:** Flyway database migrations for fully versioned, auditable schema changes.
+ - **Server Provisioning:** Hosted on Oracle Cloud (VM.Standard.E2.1.Micro) running Ubuntu 22.04 with an explicit 2GB Swap file to prevent OOM kills under heavy load (given the 1GB RAM constraint).
+ - **Zero-Trust Firewalls:** Strict OS-level `iptables` and Oracle Cloud Security Lists restricting all ports except 80, 443, and 22.
+ - **Container Orchestration:** Fully containerized with Docker Compose orchestrating both the Java backend and a persistent PostgreSQL 15 database (bypassing Neon DB cold-starts).
+ - **Reverse Proxy & Edge:** Nginx reverse proxy routing traffic from `api.tourongo.com` to internal Docker containers, secured by Let's Encrypt Certbot SSL to prevent mixed-content errors.
+ - **DNS & DDoS Protection:** DNS managed via Cloudflare, utilizing their Web Application Firewall (WAF) and Proxy for edge caching and bot protection.
+ - **Email Delivery:** Bypassed default cloud provider SMTP port blocks (25, 465, 587) by rewriting `EmailService.java` to use the Brevo HTTP REST API for lightning-fast transactional emails.
+ - **Automated CI/CD:** Custom GitHub Actions pipeline (`deploy-backend.yml`) that securely SSHs into the Oracle instance, pulls code, rebuilds Docker images, and restarts the backend instantly on `main` branch pushes.
+ - **Frontend Hosting:** Next.js 16 / React 19 frontend deployed globally on Vercel with automatic preview environments.
 
 ---
 

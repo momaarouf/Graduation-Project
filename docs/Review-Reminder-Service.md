@@ -10,7 +10,7 @@
 
 After a traveler's trip is completed, the system automatically sends:
 
-1. **A branded HTML email** (via Brevo SMTP / `EmailService.sendHtml()`) with a CTA to leave a review
+1. **A branded HTML email** (via Brevo HTTP REST API / `EmailService.sendHtml()`) with a CTA to leave a review
 2. **An in-app notification** (type `REVIEW_REMINDER`) pushed over WebSocket to the notification bell
 
 The reminder fires **exactly 24 hours after `booking.completedAtUtc`** and is sent **exactly once**, guaranteed by a `reviewReminderSentAt` timestamp stamped atomically on the `Booking` row.

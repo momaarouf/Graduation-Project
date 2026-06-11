@@ -1,4 +1,4 @@
-# TIME_MANAGEMENT.md — Travel Marketplace Backend
+# TIME_MANAGEMENT.md — Tourongo Backend
 
 > **Last Updated:** April 2026  
 > **Scope:** All backend services, entities, and schedulers  
