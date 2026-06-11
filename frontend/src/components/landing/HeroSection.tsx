@@ -271,6 +271,7 @@ export default function HeroSection() {
  Start Your Journey
  </button>
  </div>
+ </div>
  </CinematicBackground>
  </section>
  )
