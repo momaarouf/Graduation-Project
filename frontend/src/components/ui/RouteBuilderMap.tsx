@@ -91,6 +91,7 @@ export default function RouteBuilderMap({
   const [isGeocoding, setIsGeocoding] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [map, setMap] = useState<L.Map | null>(null)
+  const [searchedLocation, setSearchedLocation] = useState<{lat: number, lng: number, name: string, address: string} | null>(null)
 
   // Generate a unique key for the MapContainer to prevent Leaflet "Map container is being reused" errors
   const [mapKey] = useState(() => `route-builder-${Math.random().toString(36).substr(2, 9)}`)
@@ -115,7 +116,22 @@ export default function RouteBuilderMap({
     if (!searchQuery.trim() || !map) return
     
     setIsGeocoding(true)
+    setSearchedLocation(null)
     try {
+      // 1. Check if it's a coordinate pair (e.g. "34.1194, 35.6461")
+      const coordsMatch = searchQuery.match(/^(-?\d+(\.\d+)?)[,\s]+(-?\d+(\.\d+)?)$/);
+      if (coordsMatch) {
+        const nLat = parseFloat(coordsMatch[1]);
+        const nLng = parseFloat(coordsMatch[3]);
+        const { address, name } = await reverseGeocode(nLat, nLng)
+        map.setView([nLat, nLng], 14)
+        setSearchedLocation({ lat: nLat, lng: nLng, name: name || 'Custom Coordinates', address })
+        toast.success(`Coordinates found`, { id: 'map-search' })
+        setIsGeocoding(false)
+        return;
+      }
+
+      // 2. Standard Name Search
       const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1`)
       const data = await resp.json()
       if (data && data[0]) {
@@ -123,6 +139,12 @@ export default function RouteBuilderMap({
         const nLat = parseFloat(lat)
         const nLng = parseFloat(lon)
         map.setView([nLat, nLng], 14)
+        setSearchedLocation({ 
+          lat: nLat, 
+          lng: nLng, 
+          name: data[0].name || display_name.split(',')[0], 
+          address: display_name 
+        })
         toast.success(`Found: ${display_name.split(',')[0]}`, { id: 'map-search' })
       } else {
         toast.error('Location not found')
@@ -131,6 +153,15 @@ export default function RouteBuilderMap({
       toast.error('Search failed')
     } finally {
       setIsGeocoding(false)
+    }
+  }
+
+  const handleAddSearched = () => {
+    if (searchedLocation) {
+      onAddStop(searchedLocation.lat, searchedLocation.lng, searchedLocation.address, searchedLocation.name)
+      setSearchedLocation(null)
+      setSearchQuery('')
+      toast.success('Stop added!')
     }
   }
 
@@ -166,15 +197,32 @@ export default function RouteBuilderMap({
         <form onSubmit={handleSearch} className="pointer-events-auto flex items-center gap-2 surface-card p-1.5 pl-4 rounded-2xl border border-theme shadow-2xl w-72">
           <input 
             type="text" 
-            placeholder="Search city, street or landmark..."
+            placeholder="Search city, street or Lat, Lng..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value)
+              if (searchedLocation) setSearchedLocation(null)
+            }}
             className="bg-transparent border-none focus:ring-0 text-xs text-theme-primary flex-1 placeholder:text-theme-muted font-medium"
           />
           <button type="submit" className="bg-primary-light hover:bg-primary-light-hover text-white p-2 rounded-xl transition-all shadow-lg active:scale-95">
             <Search className="w-3.5 h-3.5" />
           </button>
         </form>
+        
+        {searchedLocation && (
+          <div className="pointer-events-auto mt-2 p-3 surface-card rounded-2xl border border-theme shadow-xl w-72 flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
+            <p className="text-xs font-semibold text-theme-primary">{searchedLocation.name}</p>
+            <p className="text-[10px] text-theme-muted line-clamp-2">{searchedLocation.address}</p>
+            <button 
+              type="button"
+              onClick={handleAddSearched}
+              className="mt-1 flex items-center justify-center gap-2 w-full py-2 bg-green-500 hover:bg-green-600 text-white text-[10px] font-bold rounded-lg transition-colors"
+            >
+              <Plus className="w-3 h-3" /> ADD THIS LOCATION
+            </button>
+          </div>
+        )}
       </div>
 
       <MapContainer 

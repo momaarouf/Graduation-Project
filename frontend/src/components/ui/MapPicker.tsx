@@ -98,6 +98,7 @@ export default function MapPicker({
 }: MapPickerProps) {
   const [isGeocoding, setIsGeocoding] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchedLocation, setSearchedLocation] = useState<{ lat: number; lng: number; name: string; address: string } | null>(null)
   const pinIcon = useMemo(() => createCustomIcon('#2563eb'), [])
 
   // Generate a unique key for the MapContainer to prevent Leaflet "Map container is being reused" errors
@@ -135,7 +136,23 @@ export default function MapPicker({
     if (!searchQuery.trim()) return
 
     setIsGeocoding(true)
+    setSearchedLocation(null)
     try {
+      // 1. Check if input is a coordinate pair like "34.1194, 35.6461"
+      const coordsMatch = searchQuery.match(/^(-?\d+(\.\d+)?)[,\s]+(-?\d+(\.\d+)?)$/)
+      if (coordsMatch) {
+        const newLat = parseFloat(coordsMatch[1])
+        const newLng = parseFloat(coordsMatch[3])
+        const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLat}&lon=${newLng}&addressdetails=1`)
+        const data = await resp.json()
+        const address = data.display_name || ''
+        const name = data.address?.amenity || data.address?.road || data.address?.city || 'Custom Coordinates'
+        setSearchedLocation({ lat: newLat, lng: newLng, name, address })
+        setIsGeocoding(false)
+        return
+      }
+
+      // 2. Standard name/address search
       const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1`)
       const data = await resp.json()
       if (data && data.length > 0) {
@@ -143,12 +160,20 @@ export default function MapPicker({
         const newLng = parseFloat(data[0].lon)
         const address = data[0].display_name || ''
         const name = data[0].name || address.split(',')[0] || 'Searched Location'
-        onChange(newLat, newLng, address, name)
+        setSearchedLocation({ lat: newLat, lng: newLng, name, address })
       }
     } catch (error) {
       console.error('Search error:', error)
     } finally {
       setIsGeocoding(false)
+    }
+  }
+
+  const handleConfirmLocation = () => {
+    if (searchedLocation) {
+      onChange(searchedLocation.lat, searchedLocation.lng, searchedLocation.address, searchedLocation.name)
+      setSearchedLocation(null)
+      setSearchQuery('')
     }
   }
 
@@ -218,19 +243,40 @@ export default function MapPicker({
       </div>
 
       {/* SEARCH BAR */}
-      <div className="absolute top-4 right-4 z-[1000] w-[200px] sm:w-[250px]">
+      <div className="absolute top-4 right-4 z-[1000] w-[200px] sm:w-[260px] flex flex-col gap-2">
         <form onSubmit={handleSearchSubmit} className="flex items-center bg-white dark:bg-[#1a2333] rounded-xl border border-theme shadow-md overflow-hidden">
           <input 
             type="text" 
-            placeholder="Search location..." 
+            placeholder="Name or Lat, Lng..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value)
+              if (searchedLocation) setSearchedLocation(null)
+            }}
             className="flex-1 bg-transparent px-3 py-2 text-xs text-gray-800 dark:text-gray-200 focus:outline-none"
           />
           <button type="submit" disabled={isGeocoding} className="p-2 text-gray-500 hover:text-primary-light transition-colors">
             {isGeocoding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
           </button>
         </form>
+
+        {searchedLocation && (
+          <div className="bg-white dark:bg-[#1a2333] rounded-xl border border-theme shadow-xl p-3 flex flex-col gap-2">
+            <p className="text-[11px] font-bold text-gray-800 dark:text-gray-100 leading-tight">{searchedLocation.name}</p>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">{searchedLocation.address}</p>
+            <div className="grid grid-cols-2 gap-1 text-[9px] font-mono text-gray-400">
+              <span>Lat: {searchedLocation.lat.toFixed(5)}</span>
+              <span>Lng: {searchedLocation.lng.toFixed(5)}</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleConfirmLocation}
+              className="mt-1 w-full py-2 bg-green-500 hover:bg-green-600 text-white text-[10px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5"
+            >
+              ✓ CONFIRM THIS LOCATION
+            </button>
+          </div>
+        )}
       </div>
 
       {hasCoords && (
