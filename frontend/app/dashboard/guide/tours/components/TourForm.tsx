@@ -607,6 +607,17 @@ function TourLocationSection({ formData, onChange, mapId }: { formData: TourForm
  />
  </div>
 
+ <div>
+ <label className="block text-sm font-medium text-theme-secondary mb-1">
+ Meeting Point Instructions
+ </label>
+ <textarea
+ value={formData.meetingPoint.instructions || ''}
+ onChange={(e) => onChange('meetingPoint', { ...formData.meetingPoint, instructions: e.target.value })}
+ className=" w-full px-4 py-3 surface-section border-2 border-theme rounded-2xl text-theme-primary focus:outline-none focus:border-primary-light dark:border-primary-dark focus:ring-4 focus:ring-primary-light/10 dark:ring-primary-dark/5 transition-all font-bold shadow-sm hover:surface-card min-h-[100px] resize-y"
+ placeholder="e.g. Wait by the newspaper stand, look for the guide with a red umbrella"
+ />
+ </div>
  {/* Interactive Map Picker - Meeting Point */}
  <div className="mt-6">
  <label className="block text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-3 flex items-center gap-2">
