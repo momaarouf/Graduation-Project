@@ -86,6 +86,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             String providerUserId = asString(oauthUser.getAttribute("sub"));
             String email = asString(oauthUser.getAttribute("email"));
             String name = asString(oauthUser.getAttribute("name"));
+            String pictureUrl = asString(oauthUser.getAttribute("picture"));
 
             System.out.println("DEBUG: OAuth2 - email: " + email + ", providerUserId: " + providerUserId);
 
@@ -156,10 +157,16 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                     if (user.getRole() == User.Role.Traveler) {
                         TravelerProfile tp = new TravelerProfile();
                         tp.setUser(user);
+                        if (pictureUrl != null && !pictureUrl.isBlank()) {
+                            tp.setAvatarUrl(pictureUrl);
+                        }
                         travelerProfileRepository.save(tp);
                     } else if (user.getRole() == User.Role.Guide) {
                         GuideProfile gp = new GuideProfile();
                         gp.setUser(user);
+                        if (pictureUrl != null && !pictureUrl.isBlank()) {
+                            gp.setAvatarUrl(pictureUrl);
+                        }
                         guideProfileRepository.save(gp);
                     }
 
