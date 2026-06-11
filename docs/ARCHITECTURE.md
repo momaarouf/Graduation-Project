@@ -8,25 +8,22 @@ Tourongo follows a modern, decoupled client-server architecture deployed on cust
 
 ```mermaid
 graph TD
-    User[Browser / Mobile] -->|HTTPS| CF[Cloudflare WAF & CDN]
-    CF -->|Proxied HTTPS| Nginx[Nginx Reverse Proxy]
-    Nginx -->|localhost:8081| API[Spring Boot API - Docker]
-    API -->|JDBC| DB[(PostgreSQL 15 - Docker)]
-    Client[Next.js - Vercel] -->|HTTPS REST & WebSockets| CF
+    User["Browser / Mobile (Next.js on Vercel)"] -->|HTTPS| CF["Cloudflare WAF & CDN"]
+    CF -->|"Proxied HTTPS to api.tourongo.com"| Nginx[Nginx Reverse Proxy]
+    Nginx -->|localhost:8081| API["Spring Boot API - Docker"]
+    API -->|JDBC| DB[("PostgreSQL 15 - Docker")]
 
-    subgraph "Oracle Cloud Free Tier - Ubuntu 22.04"
+    subgraph Oracle["Oracle Cloud Free Tier - Ubuntu 22.04"]
         Nginx
         API
         DB
     end
 
-    subgraph "External Services"
-        API -->|Brevo HTTP REST API| Brevo[Brevo Transactional Email]
-        API -->|Stripe API| Stripe[Stripe Payment Gateway]
-        Client -->|OAuth2| Google[Google Auth]
-        Client -->|Direct Upload| Cloudinary[Cloudinary CDN]
-        API -->|Signed Signature| Cloudinary
-    end
+    API -->|Brevo HTTP REST API| Brevo[Brevo Transactional Email]
+    API -->|Stripe API| Stripe[Stripe Payment Gateway]
+    API -->|Signed Signature| Cloudinary["Cloudinary CDN"]
+    User -->|OAuth2 Redirect| Google[Google Auth]
+    User -->|Direct Upload + signed params| Cloudinary
 ```
 
 ## Backend Architecture (Spring Boot)
@@ -64,18 +61,19 @@ The frontend uses Next.js 16 App Router for robust role-based layouts and server
 
 ```mermaid
 graph TD
-    AppRouter[App Router /app] --> Layouts[Role Layouts]
+    AppRouter["App Router /app"] --> Layouts[Role Layouts]
     Layouts --> Pages[Route Pages]
 
-    Pages --> Components[UI Components /src/components]
-    Pages --> Hooks[Custom Hooks /src/lib/hooks]
+    Pages --> Components["UI Components /src/components"]
+    Pages --> Hooks["Custom Hooks /src/lib/hooks"]
 
-    Hooks --> Contexts[Contexts /src/lib/contexts]
-    Hooks --> API[API Clients /src/lib/api]
+    Hooks --> Contexts["Contexts /src/lib/contexts"]
+    Hooks --> API["API Clients /src/lib/api"]
 
-    Contexts -.-> AuthContext
-    Contexts -.-> FilterContext
-    Contexts -.-> WishlistContext
+    Contexts -.-> AuthContext[AuthContext]
+    Contexts -.-> FilterContext[FilterContext]
+    Contexts -.-> WishlistContext[WishlistContext]
+    Contexts -.-> SignupContext[SignupContext]
 ```
 
 ### Key Components:
@@ -101,24 +99,25 @@ graph TD
 
 ```mermaid
 erDiagram
-    USER ||--o{ TRAVELER_PROFILE : has
-    USER ||--o{ GUIDE_PROFILE : has
+    USER ||--o{ TRAVELER_PROFILE : "has"
+    USER ||--o{ GUIDE_PROFILE : "has"
 
-    GUIDE_PROFILE ||--o{ TOUR_TEMPLATE : creates
-    TOUR_TEMPLATE ||--o{ TOUR_OCCURRENCE : spawns
-    TOUR_TEMPLATE ||--o{ TOUR_MEDIA : has
+    GUIDE_PROFILE ||--o{ TOUR_TEMPLATE : "creates"
+    TOUR_TEMPLATE ||--o{ TOUR_OCCURRENCE : "spawns"
+    TOUR_TEMPLATE ||--o{ TOUR_MEDIA : "has"
 
-    TRAVELER_PROFILE ||--o{ BOOKING : makes
-    TOUR_OCCURRENCE ||--o{ BOOKING : receives
-    TRAVELER_PROFILE ||--o{ WAITLIST_ENTRY : joins
+    TRAVELER_PROFILE ||--o{ BOOKING : "makes"
+    TOUR_OCCURRENCE ||--o{ BOOKING : "receives"
+    TRAVELER_PROFILE ||--o{ WAITLIST_ENTRY : "joins"
+    TOUR_OCCURRENCE ||--o{ WAITLIST_ENTRY : "queues"
 
-    BOOKING ||--o| PAYMENT : requires
-    BOOKING ||--o| REVIEW : gets
-    BOOKING ||--o| DISPUTE : may_have
+    BOOKING ||--o| PAYMENT : "requires"
+    BOOKING ||--o| REVIEW : "gets"
+    BOOKING ||--o| DISPUTE : "may have"
 
-    USER ||--o{ NOTIFICATION : receives
-    USER ||--o{ CONVERSATION_PARTICIPANT : joins
-    CONVERSATION_PARTICIPANT ||--o{ MESSAGE : sends
+    USER ||--o{ NOTIFICATION : "receives"
+    USER ||--o{ CONVERSATION_PARTICIPANT : "joins"
+    CONVERSATION_PARTICIPANT }o--o{ MESSAGE : "exchanged in"
 ```
 
 ## Authentication Flow

@@ -115,20 +115,20 @@ sequenceDiagram
     participant B as User B (Thread B)
     participant DB as PostgreSQL
 
-    A->>DB: SELECT ... FOR UPDATE (occurrence id=42)
+    A->>DB: SELECT FOR UPDATE (occurrence id=42)
     Note over DB: Row lock acquired by A
-    B->>DB: SELECT ... FOR UPDATE (occurrence id=42)
-    Note over DB: Thread B BLOCKS (waiting for lock)
+    B->>DB: SELECT FOR UPDATE (occurrence id=42)
+    Note over DB: Thread B BLOCKS - waiting for lock
 
-    A->>DB: seatsReserved=9, maxCapacity=10 → OK
+    A->>DB: seatsReserved=9, maxCapacity=10 - OK to reserve
     A->>DB: UPDATE seatsReserved=11
-    A->>DB: INSERT booking (for Thread A)
-    A->>DB: COMMIT → lock released
+    A->>DB: INSERT booking row for Thread A
+    A->>DB: COMMIT - lock released
 
-    DB-->>B: Lock granted (now reads seatsReserved=11)
-    B->>DB: 11+2=13 > 10 → CONFLICT
-    DB-->>B: Exception thrown
-    B-->>User B: HTTP 409 "This tour is full. Join the waitlist instead."
+    DB-->>B: Lock granted - reads seatsReserved=11
+    B->>DB: 11+2=13 exceeds maxCapacity=10 - CONFLICT
+    DB-->>B: Throws PessimisticLockingFailureException
+    B-->>User B: HTTP 409 - This tour is full. Join the waitlist instead.
 ```
 
 ---
