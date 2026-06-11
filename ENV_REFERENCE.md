@@ -1,4 +1,4 @@
-# SafariHub — Environment Variables Reference
+# Tourongo — Environment Variables Reference
 
 Derived from the actual `application.properties` in the codebase. Every variable the backend reads.
 
@@ -64,7 +64,7 @@ spring.mail.username=YOUR_BREVO_LOGIN_EMAIL
 spring.mail.password=YOUR_BREVO_SMTP_KEY
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
-app.mail.from=noreply@safarihub.com
+app.mail.from=noreply@Tourongo.com
 app.frontend.base-url=http://localhost:3000
 
 # ─── Stripe ──────────────────────────────────────────────────────────────────
@@ -124,7 +124,7 @@ The admin account is not created via the public registration form (role=Admin is
 ```sql
 -- Create admin user (BCrypt hash for "admin123" — change immediately)
 INSERT INTO users (email, password_hash, role, is_active, email_verified, agreed_to_terms, agreed_to_privacy)
-VALUES ('admin@safarihub.com', '$2a$10$...', 'Admin', true, true, true, true);
+VALUES ('admin@Tourongo.com', '$2a$10$...', 'Admin', true, true, true, true);
 ```
 
 Or use any BCrypt encoder to generate the hash for your chosen password.

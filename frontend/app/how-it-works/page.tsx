@@ -227,6 +227,7 @@ export default function HowItWorksPage() {
  
  {/* --- HERO SECTION (Original Content with New Background) --- */}
  <section className="relative min-h-[85vh] flex flex-col items-center justify-center overflow-hidden">
+ <CinematicBackground />
  
  <div className="relative z-10 w-full max-w-7xl mx-auto px-4 text-center">
  {/* Pre-header badge */}
@@ -587,7 +588,7 @@ export default function HowItWorksPage() {
  </section>
 
  {/* --- FINAL CTA --- */}
- <section className="relative py-40 px-4 overflow-hidden">
+ <section className="relative py-24 sm:py-40 px-4 overflow-hidden">
  <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 dark:from-blue-900 dark:via-indigo-950 dark:to-purple-900" />
  <motion.div 
  animate={{ 
@@ -595,7 +596,7 @@ export default function HowItWorksPage() {
  rotate: [0, 5, 0]
  }}
  transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
- className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[500px] bg-amber-500/20 rounded-full blur-[150px]" 
+ className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full sm:w-[1000px] h-[300px] sm:h-[500px] bg-amber-500/20 rounded-full blur-[100px] sm:blur-[150px] pointer-events-none" 
  />
  
  <div className="relative z-10 max-w-5xl mx-auto text-center">

@@ -52,7 +52,7 @@ export default function AdminSettingsPage() {
 
   if (isLoading || !user) return <SettingsSkeleton />
 
-  const [activeTab, setActiveTab] = useState<'account' | 'notifications' | 'platform' | 'fees' | 'regions'>('account')
+  const [activeTab, setActiveTab] = useState<'account' | 'notifications'>('account')
   const [isSaving, setIsSaving] = useState(false)
 
   // Password
@@ -66,28 +66,6 @@ export default function AdminSettingsPage() {
   // Notifications
   const [emailNotifications, setEmailNotifications] = useState(user?.emailNotificationsEnabled ?? true)
   const [pushNotifications, setPushNotifications] = useState(user?.pushNotificationsEnabled ?? true)
-
-  // Platform
-  const [platformName, setPlatformName] = useState('Tourongo')
-  const [supportEmail, setSupportEmail] = useState('support@tourongo.com')
-  const [maintenanceMode, setMaintenanceMode] = useState(false)
-  const [welcomeEmail, setWelcomeEmail] = useState("Welcome to Tourongo! We're excited to have you...")
-  const [bookingEmail, setBookingEmail] = useState('Your booking has been confirmed...')
-  const [payoutEmail, setPayoutEmail] = useState('Your payout has been processed...')
-
-  // Fees
-  const [bronzeFee, setBronzeFee] = useState(15)
-  const [silverFee, setSilverFee] = useState(12)
-  const [goldFee, setGoldFee] = useState(10)
-  const [platinumFee, setPlatinumFee] = useState(8)
-  const [payoutFreezeHours, setPayoutFreezeHours] = useState(48)
-  const [cartLockMinutes, setCartLockMinutes] = useState(15)
-
-  // Regions
-  const [lebanonActive, setLebanonActive] = useState(true)
-  const [turkeyActive, setTurkeyActive] = useState(true)
-  const [usdToLbp, setUsdToLbp] = useState(89500)
-  const [usdToTry, setUsdToTry] = useState(32.5)
 
   const passwordStrength = getPasswordStrength(newPassword)
   const passwordsMatch = newPassword === confirmPassword
@@ -128,21 +106,9 @@ export default function AdminSettingsPage() {
     } finally { setIsSaving(false) }
   }
 
-  const handleSave = async () => {
-    setIsSaving(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1200))
-      toast.success('Settings saved!')
-    } catch { toast.error('Failed to save settings') }
-    finally { setIsSaving(false) }
-  }
-
   const TABS = [
     { id: 'account', label: 'Account' },
     { id: 'notifications', label: 'Alerts' },
-    { id: 'platform', label: 'Platform' },
-    { id: 'fees', label: 'Fees' },
-    { id: 'regions', label: 'Regions' },
   ] as const
 
   const inputClass = 'w-full pl-11 pr-4 py-3 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light transition-all font-bold'
@@ -323,191 +289,6 @@ export default function AdminSettingsPage() {
                   className="w-full sm:w-auto px-8 py-3.5 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold capitalize tracking-[0.2em] rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : <><Save className="w-4 h-4" /> Save Settings</>}
-                </button>
-              </div>
-            )}
-
-            {/* ── PLATFORM ────────────────────────────────────────────── */}
-            {activeTab === 'platform' && (
-              <div className="space-y-8">
-                {sectionTitle('bg-blue-500', 'Global Branding')}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div>
-                    <label className={labelClass}>Platform Name</label>
-                    <div className="relative">
-                      <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
-                      <input type="text" value={platformName} onChange={e => setPlatformName(e.target.value)} className={inputClass} />
-                    </div>
-                  </div>
-                  <div>
-                    <label className={labelClass}>Support Email</label>
-                    <div className="relative">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
-                      <input type="email" value={supportEmail} onChange={e => setSupportEmail(e.target.value)} className={inputClass} />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Maintenance Mode */}
-                <div className={`p-5 sm:p-6 rounded-2xl border-2 transition-all flex items-center justify-between gap-4 ${maintenanceMode ? 'bg-amber-500/10 border-amber-500/30' : 'surface-section border-theme'}`}>
-                  <div className="flex items-center gap-4">
-                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all ${maintenanceMode ? 'bg-amber-500 text-white' : 'bg-primary-light/10 text-primary-light'}`}>
-                      <Terminal className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-theme-primary">Maintenance Mode</p>
-                      <p className="text-[10px] text-theme-muted font-bold mt-0.5">Suspend all public gateway traffic</p>
-                    </div>
-                  </div>
-                  <Toggle value={maintenanceMode} onChange={() => setMaintenanceMode(!maintenanceMode)} />
-                </div>
-
-                <div className="pt-6 border-t border-[#c8d8f8] dark:border-[#1a3566]">
-                  {sectionTitle('bg-purple-500', 'Email Templates')}
-                  <div className="space-y-5">
-                    {[
-                      { label: 'Welcome Email', value: welcomeEmail, setter: setWelcomeEmail, icon: User },
-                      { label: 'Booking Confirmation', value: bookingEmail, setter: setBookingEmail, icon: FileText },
-                      { label: 'Payout Notification', value: payoutEmail, setter: setPayoutEmail, icon: DollarSign },
-                    ].map(t => (
-                      <div key={t.label}>
-                        <label className={labelClass + ' flex items-center gap-1.5'}>
-                          <t.icon className="w-3.5 h-3.5 text-primary-light" /> {t.label}
-                        </label>
-                        <textarea
-                          value={t.value}
-                          onChange={e => t.setter(e.target.value)}
-                          rows={3}
-                          className="w-full p-4 surface-section border border-theme rounded-xl text-sm font-medium text-theme-primary outline-none focus:ring-2 focus:ring-primary-light transition-all resize-none"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="w-full sm:w-auto px-8 py-3.5 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold capitalize tracking-[0.2em] rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : <><Save className="w-4 h-4" /> Save Platform Settings</>}
-                </button>
-              </div>
-            )}
-
-            {/* ── FEES ────────────────────────────────────────────────── */}
-            {activeTab === 'fees' && (
-              <div className="space-y-8">
-                {sectionTitle('bg-emerald-500', 'Guide Tier Fees')}
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  {[
-                    { label: 'Bronze', value: bronzeFee, setter: setBronzeFee, color: 'border-orange-400/40 text-orange-500' },
-                    { label: 'Silver', value: silverFee, setter: setSilverFee, color: 'border-slate-400/40 text-slate-500' },
-                    { label: 'Gold', value: goldFee, setter: setGoldFee, color: 'border-amber-400/40 text-amber-500' },
-                    { label: 'Platinum', value: platinumFee, setter: setPlatinumFee, color: 'border-blue-400/40 text-blue-500' },
-                  ].map(tier => (
-                    <div key={tier.label} className={`p-5 surface-section border-2 rounded-2xl ${tier.color}`}>
-                      <p className="text-[10px] font-bold capitalize tracking-normal mb-3 opacity-60">{tier.label} (%)</p>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          value={tier.value}
-                          onChange={e => tier.setter(Number(e.target.value))}
-                          className="w-full bg-transparent text-2xl font-black text-theme-primary outline-none pr-5"
-                        />
-                        <Percent className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 opacity-25" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="pt-6 border-t border-[#c8d8f8] dark:border-[#1a3566]">
-                  {sectionTitle('bg-blue-500', 'Timing Rules')}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {[
-                      { label: 'Payout Freeze', value: payoutFreezeHours, setter: setPayoutFreezeHours, unit: 'hrs', desc: 'Time-lock on guide payouts after completion' },
-                      { label: 'Cart Lock', value: cartLockMinutes, setter: setCartLockMinutes, unit: 'min', desc: 'Checkout reservation window duration' },
-                    ].map(rule => (
-                      <div key={rule.label} className="p-5 surface-section border border-theme rounded-2xl flex items-center justify-between gap-4">
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold text-theme-primary">{rule.label}</p>
-                          <p className="text-[10px] text-theme-muted font-bold mt-0.5 truncate">{rule.desc}</p>
-                        </div>
-                        <div className="flex items-center gap-1.5 h-12 px-4 surface-card border border-theme rounded-xl flex-shrink-0">
-                          <input
-                            type="number"
-                            value={rule.value}
-                            onChange={e => rule.setter(Number(e.target.value))}
-                            className="w-10 bg-transparent text-lg font-black text-theme-primary outline-none text-center"
-                          />
-                          <span className="text-[10px] font-bold text-theme-muted">{rule.unit}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="w-full sm:w-auto px-8 py-3.5 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold capitalize tracking-[0.2em] rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : <><Save className="w-4 h-4" /> Save Fee Structure</>}
-                </button>
-              </div>
-            )}
-
-            {/* ── REGIONS ─────────────────────────────────────────────── */}
-            {activeTab === 'regions' && (
-              <div className="space-y-6">
-                {sectionTitle('bg-indigo-500', 'Active Regions')}
-
-                {[
-                  { name: 'Lebanon', active: lebanonActive, setActive: setLebanonActive, flag: '🇱🇧', unit: 'LBP', rate: usdToLbp, setRate: setUsdToLbp },
-                  { name: 'Turkey', active: turkeyActive, setActive: setTurkeyActive, flag: '🇹🇷', unit: 'TRY', rate: usdToTry, setRate: setUsdToTry },
-                ].map(region => (
-                  <div key={region.name} className="p-5 sm:p-6 surface-section border border-theme rounded-2xl space-y-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 surface-card rounded-xl border border-theme flex items-center justify-center text-2xl flex-shrink-0">
-                          {region.flag}
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-theme-primary">{region.name}</p>
-                          <p className="text-[10px] text-theme-muted font-bold capitalize tracking-normal">Native currency: {region.unit}</p>
-                        </div>
-                      </div>
-                      <Toggle value={region.active} onChange={() => region.setActive(!region.active)} />
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 surface-card border border-theme rounded-xl">
-                      <div>
-                        <p className="text-[10px] font-bold text-theme-muted capitalize tracking-normal mb-1">Exchange Rate</p>
-                        <div className="flex items-baseline gap-2">
-                          <input
-                            type="number"
-                            value={region.rate}
-                            onChange={e => region.setRate(Number(e.target.value))}
-                            className="bg-transparent text-xl font-black text-theme-primary outline-none w-24"
-                          />
-                          <span className="text-[10px] font-bold text-theme-muted opacity-50">/ USD</span>
-                        </div>
-                      </div>
-                      <button className="w-9 h-9 surface-section hover:bg-primary-light hover:text-white rounded-lg flex items-center justify-center transition-all">
-                        <RefreshCw className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="w-full sm:w-auto px-8 py-3.5 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold capitalize tracking-[0.2em] rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : <><Save className="w-4 h-4" /> Save Region Config</>}
                 </button>
               </div>
             )}

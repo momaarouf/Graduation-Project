@@ -51,21 +51,6 @@ const getPasswordStrength = (password: string): { score: number, label: string, 
  return { score: 100, label: 'Strong', color: 'bg-success-green' }
 }
 
-const LANGUAGES = [
- { code: 'en', name: 'English', flag: '🇬🇧' },
- { code: 'ar', name: 'العربية', flag: '🇸🇦' },
- { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
- { code: 'fr', name: 'Français', flag: '🇫🇷' },
-]
-
-const TIMEZONES = [
- { value: 'UTC', label: 'UTC (Coordinated Universal Time)' },
- { value: 'America/New_York', label: 'Eastern Time (ET)' },
- { value: 'Europe/London', label: 'London (GMT)' },
- { value: 'Europe/Istanbul', label: 'Istanbul (GMT+3)' },
- { value: 'Asia/Beirut', label: 'Beirut (GMT+2)' },
-]
-
 // ============================================================================
 // MAIN PAGE
 // ============================================================================
@@ -89,8 +74,6 @@ export default function TravelerSettingsPage() {
  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
  
  // Preferences states
- const [language, setLanguage] = useState('en')
- const [timezone, setTimezone] = useState('UTC')
  const [emailNotifications, setEmailNotifications] = useState(user?.emailNotificationsEnabled ?? true)
  const [pushNotifications, setPushNotifications] = useState(user?.pushNotificationsEnabled ?? true)
  const [isSaving, setIsSaving] = useState(false)
@@ -348,28 +331,6 @@ export default function TravelerSettingsPage() {
  </h2>
  
  <div className="space-y-6">
- <div>
- <label className="block text-[10px] font-black capitalize tracking-normal text-theme-muted mb-3 ml-1">Linguistics</label>
- <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
- {LANGUAGES.map((lang) => (
- <button key={lang.code} onClick={() => setLanguage(lang.code)} className={`p-4 rounded-xl border text-center transition-all duration-300 ${language === lang.code ? 'bg-primary-light text-white border-primary-light shadow-xl' : 'surface-section text-theme-secondary border-theme hover:border-primary-light'}`}>
- <span className="text-2xl mb-2 block">{lang.flag}</span>
- <span className="text-[9px] font-black capitalize tracking-normal block">{lang.name}</span>
- </button>
- ))}
- </div>
- </div>
-
- <div>
- <label className="block text-[10px] font-black capitalize tracking-normal text-theme-muted mb-2 ml-1">Temporal Alignment</label>
- <div className="relative group">
- <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted group-focus-within:text-primary-light transition-colors" />
- <select value={timezone} onChange={(e) => setTimezone(e.target.value)} className="w-full pl-11 pr-4 py-3.5 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:ring-2 focus:ring-primary-light font-black appearance-none cursor-pointer">
- {TIMEZONES.map((tz) => <option key={tz.value} value={tz.value}>{tz.label}</option>)}
- </select>
- </div>
- </div>
-
  <div className="space-y-4 pt-4">
  <label className="block text-[10px] font-black capitalize tracking-normal text-theme-muted mb-1 ml-1">Broadcast Channels</label>
  {[

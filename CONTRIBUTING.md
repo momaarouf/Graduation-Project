@@ -1,4 +1,4 @@
-# Contributing to SafariHub
+# Contributing to Tourongo
 
 ---
 

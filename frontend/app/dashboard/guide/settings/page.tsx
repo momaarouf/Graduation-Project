@@ -69,21 +69,6 @@ const getPasswordStrength = (password: string): {
 // CONFIGURATIONS
 // ============================================================================
 
-const LANGUAGES = [
- { code: 'en', name: 'English', flag: '🇬🇧' },
- { code: 'ar', name: 'العربية', flag: '🇸🇦' },
- { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
- { code: 'fr', name: 'Français', flag: '🇫🇷' },
-]
-
-const TIMEZONES = [
- { value: 'UTC', label: 'UTC (Coordinated Universal Time)' },
- { value: 'Europe/Istanbul', label: 'Istanbul (GMT+3)' },
- { value: 'Asia/Beirut', label: 'Beirut (GMT+2)' },
- { value: 'Europe/London', label: 'London (GMT)' },
- { value: 'America/New_York', label: 'Eastern Time (ET)' },
-]
-
 // ============================================================================
 // MAIN PAGE
 // ============================================================================
@@ -107,8 +92,6 @@ export default function GuideSettingsPage() {
  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
  
  // Preferences states
- const [language, setLanguage] = useState('en')
- const [timezone, setTimezone] = useState('UTC')
  const [emailNotifications, setEmailNotifications] = useState(user?.emailNotificationsEnabled ?? true)
  const [pushNotifications, setPushNotifications] = useState(user?.pushNotificationsEnabled ?? true)
  const [isSaving, setIsSaving] = useState(false)
@@ -415,53 +398,6 @@ export default function GuideSettingsPage() {
  </div>
  </div>
 
- {/* Regional Options */}
- <div className="pt-8 border-t border-[#c8d8f8] dark:border-[#1a3566]">
- <h2 className="text-[9px] sm:text-[10px] font-bold text-theme-secondary capitalize tracking-[0.3em] mb-6 flex items-center gap-2">
- <div className="w-1.5 h-1.5 rounded-full bg-primary-light" />
- Regional Preferences
- </h2>
- 
- <div className="space-y-6">
- <div>
- <label className="block text-[10px] font-bold capitalize tracking-normal text-theme-muted mb-3 ml-1">System Language</label>
- <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
- {LANGUAGES.map((lang) => (
- <button
- key={lang.code}
- onClick={() => setLanguage(lang.code)}
- className={`p-4 rounded-xl border text-center transition-all duration-300 ${language === lang.code ? 'bg-primary-light text-white border-primary-light shadow-xl' : 'surface-section text-theme-secondary border-theme hover:border-primary-light'}`}
- >
- <span className="text-2xl mb-2 block">{lang.flag}</span>
- <span className="text-[9px] font-bold capitalize tracking-normal block">{lang.name}</span>
- </button>
- ))}
- </div>
- </div>
-
- <div>
- <label className="block text-[10px] font-bold capitalize tracking-normal text-theme-muted mb-2 ml-1">Local Timezone</label>
- <div className="relative">
- <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
- <select
- value={timezone}
- onChange={(e) => setTimezone(e.target.value)}
- className="w-full pl-11 pr-4 py-3 surface-section border border-theme rounded-xl text-sm text-theme-primary focus:outline-none focus:ring-2 focus:ring-primary-light dark:ring-primary-dark font-bold appearance-none"
- >
- {TIMEZONES.map((tz) => <option key={tz.value} value={tz.value}>{tz.label}</option>)}
- </select>
- </div>
- </div>
-
- <button
- onClick={handleSavePreferences}
- disabled={isSaving}
- className="w-full sm:w-auto px-8 py-3.5 bg-primary-light hover:bg-primary-light-hover text-white text-[10px] font-bold capitalize tracking-[0.2em] rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
- >
- {isSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : <><Save className="w-4 h-4" /> Save Preferences</>}
- </button>
- </div>
- </div>
  </div>
  )}
 

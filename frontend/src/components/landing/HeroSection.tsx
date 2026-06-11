@@ -15,6 +15,7 @@ import { Search, Shield, Users, Globe, Star, ChevronDown, Check } from 'lucide-r
 import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from '@headlessui/react'
+import CinematicBackground from '@/src/components/layout/CinematicBackground'
 
 export default function HeroSection() {
  const router = useRouter()
@@ -61,6 +62,7 @@ export default function HeroSection() {
  className="relative min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800"
  aria-label="Main hero section"
  >
+ <CinematicBackground />
  {/* 
  ============================================
  GRID BACKGROUND - DUAL THEME PATTERN
