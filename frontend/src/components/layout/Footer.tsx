@@ -15,7 +15,7 @@ export default function Footer() {
           © {new Date().getFullYear()} Tourongo Travel Marketplace
         </p>
         <p className="text-xs text-theme-muted flex items-center justify-center gap-1">
-          Designed and developed by Mo Maarouf. 
+          Designed and developed by Mohamad Maarouf. 
           <a 
             href="https://github.com/mo-maarouf/Graduation-Project" 
             target="_blank" 
