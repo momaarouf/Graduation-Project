@@ -75,7 +75,7 @@ export default async function SimilarTours({
       <div className="flex items-end justify-between">
         <div className="space-y-1">
           <h2 className="text-3xl font-bold text-theme-primary tracking-tight">
-            Similar experiences {city ? `in ${city}` : ''}
+            Similar experiences
           </h2>
           <p className="text-sm font-bold text-theme-muted">
             Hand-picked halal friendly tours for you

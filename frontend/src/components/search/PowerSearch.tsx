@@ -55,11 +55,6 @@ import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } fro
 import PriceSlider from './PriceSlider'
 import { useFilters, useApplyFilters } from '@/src/lib/contexts/FilterContext'
 import {
- Country,
- CountryLabels,
- City,
- CityLabels,
- CityCountryMap,
  Language,
  LanguageLabels,
  Duration,
@@ -68,6 +63,7 @@ import {
  MinRatingLabels,
  PRICE_RANGE
 } from '@/src/components/search/types/filters.types'
+import { Country as LibCountry, City as LibCity } from 'country-state-city'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -298,8 +294,8 @@ export default function PowerSearch({
  // STATE
  // ========================================
  const [searchQuery, setSearchQuery] = useState(initialQuery)
- const [selectedCountry, setSelectedCountry] = useState<Country | ''>('')
- const [selectedCity, setSelectedCity] = useState<City | ''>('')
+ const [selectedCountry, setSelectedCountry] = useState<string | ''>('')
+ const [selectedCity, setSelectedCity] = useState<string | ''>('')
  const [selectedLanguages, setSelectedLanguages] = useState<Language[]>([])
  const [selectedDurations, setSelectedDurations] = useState<Duration[]>([])
  const [selectedRating, setSelectedRating] = useState<MinRating | ''>('')
@@ -443,8 +439,8 @@ export default function PowerSearch({
  // Initialize from URL params on mount
  useEffect(() => {
  const q = searchParams?.get('q')
- const country = searchParams?.get('country') as Country
- const city = searchParams?.get('city') as City
+ const country = searchParams?.get('country') as string
+ const city = searchParams?.get('city') as string
  const rating = searchParams?.get('rating') as MinRating
  const minPrice = searchParams?.get('minPrice')
  const maxPrice = searchParams?.get('maxPrice')
@@ -563,7 +559,7 @@ export default function PowerSearch({
  <label className="block text-xs font-medium text-theme-muted mb-2">
  Country
  </label>
- <Listbox value={selectedCountry} onChange={setSelectedCountry}>
+ <Listbox value={selectedCountry} onChange={(val) => { setSelectedCountry(val); setSelectedCity(''); }}>
  <div className="relative">
  <ListboxButton className="
  w-full
@@ -579,7 +575,7 @@ export default function PowerSearch({
  transition-all
 ">
  <span className="block truncate">
- {selectedCountry ? CountryLabels[selectedCountry] : 'Any country'}
+ {selectedCountry ? selectedCountry : 'Any country'}
  </span>
  <ChevronDown className="w-4 h-4 text-theme-muted" />
  </ListboxButton>
@@ -620,10 +616,10 @@ export default function PowerSearch({
  </>
  )}
  </ListboxOption>
- {Object.values(Country).map((country) => (
+ {LibCountry.getAllCountries().map((country) => (
  <ListboxOption
- key={country}
- value={country}
+ key={country.isoCode}
+ value={country.name}
  className={({ focus, selected }) => `
  relative cursor-default select-none
  py-2.5 pl-10 pr-4
@@ -634,7 +630,7 @@ export default function PowerSearch({
  {({ selected }) => (
  <>
  <span className={`block truncate ${selected ? 'text-primary-light dark:text-primary-dark dark:text-primary-dark ' : 'text-theme-primary'}`}>
- {CountryLabels[country]}
+ {country.name}
  </span>
  {selected && (
  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-primary-light dark:text-primary-dark dark:text-primary-dark ">
@@ -673,7 +669,7 @@ export default function PowerSearch({
  transition-all
 ">
  <span className="block truncate">
- {selectedCity ? CityLabels[selectedCity] : 'Any city'}
+ {selectedCity ? selectedCity : 'Any city'}
  </span>
  <ChevronDown className="w-4 h-4 text-theme-muted" />
  </ListboxButton>
@@ -714,12 +710,11 @@ export default function PowerSearch({
  </>
  )}
  </ListboxOption>
- {Object.values(City)
- .filter(city => CityCountryMap[city] === selectedCountry)
+ {(LibCity.getCitiesOfCountry(LibCountry.getAllCountries().find(c => c.name === selectedCountry)?.isoCode || '') || [])
  .map((city) => (
  <ListboxOption
- key={city}
- value={city}
+ key={city.name}
+ value={city.name}
  className={({ focus, selected }) => `
  relative cursor-default select-none
  py-2.5 pl-10 pr-4
@@ -730,7 +725,7 @@ export default function PowerSearch({
  {({ selected }) => (
  <>
  <span className={`block truncate ${selected ? 'text-primary-light dark:text-primary-dark dark:text-primary-dark ' : 'text-theme-primary'}`}>
- {CityLabels[city]}
+ {city.name}
  </span>
  {selected && (
  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-primary-light dark:text-primary-dark dark:text-primary-dark ">

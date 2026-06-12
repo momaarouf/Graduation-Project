@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // FILTER TYPES DEFINITIONS
 // ============================================================================
 // LOCATION: /frontend/src/components/search/types/filters.types.ts
@@ -196,12 +196,11 @@ export const AvailabilityLabels: Record<Availability, string> = {
  */
 export interface FilterState {
  searchQuery?: string/*text search query */
- // ========== LOCATION FILTERS ==========
- /** Selected countries (Lebanon/Turkey) */
- countries?: Country[]
+  /** Selected countries */
+ countries?: string[]
 
- /** Selected cities (Beirut, Istanbul, etc.) */
- cities?: City[]
+ /** Selected cities */
+ cities?: string[]
 
  // ========== TOUR ATTRIBUTES ==========
  /** Halal certified tours only */

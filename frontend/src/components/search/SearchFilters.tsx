@@ -61,11 +61,6 @@ import PriceRangeFilter from './filters/PriceRangeFilter'
 import {
  FilterState,
  SearchFiltersProps,
- Country,
- CountryLabels,
- City,
- CityLabels,
- CityCountryMap,
  Language,
  LanguageLabels,
  Duration,
@@ -84,6 +79,7 @@ import {
 // IMPORT CONTEXT HOOKS
 // ============================================================================
 import { useFilters, useApplyFilters, useFilterState } from '@/src/lib/contexts/FilterContext'
+import { Country as LibCountry, City as LibCity } from 'country-state-city'
 
 // ============================================================================
 // FILTER DATA OPTIONS
@@ -126,7 +122,7 @@ export default function SearchFilters({
  const { isLoading: contextLoading } = useFilterState()
 
  // Local UI state
- const [selectedCountry, setSelectedCountry] = useState<Country | null>(null)
+ const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
  const [localExpanded, setLocalExpanded] = useState<Record<string, boolean>>({})
 
  // ========================================
@@ -193,21 +189,22 @@ export default function SearchFilters({
  // These only change when data changes
  // ========================================
 
- const countryOptions = useMemo(() =>
- Object.values(Country).map(country => ({
- id: country,
- label: CountryLabels[country]
- }))
- , [])
+  const countryOptions = useMemo(() =>
+  LibCountry.getAllCountries().map(country => ({
+  id: country.name,
+  label: country.name
+  }))
+  , [])
 
- const cityOptions = useMemo(() =>
- Object.values(City)
- .filter(city => !selectedCountry || CityCountryMap[city] === selectedCountry)
- .map(city => ({
- id: city,
- label: CityLabels[city]
- }))
- , [selectedCountry])
+  const cityOptions = useMemo(() => {
+  if (!selectedCountry) return []
+  const countryObj = LibCountry.getAllCountries().find(c => c.name === selectedCountry)
+  if (!countryObj) return []
+  return LibCity.getCitiesOfCountry(countryObj.isoCode)?.map(city => ({
+  id: city.name,
+  label: city.name
+  })) || []
+  }, [selectedCountry])
 
  const languageOptions = useMemo(() =>
  Object.values(Language).map(lang => ({
@@ -395,7 +392,7 @@ export default function SearchFilters({
  options={countryOptions}
  selectedValues={filters.countries || []}
  onChange={(selected) => {
- handleFilterChange({ countries: selected as Country[] })
+ handleFilterChange({ countries: selected as string[] })
  if (selectedCountry && !selected.includes(selectedCountry)) {
  setSelectedCountry(null)
  }
@@ -411,11 +408,11 @@ export default function SearchFilters({
  City
  </h4>
  <div className="relative min-w-[120px]">
- <Listbox value={selectedCountry || ''} onChange={(val) => setSelectedCountry(val as Country || null)}>
+ <Listbox value={selectedCountry || ''} onChange={(val) => setSelectedCountry(val as string || null)}>
  <div className="relative">
  <ListboxButton className="relative w-full flex items-center justify-between gap-2 px-3 py-1.5 surface-paper border border-primary-light/20 dark:border-primary-dark/20 rounded-full text-[11px] font-bold text-theme-primary hover:border-primary-light dark:hover:border-primary-dark focus:outline-none focus:ring-2 focus:ring-primary-light/20 transition-all duration-200">
  <span className="block truncate">
- {selectedCountry ? CountryLabels[selectedCountry] : 'All countries'}
+ {selectedCountry ? selectedCountry : 'All countries'}
  </span>
  <ChevronDown className="w-3 h-3 text-theme-muted transition-transform duration-200 ui-open:rotate-180" />
  </ListboxButton>
@@ -452,7 +449,7 @@ export default function SearchFilters({
  {({ selected }) => (
  <>
  <span className={`block truncate ${selected ? 'text-primary-light dark:text-primary-dark dark:text-primary-dark ' : ''}`}>
- {CountryLabels[country]}
+ {country}
  </span>
  {selected ? (
  <span className="absolute inset-y-0 left-0 flex items-center pl-2.5 text-primary-light dark:text-primary-dark dark:text-primary-dark ">
@@ -472,7 +469,7 @@ export default function SearchFilters({
  <CheckboxFilter
  options={cityOptions}
  selectedValues={filters.cities || []}
- onChange={(selected) => handleFilterChange({ cities: selected as City[] })}
+ onChange={(selected) => handleFilterChange({ cities: selected as string[] })}
  limit={5}
  showSearch={true}
  />

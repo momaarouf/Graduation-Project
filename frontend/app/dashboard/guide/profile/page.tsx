@@ -82,6 +82,7 @@ import { getGuideProfile, getGuideBookings, getGuideTours, getGuidePortfolio, up
 import { GuideBookingResponse, BookingStatus, TourTemplateResponse } from '@/src/lib/types/tour.types'
 import { motion, AnimatePresence } from 'framer-motion'
 import GuideProfileSkeleton from './skeleton'
+import ImageCropperModal from '@/src/components/ui/ImageCropperModal'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -269,14 +270,16 @@ function StatCard({ icon: Icon, label, value, color, change }: { icon: any; labe
 interface ProfileHeaderProps {
  profile: GuideProfile
  isEditing: boolean
+ isSaving: boolean
  onEdit: () => void
  onSave: () => void
  onCancel: () => void
  onAvatarChange: () => void
  onCoverChange: () => void
+ onChangeTagline: (val: string) => void
 }
 
-function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarChange, onCoverChange }: ProfileHeaderProps) {
+function ProfileHeader({ profile, isEditing, isSaving, onEdit, onSave, onCancel, onAvatarChange, onCoverChange, onChangeTagline }: ProfileHeaderProps) {
  return (
  <div className="relative mb-48 sm:mb-28">
  {/* Cover image */}
@@ -296,7 +299,7 @@ function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarC
  {/* Cover image edit button - Always accessible on hover */}
  <button
  onClick={onCoverChange}
- className=" absolute bottom-4 right-4 flex items-center gap-2 px-4 py-2 bg-black/40 hover:bg-black/60  text-white rounded-xl shadow-lg transition-all text-xs font-black capitalize tracking-normal opacity-0 group-hover:opacity-100"
+ className=" absolute bottom-4 right-4 flex items-center gap-2 px-4 py-2 bg-black/40 hover:bg-black/60  text-white rounded-xl shadow-lg transition-all text-xs font-black capitalize tracking-normal sm:opacity-0 group-hover:opacity-100"
  >
  <Camera className="w-4 h-4" />
  Change Cover
@@ -341,14 +344,14 @@ function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarC
         </div>
       </div>
       {isEditing ? (
-        <input
-          type="text"
-          value={profile.tagline}
-          onChange={(e) => {/* Handle tagline change if needed */}}
-          className="surface-card px-3 py-1 rounded-lg text-white text-sm border border-theme focus:outline-none focus:ring-2 focus:ring-white/50 w-full sm:w-64"
-          placeholder="Your tagline"
-        />
-      ) : (
+  <input
+  type="text"
+  value={profile.tagline}
+  onChange={(e) => onChangeTagline(e.target.value)}
+  className="surface-card px-3 py-1 rounded-lg text-white text-sm border border-theme focus:outline-none focus:ring-2 focus:ring-white/50 w-full sm:w-64"
+  placeholder="Your tagline"
+  />
+  ) : (
         <p className="text-sm sm:text-base font-black text-primary-light dark:text-primary-dark italic opacity-90">
           {profile.tagline || 'Leading Local Expert'}
         </p>
@@ -358,14 +361,16 @@ function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarC
 
  {/* Action buttons */}
   <div className="absolute top-4 right-4 flex flex-col sm:flex-row gap-2 sm:gap-3">
+  <AnimatePresence>
   {isEditing ? (
   <>
   <button
   onClick={onSave}
-  className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black capitalize tracking-normal rounded-xl transition-all shadow-xl hover:scale-105"
+  disabled={isSaving}
+  className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black capitalize tracking-normal rounded-xl transition-all shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
   >
   <Save className="w-4 h-4" />
-  <span className="hidden sm:inline">Save</span>
+  <span className="hidden sm:inline">{isSaving ? 'Saving...' : 'Save'}</span>
   </button>
   <button
   onClick={onCancel}
@@ -393,6 +398,7 @@ function ProfileHeader({ profile, isEditing, onEdit, onSave, onCancel, onAvatarC
   </Link>
   </>
   )}
+  </AnimatePresence>
   </div>
   </div>
  )
@@ -1052,12 +1058,18 @@ function GuideInfoCard({ profile, totalTours, totalTravelers }: GuideInfoCardPro
 export default function GuideProfilePage() {
  const router = useRouter()
  const { user } = useAuth()
- const [isEditing, setIsEditing] = useState(false)
  const [profile, setProfile] = useState(EMPTY_GUIDE_PROFILE)
  const [bookings, setBookings] = useState<GuideBookingResponse[]>([])
  const [tours, setTours] = useState<TourTemplateResponse[]>([])
  const [isLoadingData, setIsLoadingData] = useState(true)
+ const [isEditing, setIsEditing] = useState(false)
+ const [isSaving, setIsSaving] = useState(false)
  const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false)
+ const [cropperState, setCropperState] = useState<{ isOpen: boolean; imageSrc: string; type: 'avatar' | 'cover' }>({
+  isOpen: false,
+  imageSrc: '',
+  type: 'avatar'
+  })
 
  const handlePortfolioToggle = async (tourId: number, currentStatus: boolean) => {
  try {
@@ -1186,7 +1198,8 @@ export default function GuideProfilePage() {
  }
 
  const handleSave = async () => {
- try {
+  setIsSaving(true)
+  try {
  const payload = {
  fullName: (profile.firstName || profile.lastName) ? `${profile.firstName} ${profile.lastName}`.trim() : 'Guest Guide',
  phoneE164: profile.phone,
@@ -1211,13 +1224,15 @@ export default function GuideProfilePage() {
  }
  await apiClient.put('/api/guide/profile/meta', metaPayload)
 
- toast.success("Profile saved successfully")
- setIsEditing(false)
- } catch (error: any) {
- console.error("Failed to save profile", error)
- toast.error(error?.response?.data?.message ||"Failed to save profile")
- }
- }
+  toast.success("Profile saved successfully")
+  setIsEditing(false)
+  } catch (error: any) {
+  console.error("Failed to save profile", error)
+  toast.error(error?.response?.data?.message ||"Failed to save profile")
+  } finally {
+  setIsSaving(false)
+  }
+  }
  const handleCancel = () => {
  setIsEditing(false)
  // In a real app, we might want to re-load data from backend here
@@ -1239,26 +1254,36 @@ export default function GuideProfilePage() {
  coverInputRef.current?.click()
  }
 
- const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'cover') => {
- const file = e.target.files?.[0]
- if (!file) return
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'cover') => {
+  const file = e.target.files?.[0]
+  if (!file) return
 
- // Basic size check (e.g., 2MB)
- if (file.size > 2 * 1024 * 1024) {
- toast.error("Image too large. Please select a file under 2MB")
- return
- }
+  if (file.size > 5 * 1024 * 1024) {
+  toast.error("Image too large. Please select a file under 5MB")
+  return
+  }
 
- const reader = new FileReader()
- reader.onloadend = () => {
- const base64 = reader.result as string
- setProfile(prev => ({
- ...prev,
- [type === 'avatar' ? 'avatar' : 'coverImage']: base64
- }))
- }
- reader.readAsDataURL(file)
- }
+  const reader = new FileReader()
+  reader.onloadend = () => {
+  const base64 = reader.result as string
+  setCropperState({ isOpen: true, imageSrc: base64, type })
+  }
+  reader.readAsDataURL(file)
+  e.target.value = ''
+  }
+
+  const handleCropComplete = async (croppedFile: File) => {
+  const reader = new FileReader()
+  reader.onloadend = () => {
+  const base64 = reader.result as string
+  setProfile(prev => ({
+  ...prev,
+  [cropperState.type === 'avatar' ? 'avatar' : 'coverImage']: base64
+  }))
+  setCropperState(prev => ({ ...prev, isOpen: false }))
+  }
+  reader.readAsDataURL(croppedFile)
+  }
 
  const handleLanguageAdd = () => {
  setProfile(prev => ({
@@ -1318,15 +1343,17 @@ export default function GuideProfilePage() {
  <div className="max-w-7xl mx-auto py-8 sm:py-10 px-4 sm:px-6 lg:px-8 relative z-10">
  
  {/* Profile Header */}
- <ProfileHeader
- profile={profile}
- isEditing={isEditing}
- onEdit={handleEdit}
- onSave={handleSave}
- onCancel={handleCancel}
- onAvatarChange={handleAvatarChange}
- onCoverChange={handleCoverChange}
- />
+  <ProfileHeader 
+  profile={profile} 
+  isEditing={isEditing}
+  isSaving={isSaving}
+  onEdit={handleEdit}
+  onSave={handleSave}
+  onCancel={handleCancel}
+  onAvatarChange={handleAvatarChange}
+  onCoverChange={handleCoverChange}
+  onChangeTagline={(val) => handleProfileChange('tagline', val)}
+  />
 
  {/* Stats Grid - Increased top margin for more space under profile pic */}
  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-44 sm:mt-40 mb-6">

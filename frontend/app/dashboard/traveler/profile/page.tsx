@@ -42,6 +42,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { getTravelerProfile, completeTravelerProfile, TravelerProfile } from '@/src/lib/api/travelers'
 import { travelerGetLoyaltyStatus, LoyaltyStatusResponse, LoyaltyTierType } from '@/src/lib/api/traveler'
 import LoadingOverlay from '@/src/components/ui/LoadingOverlay'
+import ImageCropperModal from '@/src/components/ui/ImageCropperModal'
 
 // ============================================================================
 // LOYALTY TIER CONFIG
@@ -132,6 +133,11 @@ export default function TravelerDashboardProfilePage() {
   const [formData, setFormData] = useState<Partial<TravelerProfile>>({})
   const [newPreference, setNewPreference] = useState('')
   const [isAdding, setIsAdding] = useState(false)
+  const [cropperState, setCropperState] = useState<{ isOpen: boolean; imageSrc: string; type: 'avatarUrl' | 'coverImageUrl' }>({
+    isOpen: false,
+    imageSrc: '',
+    type: 'avatarUrl'
+  })
 
   useEffect(() => {
     async function load() {
@@ -162,16 +168,27 @@ export default function TravelerDashboardProfilePage() {
  const file = e.target.files?.[0]
  if (!file) return
 
- if (file.size > 2 * 1024 * 1024) {
- toast.error('Image is too large (max 2MB)')
+ if (file.size > 5 * 1024 * 1024) {
+ toast.error('Image is too large (max 5MB)')
  return
  }
 
  const reader = new FileReader()
  reader.onloadend = () => {
- setFormData(prev => ({ ...prev, [type]: reader.result as string }))
+ setCropperState({ isOpen: true, imageSrc: reader.result as string, type })
  }
  reader.readAsDataURL(file)
+ e.target.value = ''
+ }
+
+ const handleCropComplete = async (croppedFile: File) => {
+ const reader = new FileReader()
+ reader.onloadend = () => {
+ const base64 = reader.result as string
+ setFormData(prev => ({ ...prev, [cropperState.type]: base64 }))
+ setCropperState(prev => ({ ...prev, isOpen: false }))
+ }
+ reader.readAsDataURL(croppedFile)
  }
 
  const handleSave = async () => {
@@ -230,7 +247,7 @@ export default function TravelerDashboardProfilePage() {
   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
   <button 
   onClick={handleCoverClick}
-  className="absolute bottom-4 right-4 flex items-center gap-2 px-4 py-2 bg-black/40 hover:bg-black/60  text-white rounded-xl shadow-lg transition-all text-xs font-black capitalize tracking-normal opacity-0 group-hover:opacity-100"
+  className="absolute bottom-4 right-4 flex items-center gap-2 px-4 py-2 bg-black/40 hover:bg-black/60  text-white rounded-xl shadow-lg transition-all text-xs font-black capitalize tracking-normal sm:opacity-0 group-hover:opacity-100"
   >
   <Camera className="w-4 h-4" />
   Change Cover
@@ -530,6 +547,14 @@ export default function TravelerDashboardProfilePage() {
   className="hidden"
   accept="image/*"
   onChange={(e) => handleFileChange(e, 'coverImageUrl')}
+  />
+  
+  <ImageCropperModal
+  isOpen={cropperState.isOpen}
+  onClose={() => setCropperState(prev => ({ ...prev, isOpen: false }))}
+  imageSrc={cropperState.imageSrc}
+  onCropComplete={handleCropComplete}
+  aspectRatio={cropperState.type === 'avatarUrl' ? 1 : 16 / 9}
   />
   </div>
   </div>
