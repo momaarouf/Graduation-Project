@@ -253,6 +253,8 @@ const TOUR_CATEGORIES = [
  { label: 'Education', value: 'education' },
 ].sort((a, b) => a.label.localeCompare(b.label));
 
+const KNOWN_CATEGORY_VALUES = new Set(TOUR_CATEGORIES.map(c => c.value));
+
 // ============================================================================
 // REUSABLE COMPONENTS
 // ============================================================================
@@ -349,8 +351,121 @@ function SearchableSelect({ value, onChange, options, placeholder ="Search...", 
 }
 
 // ============================================================================
-// MOCK DATA - INITIAL FORM STATE
+// FREE-TEXT COMBOBOX (allows typing custom value not in list)
 // ============================================================================
+
+interface FreeTextSelectProps {
+ value: string;
+ onChange: (value: string) => void;
+ options: { label: string; value: string }[];
+ placeholder?: string;
+ label?: string;
+ disabled?: boolean;
+ required?: boolean;
+}
+
+function FreeTextSelect({ value, onChange, options, placeholder = 'Type or select...', label, disabled, required }: FreeTextSelectProps) {
+ const [query, setQuery] = useState('')
+ const [inputValue, setInputValue] = useState(value)
+
+ // Keep inputValue in sync when value changes externally (e.g. on edit hydration)
+ useEffect(() => {
+ const match = options.find(o => o.value === value)
+ setInputValue(match ? match.label : value)
+ }, [value])
+
+ const filteredOptions = query === ''
+ ? options
+ : options.filter(opt => opt.label.toLowerCase().includes(query.toLowerCase()))
+
+ return (
+ <div className="w-full">
+ {label && (
+ <label className="block text-sm font-medium text-theme-secondary mb-1">
+ {label}{required && <span className="text-danger-red ml-0.5">*</span>}
+ </label>
+ )}
+ <Combobox
+ value={inputValue}
+ onChange={(val: string | null) => {
+ if (!val) return
+ // val is either an option value OR the raw typed string
+ const match = options.find(o => o.value === val || o.label.toLowerCase() === val.toLowerCase())
+ const finalValue = match ? match.value : val
+ onChange(finalValue)
+ setInputValue(match ? match.label : val)
+ }}
+ disabled={disabled}
+ >
+ {({ open }) => (
+ <div className="relative">
+ <div className="relative w-full cursor-pointer overflow-hidden rounded-lg surface-section border-2 border-theme text-left focus-within:border-primary-light dark:border-primary-dark focus-within:ring-2 focus-within:ring-primary-light dark:ring-primary-dark/20 transition-all sm:text-sm shadow-sm hover:surface-card">
+ <Combobox.Input
+ className="w-full border-none py-2.5 pl-3 pr-10 text-sm leading-5 text-theme-primary bg-transparent focus:ring-0 outline-none"
+ displayValue={() => inputValue}
+ onChange={(e) => {
+ setQuery(e.target.value)
+ setInputValue(e.target.value)
+ }}
+ onBlur={() => {
+ // On blur: if what they typed is not an exact option, use the typed text directly
+ if (inputValue && inputValue !== '') {
+ const match = options.find(o => o.label.toLowerCase() === inputValue.toLowerCase())
+ onChange(match ? match.value : inputValue)
+ }
+ }}
+ placeholder={placeholder}
+ />
+ <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+ <ChevronDown className={`h-5 w-5 text-theme-muted transition-transform duration-200 ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+ </Combobox.Button>
+ </div>
+ <Combobox.Options className="absolute z-[100] mt-1 pr-2 max-h-60 w-full overflow-auto rounded-md surface-card py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm border border-theme">
+ {filteredOptions.length === 0 && query !== '' ? (
+ <Combobox.Option
+ value={query}
+ className={({ active }) => `relative cursor-default select-none py-2 px-4 text-sm font-medium ${
+ active ? 'bg-primary-light text-white' : 'text-primary-light'
+ }`}
+ >
+ Use "{query}"
+ </Combobox.Option>
+ ) : (
+ filteredOptions.slice(0, 150).map((opt, idx) => (
+ <Combobox.Option
+ key={`${opt.value}-${idx}`}
+ className={({ active }) =>
+ `relative cursor-default select-none py-2 pl-10 pr-4 ${
+ active ? 'bg-primary-light text-white' : 'text-theme-primary'
+ }`
+ }
+ value={opt.value}
+ >
+ {({ selected, active }) => (
+ <>
+ <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+ {opt.label}
+ </span>
+ {selected ? (
+ <span className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+ active ? 'text-white' : 'text-primary-light dark:text-primary-dark'
+ }`}>
+ <CheckCircle className="h-5 w-5" aria-hidden="true" />
+ </span>
+ ) : null}
+ </>
+ )}
+ </Combobox.Option>
+ ))
+ )}
+ </Combobox.Options>
+ </div>
+ )}
+ </Combobox>
+ </div>
+ )
+}
+
 
 const MOCK_TOUR_DATA_FOR_EDIT: TourFormData = {
  title: '',
@@ -508,18 +623,20 @@ function BasicInfoSection({ formData, onChange }: BasicInfoSectionProps) {
  </div>
 
  {/* Category */}
-  <div>
-  <label className="block text-sm font-medium text-theme-secondary mb-1">
-  Category <span className="text-danger-red">*</span>
-  </label>
-  <select
-  value={formData.category}
-  onChange={(e) => onChange('category', e.target.value)}
-  className=" w-full px-4 py-3 surface-section border-2 border-theme rounded-2xl text-theme-primary focus:outline-none focus:border-primary-light dark:border-primary-dark focus:ring-4 focus:ring-primary-light/10 dark:ring-primary-dark/5 transition-all shadow-sm hover:surface-card dark:hover:surface-card font-bold"
-  >
-  {TOUR_CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-  </select>
-  </div>
+ <div>
+ <label className="block text-sm font-medium text-theme-secondary mb-1">
+ Category <span className="text-danger-red">*</span>
+ </label>
+ <FreeTextSelect
+ value={formData.category}
+ onChange={(val) => onChange('category', val)}
+ options={TOUR_CATEGORIES}
+ placeholder="Select or type a category"
+ />
+ {!KNOWN_CATEGORY_VALUES.has(formData.category) && formData.category && (
+ <p className="text-[11px] text-primary-light mt-1 font-medium">✓ Custom category: "{formData.category}"</p>
+ )}
+ </div>
 
  {/* Tags */}
  <div>
@@ -573,12 +690,12 @@ function TourLocationSection({ formData, onChange, mapId }: { formData: TourForm
  />
  </div>
  <div>
- <SearchableSelect
+ <FreeTextSelect
  label="City"
  value={formData.city}
  onChange={(val) => onChange('city', val)}
  options={cityOptions}
- placeholder={formData.country ?"Select city" :"Select country first"}
+ placeholder={formData.country ? 'Type or select city' : 'Select country first'}
  disabled={!formData.country}
  />
  </div>
