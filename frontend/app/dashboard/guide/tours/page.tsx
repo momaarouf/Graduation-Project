@@ -119,7 +119,10 @@ export default function GuideToursPage() {
  useEffect(() => { fetchTours() }, [])
 
  const filteredTours = useMemo(() => {
- return tours.filter(t => {
+ return tours.map(t => ({
+ ...t,
+ media: t.media?.filter(m => !m.url?.startsWith('data:'))
+ })).filter(t => {
  if (filterStatus !== 'ALL' && t.status !== filterStatus) return false
  if (searchTerm) {
  const term = searchTerm.toLowerCase()

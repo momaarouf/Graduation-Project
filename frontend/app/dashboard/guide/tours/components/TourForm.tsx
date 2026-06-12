@@ -52,6 +52,7 @@ import {
  getGuideProfile,
  getGuideTour,
  addTourMedia,
+ deleteTourMedia,
  submitTourForReview,
  withdrawTourFromReview
 } from '@/src/lib/api/tours'
@@ -1279,6 +1280,10 @@ function MediaSection({ formData, onChange }: MediaSectionProps) {
  }
 
  const removeMedia = (index: number) => {
+ const item = formData.gallery[index]
+ if (item && !item.id.startsWith('temp-')) {
+ setDeletedMediaIds(prev => [...prev, parseInt(item.id)])
+ }
  onChange('gallery', formData.gallery.filter((_, i) => i !== index))
  }
 
@@ -2023,9 +2028,11 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  ...initialData
  } as any;
 
- // Map backend 'media' to frontend 'gallery'
+ // Map backend 'media' to frontend 'gallery' (Ignore old base64 strings)
  if (initialData && (initialData as any).media) {
- base.gallery = (initialData as any).media.map((m: any) => ({
+ base.gallery = (initialData as any).media
+ .filter((m: any) => !m.url?.startsWith('data:'))
+ .map((m: any) => ({
  id: m.id.toString(),
  type: (m.mediaType || 'IMAGE').toLowerCase() === 'video' ? 'video' : 'image',
  url: m.url,
@@ -2173,6 +2180,7 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  const [isSaving, setIsSaving] = useState(false)
  const [isLoadingProfile, setIsLoadingProfile] = useState(true)
  const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit')
+ const [deletedMediaIds, setDeletedMediaIds] = useState<number[]>([])
 
  useEffect(() => {
  const fetchProfileData = async () => {
@@ -2410,6 +2418,14 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  toast.success('Photos saved!', { id: 'media-upload' })
  }
 
+ // 3. Delete removed media from backend
+ if (deletedMediaIds.length > 0) {
+ for (const mediaId of deletedMediaIds) {
+ await deleteTourMedia(mediaId).catch(console.error)
+ }
+ setDeletedMediaIds([])
+ }
+
  router.push('/dashboard/guide/tours')
  } catch (err: any) {
  toast.error(err.response?.data?.message || 'Failed to save tour')
@@ -2504,8 +2520,17 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  })
  }
  }
+ }
 
- // 3. Submit for review
+ // 3. Delete removed media from backend
+ if (deletedMediaIds.length > 0) {
+ for (const mediaId of deletedMediaIds) {
+ await deleteTourMedia(mediaId).catch(console.error)
+ }
+ setDeletedMediaIds([])
+ }
+
+ // 4. Submit for review
  toast.loading('Submitting for review...', { id: 'submit-review' })
  await submitTourForReview(tour.id)
  toast.success('Tour sent for review', { id: 'submit-review' })

@@ -85,7 +85,7 @@ export default function EditTourPage({ params }: { params: Promise<{ id: string 
  lat: tour.meetingLatitude,
  lng: tour.meetingLongitude
  },
- gallery: tour.media?.map(m => ({
+ gallery: tour.media?.filter(m => !m.url?.startsWith('data:')).map(m => ({
  id: m.id.toString(),
  type: m.mediaType.toLowerCase(),
  url: m.url,
