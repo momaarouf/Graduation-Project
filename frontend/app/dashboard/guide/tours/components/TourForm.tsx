@@ -902,6 +902,7 @@ function ScheduleSection({ formData, onChange }: ScheduleSectionProps) {
  min="0"
  max="24"
  value={formData.durationHours === undefined ? '' : formData.durationHours}
+ onFocus={(e) => e.target.select()}
  onChange={(e) => {
  const parsed = parseInt(e.target.value, 10);
  onChange('durationHours', isNaN(parsed) ? 0 : Math.max(0, parsed));
@@ -918,6 +919,7 @@ function ScheduleSection({ formData, onChange }: ScheduleSectionProps) {
  min="0"
  max="59"
  value={formData.durationMinutes === undefined ? '' : formData.durationMinutes}
+ onFocus={(e) => e.target.select()}
  onChange={(e) => {
  const parsed = parseInt(e.target.value, 10);
  onChange('durationMinutes', isNaN(parsed) ? 0 : Math.min(59, Math.max(0, parsed)));
