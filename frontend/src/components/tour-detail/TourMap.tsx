@@ -34,24 +34,36 @@ const createCustomIcon = (color: string) => {
 }
 
 /**
- * SMALL DOT ICON - ROUTE STOP
+ * NUMBERED ROUTE STOP ICON
  */
-const createStopIcon = (color: string) => {
+const createNumberedIcon = (number: number, color: string = '#4f46e5') => {
  if (typeof window === 'undefined') return undefined;
  return L.divIcon({
  html: renderToString(
- <div style={{ 
- width: '12px', 
- height: '12px', 
- backgroundColor: color,
+ <div style={{ position: 'relative', width: '44px', height: '44px' }}>
+ {/* Number badge — positioned top-right, overlapping pin top */}
+ <div style={{
+ position: 'absolute', top: 0, right: 0,
+ width: '22px', height: '22px',
+ background: color,
+ border: '2px solid white',
  borderRadius: '50%',
- border: '2px solid rgba(37, 99, 235, 0.1)',
- boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
- }} />
+ display: 'flex', alignItems: 'center', justifyContent: 'center',
+ fontSize: '10px', fontWeight: 'bold', color: 'white',
+ boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+ zIndex: 10
+ }}>
+ {number}
+ </div>
+ {/* Pin icon — sits below badge, tip at very bottom */}
+ <div style={{ position: 'absolute', top: '12px', left: '0px' }}>
+ <MapPin style={{ width: '32px', height: '32px', color, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} fill="white" />
+ </div>
+ </div>
  ),
- className: 'custom-map-stop',
- iconSize: [12, 12],
- iconAnchor: [6, 6]
+ className: 'custom-route-pin',
+ iconSize: [44, 44],
+ iconAnchor: [16, 44]
  })
 }
 
@@ -108,7 +120,6 @@ export default function TourMap({
 }: TourMapProps) {
  // Memoize icons to avoid re-rendering
  const pinIcon = useMemo(() => createCustomIcon('#2563eb'), []) // Blue-600
- const stopIcon = useMemo(() => createStopIcon('#4f46e5'), []) // Indigo-600
  
  // Robust Validation: Handle old tours with missing coordinates
  const isValidMeetingPoint = meetingPoint && typeof meetingPoint.lat === 'number' && typeof meetingPoint.lng === 'number' && !isNaN(meetingPoint.lat) && !isNaN(meetingPoint.lng);
@@ -181,7 +192,7 @@ export default function TourMap({
  
  {/* Stops along the way */}
  {route.map((wp, idx) => (
- <Marker key={wp.id} position={[wp.latitude, wp.longitude]} icon={stopIcon}>
+ <Marker key={wp.id} position={[wp.latitude, wp.longitude]} icon={createNumberedIcon(idx + 1) || new L.Icon.Default()}>
  <Popup className="custom-popup">
  <div className="p-1">
  <span className="text-[10px] font-bold text-indigo-600 capitalize tracking-normal block mb-0.5">
