@@ -7,50 +7,76 @@ import { renderToString } from 'react-dom/server'
 import { toast } from 'react-hot-toast'
 
 /**
- * COMPONENT TO UPDATE MAP VIEW SAFELY
+ * AUTO-FIT BOUNDS: zooms map to show all stops, or pans to single stop.
+ * Replaces the old MapUpdater which only tracked the first point.
  */
-function MapUpdater({ center }: { center: [number, number] }) {
+function FitBoundsController({ path, defaultCenter }: { path: [number, number][], defaultCenter: [number, number] }) {
   const map = useMap()
-  const prevCenter = useRef<[number, number]>(center)
+  const prevLengthRef = useRef(0)
 
   useEffect(() => {
-    if (center[0] !== 0 && center[1] !== 0 && (prevCenter.current[0] !== center[0] || prevCenter.current[1] !== center[1])) {
-      const timer = setTimeout(() => {
+    if (path.length >= 2) {
+      const bounds = L.latLngBounds(path)
+      setTimeout(() => {
         try {
-          if (map) {
-            map.invalidateSize()
-            map.setView(center)
-            prevCenter.current = center
-          }
-        } catch (e) {
-          console.warn('Route map update deferred:', e)
-        }
-      }, 100)
-      return () => clearTimeout(timer)
+          map.invalidateSize()
+          map.fitBounds(bounds, { padding: [60, 60], maxZoom: 16, animate: true })
+          prevLengthRef.current = path.length
+        } catch (e) {}
+      }, 120)
+    } else if (path.length === 1 && path.length !== prevLengthRef.current) {
+      setTimeout(() => {
+        try {
+          map.invalidateSize()
+          map.setView(path[0], 14, { animate: true })
+          prevLengthRef.current = 1
+        } catch (e) {}
+      }, 120)
     }
-  }, [center, map])
+  }, [path, map])
+
   return null
 }
 
 /**
  * CUSTOM LEAFLET ICON - NUMBERED PIN
+ * 
+ * Layout (no CSS offset tricks — pure Leaflet anchor math):
+ *  - Badge circle: 28x28, hangs 12px above and 12px right of the pin
+ *  - MapPin SVG: 32x32, tip at bottom-center
+ *  - Total container: 44px wide, 44px tall
+ *  - Pin starts at x=0, y=12 inside the container
+ *  - Pin tip is at x=16, y=44 → iconAnchor: [16, 44]
  */
 const createNumberedIcon = (number: number, color: string = '#2563eb') => {
   if (typeof window === 'undefined') return null;
   try {
     return L.divIcon({
       html: renderToString(
-        <div className="relative -top-6 -left-3 transition-transform hover:scale-110 active:scale-95 duration-200">
-          <div className="absolute -top-3 -right-3 w-7 h-7 bg-primary-light border-2 border-theme rounded-full flex items-center justify-center text-[11px] font-bold text-white shadow-2xl z-[10] ring-4 ring-primary-light dark:ring-primary-dark/20">
+        <div style={{ position: 'relative', width: '44px', height: '44px' }}>
+          {/* Number badge — positioned top-right, overlapping pin top */}
+          <div style={{
+            position: 'absolute', top: 0, right: 0,
+            width: '22px', height: '22px',
+            background: color,
+            border: '2px solid white',
+            borderRadius: '50%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '10px', fontWeight: 'bold', color: 'white',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+            zIndex: 10
+          }}>
             {number}
           </div>
-          <MapPin className="w-8 h-8 drop-shadow-lg" style={{ color }} fill="white" />
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-1.5 bg-black/20 rounded-full blur-[2px]" />
+          {/* Pin icon — sits below badge, tip at very bottom */}
+          <div style={{ position: 'absolute', top: '12px', left: '0px' }}>
+            <MapPin style={{ width: '32px', height: '32px', color, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} fill="white" />
+          </div>
         </div>
       ),
       className: 'custom-route-pin',
-      iconSize: [32, 32],
-      iconAnchor: [16, 32]
+      iconSize: [44, 44],
+      iconAnchor: [16, 44]  // bottom-center of the 32px pin (left=0+16, top=12+32)
     })
   } catch (e) {
     return null
@@ -235,7 +261,7 @@ export default function RouteBuilderMap({
         ref={setMap}
       >
         <ZoomControl position="bottomleft" />
-        <MapUpdater center={centerPoint} />
+        <FitBoundsController path={path} defaultCenter={centerPoint} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"

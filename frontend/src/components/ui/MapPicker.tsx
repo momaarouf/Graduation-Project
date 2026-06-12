@@ -36,25 +36,43 @@ function MapUpdater({ center, zoom }: { center: [number, number]; zoom: number }
 
 /**
  * CUSTOM LEAFLET ICON - PIN
+ *
+ * Uses inline styles (not Tailwind) so renderToString produces correct
+ * positioning without depending on a running Tailwind stylesheet.
+ * iconAnchor: [16, 44] → tip of the 32px pin sits exactly on the coordinate.
  */
 const createCustomIcon = (color: string, label?: string) => {
   if (typeof window === 'undefined') return null;
   try {
     return L.divIcon({
       html: renderToString(
-        <div className="relative -top-6 -left-3 animate-bounce-slow">
-          {label ? (
-            <div className="absolute -top-3 -right-3 w-5 h-5 bg-primary-light border-2 border-theme rounded-full flex items-center justify-center text-[8px] font-bold text-white shadow-md z-[10]">
+        <div style={{ position: 'relative', width: '44px', height: '44px' }}>
+          {label && (
+            <div style={{
+              position: 'absolute', top: 0, right: 0,
+              width: '20px', height: '20px',
+              background: color,
+              border: '2px solid white',
+              borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '9px', fontWeight: 'bold', color: 'white',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+              zIndex: 10
+            }}>
               {label}
             </div>
-          ) : null}
-          <MapPin className="w-8 h-8 drop-shadow-lg" style={{ color }} fill="white" />
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-1.5 bg-black/20 rounded-full blur-[2px]" />
+          )}
+          <div style={{ position: 'absolute', top: '12px', left: '0px' }}>
+            <MapPin
+              style={{ width: '32px', height: '32px', color, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}
+              fill="white"
+            />
+          </div>
         </div>
       ),
       className: 'custom-map-pin',
-      iconSize: [32, 32],
-      iconAnchor: [16, 32]
+      iconSize: [44, 44],
+      iconAnchor: [16, 44]  // tip of the 32px pin: left(0)+16=16, top(12)+32=44
     })
   } catch (e) {
     return null

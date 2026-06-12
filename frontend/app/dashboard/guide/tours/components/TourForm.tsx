@@ -111,7 +111,8 @@ interface TourFormData {
  gallery: {
  id: string
  type: 'image' | 'video'
- url: string
+ url: string // preview URL (local blob or Cloudinary)
+ file?: File // original File object — only set for new unsaved media
  thumbnail?: string
  caption: string
  }[]
@@ -1249,13 +1250,10 @@ interface MediaSectionProps {
 function MediaSection({ formData, onChange }: MediaSectionProps) {
  const [uploading, setUploading] = useState(false)
 
- const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
  const files = e.target.files
  if (!files || files.length === 0) return
 
- setUploading(true)
- const uploadToastId = toast.loading(`Uploading ${files.length} file(s) to Cloudinary...`)
- try {
  const newMedia = []
  for (let i = 0; i < files.length; i++) {
  const file = files[i]
@@ -1265,25 +1263,19 @@ function MediaSection({ formData, onChange }: MediaSectionProps) {
  continue
  }
 
- // Upload directly to Cloudinary — get back a secure HTTPS URL
- const secureUrl = await uploadToCloudinary(file, 'tourongo/tours')
-
+ // Create a local object URL for instant preview — Cloudinary upload happens on Save
+ const previewUrl = URL.createObjectURL(file)
  newMedia.push({
  id: `temp-${Date.now()}-${i}`,
  type: file.type.startsWith('video') ? 'video' as const : 'image' as const,
- url: secureUrl, // ✅ Real Cloudinary URL, not base64
+ url: previewUrl,
+ file, // store the original File so we can upload later
  caption: ''
  })
  }
  onChange('gallery', [...formData.gallery, ...newMedia])
- toast.success(`${newMedia.length} file(s) uploaded!`, { id: uploadToastId })
- } catch (err: any) {
- toast.error(err?.message || 'Failed to upload image to Cloudinary', { id: uploadToastId })
- } finally {
- setUploading(false)
- // Reset the input so the same file can be re-selected if needed
+ // Reset input so the same file can be re-selected if needed
  e.target.value = ''
- }
  }
 
  const removeMedia = (index: number) => {
@@ -2078,6 +2070,18 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  }
  }
 
+ // ✅ Fix: Explicitly hydrate meetingPoint from flat backend fields
+ // The ...initialData spread above does NOT populate the nested meetingPoint object
+ if (initialData) {
+ base.meetingPoint = {
+ name: (initialData as any).meetingPointName || '',
+ address: (initialData as any).meetingPointAddress || '',
+ lat: (initialData as any).meetingLatitude ?? undefined,
+ lng: (initialData as any).meetingLongitude ?? undefined,
+ instructions: (initialData as any).meetingPointInstructions || '',
+ }
+ }
+
  // Map instantBook to bookingMode
  if (initialData && (initialData as any).instantBook !== undefined) {
  base.bookingMode = (initialData as any).instantBook ? 'instant' : 'request';
@@ -2085,6 +2089,8 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  }
 
  // Parse JSON strings to objects/arrays
+ // ✅ Fix: Parse dynamicPricing FIRST before the forEach, because
+ // the forEach reads from `initialData` which still has the raw string
  const jsonFields = [
  'halalDetails', 'dynamicPricing', 'itinerary', 'inclusions',
  'exclusions', 'requirements', 'whatToBring', 'tags', 'languages'
@@ -2094,15 +2100,18 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  const val = (initialData as any)?.[field];
  if (typeof val === 'string' && val.trim()) {
  try {
- base[field] = JSON.parse(val);
+ const parsed = JSON.parse(val)
+ base[field] = parsed
+ // For dynamicPricing, make sure enabled flag is preserved
+ if (field === 'dynamicPricing' && parsed && typeof parsed === 'object') {
+ base[field] = { ...parsed }
+ }
  } catch (e) {
  console.error(`Failed to parse ${field} from backend:`, e);
  }
  } else if (val && typeof val === 'object') {
  base[field] = val;
  }
-
- // Keep dynamic pricing as stored
  if (field === 'dynamicPricing' && base[field]) {
  base[field] = { ...base[field] };
  }
@@ -2369,30 +2378,36 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  let tourResponse
  if (isEditing && tourId) {
  tourResponse = await updateTour(parseInt(tourId), payload)
- toast.success('Tour updated successfully')
+ toast.success('Tour saved as draft ✓')
  } else {
  tourResponse = await createTour(payload)
- toast.success('Tour created successfully')
+ toast.success('Tour saved as draft ✓')
  }
 
  const tour = tourResponse
 
- // 2. Upload media
- if (formData.gallery.length > 0) {
- toast.loading('Uploading media...', { id: 'media-upload' })
+ // 2. Upload new media to Cloudinary, then save URL to backend
+ const newItems = formData.gallery.filter(m => m.id.startsWith('temp-'))
+ if (newItems.length > 0) {
+ toast.loading('Saving photos...', { id: 'media-upload' })
  for (let i = 0; i < formData.gallery.length; i++) {
  const m = formData.gallery[i]
- // ONLY upload if it's a new media item (temp ID)
- if (m.id.startsWith('temp-')) {
+ if (!m.id.startsWith('temp-')) continue
+
+ let finalUrl = m.url
+ // If we have the original File object, upload it now
+ if (m.file) {
+ finalUrl = await uploadToCloudinary(m.file, 'tourongo/tours')
+ }
+
  await addTourMedia(tour.id, {
- url: m.url,
+ url: finalUrl,
  mediaType: m.type.toUpperCase(),
  displayOrder: i,
  caption: m.caption
  })
  }
- }
- toast.success('Media uploaded', { id: 'media-upload' })
+ toast.success('Photos saved!', { id: 'media-upload' })
  }
 
  router.push('/dashboard/guide/tours')
@@ -2469,18 +2484,24 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
 
  const tour = tourResponse
 
- // 2. Upload media
- if (formData.gallery.length > 0) {
+ // 2. Upload new media to Cloudinary, then save URL to backend
+ const newItems2 = formData.gallery.filter(m => m.id.startsWith('temp-'))
+ if (newItems2.length > 0) {
  for (let i = 0; i < formData.gallery.length; i++) {
  const m = formData.gallery[i]
- if (m.id.startsWith('temp-')) {
+ if (!m.id.startsWith('temp-')) continue
+
+ let finalUrl = m.url
+ if (m.file) {
+ finalUrl = await uploadToCloudinary(m.file, 'tourongo/tours')
+ }
+
  await addTourMedia(tour.id, {
- url: m.url,
+ url: finalUrl,
  mediaType: m.type.toUpperCase(),
  displayOrder: i,
  caption: m.caption
  })
- }
  }
  }
 
