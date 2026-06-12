@@ -1306,7 +1306,13 @@ function MediaSection({ formData, onChange, onRemoveExistingMedia }: MediaSectio
  <div key={item.id} className="flex flex-col gap-2">
  <div className="relative aspect-video rounded-xl overflow-hidden border border-theme surface-section group">
  {item.type === 'image' ? (
- <Image src={item.url} alt={`Media ${index}`} fill className="object-cover" />
+ <Image 
+ src={item.url} 
+ alt={`Media ${index}`} 
+ fill 
+ className="object-cover" 
+ unoptimized={item.url.startsWith('blob:') || item.url.startsWith('data:')} 
+ />
  ) : (
  <video
  src={item.url}
