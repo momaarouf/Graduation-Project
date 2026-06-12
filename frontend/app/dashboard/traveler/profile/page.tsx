@@ -43,6 +43,7 @@ import { getTravelerProfile, completeTravelerProfile, TravelerProfile } from '@/
 import { travelerGetLoyaltyStatus, LoyaltyStatusResponse, LoyaltyTierType } from '@/src/lib/api/traveler'
 import LoadingOverlay from '@/src/components/ui/LoadingOverlay'
 import ImageCropperModal from '@/src/components/ui/ImageCropperModal'
+import apiClient from '@/src/lib/api/client'
 
 // ============================================================================
 // LOYALTY TIER CONFIG
@@ -131,13 +132,14 @@ export default function TravelerDashboardProfilePage() {
   const [loading, setLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState<Partial<TravelerProfile>>({})
-  const [newPreference, setNewPreference] = useState('')
-  const [isAdding, setIsAdding] = useState(false)
-  const [cropperState, setCropperState] = useState<{ isOpen: boolean; imageSrc: string; type: 'avatarUrl' | 'coverImageUrl' }>({
-    isOpen: false,
-    imageSrc: '',
-    type: 'avatarUrl'
-  })
+   const [newPreference, setNewPreference] = useState('')
+   const [isAdding, setIsAdding] = useState(false)
+   const [cropperState, setCropperState] = useState<{ isOpen: boolean; imageSrc: string; type: 'avatarUrl' | 'coverImageUrl' }>({
+     isOpen: false,
+     imageSrc: '',
+     type: 'avatarUrl'
+   })
+   const [pendingFiles, setPendingFiles] = useState<{ avatarUrl?: File, coverImageUrl?: File }>({})
 
   useEffect(() => {
     async function load() {
@@ -164,46 +166,66 @@ export default function TravelerDashboardProfilePage() {
  const handleAvatarClick = () => avatarInputRef.current?.click()
  const handleCoverClick = () => coverInputRef.current?.click()
 
- const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatarUrl' | 'coverImageUrl') => {
- const file = e.target.files?.[0]
- if (!file) return
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'avatarUrl' | 'coverImageUrl') => {
+  const file = e.target.files?.[0]
+  if (!file) return
 
- if (file.size > 5 * 1024 * 1024) {
- toast.error('Image is too large (max 5MB)')
- return
- }
+  if (file.size > 5 * 1024 * 1024) {
+  toast.error('Image is too large (max 5MB)')
+  return
+  }
 
- const reader = new FileReader()
- reader.onloadend = () => {
- setCropperState({ isOpen: true, imageSrc: reader.result as string, type })
- }
- reader.readAsDataURL(file)
- e.target.value = ''
- }
+  const url = URL.createObjectURL(file)
+  setCropperState({ isOpen: true, imageSrc: url, type })
+  e.target.value = ''
+  }
 
- const handleCropComplete = async (croppedFile: File) => {
- const reader = new FileReader()
- reader.onloadend = () => {
- const base64 = reader.result as string
- setFormData(prev => ({ ...prev, [cropperState.type]: base64 }))
- setCropperState(prev => ({ ...prev, isOpen: false }))
- }
- reader.readAsDataURL(croppedFile)
- }
+  const handleCropComplete = async (croppedFile: File) => {
+  const url = URL.createObjectURL(croppedFile)
+  setFormData(prev => ({ ...prev, [cropperState.type]: url }))
+  setPendingFiles(prev => ({ ...prev, [cropperState.type]: croppedFile }))
+  setCropperState(prev => ({ ...prev, isOpen: false }))
+  }
 
- const handleSave = async () => {
- try {
- setLoading(true)
- const updated = await completeTravelerProfile(formData)
- setProfile(updated)
- setIsEditing(false)
- toast.success('Profile updated successfully')
- } catch (err) {
- toast.error('Failed to update profile')
- } finally {
- setLoading(false)
- }
- }
+  const handleSave = async () => {
+  try {
+  setLoading(true)
+
+  let finalAvatarUrl = formData.avatarUrl
+  let finalCoverUrl = formData.coverImageUrl
+
+  const uploadToCloudinary = async (file: File) => {
+  const res = await apiClient.get('/api/cloudinary/signature')
+  const { signature, timestamp, apiKey, cloudName } = res.data || res
+  const cloudFormData = new FormData()
+  cloudFormData.append('file', file)
+  cloudFormData.append('api_key', apiKey)
+  cloudFormData.append('timestamp', timestamp)
+  cloudFormData.append('signature', signature)
+  cloudFormData.append('folder', 'tourongo/profiles')
+  const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: 'POST', body: cloudFormData })
+  if (!uploadRes.ok) throw new Error("Cloudinary upload failed")
+  const data = await uploadRes.json()
+  return data.secure_url
+  }
+
+  if (pendingFiles.avatarUrl) finalAvatarUrl = await uploadToCloudinary(pendingFiles.avatarUrl)
+  if (pendingFiles.coverImageUrl) finalCoverUrl = await uploadToCloudinary(pendingFiles.coverImageUrl)
+
+  const payloadToSave = { ...formData, avatarUrl: finalAvatarUrl, coverImageUrl: finalCoverUrl }
+
+  const updated = await completeTravelerProfile(payloadToSave)
+  setProfile(updated)
+  setFormData(updated)
+  setPendingFiles({})
+  setIsEditing(false)
+  toast.success('Profile updated successfully')
+  } catch (err) {
+  toast.error('Failed to update profile')
+  } finally {
+  setLoading(false)
+  }
+  }
 
  const handleAddPreference = () => {
  if (!newPreference.trim()) return

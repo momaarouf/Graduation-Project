@@ -1070,6 +1070,7 @@ export default function GuideProfilePage() {
   imageSrc: '',
   type: 'avatar'
   })
+ const [pendingFiles, setPendingFiles] = useState<{ avatar?: File, cover?: File }>({})
 
  const handlePortfolioToggle = async (tourId: number, currentStatus: boolean) => {
  try {
@@ -1200,30 +1201,53 @@ export default function GuideProfilePage() {
  const handleSave = async () => {
   setIsSaving(true)
   try {
- const payload = {
- fullName: (profile.firstName || profile.lastName) ? `${profile.firstName} ${profile.lastName}`.trim() : 'Guest Guide',
- phoneE164: profile.phone,
- country: profile.country,
- city: profile.location,
- bio: profile.bio,
- expertise: profile.expertise,
- languages: profile.languages.map(l => ({ name: l.language, proficiency: l.proficiency }))
- }
- 
- // Save base profile data
- await apiClient.post('/api/guide/profile/complete', payload)
- 
- // Save professional branding metadata
- const metaPayload = {
- tagline: profile.tagline,
- avatarUrl: profile.avatar,
- coverImageUrl: profile.coverImage,
- socialLinksJson: JSON.stringify(profile.socialLinks),
- responseRate: profile.responseRate,
- responseTimeText: profile.responseTimeText
- }
- await apiClient.put('/api/guide/profile/meta', metaPayload)
+  let finalAvatar = profile.avatar
+  let finalCover = profile.coverImage
 
+  // Upload to Cloudinary if new images exist
+  const uploadToCloudinary = async (file: File) => {
+  const res = await apiClient.get('/api/cloudinary/signature')
+  const { signature, timestamp, apiKey, cloudName } = res.data || res
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('api_key', apiKey)
+  formData.append('timestamp', timestamp)
+  formData.append('signature', signature)
+  formData.append('folder', 'tourongo/profiles')
+  const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: 'POST', body: formData })
+  if (!uploadRes.ok) throw new Error("Cloudinary upload failed")
+  const data = await uploadRes.json()
+  return data.secure_url
+  }
+
+  if (pendingFiles.avatar) finalAvatar = await uploadToCloudinary(pendingFiles.avatar)
+  if (pendingFiles.cover) finalCover = await uploadToCloudinary(pendingFiles.cover)
+
+  const payload = {
+  fullName: (profile.firstName || profile.lastName) ? `${profile.firstName} ${profile.lastName}`.trim() : 'Guest Guide',
+  phoneE164: profile.phone,
+  country: profile.country,
+  city: profile.location,
+  bio: profile.bio,
+  expertise: profile.expertise,
+  languages: profile.languages.map(l => ({ name: l.language, proficiency: l.proficiency }))
+  }
+  
+  // Save base profile data
+  await apiClient.post('/api/guide/profile/complete', payload)
+  
+  // Save professional branding metadata
+  const metaPayload = {
+  tagline: profile.tagline,
+  avatarUrl: finalAvatar,
+  coverImageUrl: finalCover,
+  socialLinksJson: JSON.stringify(profile.socialLinks),
+  responseRate: profile.responseRate,
+  responseTimeText: profile.responseTimeText
+  }
+  await apiClient.put('/api/guide/profile/meta', metaPayload)
+
+  setPendingFiles({})
   toast.success("Profile saved successfully")
   setIsEditing(false)
   } catch (error: any) {
@@ -1233,6 +1257,7 @@ export default function GuideProfilePage() {
   setIsSaving(false)
   }
   }
+
  const handleCancel = () => {
  setIsEditing(false)
  // In a real app, we might want to re-load data from backend here
@@ -1263,26 +1288,22 @@ export default function GuideProfilePage() {
   return
   }
 
-  const reader = new FileReader()
-  reader.onloadend = () => {
-  const base64 = reader.result as string
-  setCropperState({ isOpen: true, imageSrc: base64, type })
-  }
-  reader.readAsDataURL(file)
+  const url = URL.createObjectURL(file)
+  setCropperState({ isOpen: true, imageSrc: url, type })
   e.target.value = ''
   }
 
   const handleCropComplete = async (croppedFile: File) => {
-  const reader = new FileReader()
-  reader.onloadend = () => {
-  const base64 = reader.result as string
+  const url = URL.createObjectURL(croppedFile)
   setProfile(prev => ({
   ...prev,
-  [cropperState.type === 'avatar' ? 'avatar' : 'coverImage']: base64
+  [cropperState.type === 'avatar' ? 'avatar' : 'coverImage']: url
+  }))
+  setPendingFiles(prev => ({
+  ...prev,
+  [cropperState.type === 'avatar' ? 'avatar' : 'cover']: croppedFile
   }))
   setCropperState(prev => ({ ...prev, isOpen: false }))
-  }
-  reader.readAsDataURL(croppedFile)
   }
 
  const handleLanguageAdd = () => {
