@@ -1246,9 +1246,10 @@ function PricingSection({ formData, onChange }: PricingSectionProps) {
 interface MediaSectionProps {
  formData: TourFormData
  onChange: (field: string, value: any) => void
+ onRemoveExistingMedia: (id: string) => void
 }
 
-function MediaSection({ formData, onChange }: MediaSectionProps) {
+function MediaSection({ formData, onChange, onRemoveExistingMedia }: MediaSectionProps) {
  const [uploading, setUploading] = useState(false)
 
  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1282,7 +1283,7 @@ function MediaSection({ formData, onChange }: MediaSectionProps) {
  const removeMedia = (index: number) => {
  const item = formData.gallery[index]
  if (item && !item.id.startsWith('temp-')) {
- setDeletedMediaIds(prev => [...prev, parseInt(item.id)])
+ onRemoveExistingMedia(item.id)
  }
  onChange('gallery', formData.gallery.filter((_, i) => i !== index))
  }
@@ -2656,7 +2657,11 @@ export default function TourForm({ initialData, isEditing, tourId }: TourFormPro
  <BasicInfoSection formData={formData} onChange={handleChange} />
  <TourLocationSection formData={formData} onChange={handleChange} />
  <ItinerarySection formData={formData} onChange={handleChange} />
- <MediaSection formData={formData} onChange={handleChange} />
+ <MediaSection 
+  formData={formData} 
+  onChange={handleChange} 
+  onRemoveExistingMedia={(id) => setDeletedMediaIds(prev => [...prev, parseInt(id)])} 
+ />
  <CapacitySection formData={formData} onChange={handleChange} />
  <ScheduleSection formData={formData} onChange={handleChange} />
  <PricingSection formData={formData} onChange={handleChange} />
