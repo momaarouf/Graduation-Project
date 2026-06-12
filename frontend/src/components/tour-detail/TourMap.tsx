@@ -10,19 +10,26 @@ import { TourMapPointResponse } from '@/src/lib/types/tour.types'
 
 /**
  * CUSTOM LEAFLET ICON - PIN
- * Uses Lucide MapPin icon with our themed colors
+ * Uses inline styles (not Tailwind) so renderToString produces correct
+ * positioning without depending on a running Tailwind stylesheet.
+ * iconAnchor: [16, 44] → tip of the 32px pin sits exactly on the coordinate.
  */
 const createCustomIcon = (color: string) => {
+ if (typeof window === 'undefined') return null;
  return L.divIcon({
  html: renderToString(
- <div className="relative -top-6 -left-3 animate-bounce-slow">
- <MapPin className="w-8 h-8 drop-shadow-lg" style={{ color }} fill="white" />
- <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-1.5 bg-black/20 rounded-lg blur-[2px]" />
+ <div style={{ position: 'relative', width: '44px', height: '44px' }}>
+ <div style={{ position: 'absolute', top: '12px', left: '0px' }}>
+ <MapPin
+ style={{ width: '32px', height: '32px', color, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}
+ fill="white"
+ />
+ </div>
  </div>
  ),
  className: 'custom-map-pin',
- iconSize: [32, 32],
- iconAnchor: [16, 32]
+ iconSize: [44, 44],
+ iconAnchor: [16, 44]  // tip of the 32px pin: left(0)+16=16, top(12)+32=44
  })
 }
 
@@ -30,9 +37,17 @@ const createCustomIcon = (color: string) => {
  * SMALL DOT ICON - ROUTE STOP
  */
 const createStopIcon = (color: string) => {
+ if (typeof window === 'undefined') return null;
  return L.divIcon({
  html: renderToString(
- <div className="w-3 h-3 rounded-lg border-2 border-primary-light/10 dark:border-primary-dark/10 shadow-sm" style={{ backgroundColor: color }} />
+ <div style={{ 
+ width: '12px', 
+ height: '12px', 
+ backgroundColor: color,
+ borderRadius: '50%',
+ border: '2px solid rgba(37, 99, 235, 0.1)',
+ boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+ }} />
  ),
  className: 'custom-map-stop',
  iconSize: [12, 12],
