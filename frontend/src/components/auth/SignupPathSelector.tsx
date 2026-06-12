@@ -104,7 +104,7 @@ function PathCard({
 
  <ul className="mb-10 space-y-3">
  {features.map((feature, i) => (
- <li key={i} className="flex items-center gap-3 text-[10px] font-bold text-theme-secondary capitalize tracking-normal">
+ <li key={i} className="flex items-center gap-3 text-xs font-bold text-theme-secondary capitalize tracking-normal">
  <div className="w-1.5 h-1.5 rounded-full bg-primary-light" />
  {feature}
  </li>
@@ -116,7 +116,7 @@ function PathCard({
  <button
  onClick={onSelect}
  className={`
- w-full py-4 px-6 rounded-2xl font-bold text-[10px] capitalize tracking-normal transition-all duration-300 flex items-center justify-center gap-2
+ w-full py-4 px-6 rounded-2xl font-bold text-sm capitalize tracking-normal transition-all duration-300 flex items-center justify-center gap-2
  ${isSelected 
  ? 'bg-primary-light text-white shadow-lg' 
  : 'surface-card border border-theme text-theme-primary hover:surface-section shadow-sm'
@@ -129,14 +129,14 @@ function PathCard({
 
  <div className="relative py-2 flex items-center gap-3">
  <div className="flex-1 h-px surface-section" />
- <span className="text-[10px] text-theme-muted font-bold capitalize tracking-normal">or</span>
+ <span className="text-xs text-theme-muted font-bold capitalize tracking-normal">or</span>
  <div className="flex-1 h-px surface-section" />
  </div>
 
  <button
  onClick={onGoogleSelect}
  disabled={isGoogleLoading}
- className="w-full py-3.5 px-6 rounded-2xl font-bold text-[10px] capitalize tracking-normal surface-card text-theme-secondary border border-theme hover:surface-section dark:hover:surface-section transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50"
+ className="w-full py-3.5 px-6 rounded-2xl font-bold text-sm capitalize tracking-normal surface-card text-theme-secondary border border-theme hover:surface-section dark:hover:surface-section transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50"
  >
  {isGoogleLoading ? (
  <div className="w-4 h-4 border-2 border-theme-strong border-t-transparent rounded-full animate-spin" />

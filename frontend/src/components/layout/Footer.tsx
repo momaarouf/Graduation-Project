@@ -17,12 +17,12 @@ export default function Footer() {
         <p className="text-xs text-theme-muted flex items-center justify-center gap-1">
           Designed and developed by Mohamad Maarouf. 
           <a 
-            href="https://github.com/mo-maarouf/Graduation-Project" 
+            href="https://momaarouf.dev" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-primary-light dark:text-primary-dark hover:underline ml-1"
           >
-            View Source Code
+            momaarouf.dev
           </a>
         </p>
       </div>
