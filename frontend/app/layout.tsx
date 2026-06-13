@@ -33,6 +33,18 @@ export const metadata: Metadata = {
   title: 'Tourongo | Travel Marketplace',
   description: 'Connect with verified local guides for authentic experiences worldwide',
   keywords: ['travel', 'guides', 'tours', 'global', 'worldwide', 'halal', 'adventure'],
+  openGraph: {
+    title: 'Tourongo | Travel Marketplace',
+    description: 'Connect with verified local guides for authentic experiences worldwide',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Tourongo Travel Marketplace',
+      },
+    ],
+  },
 }
 
 export default function RootLayout({
