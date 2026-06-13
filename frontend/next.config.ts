@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
   // Required for the slim Docker "standalone" runner (node server.js)
   output: process.env.DOCKER_BUILD === "true" ? "standalone" : undefined,
 
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'country-state-city'],
+  },
   reactCompiler: true,
   images: {
     remotePatterns: [

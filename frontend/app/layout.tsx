@@ -21,6 +21,7 @@ import { AuthProvider } from '@/src/lib/contexts/AuthContext'
 import { WishlistProvider } from '@/src/lib/contexts/WishlistContext'
 import { Suspense } from 'react'
 import GlobalConfirmDialog from '@/src/components/ui/GlobalConfirmDialog'
+import { Analytics } from '@vercel/analytics/react'
 
 const inter = Inter({
  subsets: ['latin'],
@@ -85,6 +86,7 @@ export default function RootLayout({
  </WishlistProvider>
  </AuthProvider>
  </ThemeProvider>
+ <Analytics />
  </body>
  </html>
  )

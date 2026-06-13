@@ -56,6 +56,7 @@ import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } fro
 import FilterSection from './filters/FilterSection'
 import CheckboxFilter from './filters/CheckboxFilter'
 import PriceRangeFilter from './filters/PriceRangeFilter'
+import MultiSelectDropdown from './filters/MultiSelectDropdown'
 
 // Import types and constants
 import {
@@ -122,7 +123,6 @@ export default function SearchFilters({
  const { isLoading: contextLoading } = useFilterState()
 
  // Local UI state
- const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
  const [localExpanded, setLocalExpanded] = useState<Record<string, boolean>>({})
 
  // ========================================
@@ -178,7 +178,6 @@ export default function SearchFilters({
  const handleClearAll = useCallback(() => {
  contextClearFilters()
  if (externalOnClearAll) externalOnClearAll()
- setSelectedCountry(null)
  }, [contextClearFilters, externalOnClearAll])
 
  // ========================================
@@ -197,14 +196,20 @@ export default function SearchFilters({
   , [])
 
   const cityOptions = useMemo(() => {
-  if (!selectedCountry) return []
-  const countryObj = LibCountry.getAllCountries().find(c => c.name === selectedCountry)
-  if (!countryObj) return []
-  return LibCity.getCitiesOfCountry(countryObj.isoCode)?.map(city => ({
-  id: city.name,
-  label: city.name
-  })) || []
-  }, [selectedCountry])
+    if (!filters.countries || filters.countries.length === 0) return []
+    
+    const allCountries = LibCountry.getAllCountries()
+    const selectedCountryIsoCodes = filters.countries
+      .map(cName => allCountries.find(c => c.name === cName)?.isoCode)
+      .filter(Boolean) as string[]
+      
+    return selectedCountryIsoCodes.flatMap(iso => 
+      LibCity.getCitiesOfCountry(iso)?.map(city => ({
+        id: city.name,
+        label: city.name
+      })) || []
+    ).sort((a, b) => a.label.localeCompare(b.label))
+  }, [filters.countries])
 
  const languageOptions = useMemo(() =>
  Object.values(Language).map(lang => ({
@@ -378,105 +383,47 @@ export default function SearchFilters({
  {/* ========================================
  SECTION 1: LOCATION
  ======================================== */}
- <FilterSection
- title="Location"
- icon={<MapPin className="w-[18px] h-[18px]" />}
- >
- <div className="space-y-4">
- {/* Country filter */}
- <div>
- <h4 className="text-xs font-medium text-theme-muted mb-2">
- Country
- </h4>
- <CheckboxFilter
- options={countryOptions}
- selectedValues={filters.countries || []}
- onChange={(selected) => {
- handleFilterChange({ countries: selected as string[] })
- if (selectedCountry && !selected.includes(selectedCountry)) {
- setSelectedCountry(null)
- }
- }}
- />
- </div>
+  <FilterSection
+  title="Location"
+  icon={<MapPin className="w-[18px] h-[18px]" />}
+  >
+  <div className="space-y-4">
+  {/* Country filter */}
+  <div>
+  <h4 className="text-xs font-medium text-theme-muted mb-2">
+  Country
+  </h4>
+  <MultiSelectDropdown
+    options={countryOptions}
+    selectedValues={filters.countries || []}
+    onChange={(selected) => {
+      if (selected.length === 0) {
+        handleFilterChange({ countries: [], cities: [] })
+      } else {
+        handleFilterChange({ countries: selected })
+      }
+    }}
+    placeholder="Search countries..."
+  />
+  </div>
 
- {/* City filter - only show if country selected */}
- {filters.countries && filters.countries.length > 0 && (
- <div>
- <div className="flex items-center justify-between mb-2">
- <h4 className="text-xs font-medium text-theme-muted ">
- City
- </h4>
- <div className="relative min-w-[120px]">
- <Listbox value={selectedCountry || ''} onChange={(val) => setSelectedCountry(val as string || null)}>
- <div className="relative">
- <ListboxButton className="relative w-full flex items-center justify-between gap-2 px-3 py-1.5 surface-paper border border-primary-light/20 dark:border-primary-dark/20 rounded-full text-[11px] font-bold text-theme-primary hover:border-primary-light dark:hover:border-primary-dark focus:outline-none focus:ring-2 focus:ring-primary-light/20 transition-all duration-200">
- <span className="block truncate">
- {selectedCountry ? selectedCountry : 'All countries'}
- </span>
- <ChevronDown className="w-3 h-3 text-theme-muted transition-transform duration-200 ui-open:rotate-180" />
- </ListboxButton>
-
- <Transition
- leave="transition ease-in duration-100"
- leaveFrom="opacity-100"
- leaveTo="opacity-0"
- >
- <ListboxOptions className="absolute z-50 mt-1 max-h-60 w-48 overflow-auto right-0 rounded-xl surface-card py-1 text-xs shadow-sm ring-1 ring-black/5 dark:ring-white/10 focus:outline-none">
- <ListboxOption
- value=""
- className={({ focus, selected }) => `relative cursor-default select-none py-2 pl-8 pr-4 transition-colors ${focus ? 'bg-primary-light/10 text-primary-light dark:text-primary-dark dark:text-primary-dark ' : 'text-theme-primary'} ${selected ? 'font-semibold' : 'font-normal'}`}
- >
- {({ selected }) => (
- <>
- <span className={`block truncate ${selected ? 'text-primary-light dark:text-primary-dark dark:text-primary-dark ' : ''}`}>
- All countries
- </span>
- {selected ? (
- <span className="absolute inset-y-0 left-0 flex items-center pl-2.5 text-primary-light dark:text-primary-dark dark:text-primary-dark ">
- <Check className="w-3.5 h-3.5" />
- </span>
- ) : null}
- </>
- )}
- </ListboxOption>
- {filters.countries.map(country => (
- <ListboxOption
- key={country}
- value={country}
- className={({ focus, selected }) => `relative cursor-default select-none py-2 pl-8 pr-4 transition-colors ${focus ? 'bg-primary-light/10 text-primary-light dark:text-primary-dark dark:text-primary-dark ' : 'text-theme-primary'} ${selected ? 'font-semibold' : 'font-normal'}`}
- >
- {({ selected }) => (
- <>
- <span className={`block truncate ${selected ? 'text-primary-light dark:text-primary-dark dark:text-primary-dark ' : ''}`}>
- {country}
- </span>
- {selected ? (
- <span className="absolute inset-y-0 left-0 flex items-center pl-2.5 text-primary-light dark:text-primary-dark dark:text-primary-dark ">
- <Check className="w-3.5 h-3.5" />
- </span>
- ) : null}
- </>
- )}
- </ListboxOption>
- ))}
- </ListboxOptions>
- </Transition>
- </div>
- </Listbox>
- </div>
- </div>
- <CheckboxFilter
- options={cityOptions}
- selectedValues={filters.cities || []}
- onChange={(selected) => handleFilterChange({ cities: selected as string[] })}
- limit={5}
- showSearch={true}
- />
- </div>
- )}
- </div>
- </FilterSection>
+  {/* City filter - only show if country selected */}
+  {filters.countries && filters.countries.length > 0 && (
+  <div>
+  <h4 className="text-xs font-medium text-theme-muted mb-2">
+  City
+  </h4>
+  <MultiSelectDropdown
+    options={cityOptions}
+    selectedValues={filters.cities || []}
+    onChange={(selected) => handleFilterChange({ cities: selected })}
+    placeholder="Search cities..."
+    emptyMessage="No cities found."
+  />
+  </div>
+  )}
+  </div>
+  </FilterSection>
 
  {/* ========================================
  SECTION 2: TOUR ATTRIBUTES
