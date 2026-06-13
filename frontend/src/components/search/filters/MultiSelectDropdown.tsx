@@ -31,7 +31,8 @@ export default function MultiSelectDropdown({
         )
   }, [options, query])
 
-  const handleSelect = (val: string) => {
+  const handleSelect = (val: string | null) => {
+    if (!val) return
     if (!selectedValues.includes(val)) {
       onChange([...selectedValues, val])
     }
