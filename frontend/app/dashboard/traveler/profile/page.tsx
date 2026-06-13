@@ -42,7 +42,137 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { getTravelerProfile, completeTravelerProfile, TravelerProfile } from '@/src/lib/api/travelers'
 import { travelerGetLoyaltyStatus, LoyaltyStatusResponse, LoyaltyTierType } from '@/src/lib/api/traveler'
 import LoadingOverlay from '@/src/components/ui/LoadingOverlay'
-import ImageCropperModal from '@/src/components/ui/ImageCropperModal'
+
+import apiClient from '@/src/lib/api/client'
+
+// ============================================================================
+// LOYALTY TIER CONFIG
+// Replicated from dashboard for consistency
+// ============================================================================
+
+const TIER_CONFIG: Record<LoyaltyTierType, {
+  label: string
+  icon: string
+  badge: string
+  text: string
+  ring: string
+  gradient: string
+  discount: number
+}> = {
+  BRONZE: {
+    label: 'Bronze',
+    icon: '🥉',
+    badge: 'bg-accent-light/20 dark:bg-accent-dark/20 dark:bg-amber-900/40 text-accent-light dark:text-accent-dark dark:text-amber-300',
+    text: 'text-accent-light dark:text-accent-dark dark:text-amber-300',
+    ring: 'ring-accent-light dark:ring-accent-dark/50',
+    gradient: 'from-amber-500 to-orange-500',
+    discount: 0
+  },
+  SILVER: {
+    label: 'Silver',
+    icon: '🥈',
+    badge: 'bg-slate-100/60 text-slate-700',
+    text: 'text-slate-600',
+    ring: 'ring-slate-300/50',
+    gradient: 'from-slate-400 to-gray-500',
+    discount: 3
+  },
+  GOLD: {
+    label: 'Gold',
+    icon: '🥇',
+    badge: 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300',
+    text: 'text-yellow-700 dark:text-yellow-400',
+    ring: 'ring-yellow-400/60',
+    gradient: 'from-yellow-500 to-amber-400',
+    discount: 5
+  },
+}
+
+// ============================================================================
+// SUB-COMPONENTS
+// ============================================================================
+
+function StatCard({ icon: Icon, label, value, color }: { icon: any; label: string; value: string | number; color: string }) {
+  const colorClasses = {
+    blue: 'bg-primary-light/10 text-primary-light dark:text-primary-dark border-primary-light dark:border-primary-dark/40',
+    emerald: 'bg-success-green/10 text-success-green dark:text-emerald-400 border-success-green/40 dark:border-emerald-500/30',
+    amber: 'bg-accent-light/10 text-accent-light dark:text-amber-400 border-accent-light dark:border-amber-500/30',
+    purple: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20 dark:border-purple-500/30'
+  }
+
+ return (
+ <motion.div 
+ whileHover={{ y: -4 }}
+ className="p-3 sm:p-5 surface-card border border-theme rounded-2xl shadow-sm transition-all duration-300 overflow-hidden"
+ >
+ <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-2 sm:gap-4">
+ <div className={`p-2 sm:p-2.5 rounded-xl border flex-shrink-0 ${colorClasses[color as keyof typeof colorClasses]}`}>
+ <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+ </div>
+ <div className="min-w-0">
+ <div className="text-base sm:text-xl font-extrabold text-theme-primary leading-none mb-1 truncate">{value}</div>
+ <div className="text-[8px] sm:text-[10px] font-black capitalize tracking-normal text-theme-muted truncate">{label}</div>
+ </div>
+ </div>
+ </motion.div>
+ )
+}
+
+// ============================================================================
+// MAIN PAGE
+// ============================================================================
+
+import TravelerProfileLoading from './skeleton'
+
+export default function TravelerDashboardProfilePage() {
+ const router = useRouter()
+ const { user } = useAuth()
+  const [profile, setProfile] = useState<TravelerProfile | null>(null)
+// ============================================================================
+// TRAVELER PROFILE EDITOR - REPLICATED FROM GUIDE PREMIUM EDITOR
+// ============================================================================
+// LOCATION: /frontend/app/dashboard/traveler/profile/page.tsx
+// 
+// PURPOSE: Allow travelers to edit their profile with premium UI
+// ============================================================================
+
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/src/lib/contexts/AuthContext'
+import toast from 'react-hot-toast'
+import {
+ User,
+ Camera,
+ MapPin,
+ Globe,
+ Shield,
+ CheckCircle,
+ Edit2,
+ Save,
+ X,
+ Plus,
+ Trash2,
+ Calendar,
+ MessageSquare,
+ Heart,
+ Eye,
+ Trophy,
+ Sparkles,
+ Info,
+ Compass,
+ TrendingUp,
+ Medal,
+ Gem
+} from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { getTravelerProfile, completeTravelerProfile, TravelerProfile } from '@/src/lib/api/travelers'
+import { travelerGetLoyaltyStatus, LoyaltyStatusResponse, LoyaltyTierType } from '@/src/lib/api/traveler'
+import LoadingOverlay from '@/src/components/ui/LoadingOverlay'
+
 import apiClient from '@/src/lib/api/client'
 
 // ============================================================================
@@ -134,11 +264,7 @@ export default function TravelerDashboardProfilePage() {
   const [formData, setFormData] = useState<Partial<TravelerProfile>>({})
    const [newPreference, setNewPreference] = useState('')
    const [isAdding, setIsAdding] = useState(false)
-   const [cropperState, setCropperState] = useState<{ isOpen: boolean; imageSrc: string; type: 'avatarUrl' | 'coverImageUrl' }>({
-     isOpen: false,
-     imageSrc: '',
-     type: 'avatarUrl'
-   })
+
    const [pendingFiles, setPendingFiles] = useState<{ avatarUrl?: File, coverImageUrl?: File }>({})
 
   useEffect(() => {
@@ -171,20 +297,14 @@ export default function TravelerDashboardProfilePage() {
   if (!file) return
 
   if (file.size > 5 * 1024 * 1024) {
-  toast.error('Image is too large (max 5MB)')
+  toast.error("Image too large. Please select a file under 5MB")
   return
   }
 
   const url = URL.createObjectURL(file)
-  setCropperState({ isOpen: true, imageSrc: url, type })
+  setFormData(prev => ({ ...prev, [type]: url }))
+  setPendingFiles(prev => ({ ...prev, [type]: file }))
   e.target.value = ''
-  }
-
-  const handleCropComplete = async (croppedFile: File) => {
-  const url = URL.createObjectURL(croppedFile)
-  setFormData(prev => ({ ...prev, [cropperState.type]: url }))
-  setPendingFiles(prev => ({ ...prev, [cropperState.type]: croppedFile }))
-  setCropperState(prev => ({ ...prev, isOpen: false }))
   }
 
   const handleSave = async () => {
@@ -571,13 +691,6 @@ export default function TravelerDashboardProfilePage() {
   onChange={(e) => handleFileChange(e, 'coverImageUrl')}
   />
   
-  <ImageCropperModal
-  isOpen={cropperState.isOpen}
-  onClose={() => setCropperState(prev => ({ ...prev, isOpen: false }))}
-  imageSrc={cropperState.imageSrc}
-  onCropComplete={handleCropComplete}
-  aspectRatio={cropperState.type === 'avatarUrl' ? 1 : 16 / 9}
-  />
   </div>
   </div>
   )

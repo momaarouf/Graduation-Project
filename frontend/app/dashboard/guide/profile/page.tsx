@@ -82,7 +82,7 @@ import { getGuideProfile, getGuideBookings, getGuideTours, getGuidePortfolio, up
 import { GuideBookingResponse, BookingStatus, TourTemplateResponse } from '@/src/lib/types/tour.types'
 import { motion, AnimatePresence } from 'framer-motion'
 import GuideProfileSkeleton from './skeleton'
-import ImageCropperModal from '@/src/components/ui/ImageCropperModal'
+
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -1060,16 +1060,12 @@ export default function GuideProfilePage() {
  const { user } = useAuth()
  const [profile, setProfile] = useState(EMPTY_GUIDE_PROFILE)
  const [bookings, setBookings] = useState<GuideBookingResponse[]>([])
- const [tours, setTours] = useState<TourTemplateResponse[]>([])
+const [tours, setTours] = useState<TourTemplateResponse[]>([])
  const [isLoadingData, setIsLoadingData] = useState(true)
  const [isEditing, setIsEditing] = useState(false)
  const [isSaving, setIsSaving] = useState(false)
  const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false)
- const [cropperState, setCropperState] = useState<{ isOpen: boolean; imageSrc: string; type: 'avatar' | 'cover' }>({
-  isOpen: false,
-  imageSrc: '',
-  type: 'avatar'
-  })
+
  const [pendingFiles, setPendingFiles] = useState<{ avatar?: File, cover?: File }>({})
 
  const handlePortfolioToggle = async (tourId: number, currentStatus: boolean) => {
@@ -1289,21 +1285,15 @@ export default function GuideProfilePage() {
   }
 
   const url = URL.createObjectURL(file)
-  setCropperState({ isOpen: true, imageSrc: url, type })
-  e.target.value = ''
-  }
-
-  const handleCropComplete = async (croppedFile: File) => {
-  const url = URL.createObjectURL(croppedFile)
   setProfile(prev => ({
   ...prev,
-  [cropperState.type === 'avatar' ? 'avatar' : 'coverImage']: url
+  [type === 'avatar' ? 'avatar' : 'coverImage']: url
   }))
   setPendingFiles(prev => ({
   ...prev,
-  [cropperState.type === 'avatar' ? 'avatar' : 'cover']: croppedFile
+  [type]: file
   }))
-  setCropperState(prev => ({ ...prev, isOpen: false }))
+  e.target.value = ''
   }
 
  const handleLanguageAdd = () => {
