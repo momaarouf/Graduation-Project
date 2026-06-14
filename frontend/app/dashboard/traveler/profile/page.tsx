@@ -186,7 +186,7 @@ export default function TravelerDashboardProfilePage() {
   let finalCoverUrl = formData.coverImageUrl
 
   const uploadToCloudinary = async (file: File) => {
-  const res = await apiClient.get('/api/cloudinary/signature')
+  const res = await apiClient.get('/api/upload/signature?folder=tourongo/profiles')
   const { signature, timestamp, apiKey, cloudName } = res.data || res
   const cloudFormData = new FormData()
   cloudFormData.append('file', file)

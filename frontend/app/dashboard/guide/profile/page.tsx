@@ -1202,7 +1202,7 @@ const [tours, setTours] = useState<TourTemplateResponse[]>([])
 
   // Upload to Cloudinary if new images exist
   const uploadToCloudinary = async (file: File) => {
-  const res = await apiClient.get('/api/cloudinary/signature')
+  const res = await apiClient.get('/api/upload/signature?folder=tourongo/profiles')
   const { signature, timestamp, apiKey, cloudName } = res.data || res
   const formData = new FormData()
   formData.append('file', file)

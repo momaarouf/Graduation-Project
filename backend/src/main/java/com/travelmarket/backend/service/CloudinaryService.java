@@ -49,6 +49,8 @@ public class CloudinaryService {
         Map<String, Object> result = new HashMap<>();
         result.put("timestamp", timestamp);
         result.put("signature", signature);
+        result.put("apiKey", apiKey);
+        result.put("cloudName", cloudName);
         if (folder != null && !folder.isBlank()) {
             result.put("folder", folder);
         }
