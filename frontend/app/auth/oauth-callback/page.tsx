@@ -189,7 +189,7 @@ function OAuthCallbackContent() {
               </div>
               <span className="text-sm text-theme-secondary leading-relaxed">
                 I agree to the{' '}
-                <Link href="/legal/terms" target="_blank" className="text-primary-light dark:text-primary-dark hover:underline font-medium">
+                <Link href="/terms" target="_blank" onClick={(e) => e.stopPropagation()} className="text-primary-light dark:text-primary-dark hover:underline font-medium">
                   Terms of Service
                 </Link>
               </span>
@@ -204,7 +204,7 @@ function OAuthCallbackContent() {
               </div>
               <span className="text-sm text-theme-secondary leading-relaxed">
                 I agree to the{' '}
-                <Link href="/legal/privacy" target="_blank" className="text-primary-light dark:text-primary-dark hover:underline font-medium">
+                <Link href="/privacy" target="_blank" onClick={(e) => e.stopPropagation()} className="text-primary-light dark:text-primary-dark hover:underline font-medium">
                   Privacy Policy
                 </Link>
               </span>

@@ -612,21 +612,21 @@ export default function SearchFilters({
  >
  <div className="space-y-3">
 
- {/* Languages */}
- <div className="pt-2">
- <h4 className="flex items-center gap-2 text-xs font-medium text-theme-muted mb-2">
- <Languages className="w-3.5 h-3.5" />
- Guide Languages
- </h4>
- <CheckboxFilter
- options={languageOptions}
- selectedValues={filters.guideLanguages || []}
- onChange={(selected) => handleFilterChange({
- guideLanguages: selected as Language[]
- })}
- limit={4}
- />
- </div>
+        {/* Languages */}
+        <div className="pt-2">
+          <h4 className="flex items-center gap-2 text-xs font-medium text-theme-muted mb-2">
+            <Languages className="w-3.5 h-3.5" />
+            Guide Languages
+          </h4>
+          <MultiSelectDropdown
+            options={languageOptions}
+            selectedValues={filters.guideLanguages || []}
+            onChange={(selected) => handleFilterChange({
+              guideLanguages: selected as Language[]
+            })}
+            placeholder="Select languages..."
+          />
+        </div>
  </div>
  </FilterSection>
 

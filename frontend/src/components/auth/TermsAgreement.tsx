@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // TERMS AGREEMENT FORM - STEP 5 (FINAL STEP)
 // ============================================================================
 // LOCATION: /frontend/src/components/auth/TermsAgreement.tsx
@@ -349,10 +349,10 @@ export default function TermsAgreement({
  </div>
  <div className="flex-1">
  <p className="text-sm font-bold text-theme-primary group-hover:text-primary-light dark:text-primary-dark transition-colors">
- I agree to the Terms of Service
+ I agree to the <Link href="/terms" target="_blank" onClick={(e) => e.stopPropagation()} className="hover:underline text-primary-light dark:text-primary-dark">Terms of Service</Link>
  </p>
  <p className="text-xs font-medium text-theme-muted ">
- Confirming you're 18+ and accept our <Link href="/terms" className="text-primary-light dark:text-primary-dark hover:underline">legal framework</Link>.
+ Confirming you're 18+ and accept our legal framework.
  </p>
  </div>
  </label>
@@ -379,10 +379,10 @@ export default function TermsAgreement({
  </div>
  <div className="flex-1">
  <p className="text-sm font-bold text-theme-primary group-hover:text-primary-light dark:text-primary-dark transition-colors">
- I accept the Privacy Policy
+ I accept the <Link href="/privacy" target="_blank" onClick={(e) => e.stopPropagation()} className="hover:underline text-primary-light dark:text-primary-dark">Privacy Policy</Link>
  </p>
  <p className="text-xs font-medium text-theme-muted ">
- Consenting to how we <Link href="/privacy" className="text-primary-light dark:text-primary-dark hover:underline">handle and protect</Link> your data.
+ Consenting to how we handle and protect your data.
  </p>
  </div>
  </label>

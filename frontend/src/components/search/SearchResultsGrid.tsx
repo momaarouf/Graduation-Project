@@ -205,7 +205,21 @@ export default function SearchResultsGrid({
     setLoading(true)
     
     try {
-      // ... (rest of the logic)
+      // Map duration presets to min/max
+      let parsedMinDuration = filters.minDuration;
+      let parsedMaxDuration = filters.maxDuration;
+
+      if (filters.durations && filters.durations.length > 0) {
+        const minValues = filters.durations.map(d => parseInt(d.split('-')[0]) || 12);
+        parsedMinDuration = Math.min(...minValues);
+
+        const maxValues = filters.durations.map(d => {
+          if (d === '12+') return 999;
+          return parseInt(d.split('-')[1]);
+        });
+        parsedMaxDuration = Math.max(...maxValues);
+      }
+
       const params: PublicTourFilters = {
         halalFriendly: filters.isHalalCertified || undefined,
         instantBook: filters.hasInstantBook || undefined,
@@ -214,8 +228,8 @@ export default function SearchResultsGrid({
         hasGroupDiscount: filters.hasGroupDiscount || undefined,
         minPrice: filters.minPrice,
         maxPrice: filters.maxPrice,
-        minDuration: filters.minDuration, // simplified
-        maxDuration: filters.maxDuration,
+        minDuration: parsedMinDuration,
+        maxDuration: parsedMaxDuration,
         minCap: filters.minGroupSize,
         maxCap: filters.maxGroupSize,
         minRating: filters.minRating && filters.minRating !== MinRating.ANY ? parseFloat(filters.minRating) : undefined,
