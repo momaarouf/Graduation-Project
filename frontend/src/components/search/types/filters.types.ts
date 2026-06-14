@@ -240,7 +240,7 @@ export interface FilterState {
  isGuideVerified?: boolean
 
  /** Languages spoken by guide */
- guideLanguages?: Language[]
+ guideLanguages?: string[]
 
  // ========== RATING FILTERS ==========
  /** Minimum tour rating */

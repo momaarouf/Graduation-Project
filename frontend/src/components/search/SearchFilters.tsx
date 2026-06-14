@@ -57,6 +57,7 @@ import FilterSection from './filters/FilterSection'
 import CheckboxFilter from './filters/CheckboxFilter'
 import PriceRangeFilter from './filters/PriceRangeFilter'
 import MultiSelectDropdown from './filters/MultiSelectDropdown'
+import iso6391 from 'iso-639-1'
 
 // Import types and constants
 import {
@@ -212,9 +213,9 @@ export default function SearchFilters({
   }, [filters.countries])
 
  const languageOptions = useMemo(() =>
- Object.values(Language).map(lang => ({
+ iso6391.getAllNames().map(lang => ({
  id: lang,
- label: LanguageLabels[lang]
+ label: lang
  }))
  , [])
 
@@ -506,9 +507,14 @@ export default function SearchFilters({
  <CheckboxFilter
  options={durationOptions}
  selectedValues={filters.durations || []}
- onChange={(selected) => handleFilterChange({
- durations: selected as Duration[]
- })}
+ onChange={(selected) => {
+   // Enforce single-select behavior (radio button style)
+   // This prevents huge min-max gaps on the backend
+   const latestSelection = selected.filter(s => !filters.durations?.includes(s));
+   handleFilterChange({
+     durations: latestSelection.length > 0 ? (latestSelection as Duration[]) : (selected.length > 0 ? [selected[selected.length - 1] as Duration] : [])
+   })
+ }}
  />
  </FilterSection>
 
@@ -622,7 +628,7 @@ export default function SearchFilters({
             options={languageOptions}
             selectedValues={filters.guideLanguages || []}
             onChange={(selected) => handleFilterChange({
-              guideLanguages: selected as Language[]
+              guideLanguages: selected as string[]
             })}
             placeholder="Select languages..."
           />

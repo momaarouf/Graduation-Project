@@ -42,6 +42,7 @@ import {
 import { useSignup } from '@/src/lib/contexts/SignupContext'
 import { LanguageProficiency, LanguageProficiencyLabels } from '@/src/types/auth.types'
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions, Transition } from '@headlessui/react'
+import iso6391 from 'iso-639-1'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -58,33 +59,11 @@ interface GuideProfileFormProps {
 // CONSTANTS - Languages & Proficiency Levels
 // ============================================================================
 
-const LANGUAGES = [
- { code: 'en', name: 'English', native: 'English' },
- { code: 'ar', name: 'Arabic', native: 'العربية' },
- { code: 'tr', name: 'Turkish', native: 'Türkçe' },
- { code: 'fr', name: 'French', native: 'Français' },
- { code: 'es', name: 'Spanish', native: 'Español' },
- { code: 'de', name: 'German', native: 'Deutsch' },
- { code: 'it', name: 'Italian', native: 'Italiano' },
- { code: 'ru', name: 'Russian', native: 'Русский' },
- { code: 'zh', name: 'Chinese', native: '中文' },
- { code: 'ja', name: 'Japanese', native: '日本語' },
- { code: 'ko', name: 'Korean', native: '한국어' },
- { code: 'hi', name: 'Hindi', native: 'हिन्दी' },
- { code: 'ur', name: 'Urdu', native: 'اردو' },
- { code: 'fa', name: 'Persian', native: 'فارسی' },
- { code: 'he', name: 'Hebrew', native: 'עברית' },
- { code: 'el', name: 'Greek', native: 'Ελληνικά' },
- { code: 'nl', name: 'Dutch', native: 'Nederlands' },
- { code: 'pt', name: 'Portuguese', native: 'Português' },
- { code: 'sv', name: 'Swedish', native: 'Svenska' },
- { code: 'da', name: 'Danish', native: 'Dansk' },
- { code: 'no', name: 'Norwegian', native: 'Norsk' },
- { code: 'fi', name: 'Finnish', native: 'Suomi' },
- { code: 'pl', name: 'Polish', native: 'Polski' },
- { code: 'cs', name: 'Czech', native: 'Čeština' },
- { code: 'hu', name: 'Hungarian', native: 'Magyar' },
-].sort((a, b) => a.name.localeCompare(b.name))
+const LANGUAGES = iso6391.getAllCodes().map(code => ({
+ code,
+ name: iso6391.getName(code),
+ native: iso6391.getNativeName(code)
+})).sort((a, b) => a.name.localeCompare(b.name))
 
 const PROFICIENCY_LEVELS = [
  { value: LanguageProficiency.BEGINNER, label: LanguageProficiencyLabels[LanguageProficiency.BEGINNER], description: 'Basic conversational skills' },
