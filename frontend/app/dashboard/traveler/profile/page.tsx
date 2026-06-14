@@ -174,6 +174,7 @@ export default function TravelerDashboardProfilePage() {
   const url = URL.createObjectURL(file)
   setFormData(prev => ({ ...prev, [type]: url }))
   setPendingFiles(prev => ({ ...prev, [type]: file }))
+  setIsEditing(true)
   e.target.value = ''
   }
 

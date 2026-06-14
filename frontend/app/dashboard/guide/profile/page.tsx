@@ -1293,6 +1293,7 @@ const [tours, setTours] = useState<TourTemplateResponse[]>([])
   ...prev,
   [type]: file
   }))
+  setIsEditing(true)
   e.target.value = ''
   }
 
